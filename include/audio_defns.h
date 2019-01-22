@@ -30,6 +30,11 @@
 
 #include "h222_defns.h"
 
+#include <cctype>
+#include <cstdint>
+
+#define byte uint8_t
+
 // A simple wrapper for a frame of audio data
 struct audio_frame {
     byte* data; // The frame data, including the syncword at the start

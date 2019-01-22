@@ -18,14 +18,24 @@ Build and install the desired utility:
 These utilites are supported right now, and should build:
 
 * `tsplay`
-* `es2ts`
+* `es_test`
 * `esdots`
+* `es2ts`
 * `esfilter`
 * `esmerge`
 * `esreport`
 * `esreverse`
 * `m2ts2ts`
 * `pcapreport`
+* `psdots`
+* `psreport`
+* `rtp2264`
+* `stream_type`
+* `ps2ts`
+* `ts2es`
+* `ts2ps`
+* `ts_packet_insert`
+* `tsdvbsub`
 
 Pull requests are welcome.
 

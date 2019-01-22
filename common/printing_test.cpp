@@ -26,25 +26,25 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <stdio.h>
+#include <cstdio>
 
-#include "printing_fns.h"
+#include "printing.h"
 #include "version.h"
 
 // Some example redirection routines
 
-static void print_message_to_stdout(const char* message) { (void)printf("<<<MSG>>> %s", message); }
-static void print_message_to_stderr(const char* message) { (void)printf("<<<ERR>>> %s", message); }
-static void fprint_message_to_stdout(const char* format, va_list arg_ptr)
-{
-    printf("<<<MSG>>> ");
-    (void)vfprintf(stdout, format, arg_ptr);
-}
-static void fprint_message_to_stderr(const char* format, va_list arg_ptr)
-{
-    printf("<<<ERR>>> ");
-    (void)vfprintf(stdout, format, arg_ptr);
-}
+//static void print_message_to_stdout(const char* message) { (void)printf("<<<MSG>>> %s", message); }
+//static void print_message_to_stderr(const char* message) { (void)printf("<<<ERR>>> %s", message); }
+//static void fprint_message_to_stdout(const char* format, va_list arg_ptr)
+//{
+//    printf("<<<MSG>>> ");
+//    (void)vfprintf(stdout, format, arg_ptr);
+//}
+//static void fprint_message_to_stderr(const char* format, va_list arg_ptr)
+//{
+//    printf("<<<ERR>>> ");
+//    (void)vfprintf(stdout, format, arg_ptr);
+//}
 
 static void print_usage()
 {
@@ -57,7 +57,7 @@ static void print_usage()
 
 int main(int argc, char** argv)
 {
-    int err;
+    //int err;
 
     if (argc > 1) {
         print_usage();
@@ -93,43 +93,43 @@ int main(int argc, char** argv)
     fprint_msg("3. Printing a formatted '%s'\n", "message");
     fprint_err("4. Printing a formatted '%s'\n", "error");
 
-    printf("-----------------------------------------\n");
-    printf("Choosing 'custom functions' and repeating\n");
-    printf("-----------------------------------------\n");
-    err = redirect_output(print_message_to_stdout, print_message_to_stderr,
-        fprint_message_to_stdout, fprint_message_to_stderr);
-    if (err) {
-        printf("Oops -- that went wrong: %d\n", err);
-        return 1;
-    }
-    print_msg("1. Printing a normal message\n");
-    print_err("2. Printing an error message\n");
-    fprint_msg("3. Printing a formatted '%s'\n", "message");
-    fprint_err("4. Printing a formatted '%s'\n", "error");
+    //printf("-----------------------------------------\n");
+    //printf("Choosing 'custom functions' and repeating\n");
+    //printf("-----------------------------------------\n");
+    //err = redirect_output(print_message_to_stdout, print_message_to_stderr,
+    //    fprint_message_to_stdout, fprint_message_to_stderr);
+    //if (err) {
+    //    printf("Oops -- that went wrong: %d\n", err);
+    //    return 1;
+    //}
+    //print_msg("1. Printing a normal message\n");
+    //print_err("2. Printing an error message\n");
+    //fprint_msg("3. Printing a formatted '%s'\n", "message");
+    //fprint_err("4. Printing a formatted '%s'\n", "error");
 
-    printf("---------------------------------------------\n");
-    printf("Trying to choose only *some* custom functions\n");
-    printf("---------------------------------------------\n");
-    err = redirect_output(
-        print_message_to_stdout, print_message_to_stderr, NULL, fprint_message_to_stderr);
-    if (err == 0) {
-        printf("Oh dear, that appeared to work: %d\n", err);
-        printf("So what happens if we try our tests again?\n");
-        print_msg("1. Printing a normal message\n");
-        print_err("2. Printing an error message\n");
-        fprint_msg("3. Printing a formatted '%s'\n", "message");
-        fprint_err("4. Printing a formatted '%s'\n", "error");
-        return 1;
-    }
-    printf("Which failed - good\n");
+    //printf("---------------------------------------------\n");
+    //printf("Trying to choose only *some* custom functions\n");
+    //printf("---------------------------------------------\n");
+    //err = redirect_output(
+    //    print_message_to_stdout, print_message_to_stderr, NULL, fprint_message_to_stderr);
+    //if (err == 0) {
+    //    printf("Oh dear, that appeared to work: %d\n", err);
+    //    printf("So what happens if we try our tests again?\n");
+    //    print_msg("1. Printing a normal message\n");
+    //    print_err("2. Printing an error message\n");
+    //    fprint_msg("3. Printing a formatted '%s'\n", "message");
+    //    fprint_err("4. Printing a formatted '%s'\n", "error");
+    //    return 1;
+    //}
+    //printf("Which failed - good\n");
 
-    printf("------------------------------------------------------------------\n");
-    printf("After that (expected) failure, all four messages should still work\n");
-    printf("------------------------------------------------------------------\n");
-    print_msg("1. Printing a normal message\n");
-    print_err("2. Printing an error message\n");
-    fprint_msg("3. Printing a formatted '%s'\n", "message");
-    fprint_err("4. Printing a formatted '%s'\n", "error");
+    //printf("------------------------------------------------------------------\n");
+    //printf("After that (expected) failure, all four messages should still work\n");
+    //printf("------------------------------------------------------------------\n");
+    //print_msg("1. Printing a normal message\n");
+    //print_err("2. Printing an error message\n");
+    //fprint_msg("3. Printing a formatted '%s'\n", "message");
+    //fprint_err("4. Printing a formatted '%s'\n", "error");
 
     return 0;
 }

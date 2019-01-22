@@ -30,25 +30,30 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <errno.h>
+#include <cerrno>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#ifdef _WIN32
-#include <stddef.h>
-#else // _WIN32
 #include <unistd.h>
-#endif // _WIN32
 
+#include "accessunit.h"
+#include "bitdata.h"
 #include "compat.h"
-#include "es_fns.h"
+#include "es.h"
 #include "fmtx.h"
-#include "misc_fns.h"
-#include "pes_fns.h"
-#include "pidint_fns.h"
-#include "printing_fns.h"
-#include "ts_fns.h"
+#include "h222.h"
+#include "h262.h"
+#include "misc.h"
+#include "nalunit.h"
+#include "pes.h"
+#include "pidint.h"
+#include "printing.h"
+#include "ps.h"
+#include "reverse.h"
+#include "ts.h"
+#include "tswrite.h"
 #include "version.h"
 
 // A three-way choice for what to output by PID
@@ -745,10 +750,3 @@ int main(int argc, char** argv)
     }
     return 0;
 }
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

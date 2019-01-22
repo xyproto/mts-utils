@@ -35,13 +35,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include "version.h"
+#include "compat.h"
 #include "ac3.h"
 #include "accessunit.h"
 #include "adts.h"
 #include "audio.h"
 #include "avs.h"
 #include "bitdata.h"
-#include "compat.h"
 #include "es.h"
 #include "filter.h"
 #include "h222.h"
@@ -56,7 +57,6 @@
 #include "reverse.h"
 #include "ts.h"
 #include "tswrite.h"
-#include "version.h"
 
 #define FRAMES_PER_SECOND 25
 #define FRAMES_PER_MINUTE (FRAMES_PER_SECOND * 60)

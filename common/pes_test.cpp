@@ -26,26 +26,39 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cerrno>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
-#include "compat.h"
-#include "es_fns.h"
-#include "h262_fns.h"
-#include "misc_fns.h"
-#include "pes_fns.h"
-#include "pidint_fns.h"
-#include "ps_fns.h"
-#include "ts_fns.h"
-#include "tswrite_fns.h"
 #include "version.h"
+#include "compat.h"
+#include "ac3.h"
+#include "accessunit.h"
+#include "adts.h"
+#include "audio.h"
+#include "avs.h"
+#include "bitdata.h"
+#include "es.h"
+#include "filter.h"
+#include "h222.h"
+#include "h262.h"
+#include "l2audio.h"
+#include "misc.h"
+#include "nalunit.h"
+#include "pes.h"
+#include "pidint.h"
+#include "printing.h"
+#include "ps.h"
+#include "reverse.h"
+#include "ts.h"
+#include "tswrite.h"
 
 /*
  * Write out TS program data based on the information we have
  */
-static int write_program_data_A(PES_reader_p reader, TS_writer_p output)
+int write_program_data_A(PES_reader_p reader, TS_writer_p output)
 {
     // We know we support at most two program streams for output
     int num_progs = 0;
@@ -116,7 +129,7 @@ static int write_program_data_A(PES_reader_p reader, TS_writer_p output)
  *
  * Returns 0 if all went well, 1 if an error occurred.
  */
-static int play_pes_packets(PES_reader_p reader, TS_writer_p output)
+int play_pes_packets(PES_reader_p reader, TS_writer_p output)
 {
     int err;
     int ii;
@@ -176,7 +189,7 @@ static int play_pes_packets(PES_reader_p reader, TS_writer_p output)
     return 0;
 }
 
-static int test1(PES_reader_p reader, int verbose)
+int test1(PES_reader_p reader, int verbose)
 {
     PES_packet_data_p packet;
     int ii;
@@ -223,7 +236,7 @@ static int test1(PES_reader_p reader, int verbose)
         print_data(TRUE, "   Data", packet->data, packet->data_len, 20);
     }
 
-    old_data = malloc(packet->data_len);
+    old_data = (byte*)malloc(packet->data_len);
     if (old_data == NULL) {
         fprintf(stderr, "### Error allocating data array\n");
         return 1;
@@ -276,7 +289,7 @@ static int test1(PES_reader_p reader, int verbose)
     return 0;
 }
 
-static void print_usage()
+void print_usage()
 {
     printf("Usage: test_pes <input-file> <host>[:<port>]\n"
            "\n");
@@ -429,10 +442,3 @@ int main(int argc, char** argv)
 
     return 0;
 }
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

@@ -36,7 +36,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <ctype.h> // for isprint
+#include <cctype> // for isprint
 #include <fcntl.h>
 
 #include <ctime> // Sleeping and timing

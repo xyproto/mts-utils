@@ -30,6 +30,8 @@
 #ifndef _h222_defns
 #define _h222_defns
 
+#include <cstdint>
+
 // Include our function definition(s)
 // -- this is actually just the function for returning a string
 // representing a stream type (according to the following table),

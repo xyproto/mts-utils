@@ -5,7 +5,6 @@
 *.backup
 
 tsplay/tsplay
-common/es_test
 esdots/esdots
 es2ts/es2ts
 esfilter/esfilter
@@ -18,3 +17,14 @@ psdots/psdots
 psreport/psreport
 rtp2264/rtp2264
 stream_type/stream_type
+ps2ts/ps2ts
+ts2es/ts2es
+ts2ps/ts2ps
+ts_packet_insert/ts_packet_insert
+tsdvbsub/tsdvbsub
+
+common/es_test
+common/nal_unit_list_test
+common/pes_test
+common/printing_test
+
