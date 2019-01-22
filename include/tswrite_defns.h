@@ -197,7 +197,7 @@ struct TS_context {
 typedef struct TS_context* TS_context_p;
 
 // Arguments processed by tswrite_process_args are set to:
-#define TSWRITE_PROCESSED "<processed>"
+#define TSWRITE_PROCESSED (char*)"<processed>"
 
 #endif // _tswrite_defns
 

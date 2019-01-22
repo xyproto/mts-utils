@@ -65,7 +65,7 @@ void set_show_nal_reading_details(nal_unit_context_p context, int show)
 int build_nal_unit_context(ES_p es, nal_unit_context_p* context)
 {
     int err;
-    nal_unit_context_p new2 = malloc(SIZEOF_NAL_UNIT_CONTEXT);
+    nal_unit_context_p new2 = (nal_unit_context_p)malloc(SIZEOF_NAL_UNIT_CONTEXT);
     if (new2 == NULL) {
         print_err("### Unable to allocate NAL unit context datastructure\n");
         return 1;
@@ -138,7 +138,7 @@ int rewind_nal_unit_context(nal_unit_context_p context)
 int build_nal_unit(nal_unit_p* nal)
 {
     int err;
-    nal_unit_p new2 = malloc(SIZEOF_NAL_UNIT);
+    nal_unit_p new2 = (nal_unit_p)malloc(SIZEOF_NAL_UNIT);
     if (new2 == NULL) {
         print_err("### Unable to allocate NAL unit datastructure\n");
         return 1;
@@ -230,7 +230,7 @@ static int remove_emulation_prevention(byte data[], int data_len, byte* rbsp[], 
     byte* tgt = NULL;
 
     // We know we're going to produce data that is no longer than our input
-    tgt = malloc(data_len);
+    tgt = (byte*)malloc(data_len);
     if (tgt == NULL) {
         print_err("### Cannot malloc RBSP target array\n");
         return 1;
@@ -1084,6 +1084,7 @@ void report_nal(int is_msg, nal_unit_p nal)
         snprintf(what, SARRAYSIZE, "(%s)", NAL_UNIT_TYPE_STR(nal->nal_unit_type));
         // On Windows, snprintf does not guarantee to write a terminating NULL
         what[SARRAYSIZE - 1] = '\0';
+#undef SARRAYSIZE
         fprint_msg_or_err(is_msg, OFFSET_T_FORMAT_08 "/%04d: %x/%02x %-20s %u (%s) frame %u",
             nal->unit.start_posn.infile, nal->unit.start_posn.inpacket, nal->nal_ref_idc,
             nal->nal_unit_type, what, nal->u.slice.slice_type,
@@ -1152,7 +1153,7 @@ static void check_profile(nal_unit_p nal, int show_nal_details)
     }
 
     data = nal->u.seq;
-    name = (data.profile_idc == 66
+    name = (char*)(data.profile_idc == 66
             ? "baseline"
             : data.profile_idc == 77 ? "main" : data.profile_idc == 88 ? "extended" : "<unknown>");
 
@@ -1222,14 +1223,15 @@ int setup_NAL_data(int verbose, nal_unit_p nal)
         return 1;
     }
     nal->nal_ref_idc = (nal->data[0] & 0x60) >> 5;
-    nal->nal_unit_type = (nal->data[0] & 0x1F);
+    nal->nal_unit_type = (NAL_UNIT_TYPE)(nal->data[0] & 0x1F);
 
     if (verbose) {
-#define SARRAYSIZE2 20
-        char what[SARRAYSIZE2];
-        snprintf(what, SARRAYSIZE2, "(%s)", NAL_UNIT_TYPE_STR(nal->nal_unit_type));
+#define SARRAYSIZE 20
+        char what[SARRAYSIZE];
+        snprintf(what, SARRAYSIZE, "(%s)", NAL_UNIT_TYPE_STR(nal->nal_unit_type));
         // On Windows, snprintf does not guarantee to write a terminating NULL
-        what[SARRAYSIZE2 - 1] = '\0';
+        what[SARRAYSIZE - 1] = '\0';
+#undef SARRAYSIZE
         fprint_msg(OFFSET_T_FORMAT_08 "/%04d: NAL unit %d/%d %-20s", nal->unit.start_posn.infile,
             nal->unit.start_posn.inpacket, nal->nal_ref_idc, nal->nal_unit_type, what);
 
@@ -1390,7 +1392,7 @@ int write_NAL_unit_as_TS(TS_writer_p tswriter, nal_unit_p nal, uint32_t video_pi
  */
 int build_param_dict(param_dict_p* param_dict)
 {
-    param_dict_p new2 = malloc(SIZEOF_PARAM_DICT);
+    param_dict_p new2 = (param_dict_p)malloc(SIZEOF_PARAM_DICT);
     if (new2 == NULL) {
         print_err("### Unable to allocate parameter 'dictionary' datastructure\n");
         return 1;
@@ -1399,7 +1401,7 @@ int build_param_dict(param_dict_p* param_dict)
     new2->last_id = -1;
     new2->last_index = -1;
 
-    new2->ids = malloc(sizeof(uint32_t) * NAL_PIC_PARAM_START_SIZE);
+    new2->ids = (int*)malloc(sizeof(uint32_t) * NAL_PIC_PARAM_START_SIZE);
     if (new2->ids == NULL) {
         print_err("### Unable to allocate array within 'dictionary'"
                   " datastructure\n");
@@ -1407,7 +1409,7 @@ int build_param_dict(param_dict_p* param_dict)
         return 1;
     }
 
-    new2->params = malloc(SIZEOF_NAL_INNARDS * NAL_PIC_PARAM_START_SIZE);
+    new2->params = (nal_innards_p)malloc(SIZEOF_NAL_INNARDS * NAL_PIC_PARAM_START_SIZE);
     if (new2->params == NULL) {
         print_err("### Unable to allocate array within 'dictionary'"
                   " datastructure\n");
@@ -1416,7 +1418,7 @@ int build_param_dict(param_dict_p* param_dict)
         return 1;
     }
 
-    new2->posns = malloc(SIZEOF_ES_OFFSET * NAL_PIC_PARAM_START_SIZE);
+    new2->posns = (ES_offset_p)malloc(SIZEOF_ES_OFFSET * NAL_PIC_PARAM_START_SIZE);
     if (new2->posns == NULL) {
         print_err("### Unable to allocate array within 'dictionary'"
                   " datastructure\n");
@@ -1426,7 +1428,7 @@ int build_param_dict(param_dict_p* param_dict)
         return 1;
     }
 
-    new2->data_lens = malloc(sizeof(uint32_t) * NAL_PIC_PARAM_START_SIZE);
+    new2->data_lens = (uint32_t*)malloc(sizeof(uint32_t) * NAL_PIC_PARAM_START_SIZE);
     if (new2->data_lens == NULL) {
         print_err("### Unable to allocate array within 'dictionary'"
                   " datastructure\n");
@@ -1504,22 +1506,23 @@ int remember_param_data(param_dict_p param_dict, uint32_t param_id, nal_unit_p n
 
     if (param_dict->length == param_dict->size) {
         int newsize = param_dict->size + NAL_PIC_PARAM_INCREMENT;
-        param_dict->ids = realloc(param_dict->ids, newsize * sizeof(uint32_t));
+        param_dict->ids = (int*)realloc(param_dict->ids, newsize * sizeof(uint32_t));
         if (param_dict->ids == NULL) {
             print_err("### Unable to extend parameter set dictionary array\n");
             return 1;
         }
-        param_dict->params = realloc(param_dict->params, newsize * SIZEOF_NAL_INNARDS);
+        param_dict->params
+            = (nal_innards_p)realloc(param_dict->params, newsize * SIZEOF_NAL_INNARDS);
         if (param_dict->params == NULL) {
             print_err("### Unable to extend parameter set dictionary array\n");
             return 1;
         }
-        param_dict->posns = realloc(param_dict->params, newsize * SIZEOF_ES_OFFSET);
+        param_dict->posns = (ES_offset_p)realloc(param_dict->params, newsize * SIZEOF_ES_OFFSET);
         if (param_dict->posns == NULL) {
             print_err("### Unable to extend parameter set dictionary array\n");
             return 1;
         }
-        param_dict->data_lens = realloc(param_dict->params, newsize * sizeof(uint32_t));
+        param_dict->data_lens = (uint32_t*)realloc(param_dict->params, newsize * sizeof(uint32_t));
         if (param_dict->data_lens == NULL) {
             print_err("### Unable to extend parameter set dictionary array\n");
             return 1;
@@ -1638,7 +1641,7 @@ int get_seq_param_data(
  */
 int build_nal_unit_list(nal_unit_list_p* list)
 {
-    nal_unit_list_p new2 = malloc(SIZEOF_NAL_UNIT_LIST);
+    nal_unit_list_p new2 = (nal_unit_list_p)malloc(SIZEOF_NAL_UNIT_LIST);
     if (new2 == NULL) {
         print_err("### Unable to allocate NAL unit list datastructure\n");
         return 1;
@@ -1646,7 +1649,7 @@ int build_nal_unit_list(nal_unit_list_p* list)
 
     new2->length = 0;
     new2->size = NAL_UNIT_LIST_START_SIZE;
-    new2->array = malloc(sizeof(nal_unit_p) * NAL_UNIT_LIST_START_SIZE);
+    new2->array = (nal_unit_p*)malloc(sizeof(nal_unit_p) * NAL_UNIT_LIST_START_SIZE);
     if (new2->array == NULL) {
         free(new2);
         print_err("### Unable to allocate array in NAL unit list datastructure\n");
@@ -1666,7 +1669,7 @@ int append_to_nal_unit_list(nal_unit_list_p list, nal_unit_p nal)
 {
     if (list->length == list->size) {
         int newsize = list->size + NAL_UNIT_LIST_INCREMENT;
-        list->array = realloc(list->array, newsize * sizeof(nal_unit_p));
+        list->array = (nal_unit_p*)realloc(list->array, newsize * sizeof(nal_unit_p));
         if (list->array == NULL) {
             print_err("### Unable to extend NAL unit list array\n");
             return 1;

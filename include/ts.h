@@ -1065,7 +1065,7 @@ static uint64_t TWENTY_SEVEN_MHZ = 27000000;
  */
 static int new_TS_reader(TS_reader_p* tsreader)
 {
-    TS_reader_p new2 = malloc(SIZEOF_TS_READER);
+    TS_reader_p new2 = (TS_reader_p)malloc(SIZEOF_TS_READER);
     if (new2 == NULL) {
         print_err("### Unable to allocate TS read-ahead buffer\n");
         return 1;
@@ -1358,7 +1358,7 @@ int read_next_TS_packet(TS_reader_p tsreader, byte** packet)
 static int start_TS_packet_buffer(TS_reader_p tsreader)
 {
     if (tsreader->pcrbuf == NULL) {
-        tsreader->pcrbuf = malloc(SIZEOF_TS_PCR_BUFFER);
+        tsreader->pcrbuf = (TS_pcr_buffer_p)malloc(SIZEOF_TS_PCR_BUFFER);
         if (tsreader->pcrbuf == NULL) {
             print_err("### Unable to allocate TS PCR read-ahead buffer\n");
             return 1;
@@ -2715,7 +2715,7 @@ int build_psi_data(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_l
             *data_used = *data_len;
         else
             *data_used = packet_data_len;
-        *data = malloc(*data_len);
+        *data = (byte*)malloc(*data_len);
         if (*data == NULL) {
             print_err("### Unable to malloc PSI data array\n");
             return 1;
@@ -3152,6 +3152,7 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
             snprintf(buf, SARRAYSIZE, "(%s)", h222_stream_type_str(stream_type));
             // On Windows, snprintf does not guarantee to write a terminating NULL
             buf[SARRAYSIZE - 1] = '\0';
+#undef SARRAYSIZE
             fprint_msg("    Stream %02x %-40s -> PID %04x\n", stream_type, buf, pid);
             if (ES_info_length > 0)
                 print_descriptors(TRUE, "        ", NULL, &stream_data[5], ES_info_length);

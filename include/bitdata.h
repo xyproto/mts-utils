@@ -52,7 +52,7 @@ static int MASK[] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
  */
 int build_bitdata(bitdata_p* bitdata, byte data[], int data_len)
 {
-    bitdata_p new2 = malloc(SIZEOF_BITDATA);
+    bitdata_p new2 = (bitdata_p)malloc(SIZEOF_BITDATA);
     if (new2 == NULL) {
         print_err("### Unable to allocate bitdata datastructure\n");
         return 1;

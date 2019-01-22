@@ -271,7 +271,7 @@ int find_next_h262_item(ES_p es, h262_item_p* item)
  */
 int build_h262_context(ES_p es, h262_context_p* context)
 {
-    h262_context_p new2 = malloc(SIZEOF_H262_CONTEXT);
+    h262_context_p new2 = (h262_context_p)malloc(SIZEOF_H262_CONTEXT);
     if (new2 == NULL) {
         print_err("### Unable to allocate H.262 context datastructure\n");
         return 1;
@@ -387,7 +387,7 @@ static int build_h262_picture(h262_context_p context, h262_picture_p* picture, h
     int err;
     ES_unit_p unit = &(item->unit);
     byte* data = unit->data;
-    h262_picture_p new2 = malloc(SIZEOF_H262_PICTURE);
+    h262_picture_p new2 = (h262_picture_p)malloc(SIZEOF_H262_PICTURE);
     if (new2 == NULL) {
         print_err("### Unable to allocate H.262 picture datastructure\n");
         return 1;

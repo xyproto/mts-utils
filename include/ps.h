@@ -127,7 +127,7 @@ static inline int get_more_data(PS_reader_p ps)
 int build_PS_reader(int input, int quiet, PS_reader_p* ps)
 {
     int err;
-    PS_reader_p new2 = malloc(SIZEOF_PS_READER);
+    PS_reader_p new2 = (PS_reader_p)malloc(SIZEOF_PS_READER);
     if (new2 == NULL) {
         print_err("### Unable to allocate program stream read context\n");
         return 1;
@@ -672,7 +672,7 @@ int read_PS_packet_body(PS_reader_p ps, byte stream_id, PS_packet_p packet)
 #if 0 // XXX naughty stuff
   packet->data = realloc(packet->data,packet->packet_length + 6 + 10);
 #else
-    packet->data = realloc(packet->data, packet->packet_length + 6);
+    packet->data = (byte*)realloc(packet->data, packet->packet_length + 6);
 #endif
     if (packet->data == NULL) {
         print_err("### Unable to allocate PS packet data buffer\n");

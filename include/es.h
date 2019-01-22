@@ -142,7 +142,7 @@ static int setup_readahead(ES_p es)
  */
 int build_elementary_stream_file(int input, ES_p* es)
 {
-    ES_p new2 = malloc(SIZEOF_ES);
+    ES_p new2 = (ES_p)malloc(SIZEOF_ES);
     if (new2 == NULL) {
         print_err("### Unable to allocate elementary stream datastructure\n");
         return 1;
@@ -173,7 +173,7 @@ int build_elementary_stream_file(int input, ES_p* es)
  */
 int build_elementary_stream_PES(PES_reader_p reader, ES_p* es)
 {
-    ES_p new2 = malloc(SIZEOF_ES);
+    ES_p new2 = (ES_p)malloc(SIZEOF_ES);
     if (new2 == NULL) {
         print_err("### Unable to allocate elementary stream datastructure\n");
         return 1;
@@ -265,7 +265,7 @@ int es_command_changed(ES_p es)
  */
 int setup_ES_unit(ES_unit_p unit)
 {
-    unit->data = malloc(ES_UNIT_DATA_START_SIZE);
+    unit->data = (byte*)malloc(ES_UNIT_DATA_START_SIZE);
     if (unit->data == NULL) {
         print_err("### Unable to allocate ES unit data buffer\n");
         return 1;
@@ -302,7 +302,7 @@ void clear_ES_unit(ES_unit_p unit)
 int build_ES_unit(ES_unit_p* unit)
 {
     int err;
-    ES_unit_p new2 = malloc(SIZEOF_ES_UNIT);
+    ES_unit_p new2 = (ES_unit_p)malloc(SIZEOF_ES_UNIT);
     if (new2 == NULL) {
         print_err("### Unable to allocate ES unit datastructure\n");
         return 1;
@@ -326,12 +326,12 @@ int build_ES_unit(ES_unit_p* unit)
  */
 int build_ES_unit_from_data(ES_unit_p* unit, byte* data, uint32_t data_len)
 {
-    ES_unit_p new2 = malloc(SIZEOF_ES_UNIT);
+    ES_unit_p new2 = (ES_unit_p)malloc(SIZEOF_ES_UNIT);
     if (new2 == NULL) {
         print_err("### Unable to allocate ES unit datastructure\n");
         return 1;
     }
-    new2->data = malloc(data_len);
+    new2->data = (byte*)malloc(data_len);
     if (new2->data == NULL) {
         print_err("### Unable to allocate ES unit data buffer\n");
         return 1;
@@ -578,7 +578,7 @@ static int find_ES_unit_end(ES_p es, ES_unit_p unit)
             // Otherwise, it's a data byte
             if (unit->data_len == unit->data_size) {
                 int newsize = unit->data_size + ES_UNIT_DATA_INCREMENT;
-                unit->data = realloc(unit->data, newsize);
+                unit->data = (byte*)realloc(unit->data, newsize);
                 if (unit->data == NULL) {
                     print_err("### Unable to extend ES unit data array\n");
                     return 1;
@@ -891,7 +891,7 @@ int read_ES_data(
 {
     int err;
     if (*data == NULL || data_len == NULL || num_bytes > *data_len) {
-        *data = realloc(*data, num_bytes);
+        *data = (byte*)realloc(*data, num_bytes);
         if (*data == NULL) {
             print_err("### Unable to reallocate data space\n");
             return 1;
@@ -995,7 +995,7 @@ int get_end_of_underlying_PES_packet(ES_p es, byte** data, int* data_len)
     // So, to calculation - we must remember to leave room for those
     // three bytes at the start of the data we return
     *data_len = es->reader->packet->es_data_len - offset + 3;
-    *data = malloc(*data_len);
+    *data = (byte*)malloc(*data_len);
     if (*data == NULL) {
         print_err("### Cannot allocate space for rest of PES packet\n");
         return 1;
@@ -1018,7 +1018,7 @@ int get_end_of_underlying_PES_packet(ES_p es, byte** data, int* data_len)
  */
 int build_ES_unit_list(ES_unit_list_p* list)
 {
-    ES_unit_list_p new2 = malloc(SIZEOF_ES_UNIT_LIST);
+    ES_unit_list_p new2 = (ES_unit_list_p)malloc(SIZEOF_ES_UNIT_LIST);
     if (new2 == NULL) {
         print_err("### Unable to allocate ES unit list datastructure\n");
         return 1;
@@ -1026,7 +1026,7 @@ int build_ES_unit_list(ES_unit_list_p* list)
 
     new2->length = 0;
     new2->size = ES_UNIT_LIST_START_SIZE;
-    new2->array = malloc(SIZEOF_ES_UNIT * ES_UNIT_LIST_START_SIZE);
+    new2->array = (ES_unit_p)malloc(SIZEOF_ES_UNIT * ES_UNIT_LIST_START_SIZE);
     if (new2->array == NULL) {
         free(new2);
         print_err("### Unable to allocate array in ES unit list datastructure\n");
@@ -1049,7 +1049,7 @@ int append_to_ES_unit_list(ES_unit_list_p list, ES_unit_p unit)
     ES_unit_p ptr;
     if (list->length == list->size) {
         int newsize = list->size + ES_UNIT_LIST_INCREMENT;
-        list->array = realloc(list->array, newsize * SIZEOF_ES_UNIT);
+        list->array = (ES_unit_p)realloc(list->array, newsize * SIZEOF_ES_UNIT);
         if (list->array == NULL) {
             print_err("### Unable to extend ES unit list array\n");
             return 1;
@@ -1060,7 +1060,7 @@ int append_to_ES_unit_list(ES_unit_list_p list, ES_unit_p unit)
     // Some things can be copied directly
     *ptr = *unit;
     // But some need adjusting
-    ptr->data = malloc(unit->data_len);
+    ptr->data = (byte*)malloc(unit->data_len);
     if (ptr->data == NULL) {
         print_err("### Unable to copy ES unit data array\n");
         return 1;

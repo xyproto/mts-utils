@@ -96,20 +96,20 @@
 int build_reverse_data(reverse_data_p* reverse_data, int is_h264)
 {
     int newsize = REVERSE_ARRAY_START_SIZE;
-    reverse_data_p new2 = malloc(SIZEOF_REVERSE_DATA);
+    reverse_data_p new2 = (reverse_data_p)malloc(SIZEOF_REVERSE_DATA);
     if (new2 == NULL) {
         print_err("### Unable to allocate reverse data datastructure\n");
         return 1;
     }
 
-    new2->start_file = malloc(newsize * sizeof(offset_t));
+    new2->start_file = (offset_t*)malloc(newsize * sizeof(offset_t));
     if (new2->start_file == NULL) {
         print_err("### Unable to allocate reverse data array (start_file)\n");
         free(new2);
         return 1;
     }
 
-    new2->start_pkt = malloc(newsize * sizeof(int32_t));
+    new2->start_pkt = (int32_t*)malloc(newsize * sizeof(int32_t));
     if (new2->start_pkt == NULL) {
         print_err("### Unable to allocate reverse data array (start_pkt)\n");
         free(new2->start_file);
@@ -117,7 +117,7 @@ int build_reverse_data(reverse_data_p* reverse_data, int is_h264)
         return 1;
     }
 
-    new2->index = malloc(newsize * sizeof(uint32_t));
+    new2->index = (uint32_t*)malloc(newsize * sizeof(uint32_t));
     if (new2->index == NULL) {
         print_err("### Unable to allocate reverse data array (index)\n");
         free(new2->start_file);
@@ -125,7 +125,7 @@ int build_reverse_data(reverse_data_p* reverse_data, int is_h264)
         free(new2);
         return 1;
     }
-    new2->data_len = malloc(newsize * sizeof(int32_t));
+    new2->data_len = (int32_t*)malloc(newsize * sizeof(int32_t));
     if (new2->data_len == NULL) {
         print_err("### Unable to allocate reverse data array (data_len)\n");
         free(new2->start_file);
@@ -139,7 +139,7 @@ int build_reverse_data(reverse_data_p* reverse_data, int is_h264)
         new2->seq_offset = NULL;
         new2->afd_byte = NULL;
     } else {
-        new2->seq_offset = malloc(newsize);
+        new2->seq_offset = (byte*)malloc(newsize);
         if (new2->seq_offset == NULL) {
             print_err("### Unable to allocate reverse data array (seq offset)\n");
             free(new2->start_file);
@@ -149,7 +149,7 @@ int build_reverse_data(reverse_data_p* reverse_data, int is_h264)
             free(new2);
             return 1;
         }
-        new2->afd_byte = malloc(newsize);
+        new2->afd_byte = (byte*)malloc(newsize);
         if (new2->afd_byte == NULL) {
             print_err("### Unable to allocate reverse data array (AFD)\n");
             free(new2->seq_offset);
@@ -373,34 +373,37 @@ int remember_reverse_h262_data(reverse_data_p reverse_data, uint32_t index, ES_o
 
     if (reverse_data->size == reverse_data->length) {
         int newsize = reverse_data->size + REVERSE_ARRAY_INCREMENT_SIZE;
-        reverse_data->index = realloc(reverse_data->index, newsize * sizeof(uint32_t));
+        reverse_data->index = (uint32_t*)realloc(reverse_data->index, newsize * sizeof(uint32_t));
         if (reverse_data->index == NULL) {
             print_err("### Unable to extend reverse data array (index)\n");
             return 1;
         }
-        reverse_data->start_file = realloc(reverse_data->start_file, newsize * sizeof(offset_t));
+        reverse_data->start_file
+            = (offset_t*)realloc(reverse_data->start_file, newsize * sizeof(offset_t));
         if (reverse_data->start_file == NULL) {
             print_err("### Unable to extend reverse data array (start_file)\n");
             return 1;
         }
-        reverse_data->start_pkt = realloc(reverse_data->start_pkt, newsize * sizeof(int32_t));
+        reverse_data->start_pkt
+            = (int32_t*)realloc(reverse_data->start_pkt, newsize * sizeof(int32_t));
         if (reverse_data->start_pkt == NULL) {
             print_err("### Unable to extend reverse data array (start_pkt)\n");
             return 1;
         }
-        reverse_data->data_len = realloc(reverse_data->data_len, newsize * sizeof(int32_t));
+        reverse_data->data_len
+            = (int32_t*)realloc(reverse_data->data_len, newsize * sizeof(int32_t));
         if (reverse_data->data_len == NULL) {
             print_err("### Unable to extend reverse data array (length)\n");
             return 1;
         }
 
         if (!reverse_data->is_h264) {
-            reverse_data->seq_offset = realloc(reverse_data->seq_offset, newsize);
+            reverse_data->seq_offset = (byte*)realloc(reverse_data->seq_offset, newsize);
             if (reverse_data->seq_offset == NULL) {
                 print_err("### Unable to extend reverse data array (seq offset)\n");
                 return 1;
             }
-            reverse_data->afd_byte = realloc(reverse_data->afd_byte, newsize);
+            reverse_data->afd_byte = (byte*)realloc(reverse_data->afd_byte, newsize);
             if (reverse_data->afd_byte == NULL) {
                 print_err("### Unable to extend reverse data array (AFD)\n");
                 return 1;
@@ -476,22 +479,25 @@ int remember_reverse_h264_data(
 
     if (reverse_data->size == reverse_data->length) {
         int newsize = reverse_data->size + REVERSE_ARRAY_INCREMENT_SIZE;
-        reverse_data->index = realloc(reverse_data->index, newsize * sizeof(uint32_t));
+        reverse_data->index = (uint32_t*)realloc(reverse_data->index, newsize * sizeof(uint32_t));
         if (reverse_data->index == NULL) {
             print_err("### Unable to extend reverse data array (index)\n");
             return 1;
         }
-        reverse_data->start_file = realloc(reverse_data->start_file, newsize * sizeof(offset_t));
+        reverse_data->start_file
+            = (offset_t*)realloc(reverse_data->start_file, newsize * sizeof(offset_t));
         if (reverse_data->start_file == NULL) {
             print_err("### Unable to extend reverse data array (start_file)\n");
             return 1;
         }
-        reverse_data->start_pkt = realloc(reverse_data->start_pkt, newsize * sizeof(int32_t));
+        reverse_data->start_pkt
+            = (int32_t*)realloc(reverse_data->start_pkt, newsize * sizeof(int32_t));
         if (reverse_data->start_pkt == NULL) {
             print_err("### Unable to extend reverse data array (start_pkt)\n");
             return 1;
         }
-        reverse_data->data_len = realloc(reverse_data->data_len, newsize * sizeof(int32_t));
+        reverse_data->data_len
+            = (int32_t*)realloc(reverse_data->data_len, newsize * sizeof(int32_t));
         if (reverse_data->data_len == NULL) {
             print_err("### Unable to extend reverse data array (length)\n");
             return 1;

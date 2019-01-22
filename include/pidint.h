@@ -49,12 +49,12 @@ int init_pidint_list(pidint_list_p list)
 {
     list->length = 0;
     list->size = PIDINT_LIST_START_SIZE;
-    list->number = malloc(sizeof(int) * PIDINT_LIST_START_SIZE);
+    list->number = (int*)malloc(sizeof(int) * PIDINT_LIST_START_SIZE);
     if (list->number == NULL) {
         print_err("### Unable to allocate array in program list datastructure\n");
         return 1;
     }
-    list->pid = malloc(sizeof(uint32_t) * PIDINT_LIST_START_SIZE);
+    list->pid = (uint32_t*)malloc(sizeof(uint32_t) * PIDINT_LIST_START_SIZE);
     if (list->pid == NULL) {
         free(list->number);
         print_err("### Unable to allocate array in program list datastructure\n");
@@ -70,7 +70,7 @@ int init_pidint_list(pidint_list_p list)
  */
 int build_pidint_list(pidint_list_p* list)
 {
-    pidint_list_p new2 = malloc(SIZEOF_PIDINT_LIST);
+    pidint_list_p new2 = (pidint_list_p)malloc(SIZEOF_PIDINT_LIST);
     if (new2 == NULL) {
         print_err("### Unable to allocate pid/int list datastructure\n");
         return 1;
@@ -97,12 +97,12 @@ int append_to_pidint_list(pidint_list_p list, uint32_t pid, int program)
 
     if (list->length == list->size) {
         int newsize = list->size + PIDINT_LIST_INCREMENT;
-        list->number = realloc(list->number, newsize * sizeof(int));
+        list->number = (int*)realloc(list->number, newsize * sizeof(int));
         if (list->number == NULL) {
             print_err("### Unable to extend pid/int list array\n");
             return 1;
         }
-        list->pid = realloc(list->pid, newsize * sizeof(uint32_t));
+        list->pid = (uint32_t*)realloc(list->pid, newsize * sizeof(uint32_t));
         if (list->pid == NULL) {
             print_err("### Unable to extend pid/int list array\n");
             return 1;
@@ -314,7 +314,7 @@ static int init_pmt_streams(pmt_p pmt)
 {
     pmt->num_streams = 0;
     pmt->streams_size = PMT_STREAMS_START_SIZE;
-    pmt->streams = malloc(SIZEOF_PMT_STREAM * PMT_STREAMS_START_SIZE);
+    pmt->streams = (pmt_stream_p)malloc(SIZEOF_PMT_STREAM * PMT_STREAMS_START_SIZE);
     if (pmt->streams == NULL) {
         print_err("### Unable to allocate streams in PMT datastructure\n");
         return 1;
@@ -352,7 +352,7 @@ pmt_p build_pmt(uint16_t program_number, byte version_number, uint32_t PCR_pid)
         return NULL;
     }
 
-    new2 = malloc(SIZEOF_PMT);
+    new2 = (pmt_p)malloc(SIZEOF_PMT);
     if (new2 == NULL) {
         print_err("### Unable to allocate PMT datastructure\n");
         return NULL;
@@ -390,14 +390,14 @@ int set_pmt_program_info(pmt_p pmt, uint16_t program_info_length, byte* program_
         return 1;
     }
     if (pmt->program_info == NULL) {
-        pmt->program_info = malloc(program_info_length);
+        pmt->program_info = (byte*)malloc(program_info_length);
         if (pmt->program_info == NULL) {
             print_err("### Unable to allocate program info in PMT datastructure\n");
             return 1;
         }
     } else if (program_info_length != pmt->program_info_length) {
         // well, we might be shrinking it rather than growing it, but still
-        pmt->program_info = realloc(pmt->program_info, program_info_length);
+        pmt->program_info = (byte*)realloc(pmt->program_info, program_info_length);
         if (pmt->program_info == NULL) {
             print_err("### Unable to extend program info in PMT datastructure\n");
             return 1;
@@ -437,7 +437,7 @@ int add_stream_to_pmt(
 
     if (pmt->num_streams == pmt->streams_size) {
         int newsize = pmt->streams_size + PMT_STREAMS_INCREMENT;
-        pmt->streams = realloc(pmt->streams, newsize * SIZEOF_PMT_STREAM);
+        pmt->streams = (pmt_stream_p)realloc(pmt->streams, newsize * SIZEOF_PMT_STREAM);
         if (pmt->streams == NULL) {
             print_err("### Unable to extend PMT streams array\n");
             return 1;
@@ -448,7 +448,7 @@ int add_stream_to_pmt(
     pmt->streams[pmt->num_streams].elementary_PID = elementary_PID;
     pmt->streams[pmt->num_streams].ES_info_length = ES_info_length;
     if (ES_info_length > 0) {
-        pmt->streams[pmt->num_streams].ES_info = malloc(ES_info_length);
+        pmt->streams[pmt->num_streams].ES_info = (byte*)malloc(ES_info_length);
         if (pmt->streams[pmt->num_streams].ES_info == NULL) {
             print_err("### Unable to allocate PMT stream ES info\n");
             return 1;

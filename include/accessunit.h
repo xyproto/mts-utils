@@ -49,7 +49,7 @@ static inline int build_access_unit(access_unit_p* acc_unit, uint32_t index)
 {
     int err;
 
-    access_unit_p new2 = malloc(SIZEOF_ACCESS_UNIT);
+    access_unit_p new2 = (access_unit_p)malloc(SIZEOF_ACCESS_UNIT);
     if (new2 == NULL) {
         print_err("### Unable to allocate access unit datastructure\n");
         return 1;
@@ -618,7 +618,7 @@ static inline int end_access_unit(
 int build_access_unit_context(ES_p es, access_unit_context_p* context)
 {
     int err;
-    access_unit_context_p new2 = malloc(SIZEOF_ACCESS_UNIT_CONTEXT);
+    access_unit_context_p new2 = (access_unit_context_p)malloc(SIZEOF_ACCESS_UNIT_CONTEXT);
     if (new2 == NULL) {
         print_err("### Unable to allocate access unit context datastructure\n");
         return 1;

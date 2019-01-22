@@ -84,7 +84,7 @@
  */
 static int build_PES_packet_data(PES_packet_data_p* data)
 {
-    PES_packet_data_p new2 = malloc(SIZEOF_PES_PACKET_DATA);
+    PES_packet_data_p new2 = (PES_packet_data_p)malloc(SIZEOF_PES_PACKET_DATA);
     if (new2 == NULL) {
         print_err("### Unable to allocate PES packet datastructure\n");
         return 1;
@@ -115,7 +115,7 @@ static int build_PES_packet_data(PES_packet_data_p* data)
 static inline int extend_PES_packet_data(PES_packet_data_p data, byte bytes[], int bytes_len)
 {
     if (data->data == NULL) {
-        data->data = malloc(bytes_len);
+        data->data = (byte*)malloc(bytes_len);
         if (data->data == NULL) {
             print_err("### Unable to extend PES packet data array\n");
             return 1;
@@ -123,7 +123,7 @@ static inline int extend_PES_packet_data(PES_packet_data_p data, byte bytes[], i
         memcpy(data->data, bytes, bytes_len);
         data->data_len = bytes_len;
     } else {
-        data->data = realloc(data->data, data->data_len + bytes_len);
+        data->data = (byte*)realloc(data->data, data->data_len + bytes_len);
         if (data->data == NULL) {
             print_err("### Unable to extend PES packet data array\n");
             return 1;
@@ -156,14 +156,14 @@ static inline int build_dummy_PES_packet_data(PES_packet_data_p* data, int data_
         local_data->is_video = FALSE;
     }
     if (local_data->data == NULL) {
-        local_data->data = malloc(data_len);
+        local_data->data = (byte*)malloc(data_len);
         if (local_data->data == NULL) {
             print_err("### Unable to extend dummy PES packet data array\n");
             return 1;
         }
         memset(local_data->data, 0xFF, data_len);
     } else if (data_len > local_data->data_len) {
-        local_data->data = realloc(local_data->data, data_len);
+        local_data->data = (byte*)realloc(local_data->data, data_len);
         if (local_data->data == NULL) {
             print_err("### Unable to extend dummy PES packet data array\n");
             return 1;
@@ -224,12 +224,12 @@ static int init_peslist(peslist_p list)
     int ii;
     list->length = 0;
     list->size = PESLIST_START_SIZE;
-    list->data = malloc(SIZEOF_PES_PACKET_DATA * PESLIST_START_SIZE);
+    list->data = (PES_packet_data_p*)malloc(SIZEOF_PES_PACKET_DATA * PESLIST_START_SIZE);
     if (list->data == NULL) {
         print_err("### Unable to allocate PES array in PID/PES data array");
         return 1;
     }
-    list->pid = malloc(sizeof(uint32_t) * PESLIST_START_SIZE);
+    list->pid = (uint32_t*)malloc(sizeof(uint32_t) * PESLIST_START_SIZE);
     if (list->pid == NULL) {
         free(list->data);
         print_err("### Unable to allocate PID array in PID/PES data array\n");
@@ -248,7 +248,7 @@ static int init_peslist(peslist_p list)
  */
 static int build_peslist(peslist_p* list)
 {
-    peslist_p new2 = malloc(SIZEOF_PESLIST);
+    peslist_p new2 = (peslist_p)malloc(SIZEOF_PESLIST);
     if (new2 == NULL) {
         print_err("### Unable to allocate PID/PES data array\n");
         return 1;
@@ -372,13 +372,13 @@ static int start_packet_in_peslist(
     // Otherwise, we need to add a new entry to the list
     if (list->length == list->size) {
         int newsize = list->size + PESLIST_INCREMENT;
-        list->data = realloc(list->data, newsize * SIZEOF_PES_PACKET_DATA);
+        list->data = (PES_packet_data_p*)realloc(list->data, newsize * SIZEOF_PES_PACKET_DATA);
         if (list->data == NULL) {
             print_err("### Unable to extend PID/PES data array\n");
             free_PES_packet_data(data);
             return 1;
         }
-        list->pid = realloc(list->pid, newsize * sizeof(uint32_t));
+        list->pid = (uint32_t*)realloc(list->pid, newsize * sizeof(uint32_t));
         if (list->pid == NULL) {
             print_err("### Unable to extend PID/PES data array\n");
             free_PES_packet_data(data);
@@ -1501,7 +1501,7 @@ static int determine_PES_video_type(PES_reader_p reader)
 static int build_PES_reader_datastructure(int give_info, int give_warnings, PES_reader_p* reader)
 {
     int err;
-    PES_reader_p new2 = malloc(SIZEOF_PES_READER);
+    PES_reader_p new2 = (PES_reader_p)malloc(SIZEOF_PES_READER);
     if (new2 == NULL) {
         print_err("### Unable to allocate PES reader datastructure\n");
         return 1;

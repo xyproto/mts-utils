@@ -364,22 +364,13 @@ static int map_circular_buffer(circular_buffer_p* circular, int circ_buf_size, i
 
     *circular = NULL;
 
-#ifdef _WIN32
-    // Under Windows, we're using threading to manage our parent/child
-    // processes, so we can just use malloc here
-    cb = malloc(total_size);
-    if (cb == NULL) {
-        fprint_err("### Error mapping circular buffer as shared memory: %s\n", strerror(errno));
-        return 1;
-    }
-#else // _WIN32
-    cb = mmap(NULL, total_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, -1, 0);
+    cb = (circular_buffer_p)mmap(
+        NULL, total_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, -1, 0);
 
     if (cb == MAP_FAILED) {
         fprint_err("### Error mapping circular buffer as shared memory: %s\n", strerror(errno));
         return 1;
     }
-#endif // _WIN32
 
     cb->start = 1;
     cb->end = 0;
@@ -645,7 +636,7 @@ static int build_buffered_TS_output(buffered_TS_output_p* writer, int circ_buf_s
 {
     int err, ii;
     circular_buffer_p circular;
-    buffered_TS_output_p new2 = calloc(1, SIZEOF_BUFFERED_TS_OUTPUT);
+    buffered_TS_output_p new2 = (buffered_TS_output_p)calloc(1, SIZEOF_BUFFERED_TS_OUTPUT);
     if (new2 == NULL) {
         print_err("### Unable to allocate buffered output\n");
         return 1;
@@ -1879,7 +1870,7 @@ static int received_EOF(circular_buffer_p circular)
 #if DISPLAY_BUFFER
         if (global_show_circular) {
             print_msg("Child: found EOF\n");
-            print_circular_buffer("<--", circular);
+            print_circular_buffer((char*)"<--", circular);
         }
 #else
         if (child_parent_debug)
@@ -2266,7 +2257,7 @@ static int wait_for_child_to_exit(TS_writer_p tswriter, int quiet)
 static int tswrite_build(TS_WRITER_TYPE how, int quiet, TS_writer_p* tswriter)
 {
     TS_writer_p new2 = NULL;
-    new2 = malloc(SIZEOF_TS_WRITER);
+    new2 = (TS_writer_p)malloc(SIZEOF_TS_WRITER);
     if (new2 == NULL) {
         print_err("### Unable to allocate space for TS_writer datastructure\n");
         return 1;

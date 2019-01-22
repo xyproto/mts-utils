@@ -364,7 +364,7 @@ int main(int argc, char** argv)
     }
 
     // Process the standard tswrite switches/arguments
-    err = tswrite_process_args("tsplay", argc, argv, &context);
+    err = tswrite_process_args((char*)"tsplay", argc, argv, &context);
     if (err)
         return 1;
 
@@ -468,7 +468,7 @@ int main(int argc, char** argv)
                 how = TS_W_UDP;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
                 CHECKARG("tsplay", ii);
-                err = int_value("tsplay", argv[ii], argv[ii + 1], TRUE, 10, &max);
+                err = int_value((char*)"tsplay", argv[ii], argv[ii + 1], TRUE, 10, &max);
                 if (err)
                     return 1;
                 ii++;
@@ -482,7 +482,8 @@ int main(int argc, char** argv)
                 pace_mode = TSPLAY_OUTPUT_PACE_PCR2_PMT;
             } else if (!strcmp("-forcepcr", argv[ii])) {
                 CHECKARG("tsplay", ii);
-                err = unsigned_value("tsplay", argv[ii], argv[ii + 1], 0, &override_pcr_pid);
+                err = unsigned_value(
+                    (char*)"tsplay", argv[ii], argv[ii + 1], 0, &override_pcr_pid);
                 if (err)
                     return 1;
                 ii++;
@@ -501,14 +502,14 @@ int main(int argc, char** argv)
             } else if (!strcmp("-vstream", argv[ii])) {
                 CHECKARG("tsplay", ii);
                 err = int_value_in_range(
-                    "ps2ts", argv[ii], argv[ii + 1], 0, 0xF, 0, &video_stream);
+                    (char*)"ps2ts", argv[ii], argv[ii + 1], 0, 0xF, 0, &video_stream);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-astream", argv[ii])) {
                 CHECKARG("tsplay", ii);
                 err = int_value_in_range(
-                    "ps2ts", argv[ii], argv[ii + 1], 0, 0x1F, 0, &audio_stream);
+                    (char*)"ps2ts", argv[ii], argv[ii + 1], 0, 0x1F, 0, &audio_stream);
                 if (err)
                     return 1;
                 want_ac3_audio = FALSE;
@@ -516,7 +517,7 @@ int main(int argc, char** argv)
             } else if (!strcmp("-ac3stream", argv[ii])) {
                 CHECKARG("tsplay", ii);
                 err = int_value_in_range(
-                    "ps2ts", argv[ii], argv[ii + 1], 0, 0x7, 0, &audio_stream);
+                    (char*)"ps2ts", argv[ii], argv[ii + 1], 0, 0x7, 0, &audio_stream);
                 if (err)
                     return 1;
                 want_ac3_audio = TRUE;
@@ -535,19 +536,20 @@ int main(int argc, char** argv)
                 ii++;
             } else if (!strcmp("-prepeat", argv[ii])) {
                 CHECKARG("tsplay", ii);
-                err = int_value("tsplay", argv[ii], argv[ii + 1], TRUE, 10, &repeat_program_every);
+                err = int_value(
+                    (char*)"tsplay", argv[ii], argv[ii + 1], TRUE, 10, &repeat_program_every);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-pad", argv[ii])) {
                 CHECKARG("tsplay", ii);
-                err = int_value("tsplay", argv[ii], argv[ii + 1], TRUE, 10, &pad_start);
+                err = int_value((char*)"tsplay", argv[ii], argv[ii + 1], TRUE, 10, &pad_start);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-ignore", argv[ii])) {
                 CHECKARG("tsplay", ii);
-                err = unsigned_value("tsplay", argv[ii], argv[ii + 1], 0, &pid_to_ignore);
+                err = unsigned_value((char*)"tsplay", argv[ii], argv[ii + 1], 0, &pid_to_ignore);
                 if (err)
                     return 1;
                 if (pid_to_ignore == 0) {
@@ -557,19 +559,19 @@ int main(int argc, char** argv)
                 ii++;
             } else if (!strcmp("-vpid", argv[ii])) {
                 CHECKARG("tsplay", ii);
-                err = unsigned_value("tsplay", argv[ii], argv[ii + 1], 0, &video_pid);
+                err = unsigned_value((char*)"tsplay", argv[ii], argv[ii + 1], 0, &video_pid);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-apid", argv[ii])) {
                 CHECKARG("tsplay", ii);
-                err = unsigned_value("tsplay", argv[ii], argv[ii + 1], 0, &audio_pid);
+                err = unsigned_value((char*)"tsplay", argv[ii], argv[ii + 1], 0, &audio_pid);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-pmt", argv[ii])) {
                 CHECKARG("tsplay", ii);
-                err = unsigned_value("tsplay", argv[ii], argv[ii + 1], 0, &pmt_pid);
+                err = unsigned_value((char*)"tsplay", argv[ii], argv[ii + 1], 0, &pmt_pid);
                 if (err)
                     return 1;
                 ii++;
@@ -578,10 +580,10 @@ int main(int argc, char** argv)
                     print_err("### tsplay: -drop requires two arguments\n");
                     return 1;
                 }
-                err = int_value("tsplay", argv[ii], argv[ii + 1], TRUE, 0, &drop_packets);
+                err = int_value((char*)"tsplay", argv[ii], argv[ii + 1], TRUE, 0, &drop_packets);
                 if (err)
                     return 1;
-                err = int_value("tsplay", argv[ii], argv[ii + 2], TRUE, 0, &drop_number);
+                err = int_value((char*)"tsplay", argv[ii], argv[ii + 2], TRUE, 0, &drop_number);
                 if (err)
                     return 1;
                 ii += 2;
@@ -597,7 +599,7 @@ int main(int argc, char** argv)
                 had_input_name = TRUE;
             } else if (!had_output_name) {
                 // This is presumably the host to write to
-                err = host_value("tsplay", NULL, argv[ii], &output_name, &port);
+                err = host_value((char*)"tsplay", NULL, argv[ii], &output_name, &port);
                 if (err)
                     return 1;
                 had_output_name = TRUE;
@@ -624,7 +626,7 @@ int main(int argc, char** argv)
 
     // On the other hand, it can be nice to have a *string* for <stdout>
     if (how == TS_W_STDOUT)
-        output_name = "<stdout>";
+        output_name = (char*)"<stdout>";
 
     // Try to stop extraneous data ending up in our output stream
     if (how == TS_W_STDOUT) {
@@ -664,7 +666,7 @@ int main(int argc, char** argv)
             return 1;
         }
     } else {
-        input_name = "<stdin>";
+        input_name = (char*)"<stdin>";
         input = STDIN_FILENO;
         is_TS = TRUE; // an assertion
     }
