@@ -112,7 +112,7 @@ int read_next_ac3_frame(int file, audio_frame_p* frame)
         frame_length += frmsizecod & 1;
     frame_length <<= 1; // Convert from 16-bit words to bytes
 
-    data = malloc(frame_length);
+    data = (byte*)malloc(frame_length);
     if (data == NULL) {
         print_err("### Unable to extend data buffer for AC3 frame\n");
         return 1;

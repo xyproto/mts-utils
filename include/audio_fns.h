@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * Generic support for audio streams.
  *
@@ -25,9 +27,6 @@
  *
  * ***** END LICENSE BLOCK *****
  */
-
-#ifndef _audio_fns
-#define _audio_fns
 
 #include "audio_defns.h"
 
@@ -60,12 +59,3 @@ void free_audio_frame(audio_frame_p* frame);
  * goes wrong.
  */
 int read_next_audio_frame(int file, int audio_type, audio_frame_p* frame);
-
-#endif // _audio_fns
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

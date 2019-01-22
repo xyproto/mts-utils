@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Datastructures for working with access units in H.264 elementary streams.
  *
@@ -25,9 +26,6 @@
  *
  * ***** END LICENSE BLOCK *****
  */
-
-#ifndef _accessunit_defns
-#define _accessunit_defns
 
 #include "es_defns.h"
 #include "nalunit_defns.h"
@@ -125,12 +123,3 @@ struct access_unit_context {
     byte no_more_data;
 };
 #define SIZEOF_ACCESS_UNIT_CONTEXT sizeof(struct access_unit_context)
-
-#endif // _accessunit_defns
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Functions for working with access units in H.264 elementary streams.
  *
@@ -25,9 +26,6 @@
  *
  * ***** END LICENSE BLOCK *****
  */
-
-#ifndef _accessunit_fns
-#define _accessunit_fns
 
 #include "accessunit_defns.h"
 
@@ -274,12 +272,3 @@ int get_next_h264_frame(
  * Returns TRUE if so, FALSE if not.
  */
 int access_unit_has_PTS(access_unit_p access_unit);
-
-#endif // _accessunit_fns
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

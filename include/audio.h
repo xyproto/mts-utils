@@ -45,9 +45,9 @@
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int build_audio_frame(audio_frame_p* frame)
+inline int build_audio_frame(audio_frame_p* frame)
 {
-    audio_frame_p new = malloc(SIZEOF_AUDIO_FRAME);
+    audio_frame_p new2 = (audio_frame_p)malloc(SIZEOF_AUDIO_FRAME);
     if (new2 == NULL) {
         fprint_err("### Unable to allocate audio frame datastructure\n");
         return 1;

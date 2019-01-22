@@ -26,20 +26,35 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cerrno>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <fcntl.h>
+#include <unistd.h>
 
-#include "accessunit_fns.h"
-#include "audio_fns.h"
-#include "avs_fns.h"
+#include "ac3.h"
+#include "accessunit.h"
+#include "adts.h"
+#include "audio.h"
+#include "avs.h"
+#include "bitdata.h"
 #include "compat.h"
-#include "es_fns.h"
-#include "misc_fns.h"
-#include "printing_fns.h"
-#include "ts_fns.h"
-#include "tswrite_fns.h"
+#include "es.h"
+#include "filter.h"
+#include "h222.h"
+#include "h262.h"
+#include "l2audio.h"
+#include "misc.h"
+#include "nalunit.h"
+#include "pes.h"
+#include "pidint.h"
+#include "printing.h"
+#include "ps.h"
+#include "reverse.h"
+#include "ts.h"
+#include "tswrite.h"
 #include "version.h"
 
 // Default audio rates, in Hertz
@@ -822,10 +837,3 @@ int main(int argc, char** argv)
     }
     return 0;
 }
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

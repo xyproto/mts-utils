@@ -15,12 +15,15 @@ Build and install the desired utility:
 * `cxx -C tsplay`
 * `sudo install -Dm755 -t /usr/bin tsplay/tsplay`
 
-These utilites are supported right now:
+These utilites are supported right now, and should build:
 
 * `tsplay`
 * `es2ts`
 * `esdots`
 * `esfilter`
+* `esmerge`
+* `esreport`
+* `esreverse`
 
 Pull requests are welcome.
 

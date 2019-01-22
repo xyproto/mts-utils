@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * Support for ISO/IEC 14496-3:2001(E) AAC ADTS audio streams.
  *
@@ -26,9 +28,6 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#ifndef _adts_defns
-#define _adts_defns
-
 #include "audio_defns.h"
 // AAC ADTS provides audio in frames of constant time
 
@@ -42,12 +41,3 @@
 // Specify this flag to indicate that there is always an emphasis field, even
 // if the ID says there isn't one - included for symmetry with NO_EMPHASIS.
 #define ADTS_FLAG_FORCE_EMPHASIS (1 << 1)
-
-#endif // _adts_defns
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

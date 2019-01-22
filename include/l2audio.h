@@ -201,26 +201,6 @@ static int peek_frame_header(const uint32_t header)
 }
 
 /*
- * Build a new layer2 audio frame datastructure
- *
- * Returns 0 if all goes well, 1 if something goes wrong.
- */
-static inline int build_audio_frame(audio_frame_p* frame)
-{
-    audio_frame_p new2 = malloc(SIZEOF_AUDIO_FRAME);
-    if (new2 == NULL) {
-        print_err("### Unable to allocate audio frame datastructure\n");
-        return 1;
-    }
-
-    new2->data = NULL;
-    new2->data_len = 0;
-
-    *frame = new2;
-    return 0;
-}
-
-/*
  * Read the next audio frame.
  *
  * Assumes that the input stream is synchronised - i.e., it does not
@@ -292,7 +272,7 @@ int read_next_l2audio_frame(int file, audio_frame_p* frame)
         return 1;
     }
 
-    data = malloc(frame_length);
+    data = (byte*)malloc(frame_length);
     if (data == NULL) {
         print_err("### Unable to extend data buffer for MPEG layer 2 audio frame\n");
         free(data);

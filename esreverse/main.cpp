@@ -30,29 +30,35 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <errno.h>
+#include <cerrno>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#ifdef _WIN32
-#include <stddef.h>
-#else // _WIN32
 #include <unistd.h>
-#endif // _WIN32
 
-#include "accessunit_fns.h"
+#include "ac3.h"
+#include "accessunit.h"
+#include "adts.h"
+#include "audio.h"
+#include "avs.h"
+#include "bitdata.h"
 #include "compat.h"
-#include "es_fns.h"
-#include "h262_fns.h"
-#include "misc_fns.h"
-#include "nalunit_fns.h"
-#include "pes_fns.h"
-#include "printing_fns.h"
-#include "reverse_fns.h"
-#include "ts_fns.h"
-#include "tswrite_fns.h"
+#include "es.h"
+#include "filter.h"
+#include "h222.h"
+#include "h262.h"
+#include "l2audio.h"
+#include "misc.h"
+#include "nalunit.h"
+#include "pes.h"
+#include "pidint.h"
+#include "printing.h"
+#include "ps.h"
+#include "reverse.h"
+#include "ts.h"
+#include "tswrite.h"
 #include "version.h"
 
 #define DEBUG 0
@@ -60,13 +66,6 @@
 #if SHOW_REVERSE_DATA
 static int show_reverse_data = FALSE;
 #endif
-
-/*
- * Write out packet data as ES or TS. This is defined in reverse.c, but
- * otherwise unadvertised.
- */
-extern int write_packet_data(
-    WRITER output, int as_TS, byte data[], int data_len, uint32_t pid, byte stream_id);
 
 /*
  * Find the I slices in our input stream, and output them in reverse order.
@@ -676,10 +675,3 @@ int main(int argc, char** argv)
     }
     return 0;
 }
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

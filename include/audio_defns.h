@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * Support for generic audio streams
  *
@@ -26,9 +28,6 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#ifndef _audio_defns
-#define _audio_defns
-
 #include "h222_defns.h"
 
 // A simple wrapper for a frame of audio data
@@ -56,12 +55,3 @@ typedef struct audio_frame* audio_frame_p;
                                                                         : (x) == AUDIO_ADTS_MPEG4 \
                         ? "ADTS-MPEG4"                                                            \
                         : (x) == AUDIO_L2 ? "MPEG2" : (x) == AUDIO_AC3 ? "ATSC-AC3" : "???")
-
-#endif // _audio_defns
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

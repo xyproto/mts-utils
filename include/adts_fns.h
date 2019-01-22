@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * Support for ISO/IEC 14496-3:2001(E) AAC ADTS audio streams.
  *
@@ -25,9 +27,6 @@
  *
  * ***** END LICENSE BLOCK *****
  */
-
-#ifndef _adts_fns
-#define _adts_fns
 
 #include "adts_defns.h"
 #include "audio_fns.h"
@@ -62,12 +61,3 @@
  * goes wrong.
  */
 int read_next_adts_frame(int file, audio_frame_p* frame, unsigned int flags);
-
-#endif // _adts_fns
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

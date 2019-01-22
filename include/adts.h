@@ -122,7 +122,7 @@ int read_next_adts_frame(int file, audio_frame_p* frame, unsigned int flags)
     fprint_msg("   length %d\n", frame_length);
 #endif
 
-    data = malloc(frame_length);
+    data = (byte*)malloc(frame_length);
     if (data == NULL) {
         print_err("### Unable to extend data buffer for ADTS frame\n");
         free(data);
