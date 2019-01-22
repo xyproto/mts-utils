@@ -53,7 +53,6 @@ install: install-man
 	DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) cxx -C tsplay install
 	DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) cxx -C tsreport install
 	DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) cxx -C tsserve install
-	DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) cxx -C common install
 
 install-man:
 	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/es2ts.1
