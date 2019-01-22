@@ -27,24 +27,30 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <errno.h>
+#include <cerrno>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fcntl.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#ifdef _WIN32
-#include <stddef.h>
-#else // _WIN32
 #include <unistd.h>
-#endif // _WIN32
 
-#include "compat.h"
-#include "misc_fns.h"
-#include "printing_fns.h"
-#include "ps_fns.h"
 #include "version.h"
+#include "compat.h"
+#include "accessunit.h"
+#include "bitdata.h"
+#include "es.h"
+#include "h222.h"
+#include "h262.h"
+#include "misc.h"
+#include "nalunit.h"
+#include "pes.h"
+#include "pidint.h"
+#include "printing.h"
+#include "ps.h"
+#include "reverse.h"
+#include "ts.h"
+#include "tswrite.h"
 
 /*
  * Report on the given file with characters representing packets
@@ -327,10 +333,3 @@ int main(int argc, char** argv)
     }
     return 0;
 }
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:
