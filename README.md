@@ -30,4 +30,11 @@ The tools are focused on:
 * Simple manipulation of stream data (`es2ts`, `esfilter`, `esreverse`, `esmerge`, `ts2es`)
 * Streaming of data, possibly with introduced errors (`tsplay`).
 
+# License
+
+* MPL 1.1
+
+# Version
+
+* 2.0.0 (WIP)
 
