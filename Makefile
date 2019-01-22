@@ -75,7 +75,7 @@ endif
 ifdef PROFILE
 PROFILE_FLAGS = -pg
 else
-PROFILE_FLAGS = 
+PROFILE_FLAGS =
 endif
 
 # On Linux, large file support is not necessarily enabled. To make programs
@@ -162,8 +162,8 @@ PROG_OBJS = \
 
 TS2PS_OBJS = $(OBJDIR)/ts2ps.o
 
-TEST_PES_OBJS = $(OBJDIR)/test_pes.o 
-TEST_PRINTING_OBJS = $(OBJDIR)/test_printing.o 
+TEST_PES_OBJS = $(OBJDIR)/test_pes.o
+TEST_PRINTING_OBJS = $(OBJDIR)/test_printing.o
 
 TEST_OBJS = \
   $(OBJDIR)/test_nal_unit_list.o \
@@ -207,8 +207,8 @@ PROGS = \
 TS2PS_PROG = $(BINDIR)/ts2ps
 
 # Is test_pes still useful?
-TEST_PES_PROG = $(BINDIR)/test_pes 
-TEST_PRINTING_PROG = $(BINDIR)/test_printing 
+TEST_PES_PROG = $(BINDIR)/test_pes
+TEST_PRINTING_PROG = $(BINDIR)/test_printing
 
 # And then the testing programs (which we only build if we are
 # running the tests)
@@ -386,7 +386,7 @@ $(OBJDIR)/tsreport.o:     tsreport.c $(TS_H) fmtx.h misc_fns.h version.h
 	$(CC) -c $< -o $@ $(CFLAGS)
 $(OBJDIR)/tsserve.o:     tsserve.c $(TS_H) $(PS_H) $(ES_H) misc_fns.h $(PES_H) version.h
 	$(CC) -c $< -o $@ $(CFLAGS)
-$(OBJDIR)/ts_packet_insert.o:     ts_packet_insert.c 
+$(OBJDIR)/ts_packet_insert.o:     ts_packet_insert.c
 	$(CC) -c $< -o $@ $(CFLAGS)
 $(OBJDIR)/tsplay.o:       tsplay.c $(TS_H) misc_fns.h $(PS_H) $(PES_H) version.h tsplay_fns.h
 	$(CC) -c $< -o $@ $(CFLAGS)
