@@ -1,30 +1,39 @@
-# tstools2
+# mts-utils
 
-Fork of `tstools`, formerly hosted at `code.google.com/p/tstools`.
+## MPEG Transport Stream Utilities
+
+Fork of `tstools`, formerly hosted at [`code.google.com/p/tstools`](https://code.google.com/p/tstools).
 
 This is a collection of utilities for working with MPEG data on 64-bit Linux.
+
+The goal of this fork is not portability and not being a drop-in replacement, but to make it possible to compile all the utilities with a modern C++ compiler, and make them easy to package on a modern Linux distro.
+
+Tested on Arch Linux with GCC 8.2.1.
 
 # Requirements
 
 * [cxx](https://github.com/xyproto/cxx)
-* scons
+* SCons
 * GNU `make`
-* C++ compiler with support for C++2a or later (GCC 8.2.1 works).
+* C++ compiler with support for `-std=c++2a`
 
 # Building and installing
 
-Build and install the desired utility:
+Build a utility:
 
 * `cxx -C tsplay`
-* `sudo install -Dm755 -t /usr/bin tsplay/tsplay`
 
-Install the corresponding man page:
+Install the desired utility (use `sudo` if you need):
 
-* `sudo install -Dm644 -t /usr/share/man/man1 docs/mdoc/tsplay.1`
+* `install -Dm755 -t /usr/bin tsplay/tsplay`
+
+Install the corresponding man page (use `sudo` if you need):
+
+* `install -Dm644 -t /usr/share/man/man1 docs/mdoc/tsplay.1`
 
 Or build and install everything:
 
-* `sudo make install` 
+* `sudo make install`
 
 The following utilites are available:
 
