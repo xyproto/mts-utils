@@ -1,5 +1,7 @@
 # mts-utils
 
+[![Build Status](https://travis-ci.org/xyproto/mts-utils.svg?branch=master)](https://travis-ci.org/xyproto/mts-utils)
+
 ## MPEG Transport Stream Utilities
 
 Fork of `tstools`, formerly hosted at [`code.google.com/p/tstools`](https://code.google.com/p/tstools).
