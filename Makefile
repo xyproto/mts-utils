@@ -4,28 +4,28 @@ DESTDIR ?=
 PREFIX ?= /usr
 
 all:
-	cxx -C es2ts
-	cxx -C esdots
-	cxx -C esfilter
-	cxx -C esmerge
-	cxx -C esreport
-	cxx -C esreverse
-	cxx -C m2ts2ts
-	cxx -C pcapreport
-	cxx -C ps2ts
-	cxx -C psdots
-	cxx -C psreport
-	cxx -C rtp2264
-	cxx -C stream_type
-	cxx -C ts2es
-	cxx -C ts2ps
-	cxx -C ts_packet_insert
-	cxx -C tsdvbsub
-	cxx -C tsfilter
-	cxx -C tsinfo
-	cxx -C tsplay
-	cxx -C tsreport
-	cxx -C tsserve
+	cxx -C es2ts opt
+	cxx -C esdots opt
+	cxx -C esfilter opt
+	cxx -C esmerge opt
+	cxx -C esreport opt
+	cxx -C esreverse opt
+	cxx -C m2ts2ts opt
+	cxx -C pcapreport opt
+	cxx -C ps2ts opt
+	cxx -C psdots opt
+	cxx -C psreport opt
+	cxx -C rtp2264 opt
+	cxx -C stream_type opt
+	cxx -C ts2es opt
+	cxx -C ts2ps opt
+	cxx -C ts_packet_insert opt
+	cxx -C tsdvbsub opt
+	cxx -C tsfilter opt
+	cxx -C tsinfo opt
+	cxx -C tsplay opt
+	cxx -C tsreport opt
+	cxx -C tsserve opt
 
 test:
 	cxx -C common test
