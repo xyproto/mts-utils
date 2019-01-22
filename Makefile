@@ -544,18 +544,11 @@ clean: objclean
 .PHONY: distclean
 distclean: clean
 	-rm -rf $(OBJDIR) $(LIBDIR) $(BINDIR)
-	rm -f debian/files debian/tstools.*
-	rm -rf debian/tstools
 
 .PHONY: dist
 dist: distclean
 	ln -snf `pwd` ../tstools-$(TSTOOLS_VERSION)
 	tar czhf ../tstools-$(TSTOOLS_VERSION).tar.gz ../tstools-$(TSTOOLS_VERSION)
-
-.PHONY: dist-debian
-dist-debian: dist
-	ln -snf tstools-$(TSTOOLS_VERSION).tar.gz ../tstools_$(TSTOOLS_VERSION).orig.tar.gz
-	debuild -uc -us
 
 TESTDATAFILE = /data/video/CVBt_hp_trail.264
 
