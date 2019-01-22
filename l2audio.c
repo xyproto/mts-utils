@@ -82,12 +82,12 @@ static const int * const bitrate_table[3][3] =
 };
 
 // Sample rates table
-static const unsigned int sampling_table[3][3] =
-{
-  { 44100, 48000, 32000 },
-  { 22050, 24000, 16000 },
-  { 11025, 12000,  8000 }
-};
+//static const unsigned int sampling_table[3][3] =
+//{
+//  { 44100, 48000, 32000 },
+//  { 22050, 24000, 16000 },
+//  { 11025, 12000,  8000 }
+//};
 
 
 
