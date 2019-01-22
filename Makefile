@@ -56,28 +56,28 @@ install: install-man
 	DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) cxx -C common install
 
 install-man:
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/es2ts.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/s2ts.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/sdots.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/sfilter.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/smerge.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/sreport.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/sreverse.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/2ts2ts.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/capreport.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/s2ts.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/sdots.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/sreport.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/tp2264.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/tream_type.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/s2es.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/s_packet_insert.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/sdvbsub.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/sfilter.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/sinfo.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/splay.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/sreport.1
-	install -Dm644 $(DESTDIR)$(PREFIX)/share/man/man1 docs/mdoc/sserve.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/es2ts.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/s2ts.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/sdots.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/sfilter.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/smerge.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/sreport.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/sreverse.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/2ts2ts.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/capreport.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/s2ts.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/sdots.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/sreport.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/tp2264.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/tream_type.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/s2es.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/s_packet_insert.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/sdvbsub.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/sfilter.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/sinfo.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/splay.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/sreport.1
+	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/sserve.1
 
 clean:
 	cxx -C es2ts clean
