@@ -29,6 +29,8 @@
  */
 
 #include <cmath>
+#undef min
+
 #include <cstdio>
 #include <cstdlib>
 
@@ -590,7 +592,7 @@ int unsigned_value(char* prefix, char* cmd, char* arg, int base, uint32_t* value
         if (errno == ERANGE && val == 0)
             fprint_err(
                 "String cannot be converted to (long) unsigned integer in %s %s\n", cmd, arg);
-        else if (errno == ERANGE && (val == LONG_MAX || val == LONG_MIN))
+        else if (errno == ERANGE && (val == LONG_MAX || val == (long unsigned int)LONG_MIN))
             fprint_err("Number is too big (overflows) in %s %s\n", cmd, arg);
         else
             fprint_err("Cannot read number in %s %s (%s)\n", cmd, arg, strerror(errno));

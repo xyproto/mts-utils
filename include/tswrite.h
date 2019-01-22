@@ -1135,7 +1135,7 @@ static int add_eof_entry(buffered_TS_output_p writer)
     circular->end = data_pos;
 #if DISPLAY_BUFFER
     if (global_show_circular)
-        print_circular_buffer("eof", circular);
+        print_circular_buffer((char*)"eof", circular);
 #endif
     circular->eos = TRUE;
     return 0;
@@ -1346,7 +1346,7 @@ static void wait_microseconds(int microseconds)
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int write_file_data(TS_writer_p tswriter, byte data[], int data_len)
+static int write_file_data(TS_writer_p tswriter, byte data[], size_t data_len)
 {
     size_t written = 0;
     errno = 0;
@@ -1846,7 +1846,7 @@ static int write_circular_data(const SOCKET output, const circular_buffer_p circ
 
 #if DISPLAY_BUFFER
     if (global_show_circular)
-        print_circular_buffer("<--", circular);
+        print_circular_buffer((char*)"<--", circular);
 #endif
     return 0;
 }

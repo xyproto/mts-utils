@@ -34,12 +34,14 @@
 
 static inline uint32_t uint_32_ctx(const struct _pcap_io_ctx* const ctx, const void* v)
 {
-    return ctx->is_be ? uint_32_be(v) : uint_32_le(v);
+    return ctx->is_be ? uint_32_be(static_cast<const uint8_t*>(v))
+                      : uint_32_le(static_cast<const uint8_t*>(v));
 }
 
 static inline uint16_t uint_16_ctx(const struct _pcap_io_ctx* const ctx, const void* v)
 {
-    return ctx->is_be ? uint_16_be(v) : uint_16_le(v);
+    return ctx->is_be ? uint_16_be(static_cast<const uint8_t*>(v))
+                      : uint_16_le(static_cast<const uint8_t*>(v));
 }
 
 // Hi-32, Lo-32 but native within!
@@ -50,9 +52,10 @@ static inline uint64_t uint_64_be_ctx(const struct _pcap_io_ctx* const ctx, cons
 
 static inline uint64_t uint_64_ctx(const struct _pcap_io_ctx* const ctx, const void* v)
 {
-    return ctx->is_be
-        ? ((uint64_t)uint_32_be(v) << 32) | (uint64_t)uint_32_be((const uint8_t*)v + 4)
-        : ((uint64_t)uint_32_le((const uint8_t*)v + 4) << 32) | (uint64_t)uint_32_le(v);
+    return ctx->is_be ? ((uint64_t)uint_32_be(static_cast<const uint8_t*>(v)) << 32)
+            | (uint64_t)uint_32_be(static_cast<const uint8_t*>(v) + 4)
+                      : ((uint64_t)uint_32_le(static_cast<const uint8_t*>(v) + 4) << 32)
+            | (uint64_t)uint_32_le(static_cast<const uint8_t*>(v));
 }
 
 static int read_block_header(const struct _pcap_io_ctx* const ctx, uint32_t* const pLength)
@@ -94,7 +97,7 @@ static int read_chunk(FILE* const f, const size_t len, uint8_t** const pBuf)
         }
     }
 
-    *pBuf = buf;
+    *pBuf = static_cast<uint8_t*>(buf);
     return 1;
 }
 
@@ -248,12 +251,14 @@ static int read_block(struct _pcap_io_ctx* const ctx, pcapng_header_t* const hdr
         // Alloc a new if (or at least check we have one)
         if (ctx->if_count + 1 > ctx->if_size) {
             if (ctx->interfaces == NULL) {
-                if ((ctx->interfaces = malloc(sizeof(*ctx->interfaces) * 4)) == NULL)
+                if ((ctx->interfaces
+                        = (pcapng_hdr_interface_t*)malloc(sizeof(*ctx->interfaces) * 4))
+                    == NULL)
                     return PCAP_ERR_OUT_OF_MEMORY;
                 ctx->if_size = 4;
             } else {
-                pcapng_hdr_interface_t* resized
-                    = realloc(ctx->interfaces, sizeof(*ctx->interfaces) * ctx->if_size * 2);
+                pcapng_hdr_interface_t* resized = (pcapng_hdr_interface_t*)realloc(
+                    ctx->interfaces, sizeof(*ctx->interfaces) * ctx->if_size * 2);
                 if (resized == NULL)
                     return PCAP_ERR_OUT_OF_MEMORY;
                 ctx->if_size *= 2;
@@ -337,7 +342,7 @@ static int read_block(struct _pcap_io_ctx* const ctx, pcapng_header_t* const hdr
     if (rv <= 0) {
         free_block(hdr);
     } else {
-        hdr->type = hdr_type;
+        hdr->type = static_cast<pcapng_type_t>(hdr_type);
     }
 
     return rv;
@@ -362,7 +367,7 @@ static int pcap_read_header(PCAP_reader_p ctx, pcap_hdr_t* hdr)
     magic = uint_32_be(hdr_val + 0);
 
     if (magic == PCAPNG_TYPE_SECTION_HEADER_BLOCK) {
-        pcapng_header_t nghdr = { 0 };
+        pcapng_header_t nghdr = { static_cast<pcapng_type_t>(0) };
 
         printf("NG header found\n");
 

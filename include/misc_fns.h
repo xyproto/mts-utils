@@ -30,14 +30,7 @@
 
 #include "es_defns.h"
 #include "misc_defns.h"
-#ifndef _WIN32
 #include <stdint.h>
-#endif
-
-#ifdef _WIN32
-#include "compat.h"
-#include <winsock2.h>
-#endif // _WIN32
 
 #define CRC32_POLY 0x04c11db7L
 
