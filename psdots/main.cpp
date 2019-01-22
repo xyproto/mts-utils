@@ -35,10 +35,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "version.h"
-#include "compat.h"
 #include "accessunit.h"
 #include "bitdata.h"
+#include "compat.h"
 #include "es.h"
 #include "h222.h"
 #include "h262.h"
@@ -51,6 +50,7 @@
 #include "reverse.h"
 #include "ts.h"
 #include "tswrite.h"
+#include "version.h"
 
 /*
  * Report on the given file with characters representing packets

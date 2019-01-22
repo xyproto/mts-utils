@@ -30,34 +30,34 @@
 
 #include <cerrno>
 #include <cmath>
-#include <fcntl.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <fcntl.h>
 #include <unistd.h>
 
-#include "compat.h"
-#include "version.h"
-#include "misc.h"
-#include "printing.h"
-#include "ts.h"
 #include "ac3.h"
 #include "accessunit.h"
 #include "adts.h"
 #include "audio.h"
 #include "avs.h"
 #include "bitdata.h"
+#include "compat.h"
 #include "es.h"
 #include "filter.h"
 #include "h222.h"
 #include "h262.h"
 #include "l2audio.h"
+#include "misc.h"
 #include "nalunit.h"
 #include "pes.h"
 #include "pidint.h"
+#include "printing.h"
 #include "ps.h"
 #include "reverse.h"
+#include "ts.h"
 #include "tswrite.h"
+#include "version.h"
 
 #include "ethernet.h"
 #include "fmtx.h"
