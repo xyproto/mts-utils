@@ -34,19 +34,18 @@
 
 /* Specify this flag to indicate that there is no emphasis
  *  field in the ADTS header. Generally, MPEG-2 ADTS audio
- *  (ID=0) has no emphasis field and MPEG-4 (ID=1) has 
- *  emphasis, but some H.264/AAC streams have 
+ *  (ID=0) has no emphasis field and MPEG-4 (ID=1) has
+ *  emphasis, but some H.264/AAC streams have
  *  MPEG-4 ADTS with no emphasis and in those cases, you'll
  *  need this flag.
  */
-#define ADTS_FLAG_NO_EMPHASIS  (1<<0)
+#define ADTS_FLAG_NO_EMPHASIS (1 << 0)
 
 /* Specify this flag to indicate that there is always an
  * emphasis field, even if the ID says there isn't one -
  * included for symmetry with NO_EMPHASIS.
  */
-#define ADTS_FLAG_FORCE_EMPHASIS (1<<1)
-
+#define ADTS_FLAG_FORCE_EMPHASIS (1 << 1)
 
 /*
  * Read the next ADTS frame.
@@ -62,13 +61,10 @@
  * Returns 0 if all goes well, EOF if end-of-file is read, and 1 if something
  * goes wrong.
  */
-extern int read_next_adts_frame(int            file,
-                                audio_frame_p *frame,
-                                unsigned int   flags);
-
+extern int read_next_adts_frame(int file, audio_frame_p* frame, unsigned int flags);
 
 #endif // _adts_fns
-
+
 // Local Variables:
 // tab-width: 8
 // indent-tabs-mode: nil

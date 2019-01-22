@@ -32,8 +32,8 @@
 
 #include "compat.h"
 #include "h222_defns.h"
-#include "tswrite_defns.h"
 #include "ps_defns.h"
+#include "tswrite_defns.h"
 
 // ============================================================
 // Program stream reading functions
@@ -48,9 +48,7 @@
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-extern int build_PS_reader(int           input,
-                           int           quiet,
-                           PS_reader_p  *ps);
+extern int build_PS_reader(int input, int quiet, PS_reader_p* ps);
 /*
  * Tidy up the PS read-ahead context after we've finished with it.
  *
@@ -61,7 +59,7 @@ extern int build_PS_reader(int           input,
  *
  * Does not close the associated file.
  */
-extern void free_PS_reader(PS_reader_p  *ps);
+extern void free_PS_reader(PS_reader_p* ps);
 /*
  * Open a PS file for reading.
  *
@@ -71,15 +69,13 @@ extern void free_PS_reader(PS_reader_p  *ps);
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-extern int open_PS_file(char         *name,
-                        int           quiet,
-                        PS_reader_p  *ps);
+extern int open_PS_file(char* name, int quiet, PS_reader_p* ps);
 /*
  * Close a PS file, and free the reader context
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-extern int close_PS_file(PS_reader_p   *ps);
+extern int close_PS_file(PS_reader_p* ps);
 /*
  * Given a program stream, attempt to determine if it holds H.262 or H.264
  * data.
@@ -96,8 +92,7 @@ extern int close_PS_file(PS_reader_p   *ps);
  * Returns 0 if all goes well, 1 if there was an error (including the
  * stream not appearing to be either).
  */
-extern int determine_if_PS_is_h264(PS_reader_p  ps,
-                                   int         *is_h264);
+extern int determine_if_PS_is_h264(PS_reader_p ps, int* is_h264);
 /*
  * Given a program stream, attempt to determine what type of video data it
  * contains.
@@ -112,8 +107,7 @@ extern int determine_if_PS_is_h264(PS_reader_p  ps,
  * Returns 0 if all goes well, 1 if there was an error (including the
  * stream not appearing to be either).
  */
-extern int determine_PS_video_type(PS_reader_p  ps,
-                                   int         *video_type);
+extern int determine_PS_video_type(PS_reader_p ps, int* video_type);
 /*
  * Seek within the PS file.
  *
@@ -126,20 +120,18 @@ extern int determine_PS_video_type(PS_reader_p  ps,
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-extern int seek_using_PS_reader(PS_reader_p  ps,
-                                offset_t     posn);
+extern int seek_using_PS_reader(PS_reader_p ps, offset_t posn);
 /*
  * Rewind the PS context to the remembered "start of data"
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-extern int rewind_program_stream(PS_reader_p  ps);
+extern int rewind_program_stream(PS_reader_p ps);
 /*
  * Print out a stream id in a manner consistent with the PS usages
  * of the stream id values.
  */
-extern void print_stream_id(int    is_msg,
-                            byte   stream_id);
+extern void print_stream_id(int is_msg, byte stream_id);
 /*
  * Look for the start (the first 4 bytes) of the next program stream packet.
  *
@@ -162,11 +154,8 @@ extern void print_stream_id(int    is_msg,
  *   * EOF if EOF is read, or an MPEG_program_end_code is read, or
  *   * 1 if some error (including the first 3 bytes not being 00 00 01) occurs.
  */
-extern int find_PS_packet_start(PS_reader_p ps,
-                                int         verbose,
-                                uint32_t    max,
-                                offset_t   *posn,
-                                byte       *stream_id);
+extern int find_PS_packet_start(
+    PS_reader_p ps, int verbose, uint32_t max, offset_t* posn, byte* stream_id);
 /*
  * Look for the next PS pack header.
  *
@@ -190,10 +179,7 @@ extern int find_PS_packet_start(PS_reader_p ps,
  *   * EOF if EOF is read, or an MPEG_program_end_code is read, or
  *   * 1 if some error (including the first 3 bytes not being 00 00 01) occurs.
  */
-extern int find_PS_pack_header_start(PS_reader_p ps,
-                                     int         verbose,
-                                     uint32_t    max,
-                                     offset_t   *posn);
+extern int find_PS_pack_header_start(PS_reader_p ps, int verbose, uint32_t max, offset_t* posn);
 /*
  * Read in (the rest of) a PS packet according to its length.
  *
@@ -210,9 +196,7 @@ extern int find_PS_pack_header_start(PS_reader_p ps,
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int read_PS_packet_body(PS_reader_p   ps,
-                               byte          stream_id,
-                               PS_packet_p   packet);
+extern int read_PS_packet_body(PS_reader_p ps, byte stream_id, PS_packet_p packet);
 /*
  * Read in the body of the pack header (but *not* the system header packets
  * therein).
@@ -222,14 +206,13 @@ extern int read_PS_packet_body(PS_reader_p   ps,
  *
  * Returns 0 if it succeeds, or 1 if some error occurs.
  */
-extern int read_PS_pack_header_body(PS_reader_p       ps,
-                                    PS_pack_header_p  hdr);
-
+extern int read_PS_pack_header_body(PS_reader_p ps, PS_pack_header_p hdr);
+
 /*
  * Clear the contents of a PS packet datastructure. Frees the internal
  * `data` array.
  */
-extern void clear_PS_packet(PS_packet_p  packet);
+extern void clear_PS_packet(PS_packet_p packet);
 /*
  * Tidy up and free a PS packet datastructure after we've finished with it.
  *
@@ -237,7 +220,7 @@ extern void clear_PS_packet(PS_packet_p  packet);
  *
  * If `unit` is already NULL, does nothing.
  */
-extern void free_PS_packet(PS_packet_p  *packet);
+extern void free_PS_packet(PS_packet_p* packet);
 /*
  * Read in the start (the first 4 bytes) of the next program stream packet.
  *
@@ -260,10 +243,7 @@ extern void free_PS_packet(PS_packet_p  *packet);
  *   * 2 if the bytes read are not 00 00 01 `stream_id`, or
  *   * 1 if some other error occurs.
  */
-extern int read_PS_packet_start(PS_reader_p ps,
-                                int         verbose,
-                                offset_t   *posn,
-                                byte       *stream_id);
+extern int read_PS_packet_start(PS_reader_p ps, int verbose, offset_t* posn, byte* stream_id);
 
 /*
  * Inspect the given PS packet, and determine if it contains AC3 or DTS audio data.
@@ -280,13 +260,9 @@ extern int read_PS_packet_start(PS_reader_p ps,
  *
  * Returns one of the SUBSTREAM_* values.
  */
-extern int identify_private1_data(struct PS_packet *packet,
-                                  int               is_dvd,
-                                  int               verbose,
-                                  int              *substream_index,
-                                  byte             *bsmod,
-                                  byte             *acmod);
-
+extern int identify_private1_data(struct PS_packet* packet, int is_dvd, int verbose,
+    int* substream_index, byte* bsmod, byte* acmod);
+
 // ============================================================
 // PS to TS functions
 // ============================================================
@@ -329,27 +305,13 @@ extern int identify_private1_data(struct PS_packet *packet,
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-extern int ps_to_ts(PS_reader_p  ps,
-                    TS_writer_p  output,
-                    int          pad_start,
-                    int          program_repeat,
-                    int          video_type,
-                    int          is_dvd,
-                    int          video_stream,
-                    int          audio_stream,
-                    int          want_ac3_audio,
-                    int          dolby_is_dvb,
-                    uint32_t     pmt_pid,
-                    uint32_t     pcr_pid,
-                    uint32_t     video_pid,
-                    int          keep_audio,
-                    uint32_t     audio_pid,
-                    int          max,
-                    int          verbose,
-                    int          quiet);
+extern int ps_to_ts(PS_reader_p ps, TS_writer_p output, int pad_start, int program_repeat,
+    int video_type, int is_dvd, int video_stream, int audio_stream, int want_ac3_audio,
+    int dolby_is_dvb, uint32_t pmt_pid, uint32_t pcr_pid, uint32_t video_pid, int keep_audio,
+    uint32_t audio_pid, int max, int verbose, int quiet);
 
 #endif // _ps_fns
-
+
 // Local Variables:
 // tab-width: 8
 // indent-tabs-mode: nil

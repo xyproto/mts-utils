@@ -40,9 +40,8 @@
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-extern int build_h262_filter_context_strip(h262_filter_context_p *fcontext,
-                                           h262_context_p         h262,
-                                           int                    all_IP);
+extern int build_h262_filter_context_strip(
+    h262_filter_context_p* fcontext, h262_context_p h262, int all_IP);
 /*
  * Build a new filter context for "filtering" H.262 data
  *
@@ -53,13 +52,12 @@ extern int build_h262_filter_context_strip(h262_filter_context_p *fcontext,
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-extern int build_h262_filter_context(h262_filter_context_p *fcontext,
-                                     h262_context_p         h262,
-                                     int                    freq);
+extern int build_h262_filter_context(
+    h262_filter_context_p* fcontext, h262_context_p h262, int freq);
 /*
  * Reset an H.262 filter context, ready to start filtering anew.
  */
-extern void reset_h262_filter_context(h262_filter_context_p  fcontext);
+extern void reset_h262_filter_context(h262_filter_context_p fcontext);
 /*
  * Free a filter context
  *
@@ -69,7 +67,7 @@ extern void reset_h262_filter_context(h262_filter_context_p  fcontext);
  * - `fcontext` is the filter context, which will be freed, and returned
  *   as NULL.
  */
-extern void free_h262_filter_context(h262_filter_context_p *fcontext);
+extern void free_h262_filter_context(h262_filter_context_p* fcontext);
 /*
  * Build a new filter context for "stripping" ES data
  *
@@ -80,9 +78,8 @@ extern void free_h262_filter_context(h262_filter_context_p *fcontext);
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-extern int build_h264_filter_context_strip(h264_filter_context_p *fcontext,
-                                           access_unit_context_p  access,
-                                           int                    allref);
+extern int build_h264_filter_context_strip(
+    h264_filter_context_p* fcontext, access_unit_context_p access, int allref);
 /*
  * Build a new filter context for "filtering" ES data
  *
@@ -93,13 +90,12 @@ extern int build_h264_filter_context_strip(h264_filter_context_p *fcontext,
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-extern int build_h264_filter_context(h264_filter_context_p *fcontext,
-                                     access_unit_context_p  access,
-                                     int                    freq);
+extern int build_h264_filter_context(
+    h264_filter_context_p* fcontext, access_unit_context_p access, int freq);
 /*
  * Reset an H.264 filter context, ready to start filtering anew.
  */
-extern void reset_h264_filter_context(h264_filter_context_p  fcontext);
+extern void reset_h264_filter_context(h264_filter_context_p fcontext);
 /*
  * Free an H.264 filter context
  *
@@ -109,7 +105,7 @@ extern void reset_h264_filter_context(h264_filter_context_p  fcontext);
  * - `fcontext` is the filter context, which will be freed, and returned
  *   as NULL.
  */
-extern void free_h264_filter_context(h264_filter_context_p *fcontext);
+extern void free_h264_filter_context(h264_filter_context_p* fcontext);
 
 /*
  * Retrieve the next I (and/or, if fcontext->allref, P) frame in this H.262 ES.
@@ -147,12 +143,8 @@ extern void free_h264_filter_context(h264_filter_context_p *fcontext);
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-extern int get_next_stripped_h262_frame(h262_filter_context_p  fcontext,
-                                        int                    verbose,
-                                        int                    quiet,
-                                        h262_picture_p        *seq_hdr,
-                                        h262_picture_p        *frame,
-                                        int                   *frames_seen);
+extern int get_next_stripped_h262_frame(h262_filter_context_p fcontext, int verbose, int quiet,
+    h262_picture_p* seq_hdr, h262_picture_p* frame, int* frames_seen);
 /*
  * Retrieve the next I frame, from the H.262 ES, aiming for an "apparent" kept
  * frequency as stated.
@@ -191,12 +183,8 @@ extern int get_next_stripped_h262_frame(h262_filter_context_p  fcontext,
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-extern int get_next_filtered_h262_frame(h262_filter_context_p  fcontext,
-                                        int                    verbose,
-                                        int                    quiet,
-                                        h262_picture_p        *seq_hdr,
-                                        h262_picture_p        *frame,
-                                        int                   *frames_seen);
+extern int get_next_filtered_h262_frame(h262_filter_context_p fcontext, int verbose, int quiet,
+    h262_picture_p* seq_hdr, h262_picture_p* frame, int* frames_seen);
 /*
  * Return the next IDR or I (and maybe any reference) frame from this H.264 ES.
  *
@@ -218,11 +206,8 @@ extern int get_next_filtered_h262_frame(h262_filter_context_p  fcontext,
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-extern int get_next_stripped_h264_frame(h264_filter_context_p  fcontext,
-                                        int                    verbose,
-                                        int                    quiet,
-                                        access_unit_p         *frame,
-                                        int                   *frames_seen);
+extern int get_next_stripped_h264_frame(h264_filter_context_p fcontext, int verbose, int quiet,
+    access_unit_p* frame, int* frames_seen);
 /*
  * Retrieve the next frame from the H.264 (MPEG-4/AVC) ES, aiming
  * for an "apparent" kept frequency as stated.
@@ -252,15 +237,11 @@ extern int get_next_stripped_h264_frame(h264_filter_context_p  fcontext,
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-extern int get_next_filtered_h264_frame(h264_filter_context_p  fcontext,
-                                        int                    verbose,
-                                        int                    quiet,
-                                        access_unit_p         *frame,
-                                        int                   *frames_seen);
-
+extern int get_next_filtered_h264_frame(h264_filter_context_p fcontext, int verbose, int quiet,
+    access_unit_p* frame, int* frames_seen);
 
 #endif // _filter_fns
-
+
 // Local Variables:
 // tab-width: 8
 // indent-tabs-mode: nil

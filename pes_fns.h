@@ -29,8 +29,8 @@
 #ifndef _pes_fns
 #define _pes_fns
 
-#include "pes_defns.h"
 #include "es_defns.h"
+#include "pes_defns.h"
 
 /*
  * Free a PES packet datastructure
@@ -38,7 +38,7 @@
  * - `data` is the PES packet datastructure, which will be freed,
  *   and returned as NULL.
  */
-extern void free_PES_packet_data(PES_packet_data_p *data);
+extern void free_PES_packet_data(PES_packet_data_p* data);
 /*
  * Look at the start of a file to determine if it appears to be transport
  * stream. Rewinds the file when it is finished.
@@ -52,8 +52,7 @@ extern void free_PES_packet_data(PES_packet_data_p *data);
  *
  * Returns 0 if all goes well, 1 if there was an error.
  */
-extern int determine_if_TS_file(int    input,
-                                int   *is_TS);
+extern int determine_if_TS_file(int input, int* is_TS);
 /*
  * Build a PES reader datastructure for PS data
  *
@@ -66,10 +65,8 @@ extern int determine_if_TS_file(int    input,
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-extern int build_PS_PES_reader(PS_reader_p    ps,
-                               int            give_info,
-                               int            give_warnings,
-                               PES_reader_p  *reader);
+extern int build_PS_PES_reader(
+    PS_reader_p ps, int give_info, int give_warnings, PES_reader_p* reader);
 /*
  * Build a PES reader datastructure for TS data
  *
@@ -85,11 +82,8 @@ extern int build_PS_PES_reader(PS_reader_p    ps,
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-extern int build_TS_PES_reader(TS_reader_p    tsreader,
-                               int            give_info,
-                               int            give_warnings,
-                               uint16_t       program_number,
-                               PES_reader_p  *reader);
+extern int build_TS_PES_reader(TS_reader_p tsreader, int give_info, int give_warnings,
+    uint16_t program_number, PES_reader_p* reader);
 /*
  * Build a PES reader datastructure
  *
@@ -106,12 +100,8 @@ extern int build_TS_PES_reader(TS_reader_p    tsreader,
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-extern int build_PES_reader(int            input,
-                            int            is_TS,
-                            int            give_info,
-                            int            give_warnings,
-                            uint16_t       program_number,
-                            PES_reader_p  *reader);
+extern int build_PES_reader(int input, int is_TS, int give_info, int give_warnings,
+    uint16_t program_number, PES_reader_p* reader);
 /*
  * Open a Transport Stream file for PES packet reading
  *
@@ -129,11 +119,8 @@ extern int build_PES_reader(int            input,
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-extern int open_PES_reader_for_TS(char          *filename,
-                                  uint16_t       program_number,
-                                  int            give_info,
-                                  int            give_warnings,
-                                  PES_reader_p  *reader);
+extern int open_PES_reader_for_TS(char* filename, uint16_t program_number, int give_info,
+    int give_warnings, PES_reader_p* reader);
 /*
  * Open a Program Stream file for PES packet reading
  *
@@ -147,10 +134,8 @@ extern int open_PES_reader_for_TS(char          *filename,
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-extern int open_PES_reader_for_PS(char          *filename,
-                                  int            give_info,
-                                  int            give_warnings,
-                                  PES_reader_p  *reader);
+extern int open_PES_reader_for_PS(
+    char* filename, int give_info, int give_warnings, PES_reader_p* reader);
 /*
  * Open a Program Stream or Transport Stream file for PES packet reading
  *
@@ -171,10 +156,7 @@ extern int open_PES_reader_for_PS(char          *filename,
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-extern int open_PES_reader(char          *filename,
-                           int            give_info,
-                           int            give_warnings,
-                           PES_reader_p  *reader);
+extern int open_PES_reader(char* filename, int give_info, int give_warnings, PES_reader_p* reader);
 /*
  * Tell the PES reader whether we only want video data
  *
@@ -184,8 +166,7 @@ extern int open_PES_reader(char          *filename,
  * By default, the PES reader returns video data and a single audio
  * stream (taken from the first audio stream encountered).
  */
-extern void set_PES_reader_video_only(PES_reader_p  reader,
-                                      int           video_only);
+extern void set_PES_reader_video_only(PES_reader_p reader, int video_only);
 /*
  * Tell the PES reader which audio stream we want.
  *
@@ -201,8 +182,7 @@ extern void set_PES_reader_video_only(PES_reader_p  reader,
  * Returns 0 if all went well, or 1 if there was an error (specifically,
  * that `stream_number` was not in the range 0-31).
  */
-extern int set_PES_reader_audio_stream(PES_reader_p  reader,
-                                       int           stream_number);
+extern int set_PES_reader_audio_stream(PES_reader_p reader, int stream_number);
 /*
  * Tell the PES reader to get its audio stream from private stream 1
  * (this is the stream that is conventionally used for Dolby in DVD data).
@@ -214,7 +194,7 @@ extern int set_PES_reader_audio_stream(PES_reader_p  reader,
  *
  * This call only has effect if the input data is PS.
  */
-extern void set_PES_reader_audio_private1(PES_reader_p  reader);
+extern void set_PES_reader_audio_private1(PES_reader_p reader);
 /*
  * Tell the PES reader to "pretend" it has read a PAT and PMT with
  * the given program information.
@@ -235,24 +215,19 @@ extern void set_PES_reader_audio_private1(PES_reader_p  reader);
  * - `pcr_pid` is the PID to assume for the PCR data - this will often
  *   be the same as the `video_pid`
  */
-extern void set_PES_reader_program_data(PES_reader_p  reader,
-                                        uint16_t      program_number,
-                                        uint32_t      pmt_pid,
-                                        uint32_t      video_pid,
-                                        uint32_t      audio_pid,
-                                        uint32_t      pcr_pid);
+extern void set_PES_reader_program_data(PES_reader_p reader, uint16_t program_number,
+    uint32_t pmt_pid, uint32_t video_pid, uint32_t audio_pid, uint32_t pcr_pid);
 /*
  * Tell the PES reader that the PS data it is reading is MPEG-4/AVC,
  * as opposed to MPEG-1/MPEG-2.
  */
-extern void set_PES_reader_h264(PES_reader_p  reader);
+extern void set_PES_reader_h264(PES_reader_p reader);
 /*
  * Tell the PES reader that the PS data it is reading is of
  * type `video_type` (which is assumed to be a legitimate value
  * such as VIDEO_H264, etc.)
  */
-extern void set_PES_reader_video_type(PES_reader_p  reader,
-                                      int           video_type);
+extern void set_PES_reader_video_type(PES_reader_p reader, int video_type);
 /*
  * Tell the PES reader whether to output any Dolby (AC-3) audio data
  * it may read using the DVB stream type (0x06) or the ATSC stream
@@ -261,12 +236,11 @@ extern void set_PES_reader_video_type(PES_reader_p  reader,
  * If it is reading TS data, then the default is to use whatever stream type
  * the Dolby audio was read with.
  *
- * If it is reading PS data, then the default is to assume DVB data. 
+ * If it is reading PS data, then the default is to assume DVB data.
  *
  * This call only has effect if Dolby audio data is actually selected.
  */
-extern void set_PES_reader_dolby_stream_type(PES_reader_p  reader,
-                                             int           is_dvb);
+extern void set_PES_reader_dolby_stream_type(PES_reader_p reader, int is_dvb);
 /*
  * Reposition the PES reader to an earlier packet
  *
@@ -286,8 +260,7 @@ extern void set_PES_reader_dolby_stream_type(PES_reader_p  reader,
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-extern int set_PES_reader_position(PES_reader_p  reader,
-                                   offset_t      posn);
+extern int set_PES_reader_position(PES_reader_p reader, offset_t posn);
 /*
  * Free a PES reader, and the relevant datastructures. Does not close
  * the underlying file.
@@ -297,7 +270,7 @@ extern int set_PES_reader_position(PES_reader_p  reader,
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-extern int free_PES_reader(PES_reader_p  *reader);
+extern int free_PES_reader(PES_reader_p* reader);
 /*
  * Close a PES reader, and free the relevant datastructures.
  *
@@ -307,7 +280,7 @@ extern int free_PES_reader(PES_reader_p  *reader);
  * Returns 0 if all goes well, 1 if something goes wrong with closing the
  * file (although in that case, the `reader` will still have been freed).
  */
-extern int close_PES_reader(PES_reader_p  *reader);
+extern int close_PES_reader(PES_reader_p* reader);
 /*
  * Return the next PES packet from the input file
  *
@@ -316,7 +289,7 @@ extern int close_PES_reader(PES_reader_p  *reader);
  * Returns 0 if all goes well, EOF if end of file is read, and 1 if
  * something goes wrong.
  */
-extern int read_next_PES_packet(PES_reader_p  reader);
+extern int read_next_PES_packet(PES_reader_p reader);
 
 /*
  * Given an MPEG-1 PES packet, determine the offset of the ES data.
@@ -328,7 +301,7 @@ extern int read_next_PES_packet(PES_reader_p  reader);
  * Returns the required offset (i.e., packet[offset] is the first byte
  * of the ES data within the PES packet).
  */
-extern int calc_mpeg1_pes_offset(byte  *data, int data_len);
+extern int calc_mpeg1_pes_offset(byte* data, int data_len);
 
 /*
  * Read in the next PES packet that contains ES data we are interested in
@@ -339,7 +312,7 @@ extern int calc_mpeg1_pes_offset(byte  *data, int data_len);
  * Returns 0 if all goes well, EOF if end of file is read, and 1 if
  * something goes wrong.
  */
-extern int read_next_PES_ES_packet(PES_reader_p       reader);
+extern int read_next_PES_ES_packet(PES_reader_p reader);
 /*
  * If the given PES packet data contains a PTS field, return it
  *
@@ -350,10 +323,7 @@ extern int read_next_PES_ES_packet(PES_reader_p       reader);
  *
  * Returns 0 if all went well, 1 if an error occurs.
  */
-extern int find_PTS_in_PES(byte      data[],
-                           int32_t   data_len,
-                           int      *got_pts,
-                           uint64_t *pts);
+extern int find_PTS_in_PES(byte data[], int32_t data_len, int* got_pts, uint64_t* pts);
 /*
  * If the given PES packet data contains a DTS field, return it
  *
@@ -364,10 +334,7 @@ extern int find_PTS_in_PES(byte      data[],
  *
  * Returns 0 if all went well, 1 if an error occurs.
  */
-extern int find_DTS_in_PES(byte      data[],
-                           int32_t   data_len,
-                           int      *got_dts,
-                           uint64_t *dts);
+extern int find_DTS_in_PES(byte data[], int32_t data_len, int* got_dts, uint64_t* dts);
 /*
  * If the given PES packet data contains a PTS and/or DTS field, return it
  *
@@ -380,12 +347,8 @@ extern int find_DTS_in_PES(byte      data[],
  *
  * Returns 0 if all went well, 1 if an error occurs.
  */
-extern int find_PTS_DTS_in_PES(byte      data[],
-                               int32_t   data_len,
-                               int      *got_pts,
-                               uint64_t *pts,
-                               int      *got_dts,
-                               uint64_t *dts);
+extern int find_PTS_DTS_in_PES(
+    byte data[], int32_t data_len, int* got_pts, uint64_t* pts, int* got_dts, uint64_t* dts);
 /*
  * If the given PES packet data contains an ESCR field, return it
  *
@@ -396,10 +359,7 @@ extern int find_PTS_DTS_in_PES(byte      data[],
  *
  * Returns 0 if all went well, 1 if an error occurs.
  */
-extern int find_ESCR_in_PES(byte      data[],
-                            int32_t   data_len,
-                            int      *got_escr,
-                            uint64_t *escr);
+extern int find_ESCR_in_PES(byte data[], int32_t data_len, int* got_escr, uint64_t* escr);
 /*
  * Decode a PTS or DTS value.
  *
@@ -410,9 +370,7 @@ extern int find_ESCR_in_PES(byte      data[],
  *
  * Returns 0 if the PTS/DTS value is decoded successfully, 1 if an error occurs
  */
-extern int decode_pts_dts(byte     data[],
-                          int      required_guard,
-                          uint64_t *value);
+extern int decode_pts_dts(byte data[], int required_guard, uint64_t* value);
 /*
  * Encode a PTS or DTS.
  *
@@ -421,9 +379,7 @@ extern int decode_pts_dts(byte     data[],
  *   a PTS before a DTS, or 1 for a DTS after a PTS
  * - `value` is the PTS or DTS value to be encoded
  */
-extern void encode_pts_dts(byte    data[],
-                           int     guard_bits,
-                           uint64_t value);
+extern void encode_pts_dts(byte data[], int guard_bits, uint64_t value);
 /*
  * Does the given PES packet contain a PTS?
  *
@@ -431,7 +387,7 @@ extern void encode_pts_dts(byte    data[],
  *
  * Returns TRUE if it does, FALSE if it does not (or is in error)
  */
-extern int PES_packet_has_PTS(PES_packet_data_p  packet);
+extern int PES_packet_has_PTS(PES_packet_data_p packet);
 /*
  * Report on the content of a PES packet - specifically, its header data.
  *
@@ -442,10 +398,7 @@ extern int PES_packet_has_PTS(PES_packet_data_p  packet);
  *
  * Returns 0 if all went well, 1 if an error occurs.
  */
-extern int report_PES_data_array(char   *prefix,
-                                 byte   *data,
-                                 int     data_len,
-                                 int     show_data);
+extern int report_PES_data_array(char* prefix, byte* data, int data_len, int show_data);
 /*
  * Report on the content of a PES packet.
  *
@@ -462,12 +415,9 @@ extern int report_PES_data_array(char   *prefix,
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-extern void report_PES_data_array2(int         stream_type,
-                                   byte       *payload,
-                                   int         payload_len,
-                                   int         show_data_len);
+extern void report_PES_data_array2(
+    int stream_type, byte* payload, int payload_len, int show_data_len);
 
-
 // ============================================================
 // Server support
 // ============================================================
@@ -490,10 +440,8 @@ extern void report_PES_data_array2(int         stream_type,
  *   if we are writing PES data (if we are writing TS data, then the
  *   program data will be in the original TS packets)
  */
-extern void set_server_output(PES_reader_p  reader,
-                              TS_writer_p   tswriter,
-                              int           write_PES,
-                              int           program_freq);
+extern void set_server_output(
+    PES_reader_p reader, TS_writer_p tswriter, int write_PES, int program_freq);
 /*
  * Start packets being written out to a TS writer (again).
  *
@@ -504,7 +452,7 @@ extern void set_server_output(PES_reader_p  reader,
  *
  * If `reader` is NULL, nothing is done.
  */
-extern void start_server_output(PES_reader_p  reader);
+extern void start_server_output(PES_reader_p reader);
 /*
  * Stop packets being written out to a TS writer.
  *
@@ -515,7 +463,7 @@ extern void start_server_output(PES_reader_p  reader);
  *
  * If `reader` is NULL, nothing is done.
  */
-extern void stop_server_output(PES_reader_p  reader);
+extern void stop_server_output(PES_reader_p reader);
 /*
  * When outputting PES packets in "normal play" mode, add ``extra`` PES
  * packets (of the same size as each real packet) to the output. This
@@ -531,8 +479,7 @@ extern void stop_server_output(PES_reader_p  reader);
  * - `reader` is our PES reader context
  * - `extra` is how many extra packets to output per "real" packet.
  */
-extern void set_server_padding(PES_reader_p  reader,
-                               int           extra);
+extern void set_server_padding(PES_reader_p reader, int extra);
 /*
  * Write out TS program data based on the information we have within the given
  * PES reader context (as amended by any calls of
@@ -540,11 +487,10 @@ extern void set_server_padding(PES_reader_p  reader,
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-extern int write_program_data(PES_reader_p  reader,
-                              TS_writer_p   output);
+extern int write_program_data(PES_reader_p reader, TS_writer_p output);
 
 #endif // _pes_fns
-
+
 // Local Variables:
 // tab-width: 8
 // indent-tabs-mode: nil

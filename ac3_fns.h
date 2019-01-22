@@ -32,7 +32,6 @@
 
 #include "audio_fns.h"
 
-
 /*
  * Read the next AC3 frame.
  *
@@ -45,12 +44,10 @@
  * Returns 0 if all goes well, EOF if end-of-file is read, and 1 if something
  * goes wrong.
  */
-extern int read_next_ac3_frame(int            file,
-                               audio_frame_p *frame);
-
+extern int read_next_ac3_frame(int file, audio_frame_p* frame);
 
 #endif // _ac3_fns
-
+
 // Local Variables:
 // tab-width: 8
 // indent-tabs-mode: nil

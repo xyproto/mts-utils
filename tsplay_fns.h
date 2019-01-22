@@ -31,8 +31,8 @@
 #ifndef _tsplay_fns
 #define _tsplay_fns
 
-#include "tswrite_defns.h"
 #include "tsplay_defns.h"
+#include "tswrite_defns.h"
 
 /*
  * Read TS packets and then output them.
@@ -58,15 +58,8 @@
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-extern int play_TS_stream(int         input,
-                          TS_writer_p tswriter,
-                          const tsplay_output_pace_mode pace_mode,
-                          uint32_t    pid_to_ignore,
-                          uint32_t    override_pcr_pid,
-                          int         max,
-                          int         loop,
-                          int         quiet,
-                          int         verbose);
+extern int play_TS_stream(int input, TS_writer_p tswriter, const tsplay_output_pace_mode pace_mode,
+    uint32_t pid_to_ignore, uint32_t override_pcr_pid, int max, int loop, int quiet, int verbose);
 
 /*
  * Read PS packets and then output them as TS.
@@ -110,29 +103,14 @@ extern int play_TS_stream(int         input,
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-extern int play_PS_stream(int          input,
-                          TS_writer_p  output,
-                          int          pad_start,
-                          int          program_repeat,
-                          int          force_stream_type,
-                          int          want_h262,
-                          int          input_is_dvd,
-                          int          video_stream,
-                          int          audio_stream,
-                          int          want_ac3_audio,
-                          int          want_dolby_as_dvb,
-                          uint32_t     pmt_pid,
-                          uint32_t     pcr_pid,
-                          uint32_t     video_pid,
-                          int          keep_audio,
-                          uint32_t     audio_pid,
-                          int          max,
-                          int          loop,
-                          int          verbose,
-                          int          quiet);
+extern int play_PS_stream(int input, TS_writer_p output, int pad_start, int program_repeat,
+    int force_stream_type, int want_h262, int input_is_dvd, int video_stream, int audio_stream,
+    int want_ac3_audio, int want_dolby_as_dvb, uint32_t pmt_pid, uint32_t pcr_pid,
+    uint32_t video_pid, int keep_audio, uint32_t audio_pid, int max, int loop, int verbose,
+    int quiet);
 
 #endif // tsplay_fns
-
+
 // Local Variables:
 // tab-width: 8
 // indent-tabs-mode: nil

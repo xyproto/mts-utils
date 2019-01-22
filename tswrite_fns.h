@@ -70,12 +70,8 @@
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-extern int tswrite_open(TS_WRITER_TYPE  how,
-                        char           *name,
-                        char           *multicast_if,
-                        int             port,
-                        int             quiet,
-                        TS_writer_p    *tswriter);
+extern int tswrite_open(TS_WRITER_TYPE how, char* name, char* multicast_if, int port, int quiet,
+    TS_writer_p* tswriter);
 /*
  * Open a network connection for TS output.
  *
@@ -96,11 +92,8 @@ extern int tswrite_open(TS_WRITER_TYPE  how,
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-extern int tswrite_open_connection(int             use_tcp,
-                                   char           *name,
-                                   int             port,
-                                   int             quiet,
-                                   TS_writer_p    *tswriter);
+extern int tswrite_open_connection(
+    int use_tcp, char* name, int port, int quiet, TS_writer_p* tswriter);
 /*
  * Open a file for TS output.
  *
@@ -116,9 +109,7 @@ extern int tswrite_open_connection(int             use_tcp,
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-extern int tswrite_open_file(char           *name,
-                             int             quiet,
-                             TS_writer_p    *tswriter);
+extern int tswrite_open_file(char* name, int quiet, TS_writer_p* tswriter);
 /*
  * Wait for a client to connect and then both write TS data to it and
  * listen for command from it. Uses TCP/IP.
@@ -130,9 +121,7 @@ extern int tswrite_open_file(char           *name,
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-extern int tswrite_wait_for_client(int           server_socket,
-                                   int           quiet,
-                                   TS_writer_p  *tswriter);
+extern int tswrite_wait_for_client(int server_socket, int quiet, TS_writer_p* tswriter);
 /*
  * Set up internal buffering for TS output. This is necessary for UDP
  * output, and optional otherwise.
@@ -168,17 +157,9 @@ extern int tswrite_wait_for_client(int           server_socket,
  * Returns 0 if all went well, 1 if something went wrong.
  */
 
-extern int tswrite_start_buffering(TS_writer_p  tswriter,
-                                   int          circ_buf_size,
-                                   int          TS_in_packet,
-                                   int          maxnowait,
-                                   int          waitfor,
-                                   int          byterate,
-                                   tswrite_pcr_mode pcr_mode,
-                                   int          prime_size,
-                                   int          prime_speedup,
-                                   double       pcr_scale,
-                                   const tswrite_pkt_hdr_type_t hdr_type);
+extern int tswrite_start_buffering(TS_writer_p tswriter, int circ_buf_size, int TS_in_packet,
+    int maxnowait, int waitfor, int byterate, tswrite_pcr_mode pcr_mode, int prime_size,
+    int prime_speedup, double pcr_scale, const tswrite_pkt_hdr_type_t hdr_type);
 
 /*
  * Set up internal buffering for TS output. This is necessary for UDP output,
@@ -192,8 +173,7 @@ extern int tswrite_start_buffering(TS_writer_p  tswriter,
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-extern int tswrite_start_buffering_from_context(TS_writer_p  tswriter,
-                                                TS_context_p context);
+extern int tswrite_start_buffering_from_context(TS_writer_p tswriter, TS_context_p context);
 /*
  * Indicate to a TS output context that `input` is to be used as
  * command input.
@@ -224,8 +204,7 @@ extern int tswrite_start_buffering_from_context(TS_writer_p  tswriter,
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-extern int tswrite_start_input(TS_writer_p  tswriter,
-                               SOCKET       input);
+extern int tswrite_start_input(TS_writer_p tswriter, SOCKET input);
 /*
  * Set/unset "atomic" status - i.e., whether a command may be interrupted
  * by the next command.
@@ -235,8 +214,7 @@ extern int tswrite_start_input(TS_writer_p  tswriter,
  * make sense only if they will always complete. This function allows that
  * state to be toggled.
  */
-extern void tswrite_set_command_atomic(TS_writer_p  tswriter,
-                                       int          atomic);
+extern void tswrite_set_command_atomic(TS_writer_p tswriter, int atomic);
 /*
  * Ask a TS writer if changed input is available.
  *
@@ -245,7 +223,7 @@ extern void tswrite_set_command_atomic(TS_writer_p  tswriter,
  * interrupted), it returns FALSE, otherwise it returns TRUE if the command
  * character has changed.
  */
-extern int tswrite_command_changed(TS_writer_p  tswriter);
+extern int tswrite_command_changed(TS_writer_p tswriter);
 /*
  * Close a file or socket opened using `tswrite_open`, and if necessary,
  * send the child process used for output buffering an end-of-file
@@ -257,8 +235,7 @@ extern int tswrite_command_changed(TS_writer_p  tswriter);
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-extern int tswrite_close(TS_writer_p  tswriter,
-                         int          quiet);
+extern int tswrite_close(TS_writer_p tswriter, int quiet);
 
 /*
  * Wait for a new command after 'p'ausing.
@@ -267,7 +244,7 @@ extern int tswrite_close(TS_writer_p  tswriter,
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-extern int wait_for_command(TS_writer_p  tswriter);
+extern int wait_for_command(TS_writer_p tswriter);
 
 /*
  * Write a Transport Stream packet out via the TS writer.
@@ -285,13 +262,10 @@ extern int wait_for_command(TS_writer_p  tswriter);
  * has been given (in which case, no further commands will be read, and no
  * more output will be written, by any subsequent calls of this function).
  */
-extern int tswrite_write(TS_writer_p  tswriter,
-                         byte         packet[TS_PACKET_SIZE],
-                         uint32_t     pid,
-                         int          got_pcr,
-                         uint64_t     pcr);
+extern int tswrite_write(
+    TS_writer_p tswriter, byte packet[TS_PACKET_SIZE], uint32_t pid, int got_pcr, uint64_t pcr);
 
-extern int tswrite_discontinuity(const TS_writer_p  tswriter);
+extern int tswrite_discontinuity(const TS_writer_p tswriter);
 
 /*
  * Write a usage string (to standard output) describing the tuning
@@ -316,7 +290,7 @@ extern void tswrite_help_debug(void);
  * Note that it is up to the caller to ensure that they *use* all
  * the values reported on here!
  */
-extern void tswrite_report_args(TS_context_p  context);
+extern void tswrite_report_args(TS_context_p context);
 /*
  * Various command line switches that are useful for tswrite are really
  * only interpretable by tswrite itself. Thus we provide a function that
@@ -341,14 +315,10 @@ extern void tswrite_report_args(TS_context_p  context);
  * Returns 0 if all goes well, 1 if there was an error. Note that not
  * specifying an output file or host counts as an error.
  */
-extern int tswrite_process_args(char           *prefix,
-                                int             argc,
-                                char           *argv[],
-                                TS_context_p    context);
-
+extern int tswrite_process_args(char* prefix, int argc, char* argv[], TS_context_p context);
 
 #endif // _tswrite_fns
-
+
 // Local Variables:
 // tab-width: 8
 // indent-tabs-mode: nil

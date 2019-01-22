@@ -42,16 +42,14 @@
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int build_bitdata(bitdata_p  *bitdata,
-                         byte        data[],
-                         int         data_len);
+extern int build_bitdata(bitdata_p* bitdata, byte data[], int data_len);
 
 /*
  * Tidy up and free a bitdata datastructure after we've finished with it.
  *
  * Clears the bitdata datastructure, frees it, and sets `bitdata` to NULL.
  */
-extern void free_bitdata(bitdata_p  *bitdata);
+extern void free_bitdata(bitdata_p* bitdata);
 
 /*
  * Return the next bit from the data.
@@ -59,8 +57,7 @@ extern void free_bitdata(bitdata_p  *bitdata);
  * Returns 0 if it reads the bit correctly, 1 if there are no more
  * bits to be read.
  */
-extern int read_bit(bitdata_p  bitdata,
-                    byte      *bit);
+extern int read_bit(bitdata_p bitdata, byte* bit);
 
 /*
  * Reads `count` bits from the data.
@@ -69,9 +66,7 @@ extern int read_bit(bitdata_p  bitdata,
  *
  * Returns 0 if all went well, 1 if there were not enough bits in the data.
  */
-extern int read_bits(bitdata_p  bitdata,
-                     int        count,
-                     uint32_t  *bits);
+extern int read_bits(bitdata_p bitdata, int count, uint32_t* bits);
 
 /*
  * Reads `count` bits from the data, into a byte.
@@ -80,9 +75,7 @@ extern int read_bits(bitdata_p  bitdata,
  *
  * Returns 0 if all went well, 1 if there were not enough bits in the data.
  */
-extern int read_bits_into_byte(bitdata_p  bitdata,
-                               int        count,
-                               byte      *bits);
+extern int read_bits_into_byte(bitdata_p bitdata, int count, byte* bits);
 /*
  * Read zero bits, counting them. Stop at the first non-zero bit.
  *
@@ -90,7 +83,7 @@ extern int read_bits_into_byte(bitdata_p  bitdata,
  * "unread" in any way, so reading another bit will retrieve the first bit
  * thereafter.
  */
-extern int count_zero_bits(bitdata_p  bitdata);
+extern int count_zero_bits(bitdata_p bitdata);
 
 /*
  * Read and decode an Exp-Golomb code.
@@ -99,8 +92,7 @@ extern int count_zero_bits(bitdata_p  bitdata);
  *
  * Returns 0 if all went well, 1 if there were not enough bits in the data.
  */
-extern int read_exp_golomb(bitdata_p   bitdata,
-                           uint32_t   *result);
+extern int read_exp_golomb(bitdata_p bitdata, uint32_t* result);
 
 /*
  * Read and decode a signed Exp-Golomb code.
@@ -109,12 +101,10 @@ extern int read_exp_golomb(bitdata_p   bitdata,
  *
  * Returns 0 if all went well, 1 if there were not enough bits in the data.
  */
-extern int read_signed_exp_golomb(bitdata_p   bitdata,
-                                  int32_t     *result);
-
+extern int read_signed_exp_golomb(bitdata_p bitdata, int32_t* result);
 
 #endif // _bitdata_fns
-
+
 // Local Variables:
 // tab-width: 8
 // indent-tabs-mode: nil

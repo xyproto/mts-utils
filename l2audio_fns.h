@@ -46,7 +46,7 @@
  *
  * If `frame` is already NULL, does nothing.
  */
-extern void free_audio_frame(audio_frame_p  *frame);
+extern void free_audio_frame(audio_frame_p* frame);
 
 /*
  * Read the next audio frame.
@@ -60,10 +60,9 @@ extern void free_audio_frame(audio_frame_p  *frame);
  * Returns 0 if all goes well, EOF if end-of-file is read, and 1 if something
  * goes wrong.
  */
-extern int read_next_l2audio_frame(int             file,
-                                   audio_frame_p  *frame);
+extern int read_next_l2audio_frame(int file, audio_frame_p* frame);
 #endif // _l2audio_fns
-
+
 // Local Variables:
 // tab-width: 8
 // indent-tabs-mode: nil

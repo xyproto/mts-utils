@@ -36,8 +36,7 @@
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int build_access_unit_context(ES_p                   es,
-                                     access_unit_context_p *context);
+extern int build_access_unit_context(ES_p es, access_unit_context_p* context);
 
 /*
  * Free a new access unit context datastructure.
@@ -48,13 +47,13 @@ extern int build_access_unit_context(ES_p                   es,
  *
  * Does nothing if `context` is already NULL.
  */
-extern void free_access_unit_context(access_unit_context_p *context);
+extern void free_access_unit_context(access_unit_context_p* context);
 
 /*
  * Reset an acccess unit context, so it "forgets" its current information
  * about what it is reading, etc.
  */
-extern void reset_access_unit_context(access_unit_context_p  context);
+extern void reset_access_unit_context(access_unit_context_p context);
 
 /*
  * Rewind a file being read as access units.
@@ -67,7 +66,7 @@ extern void reset_access_unit_context(access_unit_context_p  context);
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-extern int rewind_access_unit_context(access_unit_context_p  context);
+extern int rewind_access_unit_context(access_unit_context_p context);
 
 /*
  * Tidy up and free an access unit datastructure after we've finished with it.
@@ -76,12 +75,12 @@ extern int rewind_access_unit_context(access_unit_context_p  context);
  *
  * Does nothing if `acc_unit` is already NULL.
  */
-extern void free_access_unit(access_unit_p  *acc_unit);
+extern void free_access_unit(access_unit_p* acc_unit);
 
 /*
  * Report on this access unit
  */
-extern void report_access_unit(access_unit_p  access_unit);
+extern void report_access_unit(access_unit_p access_unit);
 
 /*
  * Retrieve the bounds of this access unit in the file it was read from.
@@ -94,29 +93,27 @@ extern void report_access_unit(access_unit_p  access_unit);
  *
  * Returns 0 if all goes well, 1 if the access unit has no content.
  */
-extern int get_access_unit_bounds(access_unit_p   access_unit,
-                                  ES_offset      *start,
-                                  uint32_t       *length);
+extern int get_access_unit_bounds(access_unit_p access_unit, ES_offset* start, uint32_t* length);
 
 /*
  * Are all slices in this access unit I slices?
  */
-extern int all_slices_I(access_unit_p  access_unit);
+extern int all_slices_I(access_unit_p access_unit);
 
 /*
  * Are all slices in this access unit P slices?
  */
-extern int all_slices_P(access_unit_p  access_unit);
+extern int all_slices_P(access_unit_p access_unit);
 
 /*
  * Are all slices in this access unit I or P slices?
  */
-extern int all_slices_I_or_P(access_unit_p  access_unit);
+extern int all_slices_I_or_P(access_unit_p access_unit);
 
 /*
  * Are all slices in this access unit B slices?
  */
-extern int all_slices_B(access_unit_p  access_unit);
+extern int all_slices_B(access_unit_p access_unit);
 
 /*
  * Write out an access unit as ES.
@@ -132,9 +129,8 @@ extern int all_slices_B(access_unit_p  access_unit);
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int write_access_unit_as_ES(access_unit_p           access_unit,
-                                   access_unit_context_p   context,
-                                   FILE                   *output);
+extern int write_access_unit_as_ES(
+    access_unit_p access_unit, access_unit_context_p context, FILE* output);
 /*
  * Write out an access unit as TS.
  *
@@ -150,10 +146,8 @@ extern int write_access_unit_as_ES(access_unit_p           access_unit,
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int write_access_unit_as_TS(access_unit_p          access_unit,
-                                   access_unit_context_p  context,
-                                   TS_writer_p            tswriter,
-                                   uint32_t               video_pid);
+extern int write_access_unit_as_TS(access_unit_p access_unit, access_unit_context_p context,
+    TS_writer_p tswriter, uint32_t video_pid);
 /*
  * Write out an access unit as TS, with PTS timing in the first PES packet
  * (and PCR timing in the first TS of the frame).
@@ -171,14 +165,9 @@ extern int write_access_unit_as_TS(access_unit_p          access_unit,
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int write_access_unit_as_TS_with_pts_dts(access_unit_p          access_unit,
-                                                access_unit_context_p  context,
-                                                TS_writer_p            tswriter,
-                                                uint32_t               video_pid,
-                                                int                    got_pts,
-                                                uint64_t               pts,
-                                                int                    got_dts,
-                                                uint64_t               dts);
+extern int write_access_unit_as_TS_with_pts_dts(access_unit_p access_unit,
+    access_unit_context_p context, TS_writer_p tswriter, uint32_t video_pid, int got_pts,
+    uint64_t pts, int got_dts, uint64_t dts);
 /*
  * Write out an access unit as TS, with PCR timing in the first TS of the
  * frame.
@@ -196,12 +185,9 @@ extern int write_access_unit_as_TS_with_pts_dts(access_unit_p          access_un
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int write_access_unit_as_TS_with_PCR(access_unit_p          access_unit,
-                                            access_unit_context_p  context,
-                                            TS_writer_p            tswriter,
-                                            uint32_t               video_pid,
-                                            uint64_t               pcr_base,
-                                            uint32_t               pcr_extn);
+extern int write_access_unit_as_TS_with_PCR(access_unit_p access_unit,
+    access_unit_context_p context, TS_writer_p tswriter, uint32_t video_pid, uint64_t pcr_base,
+    uint32_t pcr_extn);
 /*
  * Retrieve the next access unit from the given elementary stream.
  *
@@ -234,10 +220,8 @@ extern int write_access_unit_as_TS_with_PCR(access_unit_p          access_unit,
  *
  * Note that `ret_access_unit` will be NULL if EOF is returned.
  */
-extern int get_next_access_unit(access_unit_context_p context,
-                                int                   quiet,
-                                int                   show_details,
-                                access_unit_p        *ret_access_unit);
+extern int get_next_access_unit(
+    access_unit_context_p context, int quiet, int show_details, access_unit_p* ret_access_unit);
 /*
  * Retrieve the next H.264 frame from the given elementary stream.
  *
@@ -282,10 +266,8 @@ extern int get_next_access_unit(access_unit_context_p context,
  *
  * Note that `ret_access_unit` will be NULL if EOF is returned.
  */
-extern int get_next_h264_frame(access_unit_context_p context,
-                               int                   quiet,
-                               int                   show_details,
-                               access_unit_p        *frame);
+extern int get_next_h264_frame(
+    access_unit_context_p context, int quiet, int show_details, access_unit_p* frame);
 /*
  * If this access unit was read from PES, did any of its PES packets contain
  * a PTS?
@@ -295,7 +277,7 @@ extern int get_next_h264_frame(access_unit_context_p context,
 extern int access_unit_has_PTS(access_unit_p access_unit);
 
 #endif // _accessunit_fns
-
+
 // Local Variables:
 // tab-width: 8
 // indent-tabs-mode: nil

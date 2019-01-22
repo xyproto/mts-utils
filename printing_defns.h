@@ -30,11 +30,11 @@
 #ifndef _printing_defns
 #define _printing_defns
 
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 #endif // _printing_defns
-
+
 // Local Variables:
 // tab-width: 8
 // indent-tabs-mode: nil

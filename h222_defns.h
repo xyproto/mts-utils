@@ -81,21 +81,21 @@
 // 80-FF  User Private
 // 81	  Traditionally ATSC Dolby (AC-3)
 
-#define MPEG1_VIDEO_STREAM_TYPE		0x01
-#define MPEG2_VIDEO_STREAM_TYPE		0x02  // H.262
-#define AVC_VIDEO_STREAM_TYPE		0x1B  // MPEG-4 part10 - H.264
-#define AVS_VIDEO_STREAM_TYPE           0x42  // AVS -- Chinese standard
-#define DVB_DOLBY_AUDIO_STREAM_TYPE	0x06  // [1]
-#define ATSC_DOLBY_AUDIO_STREAM_TYPE	0x81  // [1]
-#define MPEG2_AUDIO_STREAM_TYPE		0x04
-#define MPEG1_AUDIO_STREAM_TYPE		0x03
-#define ADTS_AUDIO_STREAM_TYPE		0x0F  // AAC ADTS
-#define MPEG4_PART2_VIDEO_STREAM_TYPE   0x10
-#define LATM_AUDIO_STREAM_TYPE          0x11  // How much do we support this?
-#define H265_VIDEO_STREAM_TYPE          0x24
+#define MPEG1_VIDEO_STREAM_TYPE 0x01
+#define MPEG2_VIDEO_STREAM_TYPE 0x02 // H.262
+#define AVC_VIDEO_STREAM_TYPE 0x1B // MPEG-4 part10 - H.264
+#define AVS_VIDEO_STREAM_TYPE 0x42 // AVS -- Chinese standard
+#define DVB_DOLBY_AUDIO_STREAM_TYPE 0x06 // [1]
+#define ATSC_DOLBY_AUDIO_STREAM_TYPE 0x81 // [1]
+#define MPEG2_AUDIO_STREAM_TYPE 0x04
+#define MPEG1_AUDIO_STREAM_TYPE 0x03
+#define ADTS_AUDIO_STREAM_TYPE 0x0F // AAC ADTS
+#define MPEG4_PART2_VIDEO_STREAM_TYPE 0x10
+#define LATM_AUDIO_STREAM_TYPE 0x11 // How much do we support this?
+#define H265_VIDEO_STREAM_TYPE 0x24
 
-#define DOLBY_DVB_STREAM_TYPE           0x06  // [1]
-#define DOLBY_ATSC_STREAM_TYPE          0x81  // [1]
+#define DOLBY_DVB_STREAM_TYPE 0x06 // [1]
+#define DOLBY_ATSC_STREAM_TYPE 0x81 // [1]
 
 // [1] In DVB (the European transmission standard) Dolby (AC-3) audio is
 //     carried in stream type 0x06, but in ATSC (the USA standard), stream
@@ -104,12 +104,10 @@
 //     descriptors in the PMT as well to say we really mean Dolby (AC-3)
 //     Also, in DVB, other types of stream can be in 0x06.
 
-#define IS_VIDEO_STREAM_TYPE(s)  ((s)==MPEG1_VIDEO_STREAM_TYPE || \
-                                  (s)==MPEG2_VIDEO_STREAM_TYPE || \
-                                  (s)==AVC_VIDEO_STREAM_TYPE   || \
-                                  (s)==H265_VIDEO_STREAM_TYPE || \
-                                  (s)==AVS_VIDEO_STREAM_TYPE   || \
-                                  (s)==MPEG4_PART2_VIDEO_STREAM_TYPE)
+#define IS_VIDEO_STREAM_TYPE(s)                                                                   \
+    ((s) == MPEG1_VIDEO_STREAM_TYPE || (s) == MPEG2_VIDEO_STREAM_TYPE                             \
+        || (s) == AVC_VIDEO_STREAM_TYPE || (s) == H265_VIDEO_STREAM_TYPE                          \
+        || (s) == AVS_VIDEO_STREAM_TYPE || (s) == MPEG4_PART2_VIDEO_STREAM_TYPE)
 
 // Although I include Dolby in the "standard" audio types, beware that the
 // stream type usage is not specified by H.222 itself - it is "convention"
@@ -120,14 +118,12 @@
 // other hand, practice seems to be to use the stream types only in the
 // expected manner.
 
-#define IS_DOLBY_STREAM_TYPE(s) ((s)==DOLBY_DVB_STREAM_TYPE || \
-                                 (s)==DOLBY_ATSC_STREAM_TYPE)
+#define IS_DOLBY_STREAM_TYPE(s) ((s) == DOLBY_DVB_STREAM_TYPE || (s) == DOLBY_ATSC_STREAM_TYPE)
 
-#define IS_AUDIO_STREAM_TYPE(s)  ((s)==MPEG1_AUDIO_STREAM_TYPE || \
-                                  (s)==MPEG2_AUDIO_STREAM_TYPE || \
-                                  (s)==ADTS_AUDIO_STREAM_TYPE  || \
-                                  (s)==LATM_AUDIO_STREAM_TYPE  || \
-                                  IS_DOLBY_STREAM_TYPE((s)))
+#define IS_AUDIO_STREAM_TYPE(s)                                                                   \
+    ((s) == MPEG1_AUDIO_STREAM_TYPE || (s) == MPEG2_AUDIO_STREAM_TYPE                             \
+        || (s) == ADTS_AUDIO_STREAM_TYPE || (s) == LATM_AUDIO_STREAM_TYPE                         \
+        || IS_DOLBY_STREAM_TYPE((s)))
 
 // ------------------------------------------------------------
 // Stream ids, as used in PES headers
@@ -142,7 +138,7 @@
 // 3     BF    1011 1111  private_stream_2
 //       C0-DF 110x xxxx  ISO/IEC 13818-3 or ISO/IEC 11172-3 or
 //                        ISO/IEC 13818-7 or ISO/IEC 14496-3 audio stream
-//                        number x xxxx 
+//                        number x xxxx
 //       Ex    1110 xxxx  ITU-T Rec. H.262 | ISO/IEC 13818-2, ISO/IEC 11172-2,
 //                        ISO/IEC 14496-2 or ITU-T Rec. H.264 | ISO/IEC
 //                        14496-10 video stream number xxxx
@@ -160,14 +156,14 @@
 //       FA    1111 1010  ISO/IEC14496-1_SL-packetized_stream
 //       FB    1111 1011  ISO/IEC14496-1_FlexMux_stream
 //       FC    1111 1100  descriptive data stream
-//       FD    1111 1101  reserved data stream 
+//       FD    1111 1101  reserved data stream
 //       FE    1111 1110  reserved data stream
 // 4     FF    1111 1111  program_stream_directory
-// 
+//
 //   The notation x means that the values '0' or '1' are both permitted and
 //   results in the same stream type. The stream number is given by the values
 //   taken by the x's.
-// 
+//
 // NOTES
 // 1  PES packets of type program_stream_map have unique syntax specified
 //    in 2.5.4.1.
@@ -186,30 +182,28 @@
 //    a Program Stream or an ISO/IEC 11172-1 System Stream, in a Transport
 //    Stream (refer to 2.4.3.7).
 
-#define PADDING_STREAM_ID        0xBE
+#define PADDING_STREAM_ID 0xBE
 #define PRIVATE1_AUDIO_STREAM_ID 0xBD
 #define PRIVATE2_AUDIO_STREAM_ID 0xBF
-#define DEFAULT_VIDEO_STREAM_ID  0xE0   // i.e., stream 0
-#define DEFAULT_AUDIO_STREAM_ID  0xC0   // i.e., stream 0
+#define DEFAULT_VIDEO_STREAM_ID 0xE0 // i.e., stream 0
+#define DEFAULT_AUDIO_STREAM_ID 0xC0 // i.e., stream 0
 
-#define IS_AUDIO_STREAM_ID(id)  ((id)==0xBD || ((id) >= 0xC0 && (id) <= 0xDF))
-#define IS_VIDEO_STREAM_ID(id)  ((id) >= 0xE0 && (id) <= 0xEF)
-
+#define IS_AUDIO_STREAM_ID(id) ((id) == 0xBD || ((id) >= 0xC0 && (id) <= 0xDF))
+#define IS_VIDEO_STREAM_ID(id) ((id) >= 0xE0 && (id) <= 0xEF)
 
 // ------------------------------------------------------------
 // Timing info (used in reporting on packets). Initialise to all zeroes...
-struct timing
-{
-  uint64_t  first_pcr;
-  uint64_t  last_pcr;
-  int       first_pcr_packet;
-  int       last_pcr_packet;
-  int       had_first_pcr;   // FALSE until we've started
+struct timing {
+    uint64_t first_pcr;
+    uint64_t last_pcr;
+    int first_pcr_packet;
+    int last_pcr_packet;
+    int had_first_pcr; // FALSE until we've started
 };
-typedef struct timing *timing_p;
+typedef struct timing* timing_p;
 
 #endif // _h222_defns
-
+
 // Local Variables:
 // tab-width: 8
 // indent-tabs-mode: nil

@@ -29,8 +29,8 @@
 #define _reverse_fns
 
 #include "accessunit_defns.h"
-#include "reverse_defns.h"
 #include "h262_defns.h"
+#include "reverse_defns.h"
 
 /*
  * Build the internal arrays to remember video sequence bounds in,
@@ -48,8 +48,7 @@
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int build_reverse_data(reverse_data_p *reverse_data,
-                              int             is_h264);
+extern int build_reverse_data(reverse_data_p* reverse_data, int is_h264);
 /*
  * Set the video PID and stream id for TS output.
  *
@@ -57,9 +56,7 @@ extern int build_reverse_data(reverse_data_p *reverse_data,
  * and if the standard default values (DEFAULT_VIDEO_PID and
  * DEFAULT_VIDEO_STREAM_ID) are not correct.
  */
-extern void set_reverse_pid(reverse_data_p  reverse_data,
-                            uint32_t        pid,
-                            byte            stream_id);
+extern void set_reverse_pid(reverse_data_p reverse_data, uint32_t pid, byte stream_id);
 /*
  * Add a reversing context to an H.262 context (and vice versa).
  *
@@ -67,8 +64,7 @@ extern void set_reverse_pid(reverse_data_p  reverse_data,
  *
  * Returns 0 if all is well, 1 if something goes wrong.
  */
-extern int add_h262_reverse_context(h262_context_p  h262,
-                                    reverse_data_p  reverse_data);
+extern int add_h262_reverse_context(h262_context_p h262, reverse_data_p reverse_data);
 /*
  * Add a reversing context to an access unit context (and vice versa).
  *
@@ -76,15 +72,15 @@ extern int add_h262_reverse_context(h262_context_p  h262,
  *
  * Returns 0 if all is well, 1 if something goes wrong.
  */
-extern int add_access_unit_reverse_context(access_unit_context_p  context,
-                                           reverse_data_p reverse_data);
+extern int add_access_unit_reverse_context(
+    access_unit_context_p context, reverse_data_p reverse_data);
 
 /*
  * Free the datastructure we used to remember reversing data
  *
  * Sets `reverse_data` to NULL.
  */
-extern void free_reverse_data(reverse_data_p  *reverse_data);
+extern void free_reverse_data(reverse_data_p* reverse_data);
 /*
  * Remember video sequence bounds for H.262 data
  *
@@ -103,12 +99,8 @@ extern void free_reverse_data(reverse_data_p  *reverse_data);
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int remember_reverse_h262_data(reverse_data_p    reverse_data,
-                                      uint32_t          index,
-                                      ES_offset         start_posn,
-                                      uint32_t          length,
-                                      byte              seq_offset,
-                                      byte              afd);
+extern int remember_reverse_h262_data(reverse_data_p reverse_data, uint32_t index,
+    ES_offset start_posn, uint32_t length, byte seq_offset, byte afd);
 /*
  * Remember video sequence bounds for H.264 data
  *
@@ -123,10 +115,8 @@ extern int remember_reverse_h262_data(reverse_data_p    reverse_data,
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int remember_reverse_h264_data(reverse_data_p    reverse_data,
-                                      uint32_t          index,
-                                      ES_offset         start_posn,
-                                      uint32_t          length);
+extern int remember_reverse_h264_data(
+    reverse_data_p reverse_data, uint32_t index, ES_offset start_posn, uint32_t length);
 /*
  * Retrieve video sequence bounds for entry `which`
  *
@@ -157,14 +147,9 @@ extern int remember_reverse_h264_data(reverse_data_p    reverse_data,
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int get_reverse_data(reverse_data_p    reverse_data,
-                            int               which,
-                            uint32_t         *index,
-                            ES_offset        *start_posn,
-                            uint32_t         *length,
-                            byte             *seq_offset,
-                            byte             *afd);
-
+extern int get_reverse_data(reverse_data_p reverse_data, int which, uint32_t* index,
+    ES_offset* start_posn, uint32_t* length, byte* seq_offset, byte* afd);
+
 // ============================================================
 // Collecting pictures
 // ============================================================
@@ -182,10 +167,7 @@ extern int get_reverse_data(reverse_data_p    reverse_data,
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-extern int collect_reverse_h262(h262_context_p h262,
-                                int            max,
-                                int            verbose,
-                                int            quiet);
+extern int collect_reverse_h262(h262_context_p h262, int max, int verbose, int quiet);
 /*
  * Find IDR and I slices, and remember their access units for later output
  * in reverse order.
@@ -201,10 +183,8 @@ extern int collect_reverse_h262(h262_context_p h262,
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-extern int collect_reverse_access_units(access_unit_context_p  acontext,
-                                        int             max,
-                                        int             verbose,
-                                        int             quiet);
+extern int collect_reverse_access_units(
+    access_unit_context_p acontext, int max, int verbose, int quiet);
 /*
  * Output the last picture (or an earlier one) from the reverse arrays.
  * This version writes the data out as Transport Stream.
@@ -227,12 +207,8 @@ extern int collect_reverse_access_units(access_unit_context_p  acontext,
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-extern int output_from_reverse_data_as_TS(ES_p            es,
-                                          TS_writer_p     tswriter,
-                                          int             verbose,
-                                          int             quiet,
-                                          uint32_t        offset,
-                                          reverse_data_p  reverse_data);
+extern int output_from_reverse_data_as_TS(ES_p es, TS_writer_p tswriter, int verbose, int quiet,
+    uint32_t offset, reverse_data_p reverse_data);
 /*
  * Output the last picture (or an earlier one) from the reverse arrays.
  * This version writes the data out as Elementary Stream.
@@ -255,12 +231,8 @@ extern int output_from_reverse_data_as_TS(ES_p            es,
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-extern int output_from_reverse_data_as_ES(ES_p            es,
-                                          FILE           *output,
-                                          int             verbose,
-                                          int             quiet,
-                                          uint32_t        offset,
-                                          reverse_data_p  reverse_data);
+extern int output_from_reverse_data_as_ES(
+    ES_p es, FILE* output, int verbose, int quiet, uint32_t offset, reverse_data_p reverse_data);
 /*
  * Output the H.262 pictures or H.264 access units we remembered earlier - but
  * in reverse order. This version writes the data out as Transport Stream.
@@ -287,14 +259,8 @@ extern int output_from_reverse_data_as_ES(ES_p            es,
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-extern int output_in_reverse_as_TS(ES_p            es,
-                                   TS_writer_p     tswriter,
-                                   int             frequency,
-                                   int             verbose,
-                                   int             quiet,
-                                   int32_t         start_with,
-                                   int             max,
-                                   reverse_data_p  reverse_data);
+extern int output_in_reverse_as_TS(ES_p es, TS_writer_p tswriter, int frequency, int verbose,
+    int quiet, int32_t start_with, int max, reverse_data_p reverse_data);
 /*
  * Output the H.262 pictures or H.264 access units we remembered earlier - but
  * in reverse order. This version writes the data out as Elementary Stream.
@@ -321,17 +287,11 @@ extern int output_in_reverse_as_TS(ES_p            es,
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-extern int output_in_reverse_as_ES(ES_p            es,
-                                   FILE           *output,
-                                   int             frequency,
-                                   int             verbose,
-                                   int             quiet,
-                                   int32_t         start_with,
-                                   int             max,
-                                   reverse_data_p  reverse_data);
+extern int output_in_reverse_as_ES(ES_p es, FILE* output, int frequency, int verbose, int quiet,
+    int32_t start_with, int max, reverse_data_p reverse_data);
 
 #endif // _reverse_fns
-
+
 // Local Variables:
 // tab-width: 8
 // indent-tabs-mode: nil

@@ -37,28 +37,25 @@
 /*
  * Initialise a new pid/int list datastructure.
  */
-extern int init_pidint_list(pidint_list_p  list);
+extern int init_pidint_list(pidint_list_p list);
 /*
  * Build a new pid/int list datastructure.
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int build_pidint_list(pidint_list_p  *list);
+extern int build_pidint_list(pidint_list_p* list);
 /*
  * Add a pid/integer pair to the end of the list
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int append_to_pidint_list(pidint_list_p  list,
-                                 uint32_t        pid,
-                                 int             program);
+extern int append_to_pidint_list(pidint_list_p list, uint32_t pid, int program);
 /*
  * Remove a pid/integer pair from the list
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int remove_from_pidint_list(pidint_list_p  list,
-                                   uint32_t       pid);
+extern int remove_from_pidint_list(pidint_list_p list, uint32_t pid);
 /*
  * Tidy up and free a pid/int list datastructure after we've finished with it
  *
@@ -66,22 +63,17 @@ extern int remove_from_pidint_list(pidint_list_p  list,
  *
  * Does nothing if `list` is already NULL.
  */
-extern void free_pidint_list(pidint_list_p  *list);
+extern void free_pidint_list(pidint_list_p* list);
 /*
  * Report on a pid/int list's contents
  */
-extern void report_pidint_list(pidint_list_p  list,
-                               char          *list_name,
-                               char          *int_name,
-                               int            pid_first);
+extern void report_pidint_list(pidint_list_p list, char* list_name, char* int_name, int pid_first);
 /*
  * Lookup a PID to find the corresponding integer value in a pid/int list.
  *
  * Returns 0 if the PID is in the list, -1 if it is not.
  */
-extern int pid_int_in_pidint_list(pidint_list_p  list,
-                                  uint32_t        pid,
-                                  int            *number);
+extern int pid_int_in_pidint_list(pidint_list_p list, uint32_t pid, int* number);
 /*
  * Lookup a PID to find its index in a pid/int list.
  *
@@ -91,8 +83,7 @@ extern int pid_int_in_pidint_list(pidint_list_p  list,
  *
  * Returns its index (0 or more) if the PID is in the list, -1 if it is not.
  */
-extern int pid_index_in_pidint_list(pidint_list_p  list,
-                                    uint32_t        pid);
+extern int pid_index_in_pidint_list(pidint_list_p list, uint32_t pid);
 /*
  * Lookup a PID to see if it is in a pid/int list.
  *
@@ -102,8 +93,7 @@ extern int pid_index_in_pidint_list(pidint_list_p  list,
  *
  * Returns TRUE if the PID is in the list, FALSE if it is not.
  */
-extern int pid_in_pidint_list(pidint_list_p  list,
-                              uint32_t        pid);
+extern int pid_in_pidint_list(pidint_list_p list, uint32_t pid);
 /*
  * Check if two pid/int lists have the same content.
  *
@@ -115,18 +105,15 @@ extern int pid_in_pidint_list(pidint_list_p  list,
  *
  * Returns TRUE if the two have the same content, FALSE otherwise.
  */
-extern int same_pidint_list(pidint_list_p  list1,
-                            pidint_list_p  list2);
+extern int same_pidint_list(pidint_list_p list1, pidint_list_p list2);
 /*
  * Report on a program stream list (a specialisation of report_pidint_list).
  *
  * - `list` is the stream list to report on
  * - `prefix` is NULL or a string to put before each line printed
  */
-extern void report_stream_list(pidint_list_p  list,
-                               char           *prefix);
+extern void report_stream_list(pidint_list_p list, char* prefix);
 
-
 // ============================================================================
 // PMT data maintenance
 // ============================================================================
@@ -143,8 +130,7 @@ extern void report_stream_list(pidint_list_p  list,
  * Returns (a pointer to) the new PMT datastructure, or NULL if some error
  * occurs.
  */
-extern pmt_p build_pmt(uint16_t program_number, byte version_number,
-                       uint32_t PCR_pid);
+extern pmt_p build_pmt(uint16_t program_number, byte version_number, uint32_t PCR_pid);
 /*
  * Set the descriptor data on a PMT. Specifically, 'program info',
  * the descriptor data in the PMT "as a whole".
@@ -155,9 +141,7 @@ extern pmt_p build_pmt(uint16_t program_number, byte version_number,
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int set_pmt_program_info(pmt_p    pmt,
-                                uint16_t program_info_length,
-                                byte    *program_info);
+extern int set_pmt_program_info(pmt_p pmt, uint16_t program_info_length, byte* program_info);
 /*
  * Add a program stream to a PMT datastructure
  *
@@ -165,18 +149,14 @@ extern int set_pmt_program_info(pmt_p    pmt,
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int add_stream_to_pmt(pmt_p      pmt,
-                             uint32_t   elementary_PID,
-                             byte       stream_type,
-                             uint16_t   ES_info_length,
-                             byte      *ES_info);
+extern int add_stream_to_pmt(
+    pmt_p pmt, uint32_t elementary_PID, byte stream_type, uint16_t ES_info_length, byte* ES_info);
 /*
  * Remove a program stream from a PMT.
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int remove_stream_from_pmt(pmt_p         pmt,
-                                  uint32_t      pid);
+extern int remove_stream_from_pmt(pmt_p pmt, uint32_t pid);
 /*
  * Tidy up and free a PMT datastructure after we've finished with it
  *
@@ -184,7 +164,7 @@ extern int remove_stream_from_pmt(pmt_p         pmt,
  *
  * Does nothing if `pmt` is already NULL.
  */
-extern void free_pmt(pmt_p  *pmt);
+extern void free_pmt(pmt_p* pmt);
 /*
  * Lookup a PID to find its index in a PMT datastructure.
  *
@@ -192,16 +172,14 @@ extern void free_pmt(pmt_p  *pmt);
  *
  * Returns its index (0 or more) if the PID is in the list, -1 if it is not.
  */
-extern int pid_index_in_pmt(pmt_p     pmt,
-                            uint32_t  pid);
+extern int pid_index_in_pmt(pmt_p pmt, uint32_t pid);
 /*
  * Lookup a PID to find the corresponding program stream information.
  *
  * Returns a pointer to the stream information if the PID is in the list,
  * NULL if it is not.
  */
-extern pmt_stream_p pid_stream_in_pmt(pmt_p          pmt,
-                                      uint32_t       pid);
+extern pmt_stream_p pid_stream_in_pmt(pmt_p pmt, uint32_t pid);
 /*
  * Lookup a PID to see if it is in a PMT datastructure.
  *
@@ -209,8 +187,7 @@ extern pmt_stream_p pid_stream_in_pmt(pmt_p          pmt,
  *
  * Returns TRUE if the PID is in the PMT's stream list, FALSE if it is not.
  */
-extern int pid_in_pmt(pmt_p     pmt,
-                      uint32_t  pid);
+extern int pid_in_pmt(pmt_p pmt, uint32_t pid);
 /*
  * Check if two PMT datastructures have the same content.
  *
@@ -224,8 +201,7 @@ extern int pid_in_pmt(pmt_p     pmt,
  *
  * Returns TRUE if the two have the same content, FALSE otherwise.
  */
-extern int same_pmt(pmt_p  pmt1,
-                    pmt_p  pmt2);
+extern int same_pmt(pmt_p pmt1, pmt_p pmt2);
 /*
  * Report on a PMT datastructure.
  *
@@ -233,12 +209,10 @@ extern int same_pmt(pmt_p  pmt1,
  * - `prefix` is NULL or a string to put before each line printed
  * - `pmt` is the PMT to report on
  */
-extern void report_pmt(int     is_msg,
-                       char   *prefix,
-                       pmt_p   pmt);
+extern void report_pmt(int is_msg, char* prefix, pmt_p pmt);
 
 #endif // _pidint_fns
-
+
 // Local Variables:
 // tab-width: 8
 // indent-tabs-mode: nil

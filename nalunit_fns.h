@@ -34,16 +34,14 @@
 /*
  * Request details of the NAL unit contents as they are read
  */
-extern void set_show_nal_reading_details(nal_unit_context_p  context,
-                                         int                 show);
+extern void set_show_nal_reading_details(nal_unit_context_p context, int show);
 
 /*
  * Build a new NAL unit context, for reading NAL units from an ES.
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int build_nal_unit_context(ES_p                es,
-                                  nal_unit_context_p *context);
+extern int build_nal_unit_context(ES_p es, nal_unit_context_p* context);
 /*
  * Free a NAL unit context datastructure.
  *
@@ -51,7 +49,7 @@ extern int build_nal_unit_context(ES_p                es,
  *
  * Does nothing if `context` is already NULL.
  */
-extern void free_nal_unit_context(nal_unit_context_p *context);
+extern void free_nal_unit_context(nal_unit_context_p* context);
 /*
  * Rewind a file being read as NAL units.
  *
@@ -63,13 +61,13 @@ extern void free_nal_unit_context(nal_unit_context_p *context);
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-extern int rewind_nal_unit_context(nal_unit_context_p  context);
+extern int rewind_nal_unit_context(nal_unit_context_p context);
 /*
  * Build a new NAL unit datastructure.
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int build_nal_unit(nal_unit_p  *nal);
+extern int build_nal_unit(nal_unit_p* nal);
 
 /*
  * Tidy up and free a NAL unit datastructure after we've finished with it.
@@ -78,7 +76,7 @@ extern int build_nal_unit(nal_unit_p  *nal);
  *
  * If `nal` is already NULL, does nothing.
  */
-extern void free_nal_unit(nal_unit_p  *nal);
+extern void free_nal_unit(nal_unit_p* nal);
 
 /*
  * Find and read in the next NAL unit.
@@ -95,9 +93,7 @@ extern void free_nal_unit(nal_unit_p  *nal);
  *   (specifically, if the NAL unit's RBSP data cannot be understood),
  * * 1 if some other error occurs.
  */
-extern int find_next_NAL_unit(nal_unit_context_p  context,
-                              int                 verbose,
-                              nal_unit_p         *nal);
+extern int find_next_NAL_unit(nal_unit_context_p context, int verbose, nal_unit_p* nal);
 
 /*
  * Write (copy) the current NAL unit to the ES output stream.
@@ -107,8 +103,7 @@ extern int find_next_NAL_unit(nal_unit_context_p  context,
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-extern int write_NAL_unit_as_ES(FILE       *output,
-                                nal_unit_p  nal);
+extern int write_NAL_unit_as_ES(FILE* output, nal_unit_p nal);
 /*
  * Write (copy) the current NAL unit to the output stream, wrapped up in a
  * PES within TS.
@@ -119,9 +114,7 @@ extern int write_NAL_unit_as_ES(FILE       *output,
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-extern int write_NAL_unit_as_TS(TS_writer_p tswriter,
-                                nal_unit_p  nal,
-                                uint32_t    video_pid);
+extern int write_NAL_unit_as_TS(TS_writer_p tswriter, nal_unit_p nal, uint32_t video_pid);
 
 /*
  * Create a new "dictionary" for remembering picture or sequence
@@ -129,7 +122,7 @@ extern int write_NAL_unit_as_TS(TS_writer_p tswriter,
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int build_param_dict(param_dict_p *param_dict);
+extern int build_param_dict(param_dict_p* param_dict);
 
 /*
  * Tidy up and free a parameters "dictionary" datastructure after we've
@@ -139,7 +132,7 @@ extern int build_param_dict(param_dict_p *param_dict);
  *
  * Does nothing if `param_dict` is already NULL.
  */
-extern void free_param_dict(param_dict_p  *param_dict);
+extern void free_param_dict(param_dict_p* param_dict);
 
 /*
  * Remember parameter set data in a "dictionary".
@@ -157,9 +150,7 @@ extern void free_param_dict(param_dict_p  *param_dict);
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int remember_param_data(param_dict_p  param_dict,
-                               uint32_t      param_id,
-                               nal_unit_p    nal);
+extern int remember_param_data(param_dict_p param_dict, uint32_t param_id, nal_unit_p nal);
 
 /*
  * Retrieve the picture parameter set data for the given id.
@@ -176,9 +167,8 @@ extern int remember_param_data(param_dict_p  param_dict,
  *
  * Returns 0 if it succeeds, 1 if the id is not recognised.
  */
-extern int get_pic_param_data(param_dict_p pic_param_dict,
-                              uint32_t     pic_param_id,
-                              nal_pic_param_data_p *pic_param_data);
+extern int get_pic_param_data(
+    param_dict_p pic_param_dict, uint32_t pic_param_id, nal_pic_param_data_p* pic_param_data);
 
 /*
  * Retrieve the sequence parameter set data for the given id.
@@ -195,9 +185,8 @@ extern int get_pic_param_data(param_dict_p pic_param_dict,
  *
  * Returns 0 if it succeeds, 1 if the id is not recognised.
  */
-extern int get_seq_param_data(param_dict_p seq_param_dict,
-                              uint32_t     seq_param_id,
-                              nal_seq_param_data_p *seq_param_data);
+extern int get_seq_param_data(
+    param_dict_p seq_param_dict, uint32_t seq_param_id, nal_seq_param_data_p* seq_param_data);
 
 /*
  * Is this NAL unit a slice?
@@ -205,26 +194,26 @@ extern int get_seq_param_data(param_dict_p seq_param_dict,
  * Returns true if its ``nal_unit_type`` is 1 (coded slice of IDR picture)
  * or 5 (coded slice of IDR picture).
  */
-extern int nal_is_slice(nal_unit_p  nal);
+extern int nal_is_slice(nal_unit_p nal);
 
 /*
  * Is this NAL unit a picture parameter set?
  *
  * Returns true if its ``nal_unit_type`` is 8.
  */
-extern int nal_is_pic_param_set(nal_unit_p  nal);
+extern int nal_is_pic_param_set(nal_unit_p nal);
 
 /*
  * Is this NAL unit a sequence parameter set?
  *
  * Returns true if its ``nal_unit_type`` is 7.
  */
-extern int nal_is_seq_param_set(nal_unit_p  nal);
+extern int nal_is_seq_param_set(nal_unit_p nal);
 
 /*
  * Is this NAL unit marked as part of a redundant picture?
  */
-extern int nal_is_redundant(nal_unit_p  nal);
+extern int nal_is_redundant(nal_unit_p nal);
 
 /*
  * Is this VCL NAL unit the first of a new primary coded picture?
@@ -242,7 +231,7 @@ extern int nal_is_redundant(nal_unit_p  nal);
  * both appropriate NAL units for this process.
  *
  * Acording to H.264 7.4.1.2.4 (from the JVT-J010d7 draft):
- *     
+ *
  *   The first NAL unit of a new primary code picture can be detected
  *   because:
  *
@@ -280,10 +269,8 @@ extern int nal_is_redundant(nal_unit_p  nal);
  *    sequence parameter set (which, for now, I'll assume to be the last
  *    set we found with the appropriate id).
  */
-extern int nal_is_first_VCL_NAL(nal_unit_p   nal,
-                                nal_unit_p   last);
+extern int nal_is_first_VCL_NAL(nal_unit_p nal, nal_unit_p last);
 
-
 // ------------------------------------------------------------
 // Lists of NAL units
 //
@@ -297,23 +284,21 @@ extern int nal_is_first_VCL_NAL(nal_unit_p   nal,
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int build_nal_unit_list(nal_unit_list_p  *list);
+extern int build_nal_unit_list(nal_unit_list_p* list);
 
 /*
  * Add a NAL unit to the end of the NAL unit list. Does not take a copy.
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-extern int append_to_nal_unit_list(nal_unit_list_p  list,
-                                   nal_unit_p       nal);
+extern int append_to_nal_unit_list(nal_unit_list_p list, nal_unit_p nal);
 /*
  * Reset (empty) a NAL unit list.
  *
  * If `deep` is true, then any NAL units in the list will be freed
  * as well (this will be a Bad Thing if anywhere else is using them).
  */
-extern void reset_nal_unit_list(nal_unit_list_p  list,
-                                int              deep);
+extern void reset_nal_unit_list(nal_unit_list_p list, int deep);
 
 /*
  * Tidy up and free a NAL unit list datastructure after we've finished with it.
@@ -325,26 +310,22 @@ extern void reset_nal_unit_list(nal_unit_list_p  list,
  *
  * Does nothing if `list` is already NULL.
  */
-extern void free_nal_unit_list(nal_unit_list_p  *list,
-                               int               deep);
+extern void free_nal_unit_list(nal_unit_list_p* list, int deep);
 
 /*
  * Report on a NAL unit list's contents, to the given stream.
  */
-extern void report_nal_unit_list(int    is_msg,
-                                 char  *prefix,
-                                 nal_unit_list_p  list);
+extern void report_nal_unit_list(int is_msg, char* prefix, nal_unit_list_p list);
 
 /*
  * Print out useful information about this NAL unit, on the given stream.
  *
  * This is intended as a single line of information.
  */
-extern void report_nal(int         is_msg,
-                       nal_unit_p  nal);
+extern void report_nal(int is_msg, nal_unit_p nal);
 
 #endif // _nalunit_fns
-
+
 // Local Variables:
 // tab-width: 8
 // indent-tabs-mode: nil

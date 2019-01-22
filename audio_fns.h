@@ -36,7 +36,7 @@
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-extern int build_audio_frame(audio_frame_p  *frame);
+extern int build_audio_frame(audio_frame_p* frame);
 
 /*
  * Tidy up and free an audio frame datastructure when we've finished with it
@@ -45,7 +45,7 @@ extern int build_audio_frame(audio_frame_p  *frame);
  *
  * If `frame` is already NULL, does nothing.
  */
-extern void free_audio_frame(audio_frame_p  *frame);
+extern void free_audio_frame(audio_frame_p* frame);
 /*
  * Read the next audio frame.
  *
@@ -59,12 +59,10 @@ extern void free_audio_frame(audio_frame_p  *frame);
  * Returns 0 if all goes well, EOF if end-of-file is read, and 1 if something
  * goes wrong.
  */
-extern int read_next_audio_frame(int            file,
-                                 int            audio_type,
-                                 audio_frame_p *frame);
+extern int read_next_audio_frame(int file, int audio_type, audio_frame_p* frame);
 
 #endif // _audio_fns
-
+
 // Local Variables:
 // tab-width: 8
 // indent-tabs-mode: nil

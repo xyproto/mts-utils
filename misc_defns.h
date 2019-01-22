@@ -35,28 +35,26 @@
 // Some (internal) functions find it convenient to have a union of the
 // possible output streams. Rather than duplicate the definition of these,
 // we put them here...
-union _writer
-{
-  FILE        *es_output;     // output to an ES file
-  TS_writer_p  ts_output;     // output via a TS writer
+union _writer {
+    FILE* es_output; // output to an ES file
+    TS_writer_p ts_output; // output via a TS writer
 };
 typedef union _writer WRITER;
 
 // In the programs that handle command lines, it's useful to have a simple
 // macro for checking the presence of subsidiary arguments.
 // Assumes that argc and argv have their normal names.
-#define CHECKARG(program,argno) \
-  if ((argno)+1 == argc)                                                      \
-  {                                                                           \
-    fprintf(stderr,"### %s: missing argument to %s\n",program,argv[(argno)]); \
-    return 1;                                                                 \
-  }
+#define CHECKARG(program, argno)                                                                  \
+    if ((argno) + 1 == argc) {                                                                    \
+        fprintf(stderr, "### %s: missing argument to %s\n", program, argv[(argno)]);              \
+        return 1;                                                                                 \
+    }
 
 // A simple macro to return a bit from a bitfield, for use in printf()
-#define ON(byt,msk)  ((byt & msk)?1:0)
+#define ON(byt, msk) ((byt & msk) ? 1 : 0)
 
 #endif // _misc_defns
-
+
 // Local Variables:
 // tab-width: 8
 // indent-tabs-mode: nil
