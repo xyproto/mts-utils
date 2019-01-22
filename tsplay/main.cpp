@@ -35,7 +35,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "version.h"
 #include "accessunit.h"
 #include "bitdata.h"
 #include "compat.h"
@@ -52,6 +51,7 @@
 #include "ts.h"
 #include "tsplay.h"
 #include "tswrite.h"
+#include "version.h"
 
 static void print_usage(int summary)
 {

@@ -28,9 +28,6 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <cmath>
-#undef min
-
 #include <cstdio>
 #include <cstdlib>
 
@@ -39,6 +36,10 @@
 #include <climits>
 #include <cstring>
 #include <fcntl.h> // O_... flags
+
+//#include <cmath>
+
+#include "version.h"
 
 // For the socket handling
 #include <arpa/inet.h> // inet_aton

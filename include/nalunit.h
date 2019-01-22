@@ -28,7 +28,6 @@
  */
 
 #include <cerrno>
-#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -41,6 +40,8 @@
 #include "nalunit_fns.h"
 #include "printing_fns.h"
 #include "ts_fns.h"
+
+#include "math.h"
 
 #define DEBUG 0
 

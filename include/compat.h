@@ -53,7 +53,8 @@ typedef uint8_t byte;
 #include <unistd.h>
 typedef off_t offset_t;
 
-#if defined(__linux__) && !defined(__USE_FILE_OFFSET64)
+#if defined(__linux__)
+// && !defined(__USE_FILE_OFFSET64)
 // If Linux does not have 64 bit support built in, then our offsets will
 // be just 32 bit integers
 #define OFFSET_T_FORMAT "%ld"

@@ -34,22 +34,22 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "version.h"
+#include "accessunit.h"
+#include "bitdata.h"
 #include "compat.h"
 #include "es.h"
+#include "h222.h"
+#include "h262.h"
 #include "misc.h"
+#include "nalunit.h"
 #include "pes.h"
+#include "pidint.h"
 #include "printing.h"
+#include "ps.h"
+#include "reverse.h"
 #include "ts.h"
 #include "tswrite.h"
-#include "pidint.h"
-#include "ps.h"
-#include "h262.h"
-#include "h222.h"
-#include "reverse.h"
-#include "accessunit.h"
-#include "nalunit.h"
-#include "bitdata.h"
+#include "version.h"
 
 /*
  * Write (copy) the current ES data unit to the output stream, wrapped up in a
@@ -69,7 +69,7 @@ static int write_ES_unit_as_TS(TS_writer_p output, ES_unit_p unit, uint32_t vide
 }
 
 static int transfer_data(ES_p es, TS_writer_p output, uint32_t pmt_pid, uint32_t video_pid,
-    byte stream_type, int max, int verbose, int quiet)
+    byte stream_type, int max2, int verbose, int quiet)
 {
     int err = 0;
     int count = 0;
@@ -109,7 +109,7 @@ static int transfer_data(ES_p es, TS_writer_p output, uint32_t pmt_pid, uint32_t
 
         free_ES_unit(&unit);
 
-        if (max > 0 && count >= max)
+        if (max2 > 0 && count >= max2)
             break;
     }
     if (!quiet)
@@ -193,7 +193,7 @@ int main(int argc, char** argv)
     ES_p es;
     int verbose = FALSE;
     int quiet = FALSE;
-    int max = 0;
+    int max2 = 0;
     uint32_t video_pid = 0x68;
     uint32_t pmt_pid = 0x66;
     int err = 0;
@@ -261,7 +261,7 @@ int main(int argc, char** argv)
                 quiet = TRUE;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
                 CHECKARG("es2ts", ii);
-                err = int_value("es2ts", argv[ii], argv[ii + 1], TRUE, 10, &max);
+                err = int_value("es2ts", argv[ii], argv[ii + 1], TRUE, 10, &max2);
                 if (err)
                     return 1;
                 ii++;
@@ -378,10 +378,10 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    if (max && !quiet)
-        fprint_msg("Stopping after %d ES data units\n", max);
+    if (max2 && !quiet)
+        fprint_msg("Stopping after %d ES data units\n", max2);
 
-    err = transfer_data(es, output, pmt_pid, video_pid, stream_type, max, verbose, quiet);
+    err = transfer_data(es, output, pmt_pid, video_pid, stream_type, max2, verbose, quiet);
     if (err)
         print_err("### es2ts: Error transferring data\n");
 

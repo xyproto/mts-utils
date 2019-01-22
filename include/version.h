@@ -29,7 +29,6 @@
  */
 
 #undef DEBUG
-#define __USE_FILE_OFFSET64
 
 #include "printing_fns.h"
 

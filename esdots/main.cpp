@@ -28,23 +28,30 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <math>
-#include <cmath>
 #include <cerrno>
-#include <fcntl.h>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <fcntl.h>
 #include <unistd.h>
 
 #include "accessunit.h"
 #include "avs.h"
+#include "bitdata.h"
 #include "compat.h"
 #include "es.h"
+#include "h222.h"
 #include "h262.h"
 #include "misc.h"
+#include "nalunit.h"
 #include "pes.h"
+#include "pidint.h"
 #include "printing.h"
+#include "ps.h"
+#include "reverse.h"
+#include "ts.h"
+#include "tswrite.h"
 #include "version.h"
 
 double frame_rate = 25.0; // default frame rate. this can be modified using the switch "-fr"
@@ -83,8 +90,8 @@ static int h262_item_dot(h262_item_p item, double* delta_gop, int show_gop_time)
 
     switch (item->unit.start_code) {
     case 0x00:
-        str = (item->picture_coding_type == 1 ? "i"
-                                              : item->picture_coding_type == 2
+        str = (char*)(item->picture_coding_type == 1 ? "i"
+                                                     : item->picture_coding_type == 2
                     ? "p"
                     : item->picture_coding_type == 3 ? "b"
                                                      : item->picture_coding_type == 4 ? "d" : "x");
