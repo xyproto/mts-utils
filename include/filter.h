@@ -34,8 +34,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cunistd>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include "accessunit_fns.h"
 #include "compat.h"
@@ -58,7 +58,7 @@
  */
 static int new_h262_filter_context(h262_filter_context_p* fcontext)
 {
-    h262_filter_context_p new2 = malloc(SIZEOF_H262_FILTER_CONTEXT);
+    h262_filter_context_p new2 = (h262_filter_context_p)malloc(SIZEOF_H262_FILTER_CONTEXT);
     if (new2 == NULL) {
         print_err("### Unable to allocate H.262 filter context\n");
         return 1;
@@ -170,7 +170,7 @@ void free_h262_filter_context(h262_filter_context_p* fcontext)
  */
 static int new_h264_filter_context(h264_filter_context_p* fcontext)
 {
-    h264_filter_context_p new2 = malloc(SIZEOF_H264_FILTER_CONTEXT);
+    h264_filter_context_p new2 = (h264_filter_context_p)malloc(SIZEOF_H264_FILTER_CONTEXT);
     if (new2 == NULL) {
         print_err("### Unable to allocate H.264 filter context\n");
         return 1;

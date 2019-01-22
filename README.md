@@ -4,6 +4,8 @@ Fork of `tstools`, previously hosted at `code.google.com/p/tstools`.
 
 This is a collection of utilities for working with MPEG data on 64-bit Linux.
 
+Compiles with a modern C++ compiler.
+
 # Building and installing
 
 * Install [cxx](https://github.com/xyproto/cxx)
@@ -18,6 +20,7 @@ These utilites are supported right now:
 * `tsplay`
 * `es2ts`
 * `esdots`
+* `esfilter`
 
 Pull requests are welcome.
 
@@ -34,7 +37,7 @@ The tools are focused on:
 
 * Quick reporting of useful data (`tsinfo`, `stream_type`)
 * Giving a quick overview of the entities in the stream (`esdots`, `psdots`)
-`* Reporting on TS packets (`tsreport`) or ES units/frames/fields (`esreport`)
+* Reporting on TS packets (`tsreport`) or ES units/frames/fields (`esreport`)
 * Simple manipulation of stream data (`es2ts`, `esfilter`, `esreverse`, `esmerge`, `ts2es`)
 * Streaming of data, possibly with introduced errors (`tsplay`).
 
