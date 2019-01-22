@@ -1233,13 +1233,8 @@ int seek_using_TS_reader(TS_reader_p tsreader, offset_t posn)
  */
 static int read_next_TS_packets(TS_reader_p tsreader, int start_len, byte* packet[TS_PACKET_SIZE])
 {
-#ifdef _WIN32
-    int total = start_len;
-    int length;
-#else
     ssize_t total = start_len;
     ssize_t length;
-#endif
 
     // If we exit with an error make sure we don't return anything valid here!
     *packet = NULL;

@@ -9,9 +9,8 @@ This is a set of command line tools for working with MPEG data on Linux.
 Only building `tsplay` on Linux is supported right now.
 
 * Install [cxx](https://github.com/xyproto/cxx)
-* `cd tsplay`
-* `cxx sloppy`
-* `sudo install -Dm755 tsplay /usr/bin/tsplay`
+* `cxx -C tsplay`
+* `sudo install -Dm755 -t /usr/bin tsplay/tsplay`
 
 # Additional info
 

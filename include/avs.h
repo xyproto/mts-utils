@@ -94,7 +94,7 @@ const char* avs_start_code_str(byte start_code)
  */
 int build_avs_context(ES_p es, avs_context_p* context)
 {
-    avs_context_p new = malloc(SIZEOF_AVS_CONTEXT);
+    avs_context_p new2 = (avs_context_p)malloc(SIZEOF_AVS_CONTEXT);
     if (new2 == NULL) {
         print_err("### Unable to allocate AVS context datastructure\n");
         return 1;
@@ -224,7 +224,7 @@ static int build_avs_frame(avs_context_p context, avs_frame_p* frame, ES_unit_p 
 {
     int err;
     byte* data = unit->data;
-    avs_frame_p new = malloc(SIZEOF_AVS_FRAME);
+    avs_frame_p new2 = (avs_frame_p)malloc(SIZEOF_AVS_FRAME);
     if (new2 == NULL) {
         print_err("### Unable to allocate AVS frame datastructure\n");
         return 1;
@@ -275,7 +275,7 @@ static int build_avs_frame(avs_context_p context, avs_frame_p* frame, ES_unit_p 
     if (err) {
         fprint_err(
             "### Error appending first ES unit to AVS %s\n", avs_start_code_str(unit->start_code));
-        free_avs_frame(&new);
+        free_avs_frame(&new2);
         return 1;
     }
 

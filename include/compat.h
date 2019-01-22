@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * Standard names for various quantities.
  *
@@ -31,75 +33,9 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#ifndef _compat
-#define _compat
-
-#ifdef _WIN32
-
-// Kill deprecation warnings
-#pragma warning(4 : 4996)
-
-#include <io.h>
-
-// Windows doesn't seem to supply <stdint.h>, so we shall have to try
-// for values we hope work
-typedef __int8 int8_t;
-typedef __int16 int16_t;
-typedef __int32 int32_t;
-typedef __int64 int64_t;
-
-typedef unsigned __int8 uint8_t;
-typedef unsigned __int16 uint16_t;
-typedef unsigned __int32 uint32_t;
-typedef unsigned __int64 uint64_t;
-
-typedef uint8_t byte;
-
-#define INT64_MIN (-9223372036854775807i64 - 1)
-
-// On BSD, lseek takes a 64-bit off_t value
-// On Linux, if the system supports long files, it does the same
-// On Windows, one has the choice of _lseek or _lseeki64
-#define lseek _lseeki64
-
-// MS Visual C 2003 for .Net defines off_t in sys/types.h as "long"
-// I want to use the same name for my file offsets on Windows and Unix,
-// but I also want to use a 64 bit quantity. So:
-typedef __int64 offset_t;
-
-// On Windows, printf supports %lld but only uses 32 bits of the input value,
-// which leads to confusing results. Correct representation of 64 bit integers,
-// requires the use of %I64d, which is suitable for printing out offset_t
-#define OFFSET_T_FORMAT "%I64d"
-#define OFFSET_T_FORMAT_8 "%8I64d"
-#define OFFSET_T_FORMAT_08 "%08I64d"
-
-// Whilst we're at it, define the format for a 64 bit integer as such
-#define LLD_FORMAT "%I64d"
-#define LLU_FORMAT "%I64u"
-#define LLD_FORMAT_STUMP "I64d"
-#define LLU_FORMAT_STUMP "I64u"
-
-// The MSDN documentation for Visual Studio seems to indicate that
-// the low-level "names" for stdin, etc., are not STDIN_FILENO, etc.,
-// but are instead stdin, etc.
-// This seems to naturally be confusing with the C terms stdin, etc.
-// It *may* be that they actually are not distinct. However, the *numbers*
-// follow the normal definitions.
-#ifndef STDIN_FILENO
-#define STDIN_FILENO 0
-#endif
-
-// On Windows, "inline" is a C++ only keyword. In C, it is:
-#define inline __inline
-
-// Miscellaneous other Windows-related issues...
-#define snprintf _snprintf
-
-#else // _WIN32
 // Other than on Windows, using the C99 integer definitions is what people
 // expect, so do so
-#include <stdint.h>
+#include <cstdint>
 
 // Keep "byte" for historical/affectionate reasons
 typedef uint8_t byte;
@@ -112,7 +48,7 @@ typedef uint8_t byte;
 // NB: On some systems, off_t is provided by unistd.h, but on some others
 //     it may also be necessary to explicitly include sys/types.h. We shall
 //     do both, here, for safety.
-#include <inttypes.h>
+#include <cinttypes>
 #include <sys/types.h>
 #include <unistd.h>
 typedef off_t offset_t;
@@ -140,7 +76,6 @@ typedef off_t offset_t;
 // Useful macros, but not side-effect free
 #define max(i, j) ((i) > (j) ? (i) : (j))
 #define min(i, j) ((i) < (j) ? (i) : (j))
-#endif // WIN32
 
 // Other useful things
 
@@ -154,12 +89,3 @@ typedef void* void_p;
 #define DEFAULT_VIDEO_PID 0x68
 #define DEFAULT_AUDIO_PID 0x67
 #define DEFAULT_PMT_PID 0x66
-
-#endif /* _compat */
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

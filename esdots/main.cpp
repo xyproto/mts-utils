@@ -28,26 +28,23 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <errno.h>
+#include <math>
+#include <cmath>
+#include <cerrno>
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#ifdef _WIN32
-#include <stddef.h>
-#else // _WIN32
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <unistd.h>
-#endif // _WIN32
 
-#include "accessunit_fns.h"
-#include "avs_fns.h"
+#include "accessunit.h"
+#include "avs.h"
 #include "compat.h"
-#include "es_fns.h"
-#include "h262_fns.h"
-#include "misc_fns.h"
-#include "pes_fns.h"
-#include "printing_fns.h"
+#include "es.h"
+#include "h262.h"
+#include "misc.h"
+#include "pes.h"
+#include "printing.h"
 #include "version.h"
 
 double frame_rate = 25.0; // default frame rate. this can be modified using the switch "-fr"
@@ -920,10 +917,3 @@ int main(int argc, char** argv)
     }
     return 0;
 }
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * Support for "filtering" ES, outputting to either ES or TS.
  *
@@ -28,16 +30,12 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <errno.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cunistd>
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#ifdef _WIN32
-#include <io.h>
-#else // _WIN32
-#include <unistd.h>
-#endif // _WIN32
 
 #include "accessunit_fns.h"
 #include "compat.h"
@@ -60,18 +58,18 @@
  */
 static int new_h262_filter_context(h262_filter_context_p* fcontext)
 {
-    h262_filter_context_p new = malloc(SIZEOF_H262_FILTER_CONTEXT);
-    if (new == NULL) {
+    h262_filter_context_p new2 = malloc(SIZEOF_H262_FILTER_CONTEXT);
+    if (new2 == NULL) {
         print_err("### Unable to allocate H.262 filter context\n");
         return 1;
     }
-    new->h262 = NULL;
-    new->last_seq_hdr = NULL;
-    new->new_seq_hdr = FALSE;
+    new2->h262 = NULL;
+    new2->last_seq_hdr = NULL;
+    new2->new_seq_hdr = FALSE;
 
-    reset_h262_filter_context(new);
+    reset_h262_filter_context(new2);
 
-    *fcontext = new;
+    *fcontext = new2;
     return 0;
 }
 
@@ -84,7 +82,7 @@ static int new_h262_filter_context(h262_filter_context_p* fcontext)
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-extern int build_h262_filter_context_strip(
+int build_h262_filter_context_strip(
     h262_filter_context_p* fcontext, h262_context_p h262, int all_IP)
 {
     int err = new_h262_filter_context(fcontext);
@@ -107,8 +105,7 @@ extern int build_h262_filter_context_strip(
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-extern int build_h262_filter_context(
-    h262_filter_context_p* fcontext, h262_context_p h262, int freq)
+int build_h262_filter_context(h262_filter_context_p* fcontext, h262_context_p h262, int freq)
 {
     int err = new_h262_filter_context(fcontext);
     if (err)
@@ -123,7 +120,7 @@ extern int build_h262_filter_context(
 /*
  * Reset an H.262 filter context, ready to start filtering anew.
  */
-extern void reset_h262_filter_context(h262_filter_context_p fcontext)
+void reset_h262_filter_context(h262_filter_context_p fcontext)
 {
     fcontext->pending_EOF = FALSE;
     fcontext->last_was_slice = FALSE;
@@ -146,7 +143,7 @@ extern void reset_h262_filter_context(h262_filter_context_p fcontext)
  * - `fcontext` is the filter context, which will be freed, and returned
  *   as NULL.
  */
-extern void free_h262_filter_context(h262_filter_context_p* fcontext)
+void free_h262_filter_context(h262_filter_context_p* fcontext)
 {
     if ((*fcontext) == NULL)
         return;
@@ -173,20 +170,20 @@ extern void free_h262_filter_context(h262_filter_context_p* fcontext)
  */
 static int new_h264_filter_context(h264_filter_context_p* fcontext)
 {
-    h264_filter_context_p new = malloc(SIZEOF_H264_FILTER_CONTEXT);
-    if (new == NULL) {
+    h264_filter_context_p new2 = malloc(SIZEOF_H264_FILTER_CONTEXT);
+    if (new2 == NULL) {
         print_err("### Unable to allocate H.264 filter context\n");
         return 1;
     }
 
     // Unset the important things - things we might otherwise try to free
-    // (or, for new->es, things that stop us doing anything until we're
+    // (or, for new2->es, things that stop us doing anything until we're
     // setup properly by the user)
-    new->access_unit_context = NULL;
+    new2->access_unit_context = NULL;
 
-    reset_h264_filter_context(new);
+    reset_h264_filter_context(new2);
 
-    *fcontext = new;
+    *fcontext = new2;
     return 0;
 }
 
@@ -200,7 +197,7 @@ static int new_h264_filter_context(h264_filter_context_p* fcontext)
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-extern int build_h264_filter_context_strip(
+int build_h264_filter_context_strip(
     h264_filter_context_p* fcontext, access_unit_context_p access, int allref)
 {
     int err = new_h264_filter_context(fcontext);
@@ -223,7 +220,7 @@ extern int build_h264_filter_context_strip(
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-extern int build_h264_filter_context(
+int build_h264_filter_context(
     h264_filter_context_p* fcontext, access_unit_context_p access, int freq)
 {
     int err = new_h264_filter_context(fcontext);
@@ -239,7 +236,7 @@ extern int build_h264_filter_context(
 /*
  * Reset an H.264 filter context, ready to start filtering anew.
  */
-extern void reset_h264_filter_context(h264_filter_context_p fcontext)
+void reset_h264_filter_context(h264_filter_context_p fcontext)
 {
     // `skipped_ref_pic` is TRUE if we've skipped any reference pictures
     // since our last IDR (hmm - should it start off True or False?)
@@ -267,7 +264,7 @@ extern void reset_h264_filter_context(h264_filter_context_p fcontext)
  * - `fcontext` is the filter context, which will be freed, and returned
  *   as NULL.
  */
-extern void free_h264_filter_context(h264_filter_context_p* fcontext)
+void free_h264_filter_context(h264_filter_context_p* fcontext)
 {
     if ((*fcontext) == NULL)
         return;
@@ -323,7 +320,7 @@ extern void free_h264_filter_context(h264_filter_context_p* fcontext)
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-extern int get_next_stripped_h262_frame(h262_filter_context_p fcontext, int verbose, int quiet,
+int get_next_stripped_h262_frame(h262_filter_context_p fcontext, int verbose, int quiet,
     h262_picture_p* seq_hdr, h262_picture_p* frame, int* frames_seen)
 {
     int err;
@@ -433,7 +430,7 @@ extern int get_next_stripped_h262_frame(h262_filter_context_p fcontext, int verb
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-extern int get_next_filtered_h262_frame(h262_filter_context_p fcontext, int verbose, int quiet,
+int get_next_filtered_h262_frame(h262_filter_context_p fcontext, int verbose, int quiet,
     h262_picture_p* seq_hdr, h262_picture_p* frame, int* frames_seen)
 {
     int err;
@@ -553,7 +550,7 @@ extern int get_next_filtered_h262_frame(h262_filter_context_p fcontext, int verb
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-extern int get_next_stripped_h264_frame(
+int get_next_stripped_h264_frame(
     h264_filter_context_p fcontext, int verbose, int quiet, access_unit_p* frame, int* frames_seen)
 {
     int err = 0;
@@ -657,7 +654,7 @@ extern int get_next_stripped_h264_frame(
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-extern int get_next_filtered_h264_frame(
+int get_next_filtered_h264_frame(
     h264_filter_context_p fcontext, int verbose, int quiet, access_unit_p* frame, int* frames_seen)
 {
     int err = 0;
@@ -785,10 +782,3 @@ extern int get_next_filtered_h264_frame(
         }
     }
 }
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

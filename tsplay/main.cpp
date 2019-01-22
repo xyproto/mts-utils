@@ -31,25 +31,14 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <fcntl.h>
-
 #include <unistd.h>
 
-#include <ctime> // Sleeping and timing
-
-#include "compat.h"
-#include "misc_fns.h"
-#include "printing_fns.h"
-#include "tsplay_fns.h"
-#include "tswrite_fns.h"
 #include "version.h"
-
-#include "pes_fns.h"
-#include "pidint_fns.h"
-#include "ps_fns.h"
-
 #include "accessunit.h"
 #include "bitdata.h"
+#include "compat.h"
 #include "es.h"
 #include "h222.h"
 #include "h262.h"

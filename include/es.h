@@ -441,11 +441,7 @@ static inline int get_more_data(ES_p es)
     if (es->reading_ES) {
         // Call `read` directly - we don't particularly mind if we get a "short"
         // read, since we'll just catch up later on
-#ifdef _WIN32
-        int len = _read(es->input, &es->read_ahead, ES_READ_AHEAD_SIZE);
-#else
         ssize_t len = read(es->input, &es->read_ahead, ES_READ_AHEAD_SIZE);
-#endif
         if (len == 0)
             return EOF;
         else if (len == -1) {

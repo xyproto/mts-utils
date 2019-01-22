@@ -1369,13 +1369,8 @@ static int write_file_data(TS_writer_p tswriter, byte data[], size_t data_len)
  */
 static int write_socket_data(SOCKET output, byte data[], int data_len)
 {
-#ifdef _WIN32
-    int written = 0;
-    int left = data_len;
-#else // _WIN32
     ssize_t written = 0;
     ssize_t left = data_len;
-#endif // _WIN32
     int start = 0;
 
     // (When writing to a file, we don't expect to ever write less than
@@ -1385,20 +1380,6 @@ static int write_socket_data(SOCKET output, byte data[], int data_len)
     errno = 0;
     while (left > 0) {
         written = send(output, &(data[start]), left, 0);
-#ifdef _WIN32
-        if (written == SOCKET_ERROR) {
-            int err = WSAGetLastError();
-            if (err == WSAENOBUFS) {
-                print_err("!!! Warning: 'no buffer space available' writing out"
-                          " TS packet data - retrying\n");
-            } else {
-                print_err("### Error writing out TS packet data:");
-                print_winsock_err(err);
-                print_err("\n");
-                return 1;
-            }
-        }
-#else // _WIN32
         if (written == -1) {
             if (errno == ENOBUFS) {
                 print_err("!!! Warning: 'no buffer space available' writing out"
@@ -1409,7 +1390,6 @@ static int write_socket_data(SOCKET output, byte data[], int data_len)
                 return 1;
             }
         }
-#endif // _WIN32
         left -= written;
         start += written;
     }
@@ -1430,11 +1410,7 @@ static int write_socket_data(SOCKET output, byte data[], int data_len)
 static int read_command(SOCKET command_socket, byte* command, int* command_changed)
 {
     byte thing;
-#ifdef _WIN32
-    int length = recv(command_socket, &thing, 1, 0);
-#else
     ssize_t length = read(command_socket, &thing, 1);
-#endif
     if (length == 0) {
         print_err("!!! EOF reading from command socket\n");
         *command = COMMAND_QUIT;
@@ -1444,23 +1420,7 @@ static int read_command(SOCKET command_socket, byte* command, int* command_chang
 #endif
         return 0;
         // return EOF;
-    }
-#ifdef _WIN32
-    else if (length == SOCKET_ERROR) {
-        int err = WSAGetLastError();
-        print_err("!!! Error reading from command socket:");
-        print_winsock_err(err);
-        print_err("\n");
-        *command = COMMAND_QUIT;
-        *command_changed = TRUE;
-#if DEBUG_COMMANDS
-        print_msg("[[Error -> quit]]\n");
-#endif
-        return 0;
-        // return 1;
-    }
-#else
-    else if (length == -1) {
+    } else if (length == -1) {
         fprint_err("!!! Error reading from command socket: %s\n", strerror(errno));
         *command = COMMAND_QUIT;
         *command_changed = TRUE;
@@ -1470,7 +1430,6 @@ static int read_command(SOCKET command_socket, byte* command, int* command_chang
         return 0;
         // return 1;
     }
-#endif
 
     switch (thing) {
     case 'q':
@@ -2150,52 +2109,6 @@ static int tswrite_child_process(TS_writer_p tswriter)
     }
     return 0;
 }
-#ifdef _WIN32
-// ============================================================
-// Windows threading ("fork" alternative)
-// ============================================================
-/*
- * Wrapper for tswrite_child_process, used to coerce args, etc.
- */
-static void child_thread_fn(void_p arg)
-{
-    TS_writer_p tswriter = (TS_writer_p)arg;
-    (void)tswrite_child_process(tswriter);
-
-#ifdef _WIN32
-    {
-        int err;
-        // On Windows, only the "child" knows when it has finished using its
-        // resources (i.e., the circular buffer and output socket), so only the
-        // "child" can sensibly release them...
-        err = disconnect_socket(tswriter->where.socket);
-        if (err == EOF)
-            fprint_err("### Error closing output: %s\n", strerror(errno));
-
-        // And free the buffering stuff
-        err = free_buffered_TS_output(&(tswriter->writer));
-        if (err)
-            print_err("### Error freeing TS buffer\n");
-
-        free(tswriter);
-    }
-#endif
-}
-
-/*
- * Start up the child thread, to handle the circular buffering
- */
-static int start_child(TS_writer_p tswriter)
-{
-    tswriter->child = (HANDLE)_beginthread(child_thread_fn, 0, (void_p)tswriter);
-
-    if (tswriter->child == (HANDLE)-1) {
-        fprint_err("Error creating child process: %s\n", strerror(errno));
-        return 1;
-    }
-    return 0;
-}
-#else // _WIN32
 // ============================================================
 // Unix forking ("thread" alternative)
 // ============================================================
@@ -2243,7 +2156,6 @@ static int wait_for_child_to_exit(TS_writer_p tswriter, int quiet)
     tswriter->child = 0;
     return 0;
 }
-#endif // _WIN32
 
 // ============================================================
 // Writing

@@ -96,11 +96,7 @@ static inline int get_more_data(PS_reader_p ps)
 {
     // Call `read` directly - we don't particularly mind if we get a "short"
     // read, since we'll just catch up later on
-#ifdef _WIN32
-    int len = _read(ps->input, &ps->data, PS_READ_AHEAD_SIZE);
-#else
     ssize_t len = read(ps->input, &ps->data, PS_READ_AHEAD_SIZE);
-#endif
     if (len == 0)
         return EOF;
     else if (len == -1) {

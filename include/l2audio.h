@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * Support for MPEG layer 2 audio streams.
  *
@@ -34,10 +36,10 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "compat.h"
 #include "l2audio_fns.h"
@@ -205,16 +207,16 @@ static int peek_frame_header(const uint32_t header)
  */
 static inline int build_audio_frame(audio_frame_p* frame)
 {
-    audio_frame_p new = malloc(SIZEOF_AUDIO_FRAME);
-    if (new == NULL) {
+    audio_frame_p new2 = malloc(SIZEOF_AUDIO_FRAME);
+    if (new2 == NULL) {
         print_err("### Unable to allocate audio frame datastructure\n");
         return 1;
     }
 
-    new->data = NULL;
-    new->data_len = 0;
+    new2->data = NULL;
+    new2->data_len = 0;
 
-    *frame = new;
+    *frame = new2;
     return 0;
 }
 
@@ -230,7 +232,7 @@ static inline int build_audio_frame(audio_frame_p* frame)
  * Returns 0 if all goes well, EOF if end-of-file is read, and 1 if something
  * goes wrong.
  */
-extern int read_next_l2audio_frame(int file, audio_frame_p* frame)
+int read_next_l2audio_frame(int file, audio_frame_p* frame)
 {
 #define JUST_ENOUGH 6 // just enough to hold the bits of the headers we want
 
@@ -320,10 +322,3 @@ extern int read_next_l2audio_frame(int file, audio_frame_p* frame)
 
     return 0;
 }
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

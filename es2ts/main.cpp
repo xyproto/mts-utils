@@ -26,24 +26,30 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <errno.h>
+#include <cerrno>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#ifdef _WIN32
-#include <stddef.h>
-#else // _WIN32
 #include <unistd.h>
-#endif // _WIN32
 
-#include "compat.h"
-#include "es_fns.h"
-#include "misc_fns.h"
-#include "printing_fns.h"
-#include "ts_fns.h"
-#include "tswrite_fns.h"
 #include "version.h"
+#include "compat.h"
+#include "es.h"
+#include "misc.h"
+#include "pes.h"
+#include "printing.h"
+#include "ts.h"
+#include "tswrite.h"
+#include "pidint.h"
+#include "ps.h"
+#include "h262.h"
+#include "h222.h"
+#include "reverse.h"
+#include "accessunit.h"
+#include "nalunit.h"
+#include "bitdata.h"
 
 /*
  * Write (copy) the current ES data unit to the output stream, wrapped up in a
@@ -385,15 +391,5 @@ int main(int argc, char** argv)
         fprint_err("### es2ts: Error closing output %s: %s\n", output_name, strerror(errno));
         return 1;
     }
-    if (err)
-        return 1;
-    else
-        return 0;
+    return (err ? 1 : 0);
 }
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

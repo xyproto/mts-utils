@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * Support for ATSC Digital Audio Compression Standard, Revision B
  * (AC3) audio streams.
@@ -27,10 +29,10 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "ac3_fns.h"
 #include "compat.h"
@@ -138,10 +140,3 @@ int read_next_ac3_frame(int file, audio_frame_p* frame)
 
     return 0;
 }
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

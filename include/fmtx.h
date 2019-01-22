@@ -29,11 +29,6 @@
 #define FMTX_BUFFERS_COUNT 8
 #define FMTX_BUFFER_SIZE 128
 
-#ifdef _WIN32
-#include <tchar.h>
-#define I64FMT _T("I64")
-#define I64K(x) x##I64
-#else
 typedef char TCHAR;
 #define _T(x) x
 #define I64FMT "ll"
@@ -41,7 +36,6 @@ typedef char TCHAR;
 #define _stprintf sprintf
 #define _sntprintf snprintf
 #define _tcscmp strcmp
-#endif
 
 // Flags to fmtx_time_stamp
 #define FMTX_TS_N_90kHz 0 // Supplied time stamp is in 90kHz units
@@ -56,10 +50,3 @@ typedef char TCHAR;
 
 const TCHAR* fmtx_timestamp(int64_t n, unsigned int flags);
 int fmtx_str_to_timestamp_flags(const TCHAR* arg_str);
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

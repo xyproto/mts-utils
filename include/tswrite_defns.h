@@ -37,12 +37,8 @@
 #include "h222_defns.h"
 #include "ts_defns.h"
 
-#ifdef _WIN32
-#include <winsock2.h> // for definition of SOCKET
-#else
 typedef int SOCKET; // for compatibility with Windows
 #include <termios.h> // for struct termios
-#endif
 
 struct buffered_TS_output;
 typedef struct buffered_TS_output* buffered_TS_output_p;
@@ -98,11 +94,7 @@ struct TS_writer {
 
     // Support for the child fork/thread, which actually does the writing when
     // buffered output is enabled.
-#ifdef _WIN32
-    HANDLE child; // the handle for the child thread (if any)
-#else // _WIN32
     pid_t child; // the PID of the child process (if any)
-#endif // _WIN32
     int quiet; // Should the child be as quiet as possible?
 
     // Support for "commands" being sent to us via a socket (or, on Linux/BSD,

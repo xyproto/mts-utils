@@ -310,21 +310,6 @@ int host_value(char* prefix, char* cmd, char* arg, char** hostname, int* port);
 // ============================================================
 // Sockets
 // ============================================================
-#ifdef _WIN32
-/*
- * Start up WINSOCK so we can use sockets.
- *
- * Note that each successful call of this *must* be matched by a call
- * of winsock_cleanup().
- *
- * Returns 0 if it works, 1 if it fails.
- */
-int winsock_startup(void);
-/*
- * Convert a WinSock error number into a string and print it out on stderr
- */
-void print_winsock_err(int err);
-#endif // _WIN32
 /*
  * Connect to a socket, to allow us to write to it, using TCP/IP.
  *
@@ -351,11 +336,7 @@ int connect_socket(char* hostname, int port, int use_tcpip, char* multicast_ifad
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-#ifdef _WIN32
-int disconnect_socket(SOCKET socket);
-#else // _WIN32
 int disconnect_socket(int socket);
-#endif // _WIN32
 
 /*! Decode a host byte order address to a static buffer. */
 const char* ipv4_addr_to_string(const uint32_t addr);
