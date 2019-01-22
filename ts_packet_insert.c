@@ -128,7 +128,7 @@ static int insert_packets(int      file,
 
     rv = write(out_file,buf,rv);
 
-    assert(rv=TS_PACKET_SIZE);
+    assert(rv == TS_PACKET_SIZE);
 
     packets_read++;
   }
