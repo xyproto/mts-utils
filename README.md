@@ -13,8 +13,6 @@ This is a collection of utilities for working with MPEG data on 64-bit Linux.
 
 # Building and installing
 
-* Install [cxx](https://github.com/xyproto/cxx) (requires `scons`, GNU `make` and a C++ compiler with support for C++2a or later, like GCC 8.2.1).
-
 Build and install the desired utility:
 
 * `cxx -C tsplay`
@@ -22,8 +20,11 @@ Build and install the desired utility:
 
 Install the corresponding man page:
 
-*  `gzip docs/mdoc/tspla.1`
-*  `sudo install -Dm644 -t /usr/share/man/man1 docs/mdoc/tsplay.1.gz`
+* `sudo install -Dm644 -t /usr/share/man/man1 docs/mdoc/tsplay.1`
+
+Or build and install everything:
+
+* `sudo make install` 
 
 The following utilites are available:
 
