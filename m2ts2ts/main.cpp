@@ -28,22 +28,36 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <errno.h>
+#include <cerrno>
+#include <cmath>
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#ifdef _WIN32
-#include <stddef.h>
-#else // _WIN32
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <unistd.h>
-#endif // _WIN32
 
 #include "compat.h"
-#include "misc_fns.h"
-#include "printing_fns.h"
-#include "ts_defns.h"
 #include "version.h"
+#include "misc.h"
+#include "printing.h"
+#include "ts.h"
+#include "ac3.h"
+#include "accessunit.h"
+#include "adts.h"
+#include "audio.h"
+#include "avs.h"
+#include "bitdata.h"
+#include "es.h"
+#include "filter.h"
+#include "h222.h"
+#include "h262.h"
+#include "l2audio.h"
+#include "nalunit.h"
+#include "pes.h"
+#include "pidint.h"
+#include "ps.h"
+#include "reverse.h"
+#include "tswrite.h"
 
 #define M2TS_PACKET_SIZE (4 + TS_PACKET_SIZE)
 
@@ -99,7 +113,7 @@ static int extract_packets(
             packet_buffer = packet_buffer_in_hand;
             packet_buffer_in_hand = NULL;
         } else {
-            packet_buffer = malloc(sizeof(struct _m2ts_packet_buffer));
+            packet_buffer = (m2ts_packet_buffer_p)malloc(sizeof(struct _m2ts_packet_buffer));
             /***DEBUG***/
             fprint_msg("Allocated buffer @ %p\n", packet_buffer);
             if (packet_buffer == NULL) {

@@ -24,6 +24,8 @@ These utilites are supported right now, and should build:
 * `esmerge`
 * `esreport`
 * `esreverse`
+* `m2ts2ts`
+* `pcapreport`
 
 Pull requests are welcome.
 

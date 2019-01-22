@@ -28,30 +28,41 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <errno.h>
+#include <cerrno>
+#include <cmath>
 #include <fcntl.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#ifdef _WIN32
-#include <stddef.h>
-#else // _WIN32
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <unistd.h>
-#endif // _WIN32
 
 #include "compat.h"
+#include "version.h"
+#include "misc.h"
+#include "printing.h"
+#include "ts.h"
+#include "ac3.h"
+#include "accessunit.h"
+#include "adts.h"
+#include "audio.h"
+#include "avs.h"
+#include "bitdata.h"
+#include "es.h"
+#include "filter.h"
+#include "h222.h"
+#include "h262.h"
+#include "l2audio.h"
+#include "nalunit.h"
+#include "pes.h"
+#include "pidint.h"
+#include "ps.h"
+#include "reverse.h"
+#include "tswrite.h"
+
 #include "ethernet.h"
 #include "fmtx.h"
 #include "ipv4.h"
-#include "misc_fns.h"
 #include "pcap.h"
-#include "ts_fns.h"
-#include "version.h"
 
 typedef struct pcapreport_stream_struct pcapreport_stream_t;
 
@@ -363,7 +374,7 @@ static void stream_gen_names2(const pcapreport_ctx_t* const ctx, pcapreport_stre
     }
 
     if (ctx->extract) {
-        char* name = malloc(base_len + 100);
+        char* name = (char*)malloc(base_len + 100);
         memcpy(name, base_name, base_len + 1);
 
         if (!fixed_extract_name)
@@ -373,7 +384,7 @@ static void stream_gen_names2(const pcapreport_ctx_t* const ctx, pcapreport_stre
     }
 
     if (ctx->csv_gen) {
-        char* name = malloc(base_len + 100);
+        char* name = (char*)malloc(base_len + 100);
         memcpy(name, ctx->base_name, base_len);
         snprintf(name + base_len, 100, "%s%s", identifier, ".csv");
         st->csv_name = name;
@@ -411,7 +422,7 @@ static void stream_close_files(const pcapreport_ctx_t* const ctx, pcapreport_str
 static pcapreport_section_t* section_create(const pcapreport_ctx_t* const ctx,
     pcapreport_stream_t* const st, const pcaprec_hdr_t* const pcap_pkt_hdr)
 {
-    pcapreport_section_t* const tsect = calloc(1, sizeof(*tsect));
+    pcapreport_section_t* const tsect = (pcapreport_section_t*)calloc(1, sizeof(*tsect));
     pcapreport_section_t* const last = st->section_last;
 
     if (ctx->file_split_section)
@@ -453,7 +464,7 @@ static pcapreport_section_t* section_create(const pcapreport_ctx_t* const ctx,
 
 static int digest_times_read(void* handle, byte* out_buf, size_t len)
 {
-    pcapreport_stream_t* const st = handle;
+    pcapreport_stream_t* const st = (pcapreport_stream_t*)handle;
     int nr_bytes = (len < st->tmp_len ? len : st->tmp_len);
     int new_tmp_len = st->tmp_len - nr_bytes;
 
@@ -960,7 +971,7 @@ static pcapreport_stream_t* stream_create(pcapreport_ctx_t* const ctx,
     uint32_t const dest_addr, const uint32_t dest_port)
 {
     int i;
-    pcapreport_stream_t* st = calloc(1, sizeof(*st));
+    pcapreport_stream_t* st = (pcapreport_stream_t*)calloc(1, sizeof(*st));
     st->stream_no = ctx->stream_count++;
     st->output_dest_addr = dest_addr;
     st->output_dest_port = dest_port;
@@ -1143,8 +1154,8 @@ pcapreport_stream_t* stream_find(pcapreport_ctx_t* const ctx,
 
 static int stream_sort_fn(const void* va, const void* vb)
 {
-    const pcapreport_stream_t* const* const pa = va;
-    const pcapreport_stream_t* const* const pb = vb;
+    const pcapreport_stream_t* const* const pa = (const pcapreport_stream_t* const*)va;
+    const pcapreport_stream_t* const* const pb = (const pcapreport_stream_t* const*)vb;
     return (*pa)->stream_no - (*pb)->stream_no;
 }
 
@@ -1156,7 +1167,7 @@ static int ip_reassemble(pcapreport_reassembly_t* const reas, const ipv4_header_
     int frag_final = (ip->flags & 1) == 0;
 
     // Discard unless we succeed
-    *out_pdata = (void*)NULL;
+    *out_pdata = (byte*)NULL;
     *out_plen = 0;
 
     if (frag_final && frag_offset == 0) {
@@ -1738,7 +1749,7 @@ int main(int argc, char** argv)
             unsigned int i;
             unsigned int j = 0;
             pcapreport_stream_t** const streams
-                = malloc(sizeof(pcapreport_stream_t*) * ctx->stream_count);
+                = (pcapreport_stream_t**)malloc(sizeof(pcapreport_stream_t*) * ctx->stream_count);
 
             // Add to array for sorting
             for (i = 0; i != 256; ++i) {
@@ -1771,10 +1782,3 @@ int main(int argc, char** argv)
 
     return 0;
 }
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:
