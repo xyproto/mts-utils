@@ -56,27 +56,27 @@ install: install-man
 	DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) cxx -C common install
 
 install-man:
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/es2ts.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/esdots.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/esfilter.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/esmerge.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/esreport.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/esreverse.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/m2ts2ts.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/pcapreport.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/ps2ts.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/psdots.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/psreport.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/rtp2264.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/stream_type.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/ts2es.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/ts_packet_insert.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/tsdvbsub.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/tsfilter.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/tsinfo.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/tsplay.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/tsreport.1
-	install -Dm644 -t $(destdir)$(prefix)/share/man/man1 docs/mdoc/tsserve.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/es2ts.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/esdots.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/esfilter.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/esmerge.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/esreport.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/esreverse.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/m2ts2ts.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/pcapreport.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/ps2ts.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/psdots.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/psreport.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/rtp2264.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/stream_type.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/ts2es.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/ts_packet_insert.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/tsdvbsub.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/tsfilter.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/tsinfo.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/tsplay.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/tsreport.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/tsserve.1
 
 clean:
 	cxx -C es2ts clean
