@@ -26,23 +26,30 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#ifdef _WIN32
-#include <stddef.h>
-#else // _WIN32
+#include <cerrno>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <fcntl.h>
 #include <unistd.h>
-#endif // _WIN32
 
+#include "accessunit.h"
+#include "bitdata.h"
 #include "compat.h"
-#include "misc_fns.h"
-#include "pidint_fns.h"
-#include "printing_fns.h"
-#include "ts_fns.h"
-#include "tswrite_defns.h"
-#include "tswrite_fns.h"
+#include "es.h"
+#include "h222.h"
+#include "h262.h"
+#include "misc.h"
+#include "nalunit.h"
+#include "pes.h"
+#include "pidint.h"
+#include "printing.h"
+#include "ps.h"
+#include "reverse.h"
+#include "ts.h"
+#include "tswrite.h"
 #include "version.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 /** List of PIDs to filter in */
 int* pidList = NULL;
@@ -56,7 +63,7 @@ void ensurePidList(int nr)
         return;
     }
     pidListAlloc = nr;
-    pidList = realloc(pidList, pidListAlloc * sizeof(int));
+    pidList = (int*)realloc(pidList, pidListAlloc * sizeof(int));
 }
 
 int main(int argn, char* args[])
@@ -236,5 +243,3 @@ static void print_usage(void)
               "                    and all packets in the input from then  \n"
               "                    on.\n");
 }
-
-/* End file */

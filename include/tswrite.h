@@ -32,11 +32,11 @@
  * ***** END LICENSE BLOCK *****
  */
 
+#include <cctype> // for isprint
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cctype> // for isprint
 #include <fcntl.h>
 
 #include <ctime> // Sleeping and timing

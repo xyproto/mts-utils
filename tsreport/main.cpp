@@ -26,26 +26,30 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <errno.h>
+#include <cerrno>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fcntl.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#ifdef _WIN32
-#include <stddef.h>
-#else // _WIN32
 #include <unistd.h>
-#endif // _WIN32
 
+#include "accessunit.h"
+#include "bitdata.h"
 #include "compat.h"
+#include "es.h"
 #include "fmtx.h"
-#include "misc_fns.h"
-#include "pes_fns.h"
-#include "pidint_fns.h"
-#include "printing_fns.h"
-#include "ts_fns.h"
+#include "h222.h"
+#include "h262.h"
+#include "misc.h"
+#include "nalunit.h"
+#include "pes.h"
+#include "pidint.h"
+#include "printing.h"
+#include "ps.h"
+#include "reverse.h"
+#include "ts.h"
+#include "tswrite.h"
 #include "version.h"
 
 #define AV_COUNT 2
@@ -155,7 +159,7 @@ static void avg_rate_add(avg_rate_t* ar, uint64_t time, uint64_t bytes)
 
     if (ar->els == NULL) {
         ar->max_els = 1024;
-        ar->els = calloc(ar->max_els, sizeof(ar->els[0]));
+        ar->els = (avg_rate_el_t*)calloc(ar->max_els, sizeof(ar->els[0]));
     }
 
     while (ar->in_el != ar->out_el && pcr_unsigned_diff(time, ar->els[ar->out_el].time) > gap) {
@@ -1346,15 +1350,5 @@ int main(int argc, char** argv)
         return 1;
     }
     err = close_TS_reader(&tsreader);
-    if (err)
-        return 1;
-
-    return 0;
+    return (err ? 1 : 0);
 }
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

@@ -4,6 +4,11 @@
 *.bak
 *.backup
 
+common/es_test
+common/nal_unit_list_test
+common/pes_test
+common/printing_test
+
 tsplay/tsplay
 esdots/esdots
 es2ts/es2ts
@@ -22,9 +27,7 @@ ts2es/ts2es
 ts2ps/ts2ps
 ts_packet_insert/ts_packet_insert
 tsdvbsub/tsdvbsub
-
-common/es_test
-common/nal_unit_list_test
-common/pes_test
-common/printing_test
-
+tsfilter/tsfilter
+tsinfo/tsinfo
+tsreport/tsreport
+tsserve/tsserve

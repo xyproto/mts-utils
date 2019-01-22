@@ -27,42 +27,38 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <errno.h>
+#include <cerrno>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fcntl.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <unistd.h>
 
-#ifdef _WIN32
-#include <process.h>
-#include <stddef.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#else // _WIN32
+#include <ctime>
 #include <netinet/in.h> // sockaddr_in
 #include <signal.h> // sigaction, etc.
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/wait.h> // WNOHANG
-#include <unistd.h>
-#endif // _WIN32
 
-#include <time.h> // Sleeping and timing
-
-#include "accessunit_fns.h"
+#include "accessunit.h"
+#include "bitdata.h"
 #include "compat.h"
-#include "es_fns.h"
-#include "filter_fns.h"
-#include "h262_fns.h"
-#include "misc_fns.h"
-#include "nalunit_fns.h"
-#include "pes_fns.h"
-#include "printing_fns.h"
-#include "ps_fns.h"
-#include "reverse_fns.h"
-#include "ts_fns.h"
-#include "tswrite_fns.h"
+#include "es.h"
+#include "filter.h"
+#include "fmtx.h"
+#include "h222.h"
+#include "h262.h"
+#include "misc.h"
+#include "nalunit.h"
+#include "pes.h"
+#include "pidint.h"
+#include "printing.h"
+#include "ps.h"
+#include "reverse.h"
+#include "ts.h"
+#include "tswrite.h"
 #include "version.h"
 
 //#define DEBUG
@@ -2673,7 +2669,7 @@ static void set_child_exit_handler()
 {
     int ret;
     struct sigaction action;
-    action.sa_handler = on_child_exit;
+    action.sa_handler = (__sighandler_t)on_child_exit;
     action.sa_flags = SA_NOCLDSTOP; // we only want terminated children, not stopped children
 #ifdef SA_RESTART
     action.sa_flags |= SA_RESTART;
