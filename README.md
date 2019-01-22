@@ -51,6 +51,10 @@ The following utilites are available:
 * `tsreport`
 * `tsserve`
 
+# TODO
+
+- [ ] Fix all warnings
+
 # Additional info
 
 The emphasis is on relatively simple tools which concentrate on MPEG (H.264 and
