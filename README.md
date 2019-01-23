@@ -95,5 +95,5 @@ The tools are focused on:
 
 # Version
 
-* 2.0.0 (WIP)
+* 2.0.1
 
