@@ -27,9 +27,6 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <string>
-using namespace std::string_literals;
-
 #include <cerrno>
 #include <cmath>
 #include <cstdio>

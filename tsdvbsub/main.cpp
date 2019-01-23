@@ -5,29 +5,6 @@
  * This is still a work in progress, the dump isn't comprehensive and error
  * detection is minimal
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 
 #include <cerrno>
@@ -492,8 +469,8 @@ static int extract_av(int input, const int prog_no, int max, int verbose, int qu
     int max_to_read = max;
     int total_num_read = 0;
     uint32_t pid = 0;
-    TS_reader_p tsreader = NULL;
-    pmt_p pmt = NULL;
+    TS_reader_p tsreader = nullptr;
+    pmt_p pmt = nullptr;
 
     // Turn our file into a TS reader
     err = build_TS_reader(input, &tsreader);
@@ -569,7 +546,7 @@ static int extract_av(int input, const int prog_no, int max, int verbose, int qu
 static int extract_pid(int input, uint32_t pid_wanted, int max, int verbose, int quiet)
 {
     int err;
-    TS_reader_p tsreader = NULL;
+    TS_reader_p tsreader = nullptr;
 
     // Turn our file into a TS reader
     err = build_TS_reader(input, &tsreader);
@@ -613,7 +590,7 @@ static void print_usage()
 int main(int argc, char** argv)
 {
     int use_stdin = FALSE;
-    char* input_name = NULL;
+    char* input_name = nullptr;
     int had_input_name = FALSE;
     EXTRACT extract = EXTRACT_TS;
 
