@@ -1,9 +1,9 @@
-.PHONY: all clean install install-man test
+.PHONY: build check install-man install clean
 
 DESTDIR ?=
 PREFIX ?= /usr
 
-all:
+build:
 	cxx -C es2ts opt
 	cxx -C esdots opt
 	cxx -C esfilter opt
@@ -27,32 +27,8 @@ all:
 	cxx -C tsreport opt
 	cxx -C tsserve opt
 
-test:
+check:
 	cxx -C common test
-
-install: install-man
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C es2ts install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C esdots install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C esfilter install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C esmerge install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C esreport install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C esreverse install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C m2ts2ts install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C pcapreport install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C ps2ts install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C psdots install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C psreport install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C rtp2264 install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C stream_type install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C ts2es install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C ts2ps install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C ts_packet_insert install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C tsdvbsub install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C tsfilter install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C tsinfo install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C tsplay install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C tsreport install
-	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C tsserve install
 
 install-man:
 	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/es2ts.1
@@ -76,6 +52,30 @@ install-man:
 	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/tsplay.1
 	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/tsreport.1
 	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/tsserve.1
+
+install: build install-man
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C es2ts install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C esdots install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C esfilter install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C esmerge install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C esreport install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C esreverse install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C m2ts2ts install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C pcapreport install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C ps2ts install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C psdots install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C psreport install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C rtp2264 install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C stream_type install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C ts2es install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C ts2ps install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C ts_packet_insert install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C tsdvbsub install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C tsfilter install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C tsinfo install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C tsplay install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C tsreport install
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C tsserve install
 
 clean:
 	cxx -C es2ts clean
