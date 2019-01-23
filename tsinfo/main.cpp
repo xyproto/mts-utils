@@ -27,6 +27,9 @@
  * ***** END LICENSE BLOCK *****
  */
 
+#include <string>
+using namespace std::string_literals;
+
 #include <cerrno>
 #include <cmath>
 #include <cstdio>
@@ -58,7 +61,7 @@
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int report_streams(TS_reader_p tsreader, int max, int verbose)
+int report_streams(TS_reader_p tsreader, int max, int verbose)
 {
     int err;
     int ii;
@@ -66,18 +69,18 @@ static int report_streams(TS_reader_p tsreader, int max, int verbose)
     // TODO: Should really support multiple programs
     //       (some use of pidint_list to support program number -> PMT?)
 
-    pidint_list_p this_prog_list = NULL;
-    pidint_list_p last_prog_list = NULL;
-    pmt_p this_pmt = NULL;
-    pmt_p last_pmt = NULL;
+    pidint_list_p this_prog_list = nullptr;
+    pidint_list_p last_prog_list = nullptr;
+    pmt_p this_pmt = nullptr;
+    pmt_p last_pmt = nullptr;
 
     uint32_t pmt_pid = 0; // which will get "masked" by the PAT pid
 
-    byte* pat_data = NULL;
+    byte* pat_data = nullptr;
     int pat_data_len = 0;
     int pat_data_used = 0;
 
-    byte* pmt_data = NULL;
+    byte* pmt_data = nullptr;
     int pmt_data_len = 0;
     int pmt_data_used = 0;
 
@@ -122,7 +125,7 @@ static int report_streams(TS_reader_p tsreader, int max, int verbose)
                 // started one, so throw its data away
                 print_err("!!! Discarding previous (uncompleted) PAT data\n");
                 free(pat_data);
-                pat_data = NULL;
+                pat_data = nullptr;
                 pat_data_len = 0;
                 pat_data_used = 0;
             } else if (!payload_unit_start_indicator && !pat_data) {
@@ -161,7 +164,7 @@ static int report_streams(TS_reader_p tsreader, int max, int verbose)
             }
 
             free(pat_data);
-            pat_data = NULL;
+            pat_data = nullptr;
             pat_data_len = 0;
             pat_data_used = 0;
             num_pats++;
@@ -175,7 +178,7 @@ static int report_streams(TS_reader_p tsreader, int max, int verbose)
             }
 
             if (!same_pidint_list(this_prog_list, last_prog_list)) {
-                if (last_prog_list != NULL)
+                if (last_prog_list != nullptr)
                     fprint_msg("\nPacket %d is PAT - content changed\n", ii + 1);
                 else if (!verbose)
                     fprint_msg("\nPacket %d is PAT\n", ii + 1);
@@ -206,7 +209,7 @@ static int report_streams(TS_reader_p tsreader, int max, int verbose)
                 // started one, so throw its data away
                 print_err("!!! Discarding previous (uncompleted) PMT data\n");
                 free(pmt_data);
-                pmt_data = NULL;
+                pmt_data = nullptr;
                 pmt_data_len = 0;
                 pmt_data_used = 0;
             } else if (!payload_unit_start_indicator && !pmt_data) {
@@ -242,7 +245,7 @@ static int report_streams(TS_reader_p tsreader, int max, int verbose)
             }
 
             free(pmt_data);
-            pmt_data = NULL;
+            pmt_data = nullptr;
             pmt_data_len = 0;
             pmt_data_used = 0;
             num_pmts++;
@@ -253,7 +256,7 @@ static int report_streams(TS_reader_p tsreader, int max, int verbose)
                 continue;
             }
 
-            if (last_pmt != NULL)
+            if (last_pmt != nullptr)
                 fprint_msg("\nPacket %d is PMT with PID %04x (%d)"
                            " - content changed\n",
                     ii + 1, pid, pid);
@@ -277,7 +280,7 @@ static int report_streams(TS_reader_p tsreader, int max, int verbose)
     return 0;
 }
 
-static void print_usage()
+void print_usage()
 {
     print_msg("Usage: tsinfo [switches] [<infile>]\n"
               "\n");
@@ -300,14 +303,14 @@ static void print_usage()
 int main(int argc, char** argv)
 {
     int use_stdin = FALSE;
-    char* input_name = NULL;
+    char* input_name = nullptr;
     int had_input_name = FALSE;
     int max = 10000;
     int verbose = FALSE; // True => output diagnostic/progress messages
     int lookfor = 1;
     int err = 0;
 
-    TS_reader_p tsreader = NULL;
+    TS_reader_p tsreader = nullptr;
 
     int ii = 1;
 
@@ -376,7 +379,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    err = open_file_for_TS_read((use_stdin ? NULL : input_name), &tsreader);
+    err = open_file_for_TS_read((use_stdin ? nullptr : input_name), &tsreader);
     if (err) {
         fprint_err("### tsinfo: Unable to open input file %s for reading TS\n",
             use_stdin ? "<stdin>" : input_name);
@@ -392,15 +395,5 @@ int main(int argc, char** argv)
     }
 
     err = close_TS_reader(&tsreader);
-    if (err)
-        return 1;
-
-    return 0;
+    return (err ? 1 : 0);
 }
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:
