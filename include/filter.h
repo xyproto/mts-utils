@@ -59,12 +59,12 @@
 static int new_h262_filter_context(h262_filter_context_p* fcontext)
 {
     h262_filter_context_p new2 = (h262_filter_context_p)malloc(SIZEOF_H262_FILTER_CONTEXT);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate H.262 filter context\n");
         return 1;
     }
-    new2->h262 = NULL;
-    new2->last_seq_hdr = NULL;
+    new2->h262 = nullptr;
+    new2->last_seq_hdr = nullptr;
     new2->new_seq_hdr = FALSE;
 
     reset_h262_filter_context(new2);
@@ -125,7 +125,7 @@ void reset_h262_filter_context(h262_filter_context_p fcontext)
     fcontext->pending_EOF = FALSE;
     fcontext->last_was_slice = FALSE;
     fcontext->had_previous_picture = FALSE;
-    if (fcontext->last_seq_hdr != NULL)
+    if (fcontext->last_seq_hdr != nullptr)
         free_h262_picture(&fcontext->last_seq_hdr);
     fcontext->new_seq_hdr = FALSE;
 
@@ -141,11 +141,11 @@ void reset_h262_filter_context(h262_filter_context_p fcontext)
  * filter context refers.
  *
  * - `fcontext` is the filter context, which will be freed, and returned
- *   as NULL.
+ *   as nullptr.
  */
 void free_h262_filter_context(h262_filter_context_p* fcontext)
 {
-    if ((*fcontext) == NULL)
+    if ((*fcontext) == nullptr)
         return;
 
     // It's a little wasteful to call this, but on the other hand it is
@@ -153,10 +153,10 @@ void free_h262_filter_context(h262_filter_context_p* fcontext)
     reset_h262_filter_context(*fcontext);
 
     // Just lose our reference to the H.262 datastructure, don't free it
-    (*fcontext)->h262 = NULL;
+    (*fcontext)->h262 = nullptr;
 
     free(*fcontext);
-    *fcontext = NULL;
+    *fcontext = nullptr;
     return;
 }
 
@@ -171,7 +171,7 @@ void free_h262_filter_context(h262_filter_context_p* fcontext)
 static int new_h264_filter_context(h264_filter_context_p* fcontext)
 {
     h264_filter_context_p new2 = (h264_filter_context_p)malloc(SIZEOF_H264_FILTER_CONTEXT);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate H.264 filter context\n");
         return 1;
     }
@@ -179,7 +179,7 @@ static int new_h264_filter_context(h264_filter_context_p* fcontext)
     // Unset the important things - things we might otherwise try to free
     // (or, for new2->es, things that stop us doing anything until we're
     // setup properly by the user)
-    new2->access_unit_context = NULL;
+    new2->access_unit_context = nullptr;
 
     reset_h264_filter_context(new2);
 
@@ -262,11 +262,11 @@ void reset_h264_filter_context(h264_filter_context_p fcontext)
  * filter context refers.
  *
  * - `fcontext` is the filter context, which will be freed, and returned
- *   as NULL.
+ *   as nullptr.
  */
 void free_h264_filter_context(h264_filter_context_p* fcontext)
 {
-    if ((*fcontext) == NULL)
+    if ((*fcontext) == nullptr)
         return;
 
     // It's a little wasteful to call this, but on the other hand it is
@@ -274,10 +274,10 @@ void free_h264_filter_context(h264_filter_context_p* fcontext)
     reset_h264_filter_context(*fcontext);
 
     // Just lose our reference to the access unit context, don't free it
-    (*fcontext)->access_unit_context = NULL;
+    (*fcontext)->access_unit_context = nullptr;
 
     free(*fcontext);
-    *fcontext = NULL;
+    *fcontext = nullptr;
     return;
 }
 
@@ -296,7 +296,7 @@ void free_h264_filter_context(h264_filter_context_p* fcontext)
  * - if `quiet` is true, then only errors will be reported
  *
  * - `seq_hdr` is a sequence header, i.e., that used by the next frame to
- *   output. This will be NULL if the sequence header has not changed since
+ *   output. This will be nullptr if the sequence header has not changed since
  *   the last call of this function.
  *
  *   Note that the caller should *not* free this, and that it will not be
@@ -326,7 +326,7 @@ int get_next_stripped_h262_frame(h262_filter_context_p fcontext, int verbose, in
     int err;
 
     // A picture is built up from several items - we start with none in hand
-    h262_picture_p this_picture = NULL;
+    h262_picture_p this_picture = nullptr;
 
     *frames_seen = 0;
 
@@ -339,13 +339,13 @@ int get_next_stripped_h262_frame(h262_filter_context_p fcontext, int verbose, in
     // Otherwise, look for something we want to keep
     for (;;) {
         if (es_command_changed(fcontext->h262->es)) {
-            *frame = *seq_hdr = NULL;
+            *frame = *seq_hdr = nullptr;
             return COMMAND_RETURN_CODE;
         }
 
         err = get_next_h262_frame(fcontext->h262, verbose, quiet, &this_picture);
         if (err == EOF) {
-            *frame = *seq_hdr = NULL;
+            *frame = *seq_hdr = nullptr;
             return err;
         } else if (err) {
             print_err("### Error filtering H.262 frames\n");
@@ -361,7 +361,7 @@ int get_next_stripped_h262_frame(h262_filter_context_p fcontext, int verbose, in
                 if (fcontext->new_seq_hdr)
                     *seq_hdr = fcontext->last_seq_hdr;
                 else
-                    *seq_hdr = NULL;
+                    *seq_hdr = nullptr;
                 fcontext->new_seq_hdr = FALSE;
                 if (verbose)
                     fprint_msg(
@@ -371,7 +371,7 @@ int get_next_stripped_h262_frame(h262_filter_context_p fcontext, int verbose, in
                 free_h262_picture(&this_picture);
         } else if (this_picture->is_sequence_header) {
             // We maybe want to remember this sequence header for the next picture
-            if (fcontext->last_seq_hdr == NULL) {
+            if (fcontext->last_seq_hdr == nullptr) {
                 fcontext->last_seq_hdr = this_picture;
                 fcontext->new_seq_hdr = TRUE;
                 if (verbose)
@@ -406,13 +406,13 @@ int get_next_stripped_h262_frame(h262_filter_context_p fcontext, int verbose, in
  * - if `quiet` is true, then only errors will be reported
  *
  * - `seq_hdr` is a sequence header, i.e., that used by the next picture to
- *   output. This will be NULL if `frame` is NULL.
+ *   output. This will be nullptr if `frame` is nullptr.
  *
  *   Note that the caller should *not* free this, and that it will not be
  *   maintained over calls of this function (i.e., it is a reference to a
  *   value within the `fcontext` which is altered by this function).
  *
- * - `frame` is the next frame to output. This will be NULL if the last frame
+ * - `frame` is the next frame to output. This will be nullptr if the last frame
  *   should be output again, to provide the requested apparent frequency.
  *
  *   Note that it is the caller's responsibility to free this with
@@ -436,7 +436,7 @@ int get_next_filtered_h262_frame(h262_filter_context_p fcontext, int verbose, in
     int err;
 
     // A picture is built up from several items - we start with none in hand
-    h262_picture_p this_picture = NULL;
+    h262_picture_p this_picture = nullptr;
 
     *frames_seen = 0;
 
@@ -449,7 +449,7 @@ int get_next_filtered_h262_frame(h262_filter_context_p fcontext, int verbose, in
     // Otherwise, look for something we want to keep
     for (;;) {
         if (es_command_changed(fcontext->h262->es)) {
-            *frame = *seq_hdr = NULL;
+            *frame = *seq_hdr = nullptr;
             return COMMAND_RETURN_CODE;
         }
 
@@ -459,7 +459,7 @@ int get_next_filtered_h262_frame(h262_filter_context_p fcontext, int verbose, in
 
         err = get_next_h262_frame(fcontext->h262, verbose, quiet, &this_picture);
         if (err == EOF) {
-            *frame = *seq_hdr = NULL;
+            *frame = *seq_hdr = nullptr;
             fcontext->h262->add_fake_afd = FALSE;
             return err;
         } else if (err) {
@@ -497,8 +497,8 @@ int get_next_filtered_h262_frame(h262_filter_context_p fcontext, int verbose, in
                         if (verbose)
                             print_msg(">>> output last picture again\n");
                         free_h262_picture(&this_picture);
-                        *seq_hdr = NULL;
-                        *frame = NULL;
+                        *seq_hdr = nullptr;
+                        *frame = nullptr;
                         fcontext->frames_written++;
                         return 0;
                     }
@@ -519,7 +519,7 @@ int get_next_filtered_h262_frame(h262_filter_context_p fcontext, int verbose, in
             free_h262_picture(&this_picture);
         } else if (this_picture->is_sequence_header) {
             // We want to remember the sequence header for the next picture
-            if (fcontext->last_seq_hdr != NULL)
+            if (fcontext->last_seq_hdr != nullptr)
                 free_h262_picture(&fcontext->last_seq_hdr);
             fcontext->last_seq_hdr = this_picture;
         }
@@ -555,7 +555,7 @@ int get_next_stripped_h264_frame(
 {
     int err = 0;
     int keep = FALSE; // Should we keep the current access unit?
-    access_unit_p this_access_unit = NULL;
+    access_unit_p this_access_unit = nullptr;
 
     *frames_seen = 0;
 
@@ -575,7 +575,7 @@ int get_next_stripped_h264_frame(
 
         (*frames_seen)++;
 
-        if (this_access_unit->primary_start == NULL) {
+        if (this_access_unit->primary_start == nullptr) {
             // We don't have a primary picture - no VCL NAL
             // There seems little point in keeping the access unit
             keep = FALSE;
@@ -638,7 +638,7 @@ int get_next_stripped_h264_frame(
  *
  * - `frame` is the next frame to output.
  *
- *   If the function succeeds and `frame` is NULL, it means that the
+ *   If the function succeeds and `frame` is nullptr, it means that the
  *   last frame should be output again.
  *
  *   Note that it is the caller's responsibility to free this frame with
@@ -659,7 +659,7 @@ int get_next_filtered_h264_frame(
 {
     int err = 0;
     int keep = FALSE; // Should we keep the current access unit?
-    access_unit_p this_access_unit = NULL;
+    access_unit_p this_access_unit = nullptr;
 
     *frames_seen = 0;
 
@@ -682,7 +682,7 @@ int get_next_filtered_h264_frame(
 
         fcontext->frames_seen++;
 
-        if (this_access_unit->primary_start == NULL) {
+        if (this_access_unit->primary_start == nullptr) {
             // We don't have a primary picture - no VCL NAL
             // There seems little point in keeping the access unit
             keep = FALSE;
@@ -772,7 +772,7 @@ int get_next_filtered_h264_frame(
                     if (verbose)
                         print_msg(">>> output last access unit again\n");
                     free_access_unit(&this_access_unit);
-                    *frame = NULL;
+                    *frame = nullptr;
                     fcontext->frames_written++;
                     return 0;
                 }

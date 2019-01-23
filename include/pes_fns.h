@@ -36,7 +36,7 @@
  * Free a PES packet datastructure
  *
  * - `data` is the PES packet datastructure, which will be freed,
- *   and returned as NULL.
+ *   and returned as nullptr.
  */
 void free_PES_packet_data(PES_packet_data_p* data);
 /*
@@ -264,7 +264,7 @@ int set_PES_reader_position(PES_reader_p reader, offset_t posn);
  * the underlying file.
  *
  * - `reader` is the PES reader context. This will be freed, and
- *   returned as NULL.
+ *   returned as nullptr.
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
@@ -273,7 +273,7 @@ int free_PES_reader(PES_reader_p* reader);
  * Close a PES reader, and free the relevant datastructures.
  *
  * - `reader` is the PES reader context. This will be freed, and
- *   returned as NULL.
+ *   returned as nullptr.
  *
  * Returns 0 if all goes well, 1 if something goes wrong with closing the
  * file (although in that case, the `reader` will still have been freed).
@@ -446,7 +446,7 @@ void set_server_output(PES_reader_p reader, TS_writer_p tswriter, int write_PES,
  * If set_server_output() has not been called to define a TS writer
  * context, this will have no effect.
  *
- * If `reader` is NULL, nothing is done.
+ * If `reader` is nullptr, nothing is done.
  */
 void start_server_output(PES_reader_p reader);
 /*
@@ -457,7 +457,7 @@ void start_server_output(PES_reader_p reader);
  * If set_server_output() has not been called to define a TS writer
  * context, this will have no effect.
  *
- * If `reader` is NULL, nothing is done.
+ * If `reader` is nullptr, nothing is done.
  */
 void stop_server_output(PES_reader_p reader);
 /*

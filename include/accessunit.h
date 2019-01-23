@@ -50,7 +50,7 @@ static inline int build_access_unit(access_unit_p* acc_unit, uint32_t index)
     int err;
 
     access_unit_p new2 = (access_unit_p)malloc(SIZEOF_ACCESS_UNIT);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate access unit datastructure\n");
         return 1;
     }
@@ -58,12 +58,12 @@ static inline int build_access_unit(access_unit_p* acc_unit, uint32_t index)
     err = build_nal_unit_list(&(new2->nal_units));
     if (err) {
         free(new2);
-        *acc_unit = NULL;
+        *acc_unit = nullptr;
         return err;
     }
     new2->index = index;
     new2->started_primary_picture = FALSE;
-    new2->primary_start = NULL;
+    new2->primary_start = nullptr;
     new2->ignored_broken_NAL_units = 0;
 
     new2->frame_num = new2->field_pic_flag = new2->bottom_field_flag = 0;
@@ -81,23 +81,23 @@ static inline int build_access_unit(access_unit_p* acc_unit, uint32_t index)
 static inline void clear_access_unit(access_unit_p acc_unit, int deep)
 {
     free_nal_unit_list(&(acc_unit->nal_units), deep);
-    acc_unit->primary_start = NULL;
+    acc_unit->primary_start = nullptr;
 }
 
 /*
  * Tidy up and free an access unit datastructure after we've finished with it.
  *
- * Clears the datastructure, frees it, and returns `acc_unit` as NULL.
+ * Clears the datastructure, frees it, and returns `acc_unit` as nullptr.
  *
- * Does nothing if `acc_unit` is already NULL.
+ * Does nothing if `acc_unit` is already nullptr.
  */
 void free_access_unit(access_unit_p* acc_unit)
 {
-    if (*acc_unit == NULL)
+    if (*acc_unit == nullptr)
         return;
     clear_access_unit(*acc_unit, TRUE);
     free(*acc_unit);
-    *acc_unit = NULL;
+    *acc_unit = nullptr;
 }
 
 /*
@@ -122,7 +122,7 @@ void report_access_unit(access_unit_p access_unit)
 
     for (ii = 0; ii < access_unit->nal_units->length; ii++) {
         nal_unit_p nal = access_unit->nal_units->array[ii];
-        if (nal == NULL)
+        if (nal == nullptr)
             print_msg("     <null>\n");
         else {
             fprint_msg("    %c", ((access_unit->primary_start == nal) ? '*' : ' '));
@@ -159,7 +159,7 @@ static inline int num_slices(access_unit_p access_unit)
 int get_access_unit_bounds(access_unit_p access_unit, ES_offset* start, uint32_t* length)
 {
     int ii;
-    if (access_unit->primary_start == NULL) {
+    if (access_unit->primary_start == nullptr) {
         print_err("### Cannot determine bounds of an access unit with no content\n");
         return 1;
     }
@@ -180,7 +180,7 @@ int get_access_unit_bounds(access_unit_p access_unit, ES_offset* start, uint32_t
 int all_slices_I(access_unit_p access_unit)
 {
     int ii;
-    if (access_unit->primary_start == NULL)
+    if (access_unit->primary_start == nullptr)
         return FALSE;
     if (!nal_is_slice(access_unit->primary_start))
         return FALSE;
@@ -205,7 +205,7 @@ int all_slices_I(access_unit_p access_unit)
 int all_slices_P(access_unit_p access_unit)
 {
     int ii;
-    if (access_unit->primary_start == NULL)
+    if (access_unit->primary_start == nullptr)
         return FALSE;
     if (!nal_is_slice(access_unit->primary_start))
         return FALSE;
@@ -230,7 +230,7 @@ int all_slices_P(access_unit_p access_unit)
 int all_slices_I_or_P(access_unit_p access_unit)
 {
     int ii;
-    if (access_unit->primary_start == NULL)
+    if (access_unit->primary_start == nullptr)
         return FALSE;
     if (!nal_is_slice(access_unit->primary_start))
         return FALSE;
@@ -260,7 +260,7 @@ int all_slices_I_or_P(access_unit_p access_unit)
 int all_slices_B(access_unit_p access_unit)
 {
     int ii;
-    if (access_unit->primary_start == NULL)
+    if (access_unit->primary_start == nullptr)
         return FALSE;
     if (!nal_is_slice(access_unit->primary_start))
         return FALSE;
@@ -282,7 +282,7 @@ int all_slices_B(access_unit_p access_unit)
 /*
  * Append a NAL unit to the list of NAL units for this access unit
  *
- * NB: `pending` may be NULL
+ * NB: `pending` may be nullptr
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
@@ -305,7 +305,7 @@ static int access_unit_append(
         access_unit->field_pic_flag = nal->u.slice.field_pic_flag;
         access_unit->bottom_field_flag = nal->u.slice.bottom_field_flag;
     }
-    if (pending != NULL && pending->length > 0) {
+    if (pending != nullptr && pending->length > 0) {
         int ii;
         for (ii = 0; ii < pending->length; ii++) {
             err = append_to_nal_unit_list(access_unit->nal_units, pending->array[ii]);
@@ -316,7 +316,7 @@ static int access_unit_append(
         }
     }
 
-    if (nal != NULL) {
+    if (nal != nullptr) {
         err = append_to_nal_unit_list(access_unit->nal_units, nal);
         if (err) {
             fprint_err("### Error extending access unit %d\n", access_unit->index);
@@ -352,7 +352,7 @@ static int merge_access_unit_nals(access_unit_p access_unit1, access_unit_p* acc
     // unit, as they are still being used by the first
     clear_access_unit(*access_unit2, FALSE);
     free(*access_unit2);
-    *access_unit2 = NULL;
+    *access_unit2 = nullptr;
 
     // Fake the flags in our remaining access unit to make us "look" like
     // a frame
@@ -369,7 +369,7 @@ static int merge_access_unit_nals(access_unit_p access_unit1, access_unit_p* acc
  *
  * - `access_unit` is the access unit to write out
  * - `context` may contain additional things to write (see above), but may
- *   legitimately be NULL if there is no context.
+ *   legitimately be nullptr if there is no context.
  * - `output` is the ES file to write to
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
@@ -386,7 +386,7 @@ int write_access_unit_as_ES(access_unit_p access_unit, access_unit_context_p con
         }
     }
 
-    if (context != NULL && context->end_of_sequence) {
+    if (context != nullptr && context->end_of_sequence) {
         err = write_ES_unit(output, &(context->end_of_sequence->unit));
         if (err) {
             print_err("### Error writing end of sequence NAL unit ");
@@ -396,7 +396,7 @@ int write_access_unit_as_ES(access_unit_p access_unit, access_unit_context_p con
         free_nal_unit(&context->end_of_sequence);
     }
 
-    if (context != NULL && context->end_of_stream) {
+    if (context != nullptr && context->end_of_stream) {
         err = write_ES_unit(output, &(context->end_of_stream->unit));
         if (err) {
             print_err("### Error writing end of stream NAL unit ");
@@ -416,7 +416,7 @@ int write_access_unit_as_ES(access_unit_p access_unit, access_unit_context_p con
  * unit).
  *
  * - `context` may contain additional things to write (see above), but may
- *   legitimately be NULL if there is no context.
+ *   legitimately be nullptr if there is no context.
  * - `tswriter` is the TS context to write with
  * - `video_pid` is the PID to use to write the data
  *
@@ -427,7 +427,7 @@ static int write_access_unit_trailer_as_TS(
 {
     int err;
 
-    if (context != NULL && context->end_of_sequence) {
+    if (context != nullptr && context->end_of_sequence) {
         nal_unit_p nal = context->end_of_sequence;
         err = write_ES_as_TS_PES_packet(
             tswriter, nal->unit.data, nal->unit.data_len, video_pid, DEFAULT_VIDEO_STREAM_ID);
@@ -439,7 +439,7 @@ static int write_access_unit_trailer_as_TS(
         free_nal_unit(&context->end_of_sequence);
     }
 
-    if (context != NULL && context->end_of_stream) {
+    if (context != nullptr && context->end_of_stream) {
         nal_unit_p nal = context->end_of_stream;
         err = write_ES_as_TS_PES_packet(
             tswriter, nal->unit.data, nal->unit.data_len, video_pid, DEFAULT_VIDEO_STREAM_ID);
@@ -462,7 +462,7 @@ static int write_access_unit_trailer_as_TS(
  *
  * - `access_unit` is the access unit to write out
  * - `context` may contain additional things to write (see above), but may
- *   legitimately be NULL if there is no context.
+ *   legitimately be nullptr if there is no context.
  * - `tswriter` is the TS context to write with
  * - `video_pid` is the PID to use to write the data
  *
@@ -497,7 +497,7 @@ int write_access_unit_as_TS(access_unit_p access_unit, access_unit_context_p con
  *
  * - `access_unit` is the access unit to write out
  * - `context` may contain additional things to write (see above), but may
- *   legitimately be NULL if there is no context.
+ *   legitimately be nullptr if there is no context.
  * - `tswriter` is the TS context to write with
  * - `video_pid` is the PID to use to write the data
  * - `got_pts` is TRUE if we have a PTS value, in which case
@@ -545,7 +545,7 @@ int write_access_unit_as_TS_with_pts_dts(access_unit_p access_unit, access_unit_
  *
  * - `access_unit` is the access unit to write out
  * - `context` may contain additional things to write (see above), but may
- *   legitimately be NULL if there is no context.
+ *   legitimately be nullptr if there is no context.
  * - `tswriter` is the TS context to write with
  * - `video_pid` is the PID to use to write the data
  * - `pcr_base` and `pcr_extn` encode the PCR value.
@@ -619,18 +619,18 @@ int build_access_unit_context(ES_p es, access_unit_context_p* context)
 {
     int err;
     access_unit_context_p new2 = (access_unit_context_p)malloc(SIZEOF_ACCESS_UNIT_CONTEXT);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate access unit context datastructure\n");
         return 1;
     }
 
-    new2->pending_nal = NULL;
-    new2->end_of_stream = NULL;
-    new2->end_of_sequence = NULL;
+    new2->pending_nal = nullptr;
+    new2->end_of_stream = nullptr;
+    new2->end_of_sequence = nullptr;
     new2->access_unit_index = 0;
-    new2->reverse_data = NULL;
+    new2->reverse_data = nullptr;
     new2->no_more_data = FALSE;
-    new2->earlier_primary_start = NULL;
+    new2->earlier_primary_start = nullptr;
 
     err = build_nal_unit_context(es, &new2->nac);
     if (err) {
@@ -653,17 +653,17 @@ int build_access_unit_context(ES_p es, access_unit_context_p* context)
 /*
  * Free a new access unit context datastructure.
  *
- * Clears the datastructure, frees it, and returns `context` as NULL.
+ * Clears the datastructure, frees it, and returns `context` as nullptr.
  *
  * Does not free any `reverse_data` datastructure.
  *
- * Does nothing if `context` is already NULL.
+ * Does nothing if `context` is already nullptr.
  */
 void free_access_unit_context(access_unit_context_p* context)
 {
     access_unit_context_p cc = *context;
 
-    if (cc == NULL)
+    if (cc == nullptr)
         return;
 
     // We assume no-one else has an interest in the NAL units in
@@ -678,10 +678,10 @@ void free_access_unit_context(access_unit_context_p* context)
 
     free_nal_unit_context(&cc->nac);
 
-    cc->reverse_data = NULL;
+    cc->reverse_data = nullptr;
 
     free(*context);
-    *context = NULL;
+    *context = nullptr;
     return;
 }
 
@@ -756,7 +756,7 @@ static int remember_earlier_primary_start(access_unit_context_p context, nal_uni
 {
     nal_unit_p tgt = context->earlier_primary_start;
 
-    if (tgt == NULL) {
+    if (tgt == nullptr) {
         int err = build_nal_unit(&tgt);
         if (err) {
             print_err("### Error building NAL unit for 'earlier primary start'\n");
@@ -791,7 +791,7 @@ static int maybe_remember_access_unit(
     reverse_data_p reverse_data, access_unit_p access_unit, int verbose)
 {
     // Keep it if it is an IDR, or all of its contents are I slices
-    if (access_unit->primary_start != NULL && access_unit->primary_start->nal_ref_idc != 0
+    if (access_unit->primary_start != nullptr && access_unit->primary_start->nal_ref_idc != 0
         && (access_unit->primary_start->nal_unit_type == NAL_IDR || all_slices_I(access_unit))) {
         ES_offset start_posn = { 0, 0 };
         uint32_t num_bytes = 0;
@@ -841,21 +841,21 @@ static int maybe_remember_access_unit(
  *
  * EOF can be returned because the end of file has been reached, or because an
  * end of stream NAL unit has been encountered. The two may be distinguished
- * by looking at `context->end_of_stream`, which will be NULL if it was a true
+ * by looking at `context->end_of_stream`, which will be nullptr if it was a true
  * EOF.
  *
- * Note that `ret_access_unit` will be NULL if EOF is returned.
+ * Note that `ret_access_unit` will be nullptr if EOF is returned.
  */
 int get_next_access_unit(
     access_unit_context_p context, int quiet, int show_details, access_unit_p* ret_access_unit)
 {
     int err;
-    nal_unit_p nal = NULL;
+    nal_unit_p nal = nullptr;
     access_unit_p access_unit;
 
     // Is there anything more to read from the input stream?
     if (context->no_more_data) {
-        *ret_access_unit = NULL;
+        *ret_access_unit = nullptr;
         return EOF;
     }
 
@@ -866,11 +866,11 @@ int get_next_access_unit(
         return err;
 
     // Did we have any left over stuff to put at its start?
-    if (context->pending_nal != NULL) {
+    if (context->pending_nal != nullptr) {
         err = access_unit_append(access_unit, context->pending_nal, TRUE, context->pending_list);
         if (err)
             goto give_up;
-        context->pending_nal = NULL;
+        context->pending_nal = nullptr;
         reset_nal_unit_list(context->pending_list, FALSE);
     }
 
@@ -971,7 +971,7 @@ int get_next_access_unit(
                         reset_nal_unit_list(context->pending_list, TRUE);
                     }
                 }
-                err = access_unit_append(access_unit, nal, FALSE, NULL);
+                err = access_unit_append(access_unit, nal, FALSE, nullptr);
                 if (err)
                     goto give_up_free_nal;
             }
@@ -1042,7 +1042,7 @@ int get_next_access_unit(
     // between the last access unit and such reading
     if (context->no_more_data && access_unit->nal_units->length == 0) {
         free_access_unit(&access_unit);
-        *ret_access_unit = NULL;
+        *ret_access_unit = nullptr;
         return EOF;
     }
 
@@ -1083,10 +1083,10 @@ give_up:
  *
  * EOF can be returned because the end of file has been reached, or because an
  * end of stream NAL unit has been encountered. The two may be distinguished
- * by looking at `context->end_of_stream`, which will be NULL if it was a true
+ * by looking at `context->end_of_stream`, which will be nullptr if it was a true
  * EOF.
  *
- * Note that `ret_access_unit` will be NULL if EOF is returned.
+ * Note that `ret_access_unit` will be nullptr if EOF is returned.
  */
 static int get_next_non_empty_access_unit(
     access_unit_context_p context, int quiet, int show_details, access_unit_p* access_unit)
@@ -1214,10 +1214,10 @@ static int get_next_field_of_pair(access_unit_context_p context, int quiet, int 
  *
  * EOF can be returned because the end of file has been reached, or because an
  * end of stream NAL unit has been encountered. The two may be distinguished
- * by looking at `context->end_of_stream`, which will be NULL if it was a true
+ * by looking at `context->end_of_stream`, which will be nullptr if it was a true
  * EOF.
  *
- * Note that `ret_access_unit` will be NULL if EOF is returned.
+ * Note that `ret_access_unit` will be nullptr if EOF is returned.
  */
 int get_next_h264_frame(
     access_unit_context_p context, int quiet, int show_details, access_unit_p* frame)
@@ -1225,7 +1225,7 @@ int get_next_h264_frame(
     int err;
     access_unit_p access_unit;
 
-    *frame = NULL;
+    *frame = nullptr;
 
     err = get_next_non_empty_access_unit(context, quiet, show_details, &access_unit);
     if (err)

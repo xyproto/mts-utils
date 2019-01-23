@@ -50,12 +50,12 @@ int init_pidint_list(pidint_list_p list)
     list->length = 0;
     list->size = PIDINT_LIST_START_SIZE;
     list->number = (int*)malloc(sizeof(int) * PIDINT_LIST_START_SIZE);
-    if (list->number == NULL) {
+    if (list->number == nullptr) {
         print_err("### Unable to allocate array in program list datastructure\n");
         return 1;
     }
     list->pid = (uint32_t*)malloc(sizeof(uint32_t) * PIDINT_LIST_START_SIZE);
-    if (list->pid == NULL) {
+    if (list->pid == nullptr) {
         free(list->number);
         print_err("### Unable to allocate array in program list datastructure\n");
         return 1;
@@ -71,7 +71,7 @@ int init_pidint_list(pidint_list_p list)
 int build_pidint_list(pidint_list_p* list)
 {
     pidint_list_p new2 = (pidint_list_p)malloc(SIZEOF_PIDINT_LIST);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate pid/int list datastructure\n");
         return 1;
     }
@@ -90,20 +90,20 @@ int build_pidint_list(pidint_list_p* list)
  */
 int append_to_pidint_list(pidint_list_p list, uint32_t pid, int program)
 {
-    if (list == NULL) {
-        print_err("### Unable to append to NULL pid/int list\n");
+    if (list == nullptr) {
+        print_err("### Unable to append to nullptr pid/int list\n");
         return 1;
     }
 
     if (list->length == list->size) {
         int newsize = list->size + PIDINT_LIST_INCREMENT;
         list->number = (int*)realloc(list->number, newsize * sizeof(int));
-        if (list->number == NULL) {
+        if (list->number == nullptr) {
             print_err("### Unable to extend pid/int list array\n");
             return 1;
         }
         list->pid = (uint32_t*)realloc(list->pid, newsize * sizeof(uint32_t));
-        if (list->pid == NULL) {
+        if (list->pid == nullptr) {
             print_err("### Unable to extend pid/int list array\n");
             return 1;
         }
@@ -124,8 +124,8 @@ int remove_from_pidint_list(pidint_list_p list, uint32_t pid)
 {
     int index;
     int ii;
-    if (list == NULL) {
-        print_err("### Unable to remove entry from NULL pid/int list\n");
+    if (list == nullptr) {
+        print_err("### Unable to remove entry from nullptr pid/int list\n");
         return 1;
     }
 
@@ -148,35 +148,36 @@ int remove_from_pidint_list(pidint_list_p list, uint32_t pid)
 /*
  * Tidy up and free a pid/int list datastructure after we've finished with it
  *
- * Clears the datastructure, frees it and returns `list` as NULL.
+ * Clears the datastructure, frees it and returns `list` as nullptr.
  *
- * Does nothing if `list` is already NULL.
+ * Does nothing if `list` is already nullptr.
  */
 void free_pidint_list(pidint_list_p* list)
 {
-    if (*list == NULL)
+    if (*list == nullptr)
         return;
-    if ((*list)->number != NULL) {
+    if ((*list)->number != nullptr) {
         free((*list)->number);
-        (*list)->number = NULL;
+        (*list)->number = nullptr;
     }
-    if ((*list)->pid != NULL) {
+    if ((*list)->pid != nullptr) {
         free((*list)->pid);
-        (*list)->pid = NULL;
+        (*list)->pid = nullptr;
     }
     (*list)->length = 0;
     (*list)->size = 0;
     free(*list);
-    *list = NULL;
+    *list = nullptr;
 }
 
 /*
  * Report on a pid/int list's contents
  */
-void report_pidint_list(pidint_list_p list, char* list_name, char* int_name, int pid_first)
+void report_pidint_list(
+    pidint_list_p list, const char* list_name, const char* int_name, int pid_first)
 {
-    if (list == NULL)
-        fprint_msg("%s is NULL\n", list_name);
+    if (list == nullptr)
+        fprint_msg("%s is nullptr\n", list_name);
     else if (list->length == 0)
         fprint_msg("%s is empty\n", list_name);
     else {
@@ -196,7 +197,7 @@ void report_pidint_list(pidint_list_p list, char* list_name, char* int_name, int
 /*
  * Lookup a PID to find its index in a pid/int list.
  *
- * Note that if `list` is NULL, then -1 will be returned - this is to
+ * Note that if `list` is nullptr, then -1 will be returned - this is to
  * allow the caller to make a query before they have read a list from the
  * bitstream.
  *
@@ -205,7 +206,7 @@ void report_pidint_list(pidint_list_p list, char* list_name, char* int_name, int
 int pid_index_in_pidint_list(pidint_list_p list, uint32_t pid)
 {
     int ii;
-    if (list == NULL)
+    if (list == nullptr)
         return -1;
     for (ii = 0; ii < list->length; ii++) {
         if (list->pid[ii] == pid)
@@ -222,7 +223,7 @@ int pid_index_in_pidint_list(pidint_list_p list, uint32_t pid)
 int pid_int_in_pidint_list(pidint_list_p list, uint32_t pid, int* number)
 {
     int ii;
-    if (list == NULL)
+    if (list == nullptr)
         return -1;
     for (ii = 0; ii < list->length; ii++) {
         if (list->pid[ii] == pid) {
@@ -236,7 +237,7 @@ int pid_int_in_pidint_list(pidint_list_p list, uint32_t pid, int* number)
 /*
  * Lookup a PID to see if it is in a pid/int list.
  *
- * Note that if `list` is NULL, then FALSE will be returned - this is to
+ * Note that if `list` is nullptr, then FALSE will be returned - this is to
  * allow the caller to make a query before they have read a list from the
  * bitstream.
  *
@@ -253,7 +254,7 @@ int pid_in_pidint_list(pidint_list_p list, uint32_t pid)
  * Note that:
  *
  *  - a list always compares as the same as itself
- *  - two NULL lists compare as the same
+ *  - two nullptr lists compare as the same
  *  - the *order* of PID/int pairs in the lists does not matter
  *
  * Returns TRUE if the two have the same content, FALSE otherwise.
@@ -263,7 +264,7 @@ int same_pidint_list(pidint_list_p list1, pidint_list_p list2)
     int ii;
     if (list1 == list2)
         return TRUE;
-    else if (list1 == NULL || list2 == NULL)
+    else if (list1 == nullptr || list2 == nullptr)
         return FALSE;
     else if (list1->length != list2->length)
         return FALSE;
@@ -282,21 +283,21 @@ int same_pidint_list(pidint_list_p list1, pidint_list_p list2)
  * Report on a program stream list (a specialisation of report_pidint_list).
  *
  * - `list` is the stream list to report on
- * - `prefix` is NULL or a string to put before each line printed
+ * - `prefix` is nullptr or a string to put before each line printed
  */
 void report_stream_list(pidint_list_p list, char* prefix)
 {
-    if (prefix != NULL)
+    if (prefix != nullptr)
         print_msg(prefix);
-    if (list == NULL)
-        print_msg("Program stream list is NULL\n");
+    if (list == nullptr)
+        print_msg("Program stream list is nullptr\n");
     else if (list->length == 0)
         print_msg("Program stream list is empty\n");
     else {
         int ii;
         print_msg("Program streams:\n");
         for (ii = 0; ii < list->length; ii++) {
-            if (prefix != NULL)
+            if (prefix != nullptr)
                 print_msg(prefix);
             fprint_msg("    PID %04x (%d) -> Stream type %3d (%s)\n", list->pid[ii], list->pid[ii],
                 list->number[ii], h222_stream_type_str(list->number[ii]));
@@ -315,7 +316,7 @@ static int init_pmt_streams(pmt_p pmt)
     pmt->num_streams = 0;
     pmt->streams_size = PMT_STREAMS_START_SIZE;
     pmt->streams = (pmt_stream_p)malloc(SIZEOF_PMT_STREAM * PMT_STREAMS_START_SIZE);
-    if (pmt->streams == NULL) {
+    if (pmt->streams == nullptr) {
         print_err("### Unable to allocate streams in PMT datastructure\n");
         return 1;
     }
@@ -332,7 +333,7 @@ static int init_pmt_streams(pmt_p pmt)
  * 0x1FFE, or 0x1FFF to indicate "unset". However, for convenience, the
  * value 0 will also be accepted, and converted to 0x1FFF.
  *
- * Returns (a pointer to) the new PMT datastructure, or NULL if some error
+ * Returns (a pointer to) the new PMT datastructure, or nullptr if some error
  * occurs.
  */
 pmt_p build_pmt(uint16_t program_number, byte version_number, uint32_t PCR_pid)
@@ -349,24 +350,24 @@ pmt_p build_pmt(uint16_t program_number, byte version_number, uint32_t PCR_pid)
         fprint_err("### Error building PMT datastructure\n"
                    "    PCR PID %04x is outside legal program stream range\n",
             PCR_pid);
-        return NULL;
+        return nullptr;
     }
 
     new2 = (pmt_p)malloc(SIZEOF_PMT);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate PMT datastructure\n");
-        return NULL;
+        return nullptr;
     }
 
     new2->program_number = program_number;
     new2->version_number = version_number;
     new2->PCR_pid = PCR_pid;
     new2->program_info_length = 0;
-    new2->program_info = NULL;
+    new2->program_info = nullptr;
 
     if (init_pmt_streams(new2)) {
         free(new2);
-        return NULL;
+        return nullptr;
     }
 
     return new2;
@@ -389,16 +390,16 @@ int set_pmt_program_info(pmt_p pmt, uint16_t program_info_length, byte* program_
             PMT_MAX_INFO_LENGTH);
         return 1;
     }
-    if (pmt->program_info == NULL) {
+    if (pmt->program_info == nullptr) {
         pmt->program_info = (byte*)malloc(program_info_length);
-        if (pmt->program_info == NULL) {
+        if (pmt->program_info == nullptr) {
             print_err("### Unable to allocate program info in PMT datastructure\n");
             return 1;
         }
     } else if (program_info_length != pmt->program_info_length) {
         // well, we might be shrinking it rather than growing it, but still
         pmt->program_info = (byte*)realloc(pmt->program_info, program_info_length);
-        if (pmt->program_info == NULL) {
+        if (pmt->program_info == nullptr) {
             print_err("### Unable to extend program info in PMT datastructure\n");
             return 1;
         }
@@ -418,8 +419,8 @@ int set_pmt_program_info(pmt_p pmt, uint16_t program_info_length, byte* program_
 int add_stream_to_pmt(
     pmt_p pmt, uint32_t elementary_PID, byte stream_type, uint16_t ES_info_length, byte* ES_info)
 {
-    if (pmt == NULL) {
-        print_err("### Unable to append to NULL PMT datastructure\n");
+    if (pmt == nullptr) {
+        print_err("### Unable to append to nullptr PMT datastructure\n");
         return 1;
     }
 
@@ -438,7 +439,7 @@ int add_stream_to_pmt(
     if (pmt->num_streams == pmt->streams_size) {
         int newsize = pmt->streams_size + PMT_STREAMS_INCREMENT;
         pmt->streams = (pmt_stream_p)realloc(pmt->streams, newsize * SIZEOF_PMT_STREAM);
-        if (pmt->streams == NULL) {
+        if (pmt->streams == nullptr) {
             print_err("### Unable to extend PMT streams array\n");
             return 1;
         }
@@ -449,13 +450,13 @@ int add_stream_to_pmt(
     pmt->streams[pmt->num_streams].ES_info_length = ES_info_length;
     if (ES_info_length > 0) {
         pmt->streams[pmt->num_streams].ES_info = (byte*)malloc(ES_info_length);
-        if (pmt->streams[pmt->num_streams].ES_info == NULL) {
+        if (pmt->streams[pmt->num_streams].ES_info == nullptr) {
             print_err("### Unable to allocate PMT stream ES info\n");
             return 1;
         }
         memcpy(pmt->streams[pmt->num_streams].ES_info, ES_info, ES_info_length);
     } else
-        pmt->streams[pmt->num_streams].ES_info = NULL;
+        pmt->streams[pmt->num_streams].ES_info = nullptr;
     pmt->num_streams++;
     return 0;
 }
@@ -465,11 +466,11 @@ int add_stream_to_pmt(
  */
 static void free_pmt_stream(pmt_stream_p stream)
 {
-    if (stream == NULL)
+    if (stream == nullptr)
         return;
-    if (stream->ES_info != NULL) {
+    if (stream->ES_info != nullptr) {
         free(stream->ES_info);
-        stream->ES_info = NULL;
+        stream->ES_info = nullptr;
     }
 }
 
@@ -482,8 +483,8 @@ int remove_stream_from_pmt(pmt_p pmt, uint32_t pid)
 {
     int index;
     int ii;
-    if (pmt == NULL) {
-        print_err("### Unable to remove entry from NULL PMT datastructure\n");
+    if (pmt == nullptr) {
+        print_err("### Unable to remove entry from nullptr PMT datastructure\n");
         return 1;
     }
 
@@ -506,13 +507,13 @@ int remove_stream_from_pmt(pmt_p pmt, uint32_t pid)
 /*
  * Tidy up and free a PMT datastructure after we've finished with it
  *
- * Clears the datastructure, frees it and returns `pmt` as NULL.
+ * Clears the datastructure, frees it and returns `pmt` as nullptr.
  *
- * Does nothing if `pmt` is already NULL.
+ * Does nothing if `pmt` is already nullptr.
  */
 void free_pmt(pmt_p* pmt)
 {
-    if (*pmt == NULL)
+    if (*pmt == nullptr)
         return;
     if ((*pmt)->num_streams > 0) {
         int ii;
@@ -520,27 +521,27 @@ void free_pmt(pmt_p* pmt)
             free_pmt_stream(&(*pmt)->streams[ii]);
         (*pmt)->num_streams = 0;
     }
-    if ((*pmt)->program_info != NULL) {
+    if ((*pmt)->program_info != nullptr) {
         free((*pmt)->program_info);
-        (*pmt)->program_info = NULL;
+        (*pmt)->program_info = nullptr;
     }
     free((*pmt)->streams);
     (*pmt)->program_info_length = 0;
     free(*pmt);
-    *pmt = NULL;
+    *pmt = nullptr;
 }
 
 /*
  * Lookup a PID to find its index in a PMT datastructure.
  *
- * Note that if `pmt` is NULL, then -1 will be returned.
+ * Note that if `pmt` is nullptr, then -1 will be returned.
  *
  * Returns its index (0 or more) if the PID is in the list, -1 if it is not.
  */
 int pid_index_in_pmt(pmt_p pmt, uint32_t pid)
 {
     int ii;
-    if (pmt == NULL)
+    if (pmt == nullptr)
         return -1;
     for (ii = 0; ii < pmt->num_streams; ii++) {
         if (pmt->streams[ii].elementary_PID == pid)
@@ -553,24 +554,24 @@ int pid_index_in_pmt(pmt_p pmt, uint32_t pid)
  * Lookup a PID to find the corresponding program stream information.
  *
  * Returns a pointer to the stream information if the PID is in the list,
- * NULL if it is not.
+ * nullptr if it is not.
  */
 pmt_stream_p pid_stream_in_pmt(pmt_p pmt, uint32_t pid)
 {
     int ii;
-    if (pmt == NULL)
-        return NULL;
+    if (pmt == nullptr)
+        return nullptr;
     for (ii = 0; ii < pmt->num_streams; ii++) {
         if (pmt->streams[ii].elementary_PID == pid)
             return &pmt->streams[ii];
     }
-    return NULL;
+    return nullptr;
 }
 
 /*
  * Lookup a PID to see if it is in a PMT datastructure.
  *
- * Note that if `pmt` is NULL, then FALSE will be returned.
+ * Note that if `pmt` is nullptr, then FALSE will be returned.
  *
  * Returns TRUE if the PID is in the PMT's stream list, FALSE if it is not.
  */
@@ -585,7 +586,7 @@ static int same_pmt_stream(pmt_stream_p str1, pmt_stream_p str2)
 {
     if (str1 == str2) // !!!
         return TRUE;
-    else if (str1 == NULL || str2 == NULL) // !!!
+    else if (str1 == nullptr || str2 == nullptr) // !!!
         return FALSE;
     else if (str1->elementary_PID != str2->elementary_PID)
         return FALSE;
@@ -603,7 +604,7 @@ static int same_pmt_stream(pmt_stream_p str1, pmt_stream_p str2)
  * Note that:
  *
  *  - a PMT datastructure always compares as the same as itself
- *  - two NULL datastructures compare as the same
+ *  - two nullptr datastructures compare as the same
  *  - a different version number means a different PMT
  *  - the *order* of program streams in the PMTs does not matter
  *  - descriptors must be identical as well, and byte order therein
@@ -616,7 +617,7 @@ int same_pmt(pmt_p pmt1, pmt_p pmt2)
     int ii;
     if (pmt1 == pmt2)
         return TRUE;
-    else if (pmt1 == NULL || pmt2 == NULL)
+    else if (pmt1 == nullptr || pmt2 == nullptr)
         return FALSE;
     else if (pmt1->PCR_pid != pmt2->PCR_pid)
         return FALSE;
@@ -644,22 +645,22 @@ int same_pmt(pmt_p pmt1, pmt_p pmt2)
  * Report on a PMT datastructure.
  *
  * - if `is_msg`, report as a message, otherwise as an error
- * - `prefix` is NULL or a string to put before each line printed
+ * - `prefix` is nullptr or a string to put before each line printed
  * - `pmt` is the PMT to report on
  */
 void report_pmt(int is_msg, char* prefix, pmt_p pmt)
 {
-    if (prefix != NULL)
+    if (prefix != nullptr)
         fprint_msg_or_err(is_msg, prefix);
-    if (pmt == NULL) {
-        fprint_msg_or_err(is_msg, "PMT is NULL\n");
+    if (pmt == nullptr) {
+        fprint_msg_or_err(is_msg, "PMT is nullptr\n");
         return;
     } else
         fprint_msg_or_err(is_msg, "Program %d, version %d, PCR PID %04x (%d)\n",
             pmt->program_number, pmt->version_number, pmt->PCR_pid, pmt->PCR_pid);
 
     if (pmt->program_info_length > 0) {
-        if (prefix != NULL)
+        if (prefix != nullptr)
             fprint_msg_or_err(is_msg, prefix);
         print_data(is_msg, "   Program info", pmt->program_info, pmt->program_info_length,
             pmt->program_info_length);
@@ -667,18 +668,18 @@ void report_pmt(int is_msg, char* prefix, pmt_p pmt)
     }
     if (pmt->num_streams > 0) {
         int ii;
-        if (prefix != NULL)
+        if (prefix != nullptr)
             fprint_msg_or_err(is_msg, prefix);
         fprint_msg_or_err(is_msg, "Program streams:\n");
         for (ii = 0; ii < pmt->num_streams; ii++) {
-            if (prefix != NULL)
+            if (prefix != nullptr)
                 fprint_msg_or_err(is_msg, prefix);
             fprint_msg_or_err(is_msg, "  PID %04x (%4d) -> Stream type %02x (%3d) %s\n",
                 pmt->streams[ii].elementary_PID, pmt->streams[ii].elementary_PID,
                 pmt->streams[ii].stream_type, pmt->streams[ii].stream_type,
                 h222_stream_type_str(pmt->streams[ii].stream_type));
             if (pmt->streams[ii].ES_info_length > 0) {
-                if (prefix != NULL)
+                if (prefix != nullptr)
                     fprint_msg_or_err(is_msg, prefix);
                 print_data(is_msg, "      ES info", pmt->streams[ii].ES_info,
                     pmt->streams[ii].ES_info_length, pmt->streams[ii].ES_info_length);

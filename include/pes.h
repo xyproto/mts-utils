@@ -85,12 +85,12 @@
 static int build_PES_packet_data(PES_packet_data_p* data)
 {
     PES_packet_data_p new2 = (PES_packet_data_p)malloc(SIZEOF_PES_PACKET_DATA);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate PES packet datastructure\n");
         return 1;
     }
 
-    new2->data = NULL;
+    new2->data = nullptr;
     new2->data_len = 0;
     new2->es_data_len = 0;
     new2->length = 0;
@@ -114,9 +114,9 @@ static int build_PES_packet_data(PES_packet_data_p* data)
  */
 static inline int extend_PES_packet_data(PES_packet_data_p data, byte bytes[], int bytes_len)
 {
-    if (data->data == NULL) {
+    if (data->data == nullptr) {
         data->data = (byte*)malloc(bytes_len);
-        if (data->data == NULL) {
+        if (data->data == nullptr) {
             print_err("### Unable to extend PES packet data array\n");
             return 1;
         }
@@ -124,7 +124,7 @@ static inline int extend_PES_packet_data(PES_packet_data_p data, byte bytes[], i
         data->data_len = bytes_len;
     } else {
         data->data = (byte*)realloc(data->data, data->data_len + bytes_len);
-        if (data->data == NULL) {
+        if (data->data == nullptr) {
             print_err("### Unable to extend PES packet data array\n");
             return 1;
         }
@@ -146,8 +146,8 @@ static inline int extend_PES_packet_data(PES_packet_data_p data, byte bytes[], i
 static inline int build_dummy_PES_packet_data(PES_packet_data_p* data, int data_len)
 {
     int err;
-    static PES_packet_data_p local_data = NULL;
-    if (local_data == NULL) {
+    static PES_packet_data_p local_data = nullptr;
+    if (local_data == nullptr) {
         err = build_PES_packet_data(&local_data);
         if (err) {
             print_err("### Error building dummy PES packet\n");
@@ -155,16 +155,16 @@ static inline int build_dummy_PES_packet_data(PES_packet_data_p* data, int data_
         }
         local_data->is_video = FALSE;
     }
-    if (local_data->data == NULL) {
+    if (local_data->data == nullptr) {
         local_data->data = (byte*)malloc(data_len);
-        if (local_data->data == NULL) {
+        if (local_data->data == nullptr) {
             print_err("### Unable to extend dummy PES packet data array\n");
             return 1;
         }
         memset(local_data->data, 0xFF, data_len);
     } else if (data_len > local_data->data_len) {
         local_data->data = (byte*)realloc(local_data->data, data_len);
-        if (local_data->data == NULL) {
+        if (local_data->data == nullptr) {
             print_err("### Unable to extend dummy PES packet data array\n");
             return 1;
         }
@@ -195,20 +195,20 @@ static inline int build_dummy_PES_packet_data(PES_packet_data_p* data, int data_
  * Free a PES packet datastructure
  *
  * - `data` is the PES packet datastructure, which will be freed,
- *   and returned as NULL.
+ *   and returned as nullptr.
  */
 void free_PES_packet_data(PES_packet_data_p* data)
 {
-    if ((*data) == NULL)
+    if ((*data) == nullptr)
         return;
-    if ((*data)->data != NULL) {
+    if ((*data)->data != nullptr) {
         free((*data)->data);
-        (*data)->data = NULL;
+        (*data)->data = nullptr;
     }
     (*data)->data_len = 0;
     (*data)->length = 0;
     free(*data);
-    *data = NULL;
+    *data = nullptr;
     return;
 }
 
@@ -225,19 +225,19 @@ static int init_peslist(peslist_p list)
     list->length = 0;
     list->size = PESLIST_START_SIZE;
     list->data = (PES_packet_data_p*)malloc(SIZEOF_PES_PACKET_DATA * PESLIST_START_SIZE);
-    if (list->data == NULL) {
+    if (list->data == nullptr) {
         print_err("### Unable to allocate PES array in PID/PES data array");
         return 1;
     }
     list->pid = (uint32_t*)malloc(sizeof(uint32_t) * PESLIST_START_SIZE);
-    if (list->pid == NULL) {
+    if (list->pid == nullptr) {
         free(list->data);
         print_err("### Unable to allocate PID array in PID/PES data array\n");
         return 1;
     }
     // Just in case...
     for (ii = 0; ii < list->size; ii++)
-        list->data[ii] = NULL;
+        list->data[ii] = nullptr;
     return 0;
 }
 
@@ -249,7 +249,7 @@ static int init_peslist(peslist_p list)
 static int build_peslist(peslist_p* list)
 {
     peslist_p new2 = (peslist_p)malloc(SIZEOF_PESLIST);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate PID/PES data array\n");
         return 1;
     }
@@ -264,45 +264,45 @@ static int build_peslist(peslist_p* list)
 /*
  * Tidy up and free a PID/PES data datastructure after we've finished with it
  *
- * Clears the datastructure, frees it and returns `list` as NULL.
+ * Clears the datastructure, frees it and returns `list` as nullptr.
  *
- * Does nothing if `list` is already NULL.
+ * Does nothing if `list` is already nullptr.
  */
 static void free_peslist(peslist_p* peslist)
 {
     peslist_p list = *peslist;
-    if (list == NULL)
+    if (list == nullptr)
         return;
-    if (list->data != NULL) {
+    if (list->data != nullptr) {
         int ii;
         for (ii = 0; ii < list->length; ii++) {
-            if (list->data[ii] != NULL)
+            if (list->data[ii] != nullptr)
                 free_PES_packet_data(&list->data[ii]);
         }
         free(list->data);
-        list->data = NULL;
+        list->data = nullptr;
     }
-    if (list->pid != NULL) {
+    if (list->pid != nullptr) {
         free(list->pid);
-        list->pid = NULL;
+        list->pid = nullptr;
     }
     list->length = 0;
     list->size = 0;
     free(list);
-    *peslist = NULL;
+    *peslist = nullptr;
 }
 
 /*
  * Lookup a PID to find its index in a PID/PES data array.
  *
- * Note that if `list` is NULL, then -1 will be returned.
+ * Note that if `list` is nullptr, then -1 will be returned.
  *
  * Returns its index (0 or more) if the PID is in the list, -1 if it is not.
  */
 static inline int pid_index_in_peslist(peslist_p list, uint32_t pid)
 {
     int ii;
-    if (list == NULL)
+    if (list == nullptr)
         return -1;
     for (ii = 0; ii < list->length; ii++) {
         if (list->pid[ii] == pid)
@@ -314,7 +314,7 @@ static inline int pid_index_in_peslist(peslist_p list, uint32_t pid)
 /*
  * Lookup a PID to see if it is in a PID/PES data array.
  *
- * Note that if `list` is NULL, then FALSE will be returned.
+ * Note that if `list` is nullptr, then FALSE will be returned.
  *
  * Returns TRUE if the PID is in the list, FALSE if it is not.
  */
@@ -338,8 +338,8 @@ static int start_packet_in_peslist(
     int ii;
     peslist_p list = reader->packets;
 
-    if (list == NULL) {
-        print_err("### Unable to append to NULL PID/PES data array\n");
+    if (list == nullptr) {
+        print_err("### Unable to append to nullptr PID/PES data array\n");
         return 1;
     }
 
@@ -354,7 +354,7 @@ static int start_packet_in_peslist(
     for (ii = 0; ii < list->length; ii++) {
         if (list->pid[ii] == pid) {
             // There is already an entry for this PID - does it have data?
-            if (list->data[ii] != NULL) {
+            if (list->data[ii] != nullptr) {
                 PES_packet_data_p packet = list->data[ii];
                 if (reader->give_warning)
                     fprint_err("!!! PID %04x (%d) already has an unfinished PES packet"
@@ -373,13 +373,13 @@ static int start_packet_in_peslist(
     if (list->length == list->size) {
         int newsize = list->size + PESLIST_INCREMENT;
         list->data = (PES_packet_data_p*)realloc(list->data, newsize * SIZEOF_PES_PACKET_DATA);
-        if (list->data == NULL) {
+        if (list->data == nullptr) {
             print_err("### Unable to extend PID/PES data array\n");
             free_PES_packet_data(data);
             return 1;
         }
         list->pid = (uint32_t*)realloc(list->pid, newsize * sizeof(uint32_t));
-        if (list->pid == NULL) {
+        if (list->pid == nullptr) {
             print_err("### Unable to extend PID/PES data array\n");
             free_PES_packet_data(data);
             return 1;
@@ -395,7 +395,7 @@ static int start_packet_in_peslist(
 /*
  * Find the PES packet for a PID.
  *
- * NB: returns `data` as NULL if the data for the PID *is* NULL.
+ * NB: returns `data` as nullptr if the data for the PID *is* nullptr.
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
@@ -411,7 +411,7 @@ static inline int find_packet_in_peslist(peslist_p list, uint32_t pid, PES_packe
 /*
  * Clear the PES packet for a PID.
  *
- * Leaves the entry in the PID/PES array (with NULL data pointer) around for
+ * Leaves the entry in the PID/PES array (with nullptr data pointer) around for
  * reuse.
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
@@ -420,8 +420,8 @@ static int clear_packet_in_peslist(peslist_p list, uint32_t pid)
 {
     int index;
 
-    if (list == NULL) {
-        print_msg("Unable to clear PES packet in NULL PID/PES data array\n");
+    if (list == nullptr) {
+        print_msg("Unable to clear PES packet in nullptr PID/PES data array\n");
         return 1;
     }
 
@@ -432,7 +432,7 @@ static int clear_packet_in_peslist(peslist_p list, uint32_t pid)
             pid, pid);
         return 1;
     }
-    list->data[index] = NULL;
+    list->data[index] = nullptr;
     return 0;
 }
 
@@ -443,7 +443,7 @@ static int clear_packet_in_peslist(peslist_p list, uint32_t pid)
  * Return the next PES packet from the input PS file
  *
  * - `reader` is a PES reader context
- * - `packet_data` is the packet data (NULL if EOF is read)
+ * - `packet_data` is the packet data (nullptr if EOF is read)
  *
  * Returns 0 if all goes well, EOF if end of file is read, and 1 if
  * something goes wrong.
@@ -463,7 +463,7 @@ static int read_next_PES_packet_from_PS(PES_reader_p reader, PES_packet_data_p* 
 
         err = read_PS_packet_start(reader->psreader, FALSE, &reader->posn, &stream_id);
         if (err == EOF) {
-            *packet_data = NULL;
+            *packet_data = nullptr;
             return EOF;
         } else if (err)
             return 1;
@@ -475,7 +475,7 @@ static int read_next_PES_packet_from_PS(PES_reader_p reader, PES_packet_data_p* 
                 fprint_err("!!! Unexpected EOF - partial PS packet at " OFFSET_T_FORMAT
                            " ignored\n",
                     reader->posn);
-                *packet_data = NULL;
+                *packet_data = nullptr;
                 return EOF;
             } else if (err) {
                 fprint_err("### Error reading data for pack header starting at " OFFSET_T_FORMAT
@@ -490,7 +490,7 @@ static int read_next_PES_packet_from_PS(PES_reader_p reader, PES_packet_data_p* 
         if (err == EOF) {
             fprint_err("!!! Unexpected EOF - partial PS packet at " OFFSET_T_FORMAT " ignored\n",
                 reader->posn);
-            *packet_data = NULL;
+            *packet_data = nullptr;
             return EOF;
         } else if (err) {
             fprint_err(
@@ -553,7 +553,7 @@ static int read_next_PES_packet_from_PS(PES_reader_p reader, PES_packet_data_p* 
             (*packet_data)->posn = reader->posn;
             (*packet_data)->is_video = is_video;
             // So the data array is no longer "present" in the orignal "packet"
-            packet.data = NULL;
+            packet.data = nullptr;
             packet.data_len = 0;
             break;
         }
@@ -580,7 +580,7 @@ static void decide_pids(PES_reader_p reader)
     int had_video = FALSE;
     int had_audio = FALSE;
 
-    if (pmt == NULL)
+    if (pmt == nullptr)
         return;
 
     // Since we're not expecting our datastructure to be very big,
@@ -688,7 +688,7 @@ static void decide_pids(PES_reader_p reader)
 static int refine_TS_program_info(PES_reader_p reader, pmt_p pmt)
 {
     // If this is the *first* PMT, then just adopt its data wholesale
-    if (reader->program_map == NULL) {
+    if (reader->program_map == nullptr) {
         reader->program_map = pmt;
         reader->pcr_pid = pmt->PCR_pid;
 #if DEBUG_PROGRAM_INFO
@@ -761,7 +761,7 @@ static int extract_and_refine_TS_program_info(
     PES_reader_p reader, uint32_t pmt_pid, byte pmt_data[], int pmt_data_len)
 {
     int err;
-    pmt_p pmt = NULL;
+    pmt_p pmt = nullptr;
 
     err = extract_pmt(FALSE, pmt_data, pmt_data_len, pmt_pid, &pmt);
     if (err) {
@@ -808,7 +808,7 @@ static int find_first_PAT(PES_reader_p reader)
 {
     int err;
     int num_read;
-    pidint_list_p prog_list = NULL;
+    pidint_list_p prog_list = nullptr;
 
     err = find_pat(reader->tsreader, 0, FALSE, !reader->give_info, &num_read, &prog_list);
     if (err) {
@@ -860,7 +860,7 @@ static int find_first_PMT(PES_reader_p reader)
 {
     int err;
     int nread = 0;
-    pmt_p pmt = NULL;
+    pmt_p pmt = nullptr;
 
     for (;;) {
         err = find_next_pmt(
@@ -955,7 +955,7 @@ static int determine_TS_program_info(PES_reader_p reader)
  * - `payload` is the TS packets payload
  * - `payload_len` is the length of said payload
  * - if the PES packet is finished (i.e., all of it has been read in)
- *   then `finished` will be its data, otherwise `finished` will be NULL.
+ *   then `finished` will be its data, otherwise `finished` will be nullptr.
  *
  * Returns 0 if all went well, 1 if something went wrong
  */
@@ -964,7 +964,7 @@ static int start_new_PES_packet(PES_reader_p reader, uint32_t pid, byte payload[
 {
     int err;
     int index;
-    PES_packet_data_p just_ended = NULL;
+    PES_packet_data_p just_ended = nullptr;
     PES_packet_data_p data;
 
     // fprint_msg("%c",(pid==reader->video_pid?'V':'A'));fflush(stdout);
@@ -999,13 +999,13 @@ static int start_new_PES_packet(PES_reader_p reader, uint32_t pid, byte payload[
     // end when we start the next PES packet for that same PID (or when we
     // reach EOF).
     index = pid_index_in_peslist(reader->packets, pid);
-    if (index != -1 && reader->packets->data[index] != NULL
+    if (index != -1 && reader->packets->data[index] != nullptr
         && reader->packets->data[index]->length == 0) {
 #if DEBUG_PES_ASSEMBLY
         print_msg("@@@ just ended previous packet (by implication)\n");
 #endif
         just_ended = reader->packets->data[index];
-        reader->packets->data[index] = NULL;
+        reader->packets->data[index] = nullptr;
     }
 
     // Anyway, start a new PES packet for this TS packet's data
@@ -1075,12 +1075,12 @@ static int start_new_PES_packet(PES_reader_p reader, uint32_t pid, byte payload[
         if (err)
             return 1;
     } else
-        *finished = NULL;
+        *finished = nullptr;
 
     // And if we had a packet ended by this packet starting, defer this
     // result until later...
     if (just_ended) {
-        reader->deferred = *finished; // which might *not* be NULL
+        reader->deferred = *finished; // which might *not* be nullptr
         *finished = just_ended;
     }
 
@@ -1096,7 +1096,7 @@ static int start_new_PES_packet(PES_reader_p reader, uint32_t pid, byte payload[
  * - `payload` is the TS packets payload
  * - `payload_len` is the length of said payload
  * - if the PES packet is finished (i.e., all of it has been read in)
- *   then `finished` will be its data, otherwise `finished` will be NULL.
+ *   then `finished` will be its data, otherwise `finished` will be nullptr.
  *
  * Returns 0 if all went well, 1 if something went wrong
  */
@@ -1111,12 +1111,12 @@ static int continue_PES_packet(PES_reader_p reader, uint32_t pid, byte payload[]
 #endif
 
     err = find_packet_in_peslist(reader->packets, pid, &data);
-    if (err || data == NULL) {
+    if (err || data == nullptr) {
         if (reader->give_warning)
             fprint_err("!!! TS packet with PID %04x at " OFFSET_T_FORMAT
                        " continues an unstarted PES packet  - ignoring it\n",
                 pid, reader->posn);
-        *finished = NULL;
+        *finished = nullptr;
         return 0;
     }
 
@@ -1161,7 +1161,7 @@ static int continue_PES_packet(PES_reader_p reader, uint32_t pid, byte payload[]
         if (err)
             return 1;
     } else
-        *finished = NULL;
+        *finished = nullptr;
 
     return 0;
 }
@@ -1170,7 +1170,7 @@ static int continue_PES_packet(PES_reader_p reader, uint32_t pid, byte payload[]
  * Check for a PES packet legitimately ended by EOF
  *
  * - `reader` is a PES reader context
- * - `packet_data` is either NULL (meaning no more packets to return),
+ * - `packet_data` is either nullptr (meaning no more packets to return),
  *   or a PES packet whose length was specified as 0, meaning that it
  *   would be ended by the next PES packet with the same PID, or by EOF.
  *
@@ -1184,13 +1184,13 @@ static void check_for_EOF_packet(PES_reader_p reader, PES_packet_data_p* packet_
     int ii;
     // Not trying to be very efficient - shouldn't matter
     for (ii = 0; ii < reader->packets->length; ii++) {
-        if (reader->packets->data[ii] != NULL && reader->packets->data[ii]->length == 0) {
+        if (reader->packets->data[ii] != nullptr && reader->packets->data[ii]->length == 0) {
             *packet_data = reader->packets->data[ii];
-            reader->packets->data[ii] = NULL;
+            reader->packets->data[ii] = nullptr;
             return;
         }
     }
-    *packet_data = NULL;
+    *packet_data = nullptr;
     return;
 }
 
@@ -1198,7 +1198,7 @@ static void check_for_EOF_packet(PES_reader_p reader, PES_packet_data_p* packet_
  * Return the next PES packet from the input TS file
  *
  * - `reader` is a PES reader context
- * - `packet_data` is the packet data (NULL if EOF is read)
+ * - `packet_data` is the packet data (nullptr if EOF is read)
  *
  * Returns 0 if all goes well, EOF if end of file is read, and 1 if
  * something goes wrong.
@@ -1212,7 +1212,7 @@ static int read_next_PES_packet_from_TS(PES_reader_p reader, PES_packet_data_p* 
             free_PES_packet_data(&reader->deferred);
         } else {
             *packet_data = reader->deferred;
-            reader->deferred = NULL;
+            reader->deferred = nullptr;
 #if DEBUG_PES_ASSEMBLY
             print_msg("@@@ returning deferred PES packet\n");
 #endif
@@ -1223,7 +1223,7 @@ static int read_next_PES_packet_from_TS(PES_reader_p reader, PES_packet_data_p* 
     // If we had read EOF earlier (but not said so because of a PES
     // packet being finished by EOF), then admit to it now
     if (reader->had_eof) {
-        *packet_data = NULL;
+        *packet_data = nullptr;
         return EOF;
     }
 
@@ -1253,7 +1253,7 @@ static int read_next_PES_packet_from_TS(PES_reader_p reader, PES_packet_data_p* 
             // So, just in case, we'll check for an unbounded (length marked as
             // zero) video stream PES packet
             check_for_EOF_packet(reader, packet_data);
-            if (*packet_data == NULL)
+            if (*packet_data == nullptr)
                 return EOF;
             else
                 return 0;
@@ -1275,7 +1275,7 @@ static int read_next_PES_packet_from_TS(PES_reader_p reader, PES_packet_data_p* 
 
         // If we're writing out TS packets directly to a client, then this
         // is probably a sensible place to do it.
-        if (reader->write_TS_packets && reader->tswriter != NULL && !reader->suppress_writing) {
+        if (reader->write_TS_packets && reader->tswriter != nullptr && !reader->suppress_writing) {
             err = tswrite_write(reader->tswriter, ts_packet, pid, FALSE, 0);
             if (err) {
                 fprint_err("### Error writing TS packet (PID %04x) at " OFFSET_T_FORMAT "\n", pid,
@@ -1303,7 +1303,7 @@ static int read_next_PES_packet_from_TS(PES_reader_p reader, PES_packet_data_p* 
                            "\n",
                     reader->posn);
                 free(reader->pmt_data);
-                reader->pmt_data = NULL;
+                reader->pmt_data = nullptr;
                 reader->pmt_data_len = reader->pmt_data_used = 0;
             } else if (!payload_unit_start_indicator && !reader->pmt_data) {
                 // This is the continuation of a PMT packet, but we hadn't
@@ -1340,7 +1340,7 @@ static int read_next_PES_packet_from_TS(PES_reader_p reader, PES_packet_data_p* 
             }
 
             free(reader->pmt_data);
-            reader->pmt_data = NULL;
+            reader->pmt_data = nullptr;
             reader->pmt_data_len = reader->pmt_data_used = 0;
 
             if (reader->write_PES_packets && !reader->suppress_writing) {
@@ -1502,27 +1502,27 @@ static int build_PES_reader_datastructure(int give_info, int give_warnings, PES_
 {
     int err;
     PES_reader_p new2 = (PES_reader_p)malloc(SIZEOF_PES_READER);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate PES reader datastructure\n");
         return 1;
     }
 
-    new2->tsreader = NULL; // for the moment, at least
-    new2->psreader = NULL; // for the moment, at least
+    new2->tsreader = nullptr; // for the moment, at least
+    new2->psreader = nullptr; // for the moment, at least
     new2->is_TS = FALSE; // for want of better
     new2->give_info = give_info;
     new2->give_warning = give_warnings;
     new2->posn = 0;
     new2->is_h264 = FALSE;
     new2->video_type = VIDEO_UNKNOWN;
-    new2->packet = NULL;
+    new2->packet = nullptr;
 
     new2->program_number = 0;
-    new2->program_map = NULL;
+    new2->program_map = nullptr;
     new2->video_only = FALSE;
     new2->audio_stream_id = 0;
 
-    new2->pmt_data = NULL;
+    new2->pmt_data = nullptr;
     new2->pmt_data_len = 0;
     new2->pmt_data_used = 0;
 
@@ -1538,7 +1538,7 @@ static int build_PES_reader_datastructure(int give_info, int give_warnings, PES_
     new2->output_dolby_stream_type = new2->dolby_stream_type = DVB_DOLBY_AUDIO_STREAM_TYPE;
     new2->override_dolby_stream_type = FALSE;
 
-    new2->tswriter = NULL;
+    new2->tswriter = nullptr;
     new2->write_PES_packets = FALSE;
     new2->write_TS_packets = FALSE;
     new2->suppress_writing = TRUE;
@@ -1554,7 +1554,7 @@ static int build_PES_reader_datastructure(int give_info, int give_warnings, PES_
         return 1;
     }
 
-    new2->deferred = NULL;
+    new2->deferred = nullptr;
     new2->had_eof = FALSE;
     *reader = new2;
     return 0;
@@ -2004,7 +2004,7 @@ int set_PES_reader_position(PES_reader_p reader, offset_t posn)
  * the underlying file.
  *
  * - `reader` is the PES reader context. This will be freed, and
- *   returned as NULL.
+ *   returned as nullptr.
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
@@ -2012,25 +2012,25 @@ int free_PES_reader(PES_reader_p* reader)
 {
     int err = 0;
 
-    if ((*reader) == NULL)
+    if ((*reader) == nullptr)
         return 0;
-    if ((*reader)->packet != NULL)
+    if ((*reader)->packet != nullptr)
         free_PES_packet_data(&(*reader)->packet);
 
     // Forget any file
-    (*reader)->tsreader = NULL;
-    (*reader)->psreader = NULL;
+    (*reader)->tsreader = nullptr;
+    (*reader)->psreader = nullptr;
 
-    if ((*reader)->program_map != NULL) {
+    if ((*reader)->program_map != nullptr) {
         free_pmt(&(*reader)->program_map);
     }
-    if ((*reader)->pmt_data != NULL) {
+    if ((*reader)->pmt_data != nullptr) {
         free((*reader)->pmt_data);
-        (*reader)->pmt_data = NULL;
+        (*reader)->pmt_data = nullptr;
         (*reader)->pmt_data_len = 0;
         (*reader)->pmt_data_used = 0;
     }
-    if ((*reader)->packets != NULL) {
+    if ((*reader)->packets != nullptr) {
         free_peslist(&(*reader)->packets);
     }
     if ((*reader)->is_TS)
@@ -2038,7 +2038,7 @@ int free_PES_reader(PES_reader_p* reader)
     else
         free_PS_reader(&(*reader)->psreader);
     free(*reader);
-    *reader = NULL;
+    *reader = nullptr;
     return err;
 }
 
@@ -2046,7 +2046,7 @@ int free_PES_reader(PES_reader_p* reader)
  * Close a PES reader, and free the relevant datastructures.
  *
  * - `reader` is the PES reader context. This will be freed, and
- *   returned as NULL.
+ *   returned as nullptr.
  *
  * Returns 0 if all goes well, 1 if something goes wrong with closing the
  * file (although in that case, the `reader` will still have been freed).
@@ -2056,17 +2056,17 @@ int close_PES_reader(PES_reader_p* reader)
     int err = 0;
     int err2;
 
-    if ((*reader) == NULL)
+    if ((*reader) == nullptr)
         return 0;
 
     if ((*reader)->is_TS) {
-        if ((*reader)->tsreader != NULL) {
+        if ((*reader)->tsreader != nullptr) {
             err = close_TS_reader(&(*reader)->tsreader);
             if (err)
                 print_err("### Error closing TS reader\n");
         }
     } else {
-        if ((*reader)->psreader != NULL) {
+        if ((*reader)->psreader != nullptr) {
             err = close_PS_file(&(*reader)->psreader);
             if (err)
                 print_err("### Error closing PS reader\n");
@@ -2092,8 +2092,8 @@ int read_next_PES_packet(PES_reader_p reader)
 {
     int err;
 
-    if (reader->packet != NULL) {
-        if (reader->write_PES_packets && reader->tswriter != NULL && !reader->suppress_writing
+    if (reader->packet != nullptr) {
+        if (reader->write_PES_packets && reader->tswriter != nullptr && !reader->suppress_writing
             && !reader->dont_write_current_packet) {
             // Aha - we need to output the previous PES packet
             uint32_t pid;
@@ -2231,7 +2231,7 @@ static inline void setup_PES_as_ES(PES_packet_data_p packet)
     int offset;
 
     if (!packet->is_video) {
-        packet->es_data = packet->data + 6; // Perhaps safer than using NULL
+        packet->es_data = packet->data + 6; // Perhaps safer than using nullptr
         packet->es_data_len = 0;
         return;
     }
@@ -2247,12 +2247,12 @@ static inline void setup_PES_as_ES(PES_packet_data_p packet)
     case STREAM_ID_DSMCC_STREAM:
     case STREAM_ID_H222_E_STREAM:
         // There is data, but it's not ES data
-        packet->es_data = packet->data + 6; // Perhaps safer than using NULL
+        packet->es_data = packet->data + 6; // Perhaps safer than using nullptr
         packet->es_data_len = 0;
         return;
     case STREAM_ID_PADDING_STREAM:
         // There's no data, it's just padding bytes
-        packet->es_data = packet->data + 6; // Perhaps safer than using NULL
+        packet->es_data = packet->data + 6; // Perhaps safer than using nullptr
         packet->es_data_len = 0;
         return;
     default:
@@ -2760,15 +2760,15 @@ void report_PES_data_array2(int stream_type, byte* payload, int payload_len, int
     int with_dts = FALSE;
     uint64_t pts, dts;
     int PES_packet_length;
-    byte* data = NULL;
+    byte* data = nullptr;
     int data_len = 0;
     byte stream_id;
 
     if (payload_len == 0) {
         print_msg("  Payload has length 0\n");
         return;
-    } else if (payload == NULL) {
-        fprint_msg("  Payload is NULL, but should be length %d\n", payload_len);
+    } else if (payload == nullptr) {
+        fprint_msg("  Payload is nullptr, but should be length %d\n", payload_len);
         return;
     }
 
@@ -3327,11 +3327,11 @@ void set_server_output(PES_reader_p reader, TS_writer_p tswriter, int write_PES,
  * If set_server_output() has not been called to define a TS writer
  * context, this will have no effect.
  *
- * If `reader` is NULL, nothing is done.
+ * If `reader` is nullptr, nothing is done.
  */
 void start_server_output(PES_reader_p reader)
 {
-    if (reader != NULL)
+    if (reader != nullptr)
         reader->suppress_writing = FALSE;
     return;
 }
@@ -3341,11 +3341,11 @@ void start_server_output(PES_reader_p reader)
  *
  * If packets were already not being written out, this does nothing.
  *
- * If `reader` is NULL, nothing is done.
+ * If `reader` is nullptr, nothing is done.
  */
 void stop_server_output(PES_reader_p reader)
 {
-    if (reader != NULL)
+    if (reader != nullptr)
         reader->suppress_writing = TRUE;
     return;
 }
@@ -3405,7 +3405,7 @@ int write_program_data(PES_reader_p reader, TS_writer_p output)
         // For TS, we can use the stream types from the PMT itself
         if (reader->video_pid != 0) {
             pmt_stream_p stream = pid_stream_in_pmt(reader->program_map, reader->video_pid);
-            if (stream == NULL) {
+            if (stream == nullptr) {
                 fprint_err("### Cannot find video PID %04x in program map\n", reader->video_pid);
                 return 1;
             }
@@ -3415,7 +3415,7 @@ int write_program_data(PES_reader_p reader, TS_writer_p output)
         }
         if (reader->audio_pid != 0) {
             pmt_stream_p stream = pid_stream_in_pmt(reader->program_map, reader->audio_pid);
-            if (stream == NULL) {
+            if (stream == nullptr) {
                 fprint_err("### Cannot find audio PID %04x in program map\n", reader->audio_pid);
                 return 1;
             }

@@ -344,10 +344,10 @@ int map_circular_buffer(circular_buffer_p* circular, int circ_buf_size, int TS_i
     int total_size = base_size + data_size;
     circular_buffer_p cb;
 
-    *circular = NULL;
+    *circular = nullptr;
 
     cb = (circular_buffer_p)mmap(
-        NULL, total_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, -1, 0);
+        nullptr, total_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, -1, 0);
 
     if (cb == MAP_FAILED) {
         fprint_err("### Error mapping circular buffer as shared memory: %s\n", strerror(errno));
@@ -365,7 +365,7 @@ int map_circular_buffer(circular_buffer_p* circular, int circ_buf_size, int TS_i
     cb->hdr_type = hdr_type;
     if (hdr_type == PKT_HDR_TYPE_RTP) {
         struct timeval now;
-        gettimeofday(&now, NULL);
+        gettimeofday(&now, nullptr);
 
         cb->hdr.rtp.seq = 0;
         cb->hdr.rtp.ssrc = (uint32_t)(now.tv_sec ^ now.tv_usec << 12); // A somewhat random number
@@ -440,7 +440,7 @@ inline int wait_if_buffer_empty(circular_buffer_p circular)
             print_msg("<-- wait\n");
         count++;
 
-        err = nanosleep(&time, NULL);
+        err = nanosleep(&time, nullptr);
         if (err == -1 && errno == EINVAL) {
             fprint_err("### Child: bad value (%ld) for wait time\n", time.tv_nsec);
             return 1;
@@ -476,7 +476,7 @@ inline int wait_for_buffer_to_fill(circular_buffer_p circular)
             print_msg("<-- wait for buffer to fill\n");
         count++;
 
-        err = nanosleep(&time, NULL);
+        err = nanosleep(&time, nullptr);
         if (err == -1 && errno == EINVAL) {
             fprint_err("### Child: bad value (%ld) for wait time\n", time.tv_nsec);
             return 1;
@@ -512,7 +512,7 @@ inline int wait_if_buffer_full(circular_buffer_p circular)
             print_msg("--> wait\n");
         count++;
 
-        err = nanosleep(&time, NULL);
+        err = nanosleep(&time, nullptr);
         if (err == -1 && errno == EINVAL) {
             fprint_err("### Parent: bad value (%ld) for wait time\n", time.tv_nsec);
             return 1;
@@ -540,7 +540,7 @@ inline int wait_if_buffer_full(circular_buffer_p circular)
 void print_circular_buffer(char* prefix, circular_buffer_p circular)
 {
     int ii;
-    if (prefix != NULL)
+    if (prefix != nullptr)
         fprint_msg("%s ", prefix);
     for (ii = 0; ii < circular->size; ii++) {
         byte* offset = circular->item_data + (ii * circular->item_size);
@@ -595,7 +595,7 @@ int build_buffered_TS_output(buffered_TS_output_p* writer, int circ_buf_size, in
     int err, ii;
     circular_buffer_p circular;
     buffered_TS_output_p new2 = (buffered_TS_output_p)calloc(1, SIZEOF_BUFFERED_TS_OUTPUT);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate buffered output\n");
         return 1;
     }
@@ -636,25 +636,25 @@ int build_buffered_TS_output(buffered_TS_output_p* writer, int circ_buf_size, in
 /*
  * Free a buffered output context
  *
- * `writer` is cleared and freed, and returned as NULL. The internal
+ * `writer` is cleared and freed, and returned as nullptr. The internal
  * circular buffer is unmapped.
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
 int free_buffered_TS_output(buffered_TS_output_p* writer)
 {
-    if ((*writer)->buffer != NULL) {
+    if ((*writer)->buffer != nullptr) {
         int err = unmap_circular_buffer((*writer)->buffer);
         if (err) {
             print_err("### Error freeing buffered output\n");
             return 1;
         }
     }
-    (*writer)->buffer = NULL;
+    (*writer)->buffer = nullptr;
     (*writer)->started = FALSE;
 
     free(*writer);
-    *writer = NULL;
+    *writer = nullptr;
     return 0;
 }
 
@@ -892,7 +892,7 @@ int set_circ_times(const circular_buffer_p circ, const uint32_t index_start,
     } while (offset <= end_offset);
 
     // Predict PCR at the end of this packet if wanted
-    if (pNew_pcr_base != NULL) {
+    if (pNew_pcr_base != nullptr) {
         *pNew_pcr_base = (int64_t)pcr1 + (int64_t)offset * (int64_t)pcr_gap / (int64_t)gap_bytes;
     }
 
@@ -1618,7 +1618,7 @@ int write_tcp_data(TS_writer_p tswriter, byte data[], int data_len)
             if (data_len > 0)
                 FD_SET(tswriter->where.socket, &write_fds);
 
-            result = select(num_to_check, &read_fds, &write_fds, NULL, NULL);
+            result = select(num_to_check, &read_fds, &write_fds, nullptr, nullptr);
             if (result == -1) {
                 fprint_err("### Error in select: %s\n", strerror(errno));
                 return 1;
@@ -1683,7 +1683,7 @@ int wait_for_command(TS_writer_p tswriter)
         while (!tswriter->command_changed) {
             int result;
             FD_SET(tswriter->command_socket, &read_fds);
-            result = select(num_to_check, &read_fds, NULL, NULL, NULL);
+            result = select(num_to_check, &read_fds, nullptr, nullptr, nullptr);
             if (result == -1) {
                 fprint_err("### Error in select: %s\n", strerror(errno));
                 return 1;
@@ -1915,7 +1915,7 @@ int write_from_circular(SOCKET output, circular_buffer_p circular, int quiet, in
     packet_time_gap = this_packet_time - last_packet_time;
 
     // Work out the actual position on our own timeline
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
     // We're *actually* at this distance along our time line
     our_time_now = (now.tv_sec - start.tv_sec) * 1000000 + (now.tv_usec - start.tv_usec);
 
@@ -2120,14 +2120,14 @@ int wait_for_child_to_exit(TS_writer_p tswriter, int quiet)
  */
 int tswrite_build(TS_WRITER_TYPE how, int quiet, TS_writer_p* tswriter)
 {
-    TS_writer_p new2 = NULL;
+    TS_writer_p new2 = nullptr;
     new2 = (TS_writer_p)malloc(SIZEOF_TS_WRITER);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate space for TS_writer datastructure\n");
         return 1;
     }
     new2->how = how;
-    new2->writer = NULL;
+    new2->writer = nullptr;
     new2->child = 0;
     new2->count = 0;
     new2->quiet = quiet;
@@ -2149,7 +2149,7 @@ int tswrite_build(TS_WRITER_TYPE how, int quiet, TS_writer_p* tswriter)
  *   (this is ignored if `how` is TS_W_STDOUT)
  * - if `how` is TS_W_UDP, and `name` is a multicast address,
  *   then `multicast_if` is the IP address of the network
- *   address to use, or NULL if the default interface should
+ *   address to use, or nullptr if the default interface should
  *   be used. If `how` is not TS_W_UDP, `multicast_if` is ignored.
  * - if it is a socket (i.e., if `how` is TS_W_TCP or TS_W_UDP),
  *   then `port` is the port to use, otherwise this is ignored
@@ -2195,7 +2195,7 @@ int tswrite_open(
         if (!quiet)
             fprint_msg("Writing to file %s\n", name);
         new2->where.file = fopen(name, "wb");
-        if (new2->where.file == NULL) {
+        if (new2->where.file == nullptr) {
             fprint_err("### Unable to open output file %s: %s\n", name, strerror(errno));
             return 1;
         }
@@ -2203,7 +2203,7 @@ int tswrite_open(
     case TS_W_TCP:
         if (!quiet)
             fprint_msg("Connecting to %s via TCP/IP on port %d\n", name, port);
-        new2->where.socket = connect_socket(name, port, TRUE, NULL);
+        new2->where.socket = connect_socket(name, port, TRUE, nullptr);
         if (new2->where.socket == -1) {
             fprint_err("### Unable to connect to %s\n", name);
             return 1;
@@ -2260,7 +2260,7 @@ int tswrite_open(
  */
 int tswrite_open_connection(int use_tcp, char* name, int port, int quiet, TS_writer_p* tswriter)
 {
-    return tswrite_open((use_tcp ? TS_W_TCP : TS_W_UDP), name, NULL, port, quiet, tswriter);
+    return tswrite_open((use_tcp ? TS_W_TCP : TS_W_UDP), name, nullptr, port, quiet, tswriter);
 }
 
 /*
@@ -2268,7 +2268,7 @@ int tswrite_open_connection(int use_tcp, char* name, int port, int quiet, TS_wri
  *
  * This is a convenience wrapper around `tswrite_open`.
  *
- * - `name` is the name of the file to open, or NULL if stdout should be used
+ * - `name` is the name of the file to open, or nullptr if stdout should be used
  * - `quiet` is true if only error messages should be printed
  * - `tswriter` is the new context to use for writing TS output,
  *   which should be closed using `tswrite_close`.
@@ -2280,7 +2280,8 @@ int tswrite_open_connection(int use_tcp, char* name, int port, int quiet, TS_wri
  */
 int tswrite_open_file(char* name, int quiet, TS_writer_p* tswriter)
 {
-    return tswrite_open((name == NULL ? TS_W_STDOUT : TS_W_FILE), name, NULL, 0, quiet, tswriter);
+    return tswrite_open(
+        (name == nullptr ? TS_W_STDOUT : TS_W_FILE), name, nullptr, 0, quiet, tswriter);
 }
 
 /*
@@ -2312,7 +2313,7 @@ int tswrite_wait_for_client(int server_socket, int quiet, TS_writer_p* tswriter)
     }
 
     // Accept the connection
-    new2->where.socket = accept(server_socket, NULL, NULL);
+    new2->where.socket = accept(server_socket, nullptr, nullptr);
     if (new2->where.socket == -1) {
         fprint_err("### Error accepting connection: %s\n", strerror(errno));
         return 1;
@@ -2504,7 +2505,7 @@ int tswrite_close_child(TS_writer_p tswriter, int quiet)
 {
     int err;
 
-    if (tswriter->writer == NULL)
+    if (tswriter->writer == nullptr)
         return 0;
 
     if (tswriter->child == 0)
@@ -2597,7 +2598,7 @@ int tswrite_close(TS_writer_p tswriter, int quiet)
 {
     int err;
 
-    if (tswriter == NULL)
+    if (tswriter == nullptr)
         return 0;
 
     // Only does anything if there *is* a child to close/buffer to shut down
@@ -2671,7 +2672,7 @@ int tswrite_write(
         }
     }
 
-    if (tswriter->writer == NULL) {
+    if (tswriter->writer == nullptr) {
         // We're writing directly
         switch (tswriter->how) {
         case TS_W_STDOUT:
@@ -2712,7 +2713,7 @@ int tswrite_write(
 
 int tswrite_discontinuity(const TS_writer_p tswriter)
 {
-    if (tswriter->writer == NULL)
+    if (tswriter->writer == nullptr)
         return 0;
 
     internal_flush_buffered_TS_output(tswriter->writer);

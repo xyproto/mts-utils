@@ -43,7 +43,7 @@
  *   (this is ignored if `how` is TS_W_STDOUT)
  * - if `how` is TS_W_UDP, and `name` is a multicast address,
  *   then `multicast_if` may be the IP address of the network
- *   address to use, or NULL if the default interface should
+ *   address to use, or nullptr if the default interface should
  *   be used.
  * - if it is a socket (i.e., if `how` is TS_W_TCP or TS_W_UDP),
  *   then `port` is the port to use, otherwise this is ignored
@@ -98,7 +98,7 @@ int tswrite_open_connection(int use_tcp, char* name, int port, int quiet, TS_wri
  *
  * This is a convenience wrapper around `tswrite_open`.
  *
- * - `name` is the name of the file to open, or NULL if stdout should be used
+ * - `name` is the name of the file to open, or nullptr if stdout should be used
  * - `quiet` is true if only error messages should be printed
  * - `tswriter` is the new context to use for writing TS output,
  *   which should be closed using `tswrite_close`.

@@ -67,7 +67,7 @@ int build_nal_unit_context(ES_p es, nal_unit_context_p* context)
 {
     int err;
     nal_unit_context_p new2 = (nal_unit_context_p)malloc(SIZEOF_NAL_UNIT_CONTEXT);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate NAL unit context datastructure\n");
         return 1;
     }
@@ -92,22 +92,22 @@ int build_nal_unit_context(ES_p es, nal_unit_context_p* context)
 /*
  * Free a NAL unit context datastructure.
  *
- * Clears the datastructure, frees it, and returns `context` as NULL.
+ * Clears the datastructure, frees it, and returns `context` as nullptr.
  *
- * Does nothing if `context` is already NULL.
+ * Does nothing if `context` is already nullptr.
  */
 void free_nal_unit_context(nal_unit_context_p* context)
 {
     nal_unit_context_p cc = *context;
 
-    if (cc == NULL)
+    if (cc == nullptr)
         return;
 
     free_param_dict(&cc->seq_param_dict);
     free_param_dict(&cc->pic_param_dict);
 
     free(*context);
-    *context = NULL;
+    *context = nullptr;
     return;
 }
 
@@ -140,7 +140,7 @@ int build_nal_unit(nal_unit_p* nal)
 {
     int err;
     nal_unit_p new2 = (nal_unit_p)malloc(SIZEOF_NAL_UNIT);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate NAL unit datastructure\n");
         return 1;
     }
@@ -153,17 +153,17 @@ int build_nal_unit(nal_unit_p* nal)
     }
 
     // However, we haven't yet got any actual data
-    new2->data = NULL; // Only set to unit.data[3] when we *have* a NAL unit
+    new2->data = nullptr; // Only set to unit.data[3] when we *have* a NAL unit
     new2->data_len = 0;
-    new2->rbsp = NULL;
+    new2->rbsp = nullptr;
     new2->rbsp_len = 0;
-    new2->bit_data = NULL;
+    new2->bit_data = nullptr;
 
     new2->nal_unit_type = NAL_UNSPECIFIED;
 
     new2->starts_picture_decided = FALSE;
     new2->starts_picture = FALSE;
-    new2->start_reason = NULL;
+    new2->start_reason = nullptr;
     new2->decoded = FALSE;
 
     *nal = new2;
@@ -176,9 +176,9 @@ int build_nal_unit(nal_unit_p* nal)
 static inline void clear_nal_unit(nal_unit_p nal)
 {
     clear_ES_unit(&(nal->unit));
-    nal->data = NULL;
+    nal->data = nullptr;
     nal->data_len = 0;
-    if (nal->rbsp != NULL) {
+    if (nal->rbsp != nullptr) {
         free(nal->rbsp);
         nal->rbsp_len = 0;
     }
@@ -188,17 +188,17 @@ static inline void clear_nal_unit(nal_unit_p nal)
 /*
  * Tidy up and free a NAL unit datastructure after we've finished with it.
  *
- * Empties the NAL unit datastructure, frees it, and sets `nal` to NULL.
+ * Empties the NAL unit datastructure, frees it, and sets `nal` to nullptr.
  *
- * If `nal` is already NULL, does nothing.
+ * If `nal` is already nullptr, does nothing.
  */
 void free_nal_unit(nal_unit_p* nal)
 {
-    if (*nal == NULL)
+    if (*nal == nullptr)
         return;
     clear_nal_unit(*nal);
     free(*nal);
-    *nal = NULL;
+    *nal = nullptr;
 }
 
 // ------------------------------------------------------------
@@ -228,11 +228,11 @@ static int remove_emulation_prevention(byte data[], int data_len, byte* rbsp[], 
     int posn = 0;
     byte prev1 = 27; // J. Random Number
     byte prev2 = 27;
-    byte* tgt = NULL;
+    byte* tgt = nullptr;
 
     // We know we're going to produce data that is no longer than our input
     tgt = (byte*)malloc(data_len);
-    if (tgt == NULL) {
+    if (tgt == nullptr) {
         print_err("### Cannot malloc RBSP target array\n");
         return 1;
     }
@@ -261,16 +261,16 @@ static int remove_emulation_prevention(byte data[], int data_len, byte* rbsp[], 
 static inline int prepare_rbsp(nal_unit_p nal)
 {
     int err;
-    bitdata_p bd = NULL;
+    bitdata_p bd = nullptr;
 
-    if (nal->bit_data != NULL)
+    if (nal->bit_data != nullptr)
         return 0;
 
     // Only remove the emulation 03 bytes when we think we need to
     // (of course, we *could* do this as part of the bitdata byte
     // reading code, but unless/until it's clear that the tradeoff
     // in time/complexity is worth it, let's not bother).
-    if (nal->rbsp == NULL) {
+    if (nal->rbsp == nullptr) {
         err = remove_emulation_prevention(
             nal->data, nal->data_len, &(nal->rbsp), &(nal->rbsp_len));
         if (err) {
@@ -295,7 +295,7 @@ static inline int prepare_rbsp(nal_unit_p nal)
  *
  * Don't call this directly - call read_rbsp_data() instead.
  *
- * If either of `seq_param_dict` or `pic_param_dict` is NULL, then
+ * If either of `seq_param_dict` or `pic_param_dict` is nullptr, then
  * we only read the first few entries in the RBSP (including the
  * slice_type and the pic_parameter_set_id).
  *
@@ -308,8 +308,8 @@ static int read_slice_data(
     bitdata_p bd = nal->bit_data;
     uint32_t temp;
     nal_slice_data_p data = &(nal->u.slice);
-    nal_seq_param_data_p seq_param_data = NULL;
-    nal_pic_param_data_p pic_param_data = NULL;
+    nal_seq_param_data_p seq_param_data = nullptr;
+    nal_pic_param_data_p pic_param_data = nullptr;
 
 #define CHECK(name)                                                                               \
     if (err) {                                                                                    \
@@ -337,7 +337,7 @@ static int read_slice_data(
 
     // If we don't have sequence/parameter sets, then we can't go any
     // further. Assume the caller knew what they were doing...
-    if (seq_param_dict == NULL || pic_param_dict == NULL)
+    if (seq_param_dict == nullptr || pic_param_dict == nullptr)
         return 0;
 
     // To read the frame number we need to know how long it is, which is
@@ -857,7 +857,7 @@ static int read_SEI(nal_unit_p nal, int show_nal_details)
  * more than once. Also note that the RBSP and bitdata datastructures
  * in the NAL unit do not persist after this call.)
  *
- *     Caveat: if either `seq_param_dict` or `pic_param_dict` is NULL, and the
+ *     Caveat: if either `seq_param_dict` or `pic_param_dict` is nullptr, and the
  *     NAL unit being interpreted is an IDR or non-IDR unit (i.e., a slice),
  *     then only the first few values in the RBSP will be read (up to and
  *     including the slice_type and pic_parameter_set_id), and the RBSP will
@@ -902,9 +902,9 @@ static int read_rbsp_data(
 
     // At this point, we've finished with the actual RBSP data
     // so we might as well free it and save some space.
-    if (nal->rbsp != NULL) {
+    if (nal->rbsp != nullptr) {
         free(nal->rbsp);
-        nal->rbsp = NULL;
+        nal->rbsp = nullptr;
         nal->rbsp_len = 0;
         free_bitdata(&nal->bit_data);
     }
@@ -1025,7 +1025,7 @@ int nal_is_first_VCL_NAL(nal_unit_p nal, nal_unit_p last)
     nal->starts_picture = TRUE; // let's be optimistic...
     nal->starts_picture_decided = TRUE;
 
-    if (last == NULL) {
+    if (last == nullptr) {
         // With nothing else to compare to, we shall assume that we do
         // "start" a picture
         nal->start_reason = "First slice in data stream";
@@ -1076,14 +1076,14 @@ int nal_is_first_VCL_NAL(nal_unit_p nal, nal_unit_p last)
  */
 void report_nal(int is_msg, nal_unit_p nal)
 {
-    if (nal == NULL)
+    if (nal == nullptr)
         fprint_msg_or_err(is_msg, ".............: NAL unit <null>\n");
     else if (nal_is_slice(nal)
         && (nal->nal_unit_type == NAL_IDR || nal->nal_unit_type == NAL_NON_IDR)) {
 #define SARRAYSIZE 20
         char what[SARRAYSIZE];
         snprintf(what, SARRAYSIZE, "(%s)", NAL_UNIT_TYPE_STR(nal->nal_unit_type));
-        // On Windows, snprintf does not guarantee to write a terminating NULL
+        // On Windows, snprintf does not guarantee to write a terminating nullptr
         what[SARRAYSIZE - 1] = '\0';
 #undef SARRAYSIZE
         fprint_msg_or_err(is_msg, OFFSET_T_FORMAT_08 "/%04d: %x/%02x %-20s %u (%s) frame %u",
@@ -1133,8 +1133,8 @@ static void check_profile(nal_unit_p nal, int show_nal_details)
     struct nal_seq_param_data data;
     char* name;
 
-    if (nal == NULL) {
-        print_err("### Attempt to check profile on a NULL NAL unit\n");
+    if (nal == nullptr) {
+        print_err("### Attempt to check profile on a nullptr NAL unit\n");
         return;
     } else if (nal->nal_unit_type != 7) {
         print_err("### Attempt to check profile on a NAL unit that is not a "
@@ -1142,10 +1142,10 @@ static void check_profile(nal_unit_p nal, int show_nal_details)
         report_nal(FALSE, nal);
         return;
     } else if (!nal->decoded) {
-        // Note that we believe ourselves safe in passing NULLs for the
+        // Note that we believe ourselves safe in passing nullptrs for the
         // parameter NAL units, since we are reading a sequence parameter set,
         // which does not depend on anything else
-        int err = read_rbsp_data(nal, NULL, NULL, show_nal_details);
+        int err = read_rbsp_data(nal, nullptr, nullptr, show_nal_details);
         if (err) {
             print_err("### Error trying to decode RBSP for first sequence"
                       " parameter set\n");
@@ -1230,7 +1230,7 @@ int setup_NAL_data(int verbose, nal_unit_p nal)
 #define SARRAYSIZE 20
         char what[SARRAYSIZE];
         snprintf(what, SARRAYSIZE, "(%s)", NAL_UNIT_TYPE_STR(nal->nal_unit_type));
-        // On Windows, snprintf does not guarantee to write a terminating NULL
+        // On Windows, snprintf does not guarantee to write a terminating nullptr
         what[SARRAYSIZE - 1] = '\0';
 #undef SARRAYSIZE
         fprint_msg(OFFSET_T_FORMAT_08 "/%04d: NAL unit %d/%d %-20s", nal->unit.start_posn.infile,
@@ -1258,7 +1258,7 @@ int setup_NAL_data(int verbose, nal_unit_p nal)
  *
  * - `context` is the NAL unit context we're reading from
  * - `verbose` is true if a brief report on the NAL unit should be given
- * - `nal` is the datastructure containing the NAL unit found, or NULL
+ * - `nal` is the datastructure containing the NAL unit found, or nullptr
  *   if there was none.
  *
  * Returns:
@@ -1394,7 +1394,7 @@ int write_NAL_unit_as_TS(TS_writer_p tswriter, nal_unit_p nal, uint32_t video_pi
 int build_param_dict(param_dict_p* param_dict)
 {
     param_dict_p new2 = (param_dict_p)malloc(SIZEOF_PARAM_DICT);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate parameter 'dictionary' datastructure\n");
         return 1;
     }
@@ -1403,7 +1403,7 @@ int build_param_dict(param_dict_p* param_dict)
     new2->last_index = -1;
 
     new2->ids = (int*)malloc(sizeof(uint32_t) * NAL_PIC_PARAM_START_SIZE);
-    if (new2->ids == NULL) {
+    if (new2->ids == nullptr) {
         print_err("### Unable to allocate array within 'dictionary'"
                   " datastructure\n");
         free(new2);
@@ -1411,7 +1411,7 @@ int build_param_dict(param_dict_p* param_dict)
     }
 
     new2->params = (nal_innards_p)malloc(SIZEOF_NAL_INNARDS * NAL_PIC_PARAM_START_SIZE);
-    if (new2->params == NULL) {
+    if (new2->params == nullptr) {
         print_err("### Unable to allocate array within 'dictionary'"
                   " datastructure\n");
         free(new2->ids);
@@ -1420,7 +1420,7 @@ int build_param_dict(param_dict_p* param_dict)
     }
 
     new2->posns = (ES_offset_p)malloc(SIZEOF_ES_OFFSET * NAL_PIC_PARAM_START_SIZE);
-    if (new2->posns == NULL) {
+    if (new2->posns == nullptr) {
         print_err("### Unable to allocate array within 'dictionary'"
                   " datastructure\n");
         free(new2->params);
@@ -1430,7 +1430,7 @@ int build_param_dict(param_dict_p* param_dict)
     }
 
     new2->data_lens = (uint32_t*)malloc(sizeof(uint32_t) * NAL_PIC_PARAM_START_SIZE);
-    if (new2->data_lens == NULL) {
+    if (new2->data_lens == nullptr) {
         print_err("### Unable to allocate array within 'dictionary'"
                   " datastructure\n");
         free(new2->params);
@@ -1450,24 +1450,24 @@ int build_param_dict(param_dict_p* param_dict)
  * Tidy up and free a parameters "dictionary" datastructure after we've
  * finished with it.
  *
- * Empties the datastructure, frees it, and sets `param_dict` to NULL.
+ * Empties the datastructure, frees it, and sets `param_dict` to nullptr.
  *
- * Does nothing if `param_dict` is already NULL.
+ * Does nothing if `param_dict` is already nullptr.
  */
 void free_param_dict(param_dict_p* param_dict)
 {
-    if (*param_dict == NULL)
+    if (*param_dict == nullptr)
         return;
     free((*param_dict)->ids);
     free((*param_dict)->params);
     free((*param_dict)->posns);
     free((*param_dict)->data_lens);
-    (*param_dict)->ids = NULL;
-    (*param_dict)->params = NULL;
-    (*param_dict)->posns = NULL;
-    (*param_dict)->data_lens = NULL;
+    (*param_dict)->ids = nullptr;
+    (*param_dict)->params = nullptr;
+    (*param_dict)->posns = nullptr;
+    (*param_dict)->data_lens = nullptr;
     free(*param_dict);
-    *param_dict = NULL;
+    *param_dict = nullptr;
 }
 
 /*
@@ -1508,23 +1508,23 @@ int remember_param_data(param_dict_p param_dict, uint32_t param_id, nal_unit_p n
     if (param_dict->length == param_dict->size) {
         int newsize = param_dict->size + NAL_PIC_PARAM_INCREMENT;
         param_dict->ids = (int*)realloc(param_dict->ids, newsize * sizeof(uint32_t));
-        if (param_dict->ids == NULL) {
+        if (param_dict->ids == nullptr) {
             print_err("### Unable to extend parameter set dictionary array\n");
             return 1;
         }
         param_dict->params
             = (nal_innards_p)realloc(param_dict->params, newsize * SIZEOF_NAL_INNARDS);
-        if (param_dict->params == NULL) {
+        if (param_dict->params == nullptr) {
             print_err("### Unable to extend parameter set dictionary array\n");
             return 1;
         }
         param_dict->posns = (ES_offset_p)realloc(param_dict->params, newsize * SIZEOF_ES_OFFSET);
-        if (param_dict->posns == NULL) {
+        if (param_dict->posns == nullptr) {
             print_err("### Unable to extend parameter set dictionary array\n");
             return 1;
         }
         param_dict->data_lens = (uint32_t*)realloc(param_dict->params, newsize * sizeof(uint32_t));
-        if (param_dict->data_lens == NULL) {
+        if (param_dict->data_lens == nullptr) {
             print_err("### Unable to extend parameter set dictionary array\n");
             return 1;
         }
@@ -1643,7 +1643,7 @@ int get_seq_param_data(
 int build_nal_unit_list(nal_unit_list_p* list)
 {
     nal_unit_list_p new2 = (nal_unit_list_p)malloc(SIZEOF_NAL_UNIT_LIST);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate NAL unit list datastructure\n");
         return 1;
     }
@@ -1651,7 +1651,7 @@ int build_nal_unit_list(nal_unit_list_p* list)
     new2->length = 0;
     new2->size = NAL_UNIT_LIST_START_SIZE;
     new2->array = (nal_unit_p*)malloc(sizeof(nal_unit_p) * NAL_UNIT_LIST_START_SIZE);
-    if (new2->array == NULL) {
+    if (new2->array == nullptr) {
         free(new2);
         print_err("### Unable to allocate array in NAL unit list datastructure\n");
         return 1;
@@ -1671,7 +1671,7 @@ int append_to_nal_unit_list(nal_unit_list_p list, nal_unit_p nal)
     if (list->length == list->size) {
         int newsize = list->size + NAL_UNIT_LIST_INCREMENT;
         list->array = (nal_unit_p*)realloc(list->array, newsize * sizeof(nal_unit_p));
-        if (list->array == NULL) {
+        if (list->array == nullptr) {
             print_err("### Unable to extend NAL unit list array\n");
             return 1;
         }
@@ -1689,20 +1689,20 @@ int append_to_nal_unit_list(nal_unit_list_p list, nal_unit_p nal)
  */
 static inline void clear_nal_unit_list(nal_unit_list_p list, int deep)
 {
-    if (list->array != NULL) {
+    if (list->array != nullptr) {
         int ii;
         for (ii = 0; ii < list->length; ii++) {
             if (deep) {
                 nal_unit_p nal = list->array[ii];
-                if (nal != NULL) {
+                if (nal != nullptr) {
                     clear_nal_unit(nal);
                     free(nal);
                 }
             }
-            list->array[ii] = NULL;
+            list->array[ii] = nullptr;
         }
         free(list->array);
-        list->array = NULL;
+        list->array = nullptr;
     }
     list->length = 0;
     list->size = 0;
@@ -1716,17 +1716,17 @@ static inline void clear_nal_unit_list(nal_unit_list_p list, int deep)
  */
 void reset_nal_unit_list(nal_unit_list_p list, int deep)
 {
-    if (list->array != NULL) {
+    if (list->array != nullptr) {
         int ii;
         for (ii = 0; ii < list->length; ii++) {
             if (deep) {
                 nal_unit_p nal = list->array[ii];
-                if (nal != NULL) {
+                if (nal != nullptr) {
                     clear_nal_unit(nal);
                     free(nal);
                 }
             }
-            list->array[ii] = NULL;
+            list->array[ii] = nullptr;
         }
         // We *could* also shrink it - as it is, it will never get smaller
         // than its maximum size. Is that likely to be a problem?
@@ -1737,20 +1737,20 @@ void reset_nal_unit_list(nal_unit_list_p list, int deep)
 /*
  * Tidy up and free a NAL unit list datastructure after we've finished with it.
  *
- * Clears the datastructure, frees it and returns `list` as NULL.
+ * Clears the datastructure, frees it and returns `list` as nullptr.
  *
  * If `deep` is true, then any NAL units in the list will be freed
  * as well (this will be a Bad Thing if anywhere else is using them).
  *
- * Does nothing if `list` is already NULL.
+ * Does nothing if `list` is already nullptr.
  */
 void free_nal_unit_list(nal_unit_list_p* list, int deep)
 {
-    if (*list == NULL)
+    if (*list == nullptr)
         return;
     clear_nal_unit_list(*list, deep);
     free(*list);
-    *list = NULL;
+    *list = nullptr;
 }
 
 /*
@@ -1758,9 +1758,9 @@ void free_nal_unit_list(nal_unit_list_p* list, int deep)
  */
 void report_nal_unit_list(int is_msg, char* prefix, nal_unit_list_p list)
 {
-    if (prefix == NULL)
+    if (prefix == nullptr)
         prefix = "";
-    if (list->array == NULL)
+    if (list->array == nullptr)
         fprint_msg_or_err(is_msg, "%s<empty>\n", prefix);
     else {
         int ii;

@@ -61,7 +61,7 @@ int read_next_adts_frame(int file, audio_frame_p* frame, unsigned int flags)
     int err, ii;
     int id, layer;
     byte header[JUST_ENOUGH];
-    byte* data = NULL;
+    byte* data = nullptr;
     int frame_length;
     int has_emphasis = 0;
 
@@ -123,7 +123,7 @@ int read_next_adts_frame(int file, audio_frame_p* frame, unsigned int flags)
 #endif
 
     data = (byte*)malloc(frame_length);
-    if (data == NULL) {
+    if (data == nullptr) {
         print_err("### Unable to extend data buffer for ADTS frame\n");
         free(data);
         return 1;

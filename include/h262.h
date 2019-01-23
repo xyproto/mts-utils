@@ -60,7 +60,7 @@
 void print_h262_start_code_str(byte start_code)
 {
     byte number;
-    char* str = NULL;
+    char* str = nullptr;
     switch (start_code) {
         // H.262 start codes
     case 0x00:
@@ -144,11 +144,11 @@ void print_h262_start_code_str(byte start_code)
         break;
 
     default:
-        str = NULL;
+        str = nullptr;
         break;
     }
 
-    if (str != NULL)
+    if (str != nullptr)
         print_msg(str);
     else if (start_code == 0x47)
         print_msg("TRANSPORT STREAM sync byte");
@@ -175,7 +175,7 @@ int build_h262_item(h262_item_p* item)
 {
     int err;
     h262_item_p new2 = (h262_item_p)malloc(SIZEOF_H262_ITEM);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate MPEG2 item datastructure\n");
         return 1;
     }
@@ -192,17 +192,17 @@ int build_h262_item(h262_item_p* item)
 /*
  * Tidy up and free an MPEG2 item datastructure after we've finished with it.
  *
- * Empties the MPEG2 item datastructure, frees it, and sets `item` to NULL.
+ * Empties the MPEG2 item datastructure, frees it, and sets `item` to nullptr.
  *
- * If `item` is already NULL, does nothing.
+ * If `item` is already nullptr, does nothing.
  */
 void free_h262_item(h262_item_p* item)
 {
-    if (*item == NULL)
+    if (*item == nullptr)
         return;
     clear_ES_unit(&(*item)->unit);
     free(*item);
-    *item = NULL;
+    *item = nullptr;
 }
 
 /*
@@ -232,7 +232,7 @@ void report_h262_item(h262_item_p item)
  * information therein.
  *
  * - `es` is the elementary stream we're reading from.
- * - `item` is the datastructure containing the MPEG2 item found, or NULL
+ * - `item` is the datastructure containing the MPEG2 item found, or nullptr
  *   if there was none.
  *
  * Returns 0 if it succeeds, EOF if the end-of-file is read (i.e., there
@@ -272,15 +272,15 @@ int find_next_h262_item(ES_p es, h262_item_p* item)
 int build_h262_context(ES_p es, h262_context_p* context)
 {
     h262_context_p new2 = (h262_context_p)malloc(SIZEOF_H262_CONTEXT);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate H.262 context datastructure\n");
         return 1;
     }
 
     new2->es = es;
     new2->picture_index = 0;
-    new2->last_item = NULL;
-    new2->reverse_data = NULL;
+    new2->last_item = nullptr;
+    new2->reverse_data = nullptr;
     new2->count_since_seq_hdr = 0;
     new2->last_aspect_ratio_info = H262_UNSET_ASPECT_RATIO_INFO;
     new2->last_afd = UNSET_AFD_BYTE;
@@ -293,26 +293,26 @@ int build_h262_context(ES_p es, h262_context_p* context)
 /*
  * Free an H.262 picture reading context.
  *
- * Clears the datastructure, frees it, and returns `context` as NULL.
+ * Clears the datastructure, frees it, and returns `context` as nullptr.
  *
  * Does not free any `reverse_data` datastructure.
  *
- * Does nothing if `context` is already NULL.
+ * Does nothing if `context` is already nullptr.
  */
 void free_h262_context(h262_context_p* context)
 {
     h262_context_p cc = *context;
 
-    if (cc == NULL)
+    if (cc == nullptr)
         return;
 
-    if (cc->last_item != NULL)
+    if (cc->last_item != nullptr)
         free_h262_item(&cc->last_item);
 
-    cc->reverse_data = NULL;
+    cc->reverse_data = nullptr;
 
     free(*context);
-    *context = NULL;
+    *context = nullptr;
     return;
 }
 
@@ -388,7 +388,7 @@ static int build_h262_picture(h262_context_p context, h262_picture_p* picture, h
     ES_unit_p unit = &(item->unit);
     byte* data = unit->data;
     h262_picture_p new2 = (h262_picture_p)malloc(SIZEOF_H262_PICTURE);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate H.262 picture datastructure\n");
         return 1;
     }
@@ -455,9 +455,9 @@ static int build_h262_picture(h262_context_p context, h262_picture_p* picture, h
 static int append_fake_afd(h262_picture_p picture, byte afd)
 {
     int err;
-    static h262_item_p item = NULL;
+    static h262_item_p item = nullptr;
 
-    if (item == NULL) {
+    if (item == nullptr) {
         err = build_h262_item(&item);
         if (err) {
             print_err("### Error building 'fake' AFD for H.262 picture\n");
@@ -516,22 +516,22 @@ static int merge_fields(h262_picture_p picture1, h262_picture_p picture2)
 /*
  * Free an H.262 "picture".
  *
- * Clears the datastructure, frees it, and returns `picture` as NULL.
+ * Clears the datastructure, frees it, and returns `picture` as nullptr.
  *
- * Does nothing if `picture` is already NULL.
+ * Does nothing if `picture` is already nullptr.
  */
 void free_h262_picture(h262_picture_p* picture)
 {
     h262_picture_p pic = *picture;
 
-    if (pic == NULL)
+    if (pic == nullptr)
         return;
 
-    if (pic->list != NULL)
+    if (pic->list != nullptr)
         free_ES_unit_list(&pic->list);
 
     free(*picture);
-    *picture = NULL;
+    *picture = nullptr;
     return;
 }
 
@@ -547,7 +547,7 @@ int same_h262_picture(h262_picture_p picture1, h262_picture_p picture2)
 {
     if (picture1 == picture2)
         return TRUE;
-    else if (picture1 == NULL || picture2 == NULL)
+    else if (picture1 == nullptr || picture2 == nullptr)
         return FALSE;
     else
         return same_ES_unit_list(picture1->list, picture2->list);
@@ -654,7 +654,7 @@ static int extract_AFD(h262_item_p item, byte* afd)
 static void _show_item(h262_item_p item)
 {
     print_msg("__ ");
-    if (item == NULL) {
+    if (item == nullptr) {
         print_msg("<no item>\n");
         return;
     }
@@ -707,11 +707,11 @@ int get_next_h262_single_picture(h262_context_p context, int verbose, h262_pictu
         print_msg("__ reuse last item\n");
 #endif
 
-    context->last_item = NULL;
+    context->last_item = nullptr;
 
     // Find the first item of our next "picture"
     for (;;) {
-        if (item == NULL) {
+        if (item == nullptr) {
             err = find_next_h262_item(context->es, &item);
             if (err)
                 return err;
@@ -1025,7 +1025,7 @@ int write_h262_picture_as_TS(TS_writer_p tswriter, h262_picture_p picture, uint3
     int ii;
     ES_unit_list_p list;
 
-    if (picture == NULL || picture->list == NULL)
+    if (picture == nullptr || picture->list == nullptr)
         return 0;
 
     list = picture->list;
@@ -1057,7 +1057,7 @@ int write_h262_picture_as_ES(FILE* output, h262_picture_p picture)
     int ii;
     ES_unit_list_p list;
 
-    if (picture == NULL || picture->list == NULL)
+    if (picture == nullptr || picture->list == nullptr)
         return 0;
 
     list = picture->list;

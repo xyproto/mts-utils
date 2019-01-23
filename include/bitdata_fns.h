@@ -47,7 +47,7 @@ int build_bitdata(bitdata_p* bitdata, byte data[], int data_len);
 /*
  * Tidy up and free a bitdata datastructure after we've finished with it.
  *
- * Clears the bitdata datastructure, frees it, and sets `bitdata` to NULL.
+ * Clears the bitdata datastructure, frees it, and sets `bitdata` to nullptr.
  */
 void free_bitdata(bitdata_p* bitdata);
 

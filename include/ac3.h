@@ -65,7 +65,7 @@ int read_next_ac3_frame(int file, audio_frame_p* frame)
 {
     int i, err;
     byte sync_info[SYNCINFO_SIZE];
-    byte* data = NULL;
+    byte* data = nullptr;
     int fscod;
     int frmsizecod;
     int frame_length;
@@ -113,7 +113,7 @@ int read_next_ac3_frame(int file, audio_frame_p* frame)
     frame_length <<= 1; // Convert from 16-bit words to bytes
 
     data = (byte*)malloc(frame_length);
-    if (data == NULL) {
+    if (data == nullptr) {
         print_err("### Unable to extend data buffer for AC3 frame\n");
         return 1;
     }

@@ -126,7 +126,7 @@ struct PES_reader {
 
     // PMTs may be split over several TS packets, so we need a buffer
     // to build them in
-    byte* pmt_data; // The buffer (NULL when not in use)
+    byte* pmt_data; // The buffer (nullptr when not in use)
     int pmt_data_len; // The buffers length = the PMT section length + 3
     int pmt_data_used; // How much of said data we've already got
 

@@ -39,11 +39,11 @@ int build_access_unit_context(ES_p es, access_unit_context_p* context);
 /*
  * Free a new access unit context datastructure.
  *
- * Clears the datastructure, frees it, and returns `context` as NULL.
+ * Clears the datastructure, frees it, and returns `context` as nullptr.
  *
  * Does not free any `reverse_data` datastructure.
  *
- * Does nothing if `context` is already NULL.
+ * Does nothing if `context` is already nullptr.
  */
 void free_access_unit_context(access_unit_context_p* context);
 
@@ -69,9 +69,9 @@ int rewind_access_unit_context(access_unit_context_p context);
 /*
  * Tidy up and free an access unit datastructure after we've finished with it.
  *
- * Clears the datastructure, frees it, and returns `acc_unit` as NULL.
+ * Clears the datastructure, frees it, and returns `acc_unit` as nullptr.
  *
- * Does nothing if `acc_unit` is already NULL.
+ * Does nothing if `acc_unit` is already nullptr.
  */
 void free_access_unit(access_unit_p* acc_unit);
 
@@ -122,7 +122,7 @@ int all_slices_B(access_unit_p access_unit);
  *
  * - `access_unit` is the access unit to write out
  * - `context` may contain additional things to write (see above), but may
- *   legitimately be NULL if there is no context.
+ *   legitimately be nullptr if there is no context.
  * - `output` is the ES file to write to
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
@@ -138,7 +138,7 @@ int write_access_unit_as_ES(
  *
  * - `access_unit` is the access unit to write out
  * - `context` may contain additional things to write (see above), but may
- *   legitimately be NULL if there is no context.
+ *   legitimately be nullptr if there is no context.
  * - `tswriter` is the TS context to write with
  * - `video_pid` is the PID to use to write the data
  *
@@ -156,7 +156,7 @@ int write_access_unit_as_TS(access_unit_p access_unit, access_unit_context_p con
  *
  * - `access_unit` is the access unit to write out
  * - `context` may contain additional things to write (see above), but may
- *   legitimately be NULL if there is no context.
+ *   legitimately be nullptr if there is no context.
  * - `tswriter` is the TS context to write with
  * - `video_pid` is the PID to use to write the data
  * - `pts` is the PTS time (which is also used as the PCR base).
@@ -176,7 +176,7 @@ int write_access_unit_as_TS_with_pts_dts(access_unit_p access_unit, access_unit_
  *
  * - `access_unit` is the access unit to write out
  * - `context` may contain additional things to write (see above), but may
- *   legitimately be NULL if there is no context.
+ *   legitimately be nullptr if there is no context.
  * - `tswriter` is the TS context to write with
  * - `video_pid` is the PID to use to write the data
  * - `pcr_base` and `pcr_extn` encode the PCR value.
@@ -212,10 +212,10 @@ int write_access_unit_as_TS_with_PCR(access_unit_p access_unit, access_unit_cont
  *
  * EOF can be returned because the end of file has been reached, or because an
  * end of stream NAL unit has been encountered. The two may be distinguished
- * by looking at `context->end_of_stream`, which will be NULL if it was a true
+ * by looking at `context->end_of_stream`, which will be nullptr if it was a true
  * EOF.
  *
- * Note that `ret_access_unit` will be NULL if EOF is returned.
+ * Note that `ret_access_unit` will be nullptr if EOF is returned.
  */
 int get_next_access_unit(
     access_unit_context_p context, int quiet, int show_details, access_unit_p* ret_access_unit);
@@ -258,10 +258,10 @@ int get_next_access_unit(
  *
  * EOF can be returned because the end of file has been reached, or because an
  * end of stream NAL unit has been encountered. The two may be distinguished
- * by looking at `context->end_of_stream`, which will be NULL if it was a true
+ * by looking at `context->end_of_stream`, which will be nullptr if it was a true
  * EOF.
  *
- * Note that `ret_access_unit` will be NULL if EOF is returned.
+ * Note that `ret_access_unit` will be nullptr if EOF is returned.
  */
 int get_next_h264_frame(
     access_unit_context_p context, int quiet, int show_details, access_unit_p* frame);

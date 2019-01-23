@@ -64,7 +64,7 @@ void reset_h262_filter_context(h262_filter_context_p fcontext);
  * filter context refers.
  *
  * - `fcontext` is the filter context, which will be freed, and returned
- *   as NULL.
+ *   as nullptr.
  */
 void free_h262_filter_context(h262_filter_context_p* fcontext);
 /*
@@ -102,7 +102,7 @@ void reset_h264_filter_context(h264_filter_context_p fcontext);
  * filter context refers.
  *
  * - `fcontext` is the filter context, which will be freed, and returned
- *   as NULL.
+ *   as nullptr.
  */
 void free_h264_filter_context(h264_filter_context_p* fcontext);
 
@@ -118,7 +118,7 @@ void free_h264_filter_context(h264_filter_context_p* fcontext);
  * - if `quiet` is true, then only errors will be reported
  *
  * - `seq_hdr` is a sequence header, i.e., that used by the next frame to
- *   output. This will be NULL if the sequence header has not changed since
+ *   output. This will be nullptr if the sequence header has not changed since
  *   the last call of this function.
  *
  *   Note that the caller should *not* free this, and that it will not be
@@ -158,13 +158,13 @@ int get_next_stripped_h262_frame(h262_filter_context_p fcontext, int verbose, in
  * - if `quiet` is true, then only errors will be reported
  *
  * - `seq_hdr` is a sequence header, i.e., that used by the next picture to
- *   output. This will be NULL if `frame` is NULL.
+ *   output. This will be nullptr if `frame` is nullptr.
  *
  *   Note that the caller should *not* free this, and that it will not be
  *   maintained over calls of this function (i.e., it is a reference to a
  *   value within the `fcontext` which is altered by this function).
  *
- * - `frame` is the next frame to output. This will be NULL if the last frame
+ * - `frame` is the next frame to output. This will be nullptr if the last frame
  *   should be output again, to provide the requested apparent frequency.
  *
  *   Note that it is the caller's responsibility to free this with
@@ -220,7 +220,7 @@ int get_next_stripped_h264_frame(h264_filter_context_p fcontext, int verbose, in
  *
  * - `frame` is the next frame to output.
  *
- *   If the function succeeds and `frame` is NULL, it means that the
+ *   If the function succeeds and `frame` is nullptr, it means that the
  *   last frame should be output again.
  *
  *   Note that it is the caller's responsibility to free this frame with

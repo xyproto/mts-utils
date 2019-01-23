@@ -218,7 +218,7 @@ int read_next_l2audio_frame(int file, audio_frame_p* frame)
 
     int err, ii;
     byte header[JUST_ENOUGH];
-    byte* data = NULL;
+    byte* data = nullptr;
     int frame_length; // XXXX Really 626.94 on average
 
     offset_t posn = tell_file(file);
@@ -273,7 +273,7 @@ int read_next_l2audio_frame(int file, audio_frame_p* frame)
     }
 
     data = (byte*)malloc(frame_length);
-    if (data == NULL) {
+    if (data == nullptr) {
         print_err("### Unable to extend data buffer for MPEG layer 2 audio frame\n");
         free(data);
         return 1;

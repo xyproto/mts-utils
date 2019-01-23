@@ -95,15 +95,15 @@ const char* avs_start_code_str(byte start_code)
 int build_avs_context(ES_p es, avs_context_p* context)
 {
     avs_context_p new2 = (avs_context_p)malloc(SIZEOF_AVS_CONTEXT);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate AVS context datastructure\n");
         return 1;
     }
 
     new2->es = es;
     new2->frame_index = 0;
-    new2->last_item = NULL;
-    new2->reverse_data = NULL;
+    new2->last_item = nullptr;
+    new2->reverse_data = nullptr;
     new2->count_since_seq_hdr = 0;
 
     *context = new2;
@@ -113,26 +113,26 @@ int build_avs_context(ES_p es, avs_context_p* context)
 /*
  * Free an AVS frame reading context.
  *
- * Clears the datastructure, frees it, and returns `context` as NULL.
+ * Clears the datastructure, frees it, and returns `context` as nullptr.
  *
  * Does not free any `reverse_data` datastructure.
  *
- * Does nothing if `context` is already NULL.
+ * Does nothing if `context` is already nullptr.
  */
 void free_avs_context(avs_context_p* context)
 {
     avs_context_p cc = *context;
 
-    if (cc == NULL)
+    if (cc == nullptr)
         return;
 
-    if (cc->last_item != NULL)
+    if (cc->last_item != nullptr)
         free_ES_unit(&cc->last_item);
 
-    cc->reverse_data = NULL;
+    cc->reverse_data = nullptr;
 
     free(*context);
-    *context = NULL;
+    *context = nullptr;
     return;
 }
 
@@ -154,7 +154,7 @@ int rewind_avs_context(avs_context_p context)
     // First, forget where we are
     if (context->last_item) {
         free_ES_unit(&context->last_item);
-        context->last_item = NULL;
+        context->last_item = nullptr;
     }
 
     context->frame_index = 0; // no frames read from this file yet
@@ -225,7 +225,7 @@ static int build_avs_frame(avs_context_p context, avs_frame_p* frame, ES_unit_p 
     int err;
     byte* data = unit->data;
     avs_frame_p new2 = (avs_frame_p)malloc(SIZEOF_AVS_FRAME);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate AVS frame datastructure\n");
         return 1;
     }
@@ -286,22 +286,22 @@ static int build_avs_frame(avs_context_p context, avs_frame_p* frame, ES_unit_p 
 /*
  * Free an AVS "frame".
  *
- * Clears the datastructure, frees it, and returns `frame` as NULL.
+ * Clears the datastructure, frees it, and returns `frame` as nullptr.
  *
- * Does nothing if `frame` is already NULL.
+ * Does nothing if `frame` is already nullptr.
  */
 void free_avs_frame(avs_frame_p* frame)
 {
     avs_frame_p pic = *frame;
 
-    if (pic == NULL)
+    if (pic == nullptr)
         return;
 
-    if (pic->list != NULL)
+    if (pic->list != nullptr)
         free_ES_unit_list(&pic->list);
 
     free(*frame);
-    *frame = NULL;
+    *frame = nullptr;
     return;
 }
 
@@ -312,7 +312,7 @@ void free_avs_frame(avs_frame_p* frame)
 static void _show_item(ES_unit_p unit)
 {
     print_msg("__ ");
-    if (unit == NULL) {
+    if (unit == nullptr) {
         print_msg("<no ES unit>\n");
         return;
     }
@@ -362,11 +362,11 @@ static int get_next_avs_single_frame(avs_context_p context, int verbose, avs_fra
         print_msg("__ reuse last item\n");
 #endif
 
-    context->last_item = NULL;
+    context->last_item = nullptr;
 
     // Find the first item of our next "frame"
     for (;;) {
-        if (item == NULL) {
+        if (item == nullptr) {
             err = find_and_build_next_ES_unit(context->es, &item);
             if (err)
                 return err;
@@ -545,7 +545,7 @@ int write_avs_frame_as_TS(TS_writer_p tswriter, avs_frame_p frame, uint32_t pid)
     int ii;
     ES_unit_list_p list;
 
-    if (frame == NULL || frame->list == NULL)
+    if (frame == nullptr || frame->list == nullptr)
         return 0;
 
     list = frame->list;
@@ -587,7 +587,7 @@ int write_avs_frame_as_TS_with_pts_dts(avs_frame_p frame, TS_writer_p tswriter, 
     int ii;
     ES_unit_list_p list;
 
-    if (frame == NULL || frame->list == NULL)
+    if (frame == nullptr || frame->list == nullptr)
         return 0;
 
     list = frame->list;
@@ -628,7 +628,7 @@ int write_avs_frame_as_TS_with_PCR(avs_frame_p frame, TS_writer_p tswriter, uint
     int ii;
     ES_unit_list_p list;
 
-    if (frame == NULL || frame->list == NULL)
+    if (frame == nullptr || frame->list == nullptr)
         return 0;
 
     list = frame->list;
@@ -665,7 +665,7 @@ int write_avs_frame_as_ES(FILE* output, avs_frame_p frame)
     int ii;
     ES_unit_list_p list;
 
-    if (frame == NULL || frame->list == NULL)
+    if (frame == nullptr || frame->list == nullptr)
         return 0;
 
     list = frame->list;

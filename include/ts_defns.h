@@ -106,7 +106,7 @@ struct _ts_reader {
     offset_t posn; // the position of the next-to-be-read TS packet
     void* handle; // handle to pass to read_fn and seek_fn.
 
-    // Reader and seek functions. If these are non-NULL we call them
+    // Reader and seek functions. If these are non-nullptr we call them
     //  when we would call read() or seek().
     int (*read_fn)(void*, byte*, size_t);
     int (*seek_fn)(void*, offset_t);

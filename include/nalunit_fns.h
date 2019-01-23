@@ -45,9 +45,9 @@ int build_nal_unit_context(ES_p es, nal_unit_context_p* context);
 /*
  * Free a NAL unit context datastructure.
  *
- * Clears the datastructure, frees it, and returns `context` as NULL.
+ * Clears the datastructure, frees it, and returns `context` as nullptr.
  *
- * Does nothing if `context` is already NULL.
+ * Does nothing if `context` is already nullptr.
  */
 void free_nal_unit_context(nal_unit_context_p* context);
 /*
@@ -72,9 +72,9 @@ int build_nal_unit(nal_unit_p* nal);
 /*
  * Tidy up and free a NAL unit datastructure after we've finished with it.
  *
- * Empties the NAL unit datastructure, frees it, and sets `nal` to NULL.
+ * Empties the NAL unit datastructure, frees it, and sets `nal` to nullptr.
  *
- * If `nal` is already NULL, does nothing.
+ * If `nal` is already nullptr, does nothing.
  */
 void free_nal_unit(nal_unit_p* nal);
 
@@ -83,7 +83,7 @@ void free_nal_unit(nal_unit_p* nal);
  *
  * - `context` is the NAL unit context we're reading from
  * - `verbose` is true if a brief report on the NAL unit should be given
- * - `nal` is the datastructure containing the NAL unit found, or NULL
+ * - `nal` is the datastructure containing the NAL unit found, or nullptr
  *   if there was none.
  *
  * Returns:
@@ -128,9 +128,9 @@ int build_param_dict(param_dict_p* param_dict);
  * Tidy up and free a parameters "dictionary" datastructure after we've
  * finished with it.
  *
- * Empties the datastructure, frees it, and sets `param_dict` to NULL.
+ * Empties the datastructure, frees it, and sets `param_dict` to nullptr.
  *
- * Does nothing if `param_dict` is already NULL.
+ * Does nothing if `param_dict` is already nullptr.
  */
 void free_param_dict(param_dict_p* param_dict);
 
@@ -306,9 +306,9 @@ void reset_nal_unit_list(nal_unit_list_p list, int deep);
  * If `deep` is true, then any NAL units in the list will be freed
  * as well (this will be a Bad Thing if anywhere else is using them).
  *
- * Clears the datastructure, frees it and returns `list` as NULL.
+ * Clears the datastructure, frees it and returns `list` as nullptr.
  *
- * Does nothing if `list` is already NULL.
+ * Does nothing if `list` is already nullptr.
  */
 void free_nal_unit_list(nal_unit_list_p* list, int deep);
 

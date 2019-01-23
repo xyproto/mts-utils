@@ -55,7 +55,7 @@ void print_bits(int num_bits, byte value);
  *
  * - if `is_msg` then print as a message, otherwise as an error
  * - `name` is identifying text to start the report with.
- * - `data` is the byte data to print. This may be NULL.
+ * - `data` is the byte data to print. This may be nullptr.
  * - `length` is its length
  * - `max` is the maximum number of bytes to print
  *
@@ -71,7 +71,7 @@ void print_data(int is_msg, const char* name, const byte data[], int length, int
  * Print out (the last `max`) bytes of a byte array.
  *
  * - `name` is identifying text to start the report with.
- * - `data` is the byte data to print. This may be NULL.
+ * - `data` is the byte data to print. This may be nullptr.
  * - `length` is its length
  * - `max` is the maximum number of bytes to print
  *
@@ -166,7 +166,7 @@ int close_file(int filedes);
 /*
  * Open an input file appropriately for reading as ES.
  *
- * - `name` is the name of the file, or NULL if standard input
+ * - `name` is the name of the file, or nullptr if standard input
  *   is to be read from (which is not allowed if `use_pes` is
  *   TRUE).
  *
@@ -207,7 +207,7 @@ int open_input_as_ES(char* name, int use_pes, int quiet, int force_stream_type, 
  * reader and file (unless the input was standard input).
  *
  * - `name` is the name of the file, used for error reporting.
- * - `es` is the ES stream to close. This will be set to NULL.
+ * - `es` is the ES stream to close. This will be set to nullptr.
  *
  * Returns 0 if all goes well, 1 if something goes wrong. In the latter case,
  * suitable messages will have been written out to standard error.
@@ -221,7 +221,7 @@ int close_input_as_ES(char* name, ES_p* es);
  * Read in an unsigned integer value, checking for extraneous characters.
  *
  * - `prefix` is an optional prefix for error messages, typically the
- *   name of the program. It may be NULL.
+ *   name of the program. It may be nullptr.
  * - `cmd` is the command switch we're reading for (typically ``argv[ii]``),
  *   which is used in error messages.
  * - `str` is the string to read (typically ``argv[ii+1]``).
@@ -237,7 +237,7 @@ int unsigned_value(char* prefix, char* cmd, char* arg, int base, uint32_t* value
  * Read in an integer value, checking for extraneous characters.
  *
  * - `prefix` is an optional prefix for error messages, typically the
- *   name of the program. It may be NULL.
+ *   name of the program. It may be nullptr.
  * - `cmd` is the command switch we're reading for (typically ``argv[ii]``),
  *   which is used in error messages.
  * - `str` is the string to read (typically ``argv[ii+1]``).
@@ -249,12 +249,13 @@ int unsigned_value(char* prefix, char* cmd, char* arg, int base, uint32_t* value
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int int_value(char* prefix, char* cmd, char* str, int positive, int base, int* value);
+int int_value(
+    const char* prefix, const char* cmd, const char* str, int positive, int base, int* value);
 /*
  * Read in an integer value, checking for extraneous characters and a range.
  *
  * - `prefix` is an optional prefix for error messages, typically the
- *   name of the program. It may be NULL.
+ *   name of the program. It may be nullptr.
  * - `cmd` is the command switch we're reading for (typically ``argv[ii]``),
  *   which is used in error messages.
  * - `str` is the string to read (typically ``argv[ii+1]``).
@@ -273,7 +274,7 @@ int int_value_in_range(
  * Read in a double value, checking for extraneous characters.
  *
  * - `prefix` is an optional prefix for error messages, typically the
- *   name of the program. It may be NULL.
+ *   name of the program. It may be nullptr.
  * - `cmd` is the command switch we're reading for (typically ``argv[ii]``),
  *   which is used in error messages.
  * - `str` is the string to read (typically ``argv[ii+1]``).
@@ -288,7 +289,7 @@ int double_value(char* prefix, char* cmd, char* arg, int positive, double* value
  * Read in a hostname and (optional) port
  *
  * - `prefix` is an optional prefix for error messages, typically the
- *   name of the program. It may be NULL.
+ *   name of the program. It may be nullptr.
  * - `cmd` is the command switch we're reading for (typically ``argv[ii]``),
  *   which is used in error messages.
  * - `arg` is the string to read (typically ``argv[ii+1]``).
@@ -319,7 +320,7 @@ int host_value(char* prefix, char* cmd, char* arg, char** hostname, int* port);
  *   For UDP, multicast TTL will be enabled.
  * - If the destination address (`hostname`) is multicast and `multicast_ifaddr`
  *   is supplied, it is used to select (by IP address) the network interface
- *   on which to send the multicasts.  It may be NULL to use the default,
+ *   on which to send the multicasts.  It may be nullptr to use the default,
  *   or for non-multicast cases.
  *
  * A socket connected to via this function must be disconnected from with

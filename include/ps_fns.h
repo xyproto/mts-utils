@@ -55,7 +55,7 @@ int build_PS_reader(int input, int quiet, PS_reader_p* ps);
  * Specifically:
  *
  * - free the datastructure
- * - set `ps` to NULL
+ * - set `ps` to nullptr
  *
  * Does not close the associated file.
  */
@@ -187,7 +187,7 @@ int find_PS_pack_header_start(PS_reader_p ps, int verbose, uint32_t max, offset_
  *
  * NOTE that the `data` buffer in the `packet` is realloc'ed by this
  * function. It is thus important to ensure that the `packet` datastructure
- * contains a NULL pointer for said buffer before the first call of this
+ * contains a nullptr pointer for said buffer before the first call of this
  * function.
  *
  * - `ps` is the PS read-ahead context we're reading from
@@ -216,9 +216,9 @@ void clear_PS_packet(PS_packet_p packet);
 /*
  * Tidy up and free a PS packet datastructure after we've finished with it.
  *
- * Empties the PS packet datastructure, frees it, and sets `unit` to NULL.
+ * Empties the PS packet datastructure, frees it, and sets `unit` to nullptr.
  *
- * If `unit` is already NULL, does nothing.
+ * If `unit` is already nullptr, does nothing.
  */
 void free_PS_packet(PS_packet_p* packet);
 /*

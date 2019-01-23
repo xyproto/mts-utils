@@ -248,8 +248,9 @@ int redirect_output(void (*new_print_message_fn)(const char* message),
     void (*new_fprint_error_fn)(const char* format, va_list arg_ptr),
     void (*new_flush_msg_fn)(void))
 {
-    if (new_print_message_fn == NULL || new_print_error_fn == NULL || new_fprint_message_fn == NULL
-        || new_fprint_error_fn == NULL || new_flush_msg_fn == NULL)
+    if (new_print_message_fn == nullptr || new_print_error_fn == nullptr
+        || new_fprint_message_fn == nullptr || new_fprint_error_fn == nullptr
+        || new_flush_msg_fn == nullptr)
         return 1;
 
     fns.print_message_fn = new_print_message_fn;

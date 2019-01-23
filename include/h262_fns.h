@@ -54,9 +54,9 @@ int build_h262_item(h262_item_p* item);
 /*
  * Tidy up and free an MPEG2 item datastructure after we've finished with it.
  *
- * Empties the MPEG2 item datastructure, frees it, and sets `item` to NULL.
+ * Empties the MPEG2 item datastructure, frees it, and sets `item` to nullptr.
  *
- * If `item` is already NULL, does nothing.
+ * If `item` is already nullptr, does nothing.
  */
 void free_h262_item(h262_item_p* item);
 /*
@@ -74,7 +74,7 @@ void report_h262_item(h262_item_p item);
  * information therein.
  *
  * - `es` is the elementary stream we're reading from.
- * - `item` is the datastructure containing the MPEG2 item found, or NULL
+ * - `item` is the datastructure containing the MPEG2 item found, or nullptr
  *   if there was none.
  *
  * Returns 0 if it succeeds, EOF if the end-of-file is read (i.e., there
@@ -94,11 +94,11 @@ int build_h262_context(ES_p es, h262_context_p* context);
 /*
  * Free an H.262 picture reading context.
  *
- * Clears the datastructure, frees it, and returns `context` as NULL.
+ * Clears the datastructure, frees it, and returns `context` as nullptr.
  *
  * Does not free any `reverse_data` datastructure.
  *
- * Does nothing if `context` is already NULL.
+ * Does nothing if `context` is already nullptr.
  */
 void free_h262_context(h262_context_p* context);
 /*
@@ -116,9 +116,9 @@ int rewind_h262_context(h262_context_p context);
 /*
  * Free an H.262 "picture".
  *
- * Clears the datastructure, frees it, and returns `picture` as NULL.
+ * Clears the datastructure, frees it, and returns `picture` as nullptr.
  *
- * Does nothing if `picture` is already NULL.
+ * Does nothing if `picture` is already nullptr.
  */
 void free_h262_picture(h262_picture_p* picture);
 /*

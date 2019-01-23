@@ -259,7 +259,7 @@ int build_TS_reader_with_fns(void* handle, int (*read_fn)(void*, byte*, size_t),
 /*
  * Open a file to read TS packets from.
  *
- * If `filename` is NULL, then the input will be taken from standard input.
+ * If `filename` is nullptr, then the input will be taken from standard input.
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
@@ -267,14 +267,14 @@ int open_file_for_TS_read(char* filename, TS_reader_p* tsreader);
 /*
  * Free a TS packet read-ahead buffer
  *
- * Sets `buffer` to NULL.
+ * Sets `buffer` to nullptr.
  */
 void free_TS_reader(TS_reader_p* tsreader);
 /*
  * Free a TS packet read-ahead buffer and close the referenced file
  * (if it is not standard input).
  *
- * Sets `buffer` to NULL, whether the file close succeeds or not.
+ * Sets `buffer` to nullptr, whether the file close succeeds or not.
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
@@ -447,7 +447,7 @@ void report_adaptation_field(byte adapt[], int adapt_len);
 /*
  * Report on the timing information from this TS packet's adaptation field
  *
- * - if `times` is non-NULL, then timing information (derived from the PCR)
+ * - if `times` is non-nullptr, then timing information (derived from the PCR)
  *   will be calculated and reported
  * - `adapt` is the adaptation field content
  * - `adapt_len` is its length
@@ -477,7 +477,7 @@ void report_payload(int show_data, int stream_type, byte payload[MAX_TS_PAYLOAD_
  *
  * - if `is_msg` then print as a message, otherwise as an error
  * - `leader1` and `leader2` are the text to write at the start of each line
- *   (either or both may be NULL)
+ *   (either or both may be nullptr)
  * - `desc_data` is the data containing the descriptors
  * - `desc_data_len` is its length
  *
@@ -527,11 +527,11 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
  * - regardless, `payload_len` is the actual length of the payload.
  * - `pid` is the PID of this TS packet.
  * - `data` is the data array for the whole of the data of this PSI.
- *   If it is passed as NULL, then the TS packet must be the first for
+ *   If it is passed as nullptr, then the TS packet must be the first for
  *   this PSI, and this function will malloc an array of the appropriate
- *   length (and return it here). If it is non-NULL, then it is partially
+ *   length (and return it here). If it is non-nullptr, then it is partially
  *   full.
- * - `data_len` is the actual length of the `data` array -- if `data` is NULL
+ * - `data_len` is the actual length of the `data` array -- if `data` is nullptr
  *   then this will be set by the function.
  * - `data_used` is how many bytes of data are already in the `data` array.
  *   This will be updated by this function - if it is returned as equal to
@@ -541,7 +541,7 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
  *
  *  If a PSI packet has PUSI set, then it is the first packet of said PSI
  *  (which, for our purposes, means PAT or PMT). If it does not, then it
- *  is a continuation. If PUSI was set, call this with ``data`` NULL, otherwise
+ *  is a continuation. If PUSI was set, call this with ``data`` nullptr, otherwise
  *  pass it some previous data to continue.
  *
  * Returns 0 if all went well, 1 if something went wrong.
@@ -570,12 +570,12 @@ int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt
  *   packet forms the start of a PES packet. Its meaning is not significant
  *   if there is no payload, or if the payload is not (part of) a PES packet.
  * - `adapt` is an offset into `buf`, acting as an array of the actual
- *   adaptation control bytes. It will be NULL if there are no adaptation
+ *   adaptation control bytes. It will be nullptr if there are no adaptation
  *   controls.
  * - `adapt_len` is the length of the adaptation controls (i.e., the
  *   number of bytes). It will be 0 if there are no adaptation controls.
  * - `payload` is an offset into `buf`, acting as an array of the actual
- *   payload bytes. It will be NULL if there is no payload.
+ *   payload bytes. It will be nullptr if there is no payload.
  * - `payload_len` is the length of the payload *in this packet* (i.e., the
  *   number of bytes. It will be 0 if there is no payload.
  *
@@ -598,12 +598,12 @@ int split_TS_packet(byte buf[TS_PACKET_SIZE], uint32_t* pid, int* payload_unit_s
  *   packet forms the start of a PES packet. Its meaning is not significant
  *   if there is no payload, or if the payload is not (part of) a PES packet.
  * - `adapt` is an offset into `buf`, acting as an array of the actual
- *   adaptation control bytes. It will be NULL if there are no adaptation
+ *   adaptation control bytes. It will be nullptr if there are no adaptation
  *   controls.
  * - `adapt_len` is the length of the adaptation controls (i.e., the
  *   number of bytes). It will be 0 if there are no adaptation controls.
  * - `payload` is an offset into `buf`, acting as an array of the actual
- *   payload bytes. It will be NULL if there is no payload.
+ *   payload bytes. It will be nullptr if there is no payload.
  * - `payload_len` is the length of the payload *in this packet* (i.e., the
  *   number of bytes. It will be 0 if there is no payload.
  *
@@ -621,7 +621,7 @@ int get_next_TS_packet(TS_reader_p tsreader, uint32_t* pid, int* payload_unit_st
  * - if `quiet` is true, then don't output normal informational messages
  * - `num_read` is the number of packets read to find the PAT (or before
  *   giving up)
- * - `prog_list` is the program list from the PAT, or NULL if none was found
+ * - `prog_list` is the program list from the PAT, or nullptr if none was found
  *
  * Returns 0 if all went well, EOF if no PAT was found,
  * 1 if something else went wrong.

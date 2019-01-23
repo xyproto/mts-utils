@@ -118,7 +118,7 @@ uint32_t crc32_block(uint32_t crc, byte* pData, int blk_len)
  *
  * - if `is_msg` then print as a message, otherwise as an error
  * - `name` is identifying text to start the report with.
- * - `data` is the byte data to print. This may be NULL.
+ * - `data` is the byte data to print. This may be nullptr.
  * - `length` is its length
  * - `max` is the maximum number of bytes to print
  *
@@ -141,7 +141,7 @@ void print_data(int is_msg, const char* name, const byte data[], int length, int
 #define MAX_LINE_LENGTH 80
 
     fprint_msg_or_err(is_msg, "%s (%d byte%s):", name, length, (length == 1 ? "" : "s"));
-    if (data == NULL)
+    if (data == nullptr)
         fprint_msg_or_err(is_msg, " <null>"); // Shouldn't happen, but let's be careful.
     else {
         for (ii = 0; ii < (length < max ? length : max); ii++)
@@ -156,7 +156,7 @@ void print_data(int is_msg, const char* name, const byte data[], int length, int
  * Print out (the last `max`) bytes of a byte array.
  *
  * - `name` is identifying text to start the report with.
- * - `data` is the byte data to print. This may be NULL.
+ * - `data` is the byte data to print. This may be nullptr.
  * - `length` is its length
  * - `max` is the maximum number of bytes to print
  *
@@ -176,7 +176,7 @@ void print_end_of_data(char* name, byte data[], int length, int max)
     }
 
     fprint_msg("%s (%d byte%s):", name, length, (length == 1 ? "" : "s"));
-    if (data == NULL)
+    if (data == nullptr)
         print_msg(" <null>"); // Shouldn't happen, but let's be careful.
     else {
         if (max < length)
@@ -361,9 +361,9 @@ static int open_input_as_ES_using_PES(
     char* name, int quiet, int force_stream_type, int want_data, int* is_data, ES_p* es)
 {
     int err;
-    PES_reader_p reader = NULL;
+    PES_reader_p reader = nullptr;
 
-    if (name == NULL) {
+    if (name == nullptr) {
         print_err("### Cannot use standard input to read PES\n");
         return 1;
     }
@@ -406,7 +406,7 @@ static int open_input_as_ES_direct(
     char* name, int quiet, int force_stream_type, int want_data, int* is_data, ES_p* es)
 {
     int err;
-    int use_stdin = (name == NULL);
+    int use_stdin = (name == nullptr);
     int input = -1;
 
     if (use_stdin) {
@@ -482,7 +482,7 @@ static int open_input_as_ES_direct(
 /*
  * Open an input file appropriately for reading as ES.
  *
- * - `name` is the name of the file, or NULL if standard input
+ * - `name` is the name of the file, or nullptr if standard input
  *   is to be read from (which is not allowed if `use_pes` is
  *   TRUE).
  *
@@ -530,7 +530,7 @@ int open_input_as_ES(char* name, int use_pes, int quiet, int force_stream_type, 
  * reader and file (unless the input was standard input).
  *
  * - `name` is the name of the file, used for error reporting.
- * - `es` is the ES stream to close. This will be set to NULL.
+ * - `es` is the ES stream to close. This will be set to nullptr.
  *
  * Returns 0 if all goes well, 1 if something goes wrong. In the latter case,
  * suitable messages will have been written out to standard error.
@@ -556,7 +556,7 @@ int close_input_as_ES(char* name, ES_p* es)
  * Read in an unsigned integer value, checking for extraneous characters.
  *
  * - `prefix` is an optional prefix for error messages, typically the
- *   name of the program. It may be NULL.
+ *   name of the program. It may be nullptr.
  * - `cmd` is the command switch we're reading for (typically ``argv[ii]``),
  *   which is used in error messages.
  * - `str` is the string to read (typically ``argv[ii+1]``).
@@ -575,7 +575,7 @@ int unsigned_value(char* prefix, char* cmd, char* arg, int base, uint32_t* value
     val = strtoul(arg, &ptr, base);
     if (errno) {
         print_err("### ");
-        if (prefix != NULL)
+        if (prefix != nullptr)
             fprint_err("%s: ", prefix);
         if (errno == ERANGE && val == 0)
             fprint_err(
@@ -588,7 +588,7 @@ int unsigned_value(char* prefix, char* cmd, char* arg, int base, uint32_t* value
     }
     if (ptr[0] != '\0') {
         print_err("### ");
-        if (prefix != NULL)
+        if (prefix != nullptr)
             fprint_err("%s: ", prefix);
         if (ptr - arg == 0)
             fprint_err("Argument to %s should be a number, in %s %s\n", cmd, cmd, arg);
@@ -606,7 +606,7 @@ int unsigned_value(char* prefix, char* cmd, char* arg, int base, uint32_t* value
  * Read in an integer value, checking for extraneous characters.
  *
  * - `prefix` is an optional prefix for error messages, typically the
- *   name of the program. It may be NULL.
+ *   name of the program. It may be nullptr.
  * - `cmd` is the command switch we're reading for (typically ``argv[ii]``),
  *   which is used in error messages.
  * - `str` is the string to read (typically ``argv[ii+1]``).
@@ -618,7 +618,8 @@ int unsigned_value(char* prefix, char* cmd, char* arg, int base, uint32_t* value
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int int_value(char* prefix, char* cmd, char* arg, int positive, int base, int* value)
+int int_value(
+    const char* prefix, const char* cmd, const char* arg, int positive, int base, int* value)
 {
     char* ptr;
     long val;
@@ -626,7 +627,7 @@ int int_value(char* prefix, char* cmd, char* arg, int positive, int base, int* v
     val = strtol(arg, &ptr, base);
     if (errno) {
         print_err("### ");
-        if (prefix != NULL)
+        if (prefix != nullptr)
             fprint_err("%s: ", prefix);
         if (errno == ERANGE && val == 0)
             fprint_err("String cannot be converted to (long) integer in %s %s\n", cmd, arg);
@@ -638,7 +639,7 @@ int int_value(char* prefix, char* cmd, char* arg, int positive, int base, int* v
     }
     if (ptr[0] != '\0') {
         print_err("### ");
-        if (prefix != NULL)
+        if (prefix != nullptr)
             fprint_err("%s: ", prefix);
         if (ptr - arg == 0)
             fprint_err("Argument to %s should be a number, in %s %s\n", cmd, cmd, arg);
@@ -650,7 +651,7 @@ int int_value(char* prefix, char* cmd, char* arg, int positive, int base, int* v
 
     if (val > INT_MAX || val < INT_MIN) {
         print_err("### ");
-        if (prefix != NULL)
+        if (prefix != nullptr)
             fprint_err("%s: ", prefix);
         fprint_err("Value %ld (in %s %s) is too large (to fit into 'int')\n", val, cmd, arg);
         return 1;
@@ -658,7 +659,7 @@ int int_value(char* prefix, char* cmd, char* arg, int positive, int base, int* v
 
     if (positive && val < 0) {
         print_err("### ");
-        if (prefix != NULL)
+        if (prefix != nullptr)
             fprint_err("%s: ", prefix);
         fprint_err("Value %ld (in %s %s) is less than zero\n", val, cmd, arg);
         return 1;
@@ -672,7 +673,7 @@ int int_value(char* prefix, char* cmd, char* arg, int positive, int base, int* v
  * Read in an integer value, checking for extraneous characters and a range.
  *
  * - `prefix` is an optional prefix for error messages, typically the
- *   name of the program. It may be NULL.
+ *   name of the program. It may be nullptr.
  * - `cmd` is the command switch we're reading for (typically ``argv[ii]``),
  *   which is used in error messages.
  * - `str` is the string to read (typically ``argv[ii+1]``).
@@ -695,7 +696,7 @@ int int_value_in_range(
 
     if (temp > maximum || temp < minimum) {
         print_err("### ");
-        if (prefix != NULL)
+        if (prefix != nullptr)
             fprint_err("%s: ", prefix);
         fprint_err("Value %d (in %s %s) is not in range %d..%d (0x%x..0x%x)\n", temp, cmd, arg,
             minimum, maximum, minimum, maximum);
@@ -709,7 +710,7 @@ int int_value_in_range(
  * Read in a double value, checking for extraneous characters.
  *
  * - `prefix` is an optional prefix for error messages, typically the
- *   name of the program. It may be NULL.
+ *   name of the program. It may be nullptr.
  * - `cmd` is the command switch we're reading for (typically ``argv[ii]``),
  *   which is used in error messages.
  * - `str` is the string to read (typically ``argv[ii+1]``).
@@ -727,7 +728,7 @@ int double_value(char* prefix, char* cmd, char* arg, int positive, double* value
     val = strtod(arg, &ptr);
     if (errno) {
         print_err("### ");
-        if (prefix != NULL)
+        if (prefix != nullptr)
             fprint_err("%s: ", prefix);
         if (errno == ERANGE && val == 0)
             fprint_err("String cannot be converted to (double) float in %s %s\n", cmd, arg);
@@ -739,7 +740,7 @@ int double_value(char* prefix, char* cmd, char* arg, int positive, double* value
     }
     if (ptr[0] != '\0') {
         print_err("### ");
-        if (prefix != NULL)
+        if (prefix != nullptr)
             fprint_err("%s: ", prefix);
         fprint_err("Unexpected characters ('%s') after the %.*s in %s %s\n", ptr, (int)(ptr - arg),
             arg, cmd, arg);
@@ -748,7 +749,7 @@ int double_value(char* prefix, char* cmd, char* arg, int positive, double* value
 
     if (positive && val < 0) {
         print_err("### ");
-        if (prefix != NULL)
+        if (prefix != nullptr)
             fprint_err("%s: ", prefix);
         fprint_err("Value %f (in %s %s) is less than zero\n", val, cmd, arg);
         return 1;
@@ -762,9 +763,9 @@ int double_value(char* prefix, char* cmd, char* arg, int positive, double* value
  * Read in a hostname and (optional) port
  *
  * - `prefix` is an optional prefix for error messages, typically the
- *   name of the program. It may be NULL.
+ *   name of the program. It may be nullptr.
  * - `cmd` is the command switch we're reading for (typically ``argv[ii]``),
- *   which is used in error messages. It may be NULL if we are reading a
+ *   which is used in error messages. It may be nullptr if we are reading a
  *   "plain" host name, with no command switch in front of it.
  * - `arg` is the string to read (typically ``argv[ii+1]``).
  * - `hostname` is the host name read
@@ -786,7 +787,7 @@ int host_value(char* prefix, char* cmd, char* arg, char** hostname, int* port)
 
     *hostname = arg;
 
-    if (p != NULL) {
+    if (p != nullptr) {
         char* ptr;
         p[0] = '\0'; // yep, modifying argv[ii+1]
         errno = 0;
@@ -794,7 +795,7 @@ int host_value(char* prefix, char* cmd, char* arg, char** hostname, int* port)
         if (errno) {
             p[0] = ':';
             print_err("### ");
-            if (prefix != NULL)
+            if (prefix != nullptr)
                 fprint_err("%s: ", prefix);
             if (cmd)
                 fprint_err("Cannot read port number in %s %s (%s)\n", cmd, arg, strerror(errno));
@@ -805,7 +806,7 @@ int host_value(char* prefix, char* cmd, char* arg, char** hostname, int* port)
         if (ptr[0] != '\0') {
             p[0] = ':';
             print_err("### ");
-            if (prefix != NULL)
+            if (prefix != nullptr)
                 fprint_err("%s: ", prefix);
             if (cmd)
                 fprint_err("Unexpected characters in port number in %s %s\n", cmd, arg);
@@ -816,7 +817,7 @@ int host_value(char* prefix, char* cmd, char* arg, char** hostname, int* port)
         if (*port < 0) {
             p[0] = ':';
             print_err("### ");
-            if (prefix != NULL)
+            if (prefix != nullptr)
                 fprint_err("%s: ", prefix);
             if (cmd)
                 fprint_err("Negative port number in %s %s\n", cmd, arg);
@@ -840,7 +841,7 @@ int host_value(char* prefix, char* cmd, char* arg, char** hostname, int* port)
  *   For UDP, multicast TTL will be enabled.
  * - If the destination address (`hostname`) is multicast and `multicast_ifaddr`
  *   is supplied, it is used to select (by IP address) the network interface
- *   on which to send the multicasts.  It may be NULL to use the default,
+ *   on which to send the multicasts.  It may be nullptr to use the default,
  *   or for non-multicast cases.
  *
  * A socket connected to via this function must be disconnected from with
@@ -868,7 +869,7 @@ int connect_socket(char* hostname, int port, int use_tcpip, char* multicast_ifad
     }
 
     hp = gethostbyname(hostname);
-    if (hp == NULL) {
+    if (hp == nullptr) {
         fprint_err("### Unable to resolve host %s: %s\n", hostname, hstrerror(h_errno));
         return -1;
     }
@@ -939,7 +940,7 @@ int ipv4_string_to_addr(uint32_t* dest, const char* string)
     uint32_t out = 0;
 
     for (nr = 0, p = str_cpy; nr < 4 && *p; p = p2 + 1, ++nr) {
-        char* px = NULL;
+        char* px = nullptr;
         p2 = strchr(p, '.');
         if (p2) {
             *p2 = '\0';

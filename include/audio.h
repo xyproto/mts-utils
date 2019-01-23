@@ -48,12 +48,12 @@
 inline int build_audio_frame(audio_frame_p* frame)
 {
     audio_frame_p new2 = (audio_frame_p)malloc(SIZEOF_AUDIO_FRAME);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         fprint_err("### Unable to allocate audio frame datastructure\n");
         return 1;
     }
 
-    new2->data = NULL;
+    new2->data = nullptr;
     new2->data_len = 0;
 
     *frame = new2;
@@ -63,23 +63,23 @@ inline int build_audio_frame(audio_frame_p* frame)
 /*
  * Tidy up and free an audio frame datastructure when we've finished with it
  *
- * Empties the datastructure, frees it, and sets `frame` to NULL.
+ * Empties the datastructure, frees it, and sets `frame` to nullptr.
  *
- * If `frame` is already NULL, does nothing.
+ * If `frame` is already nullptr, does nothing.
  */
 void free_audio_frame(audio_frame_p* frame)
 {
-    if (*frame == NULL)
+    if (*frame == nullptr)
         return;
 
-    if ((*frame)->data != NULL) {
+    if ((*frame)->data != nullptr) {
         free((*frame)->data);
-        (*frame)->data = NULL;
+        (*frame)->data = nullptr;
     }
     (*frame)->data_len = 0;
 
     free(*frame);
-    *frame = NULL;
+    *frame = nullptr;
 }
 /*
  * Read the next audio frame.

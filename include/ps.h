@@ -124,7 +124,7 @@ int build_PS_reader(int input, int quiet, PS_reader_p* ps)
 {
     int err;
     PS_reader_p new2 = (PS_reader_p)malloc(SIZEOF_PS_READER);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate program stream read context\n");
         return 1;
     }
@@ -177,23 +177,23 @@ int build_PS_reader(int input, int quiet, PS_reader_p* ps)
  * Specifically:
  *
  * - free the datastructure
- * - set `ps` to NULL
+ * - set `ps` to nullptr
  *
  * Does not close the associated file.
  */
 void free_PS_reader(PS_reader_p* ps)
 {
-    if (*ps != NULL) {
+    if (*ps != nullptr) {
         (*ps)->input = -1; // "forget" our input
         free(*ps);
-        *ps = NULL;
+        *ps = nullptr;
     }
 }
 
 /*
  * Open a PS file for reading.
  *
- * - `name` is the name of the file. If this is NULL, then standard input
+ * - `name` is the name of the file. If this is nullptr, then standard input
  *   is used.
  * - If `quiet`, then don't report on ignored bytes at the start of the file
  * - `ps` is the new PS context
@@ -204,7 +204,7 @@ int open_PS_file(char* name, int quiet, PS_reader_p* ps)
 {
     int f;
 
-    if (name == NULL)
+    if (name == nullptr)
         f = STDIN_FILENO;
     else {
         f = open_binary_file(name, FALSE);
@@ -357,7 +357,7 @@ int rewind_program_stream(PS_reader_p ps) { return seek_using_PS_reader(ps, ps->
  * - `ps` is the PS read-ahead context
  * - `num_bytes` is how many bytes to read
  * - `buffer` is the buffer to read them into
- * - `posn` is the offset of said data in the file (NULL if the value is not
+ * - `posn` is the offset of said data in the file (nullptr if the value is not
  *   wanted).
  *
  * Returns 0 if all goes well, EOF if end-of-file is encountered before all
@@ -370,7 +370,7 @@ static int read_PS_bytes(PS_reader_p ps, int num_bytes, byte* buffer, offset_t* 
     int num_bytes_wanted = num_bytes;
     int num_bytes_left = ps->data_end - ps->data_ptr;
 
-    if (posn != NULL)
+    if (posn != nullptr)
         *posn = ps->data_posn + (ps->data_ptr - ps->data);
 
     for (;;) {
@@ -401,7 +401,7 @@ static int read_PS_bytes(PS_reader_p ps, int num_bytes, byte* buffer, offset_t* 
 void print_stream_id(int is_msg, byte stream_id)
 {
     byte number;
-    char* str = NULL;
+    char* str = nullptr;
     switch (stream_id) {
         // H.222 Program stream specific codes
     case 0xB9:
@@ -484,11 +484,11 @@ void print_stream_id(int is_msg, byte stream_id)
         break;
 
     default:
-        str = NULL;
+        str = nullptr;
         break;
     }
 
-    if (str != NULL)
+    if (str != nullptr)
         fprint_msg_or_err(is_msg, str);
     else if (stream_id >= 0xC0 && stream_id <= 0xDF) {
         number = stream_id & 0x1F;
@@ -619,7 +619,7 @@ int find_PS_pack_header_start(PS_reader_p ps, int verbose, uint32_t max, offset_
  *
  * NOTE that the `data` buffer in the `packet` is realloc'ed by this
  * function. It is thus important to ensure that the `packet` datastructure
- * contains a NULL pointer for said buffer before the first call of this
+ * contains a nullptr pointer for said buffer before the first call of this
  * function.
  *
  * - `ps` is the PS read-ahead context we're reading from
@@ -627,7 +627,7 @@ int find_PS_pack_header_start(PS_reader_p ps, int verbose, uint32_t max, offset_
  * - `packet` is the packet we're reading the PES packet into.
  *
  * Returns 0 if it succeeds, EOF if it unexpectedly reads end-of-file, and 1
- * if some other error occurs. `packet->data` will be NULL if EOF is returned.
+ * if some other error occurs. `packet->data` will be nullptr if EOF is returned.
  */
 int read_PS_packet_body(PS_reader_p ps, byte stream_id, PS_packet_p packet)
 {
@@ -635,13 +635,13 @@ int read_PS_packet_body(PS_reader_p ps, byte stream_id, PS_packet_p packet)
     byte buf[2];
 
     // First, the packet length
-    err = read_PS_bytes(ps, 2, buf, NULL);
+    err = read_PS_bytes(ps, 2, buf, nullptr);
     if (err) {
         fprint_err("### %s reading PS packet length\n",
             (err == EOF ? "Unexpected end of file" : "Error"));
-        if (packet->data != NULL)
+        if (packet->data != nullptr)
             free(packet->data);
-        packet->data = NULL;
+        packet->data = nullptr;
         return err;
     }
 
@@ -657,9 +657,9 @@ int read_PS_packet_body(PS_reader_p ps, byte stream_id, PS_packet_p packet)
     // - but let's check anyway
     if (packet->packet_length == 0) {
         print_err("### Packet has length 0 - not allowed in PS\n");
-        if (packet->data != NULL)
+        if (packet->data != nullptr)
             free(packet->data);
-        packet->data = NULL;
+        packet->data = nullptr;
         return 1;
     }
 
@@ -670,7 +670,7 @@ int read_PS_packet_body(PS_reader_p ps, byte stream_id, PS_packet_p packet)
 #else
     packet->data = (byte*)realloc(packet->data, packet->packet_length + 6);
 #endif
-    if (packet->data == NULL) {
+    if (packet->data == nullptr) {
         print_err("### Unable to allocate PS packet data buffer\n");
         return 1;
     }
@@ -685,13 +685,13 @@ int read_PS_packet_body(PS_reader_p ps, byte stream_id, PS_packet_p packet)
     packet->data[5] = buf[1];
 
     // And now we can read in the rest of the packet's data
-    err = read_PS_bytes(ps, packet->packet_length, &(packet->data[6]), NULL);
+    err = read_PS_bytes(ps, packet->packet_length, &(packet->data[6]), nullptr);
     if (err) {
         fprint_err("### %s reading rest of PS packet\n",
             (err == EOF ? "Unexpected end of file" : "Error"));
-        if (packet->data != NULL)
+        if (packet->data != nullptr)
             free(packet->data);
-        packet->data = NULL;
+        packet->data = nullptr;
         return err;
     }
 
@@ -728,7 +728,7 @@ int read_PS_pack_header_body(PS_reader_p ps, PS_pack_header_p hdr)
     byte dummy[8]; // a 3 bit length means no more than 7 stuffing bytes
 
     // Read just the first 8 bytes, in case it's an MPEG-1 pack header
-    err = read_PS_bytes(ps, 8, hdr->data, NULL);
+    err = read_PS_bytes(ps, 8, hdr->data, nullptr);
     if (err) {
         fprint_err("### %s reading body of PS pack header\n",
             (err == EOF ? "Unexpected end of file" : "Error"));
@@ -761,7 +761,7 @@ int read_PS_pack_header_body(PS_reader_p ps, PS_pack_header_p hdr)
 #if DEBUG
         print_msg("ISO/IEC 13818-1/H.222.0 pack header\n");
 #endif
-        err = read_PS_bytes(ps, 2, &(hdr->data[8]), NULL);
+        err = read_PS_bytes(ps, 2, &(hdr->data[8]), nullptr);
         if (err) {
             fprint_err("### %s reading last 2 bytes of body of PS pack header\n",
                 (err == EOF ? "Unexpected end of file" : "Error"));
@@ -789,7 +789,7 @@ int read_PS_pack_header_body(PS_reader_p ps, PS_pack_header_p hdr)
 
     // And ignore that many stuffing bytes...
     if (hdr->pack_stuffing_length > 0) {
-        err = read_PS_bytes(ps, hdr->pack_stuffing_length, dummy, NULL);
+        err = read_PS_bytes(ps, hdr->pack_stuffing_length, dummy, nullptr);
         if (err) {
             fprint_err("### %s reading PS pack header stuffing bytes\n",
                 (err == EOF ? "Unexpected end of file" : "Error"));
@@ -805,9 +805,9 @@ int read_PS_pack_header_body(PS_reader_p ps, PS_pack_header_p hdr)
  */
 void clear_PS_packet(PS_packet_p packet)
 {
-    if (packet->data != NULL) {
+    if (packet->data != nullptr) {
         free(packet->data);
-        packet->data = NULL;
+        packet->data = nullptr;
         packet->data_len = 0;
     }
     packet->packet_length = 0;
@@ -816,17 +816,17 @@ void clear_PS_packet(PS_packet_p packet)
 /*
  * Tidy up and free a PS packet datastructure after we've finished with it.
  *
- * Empties the PS packet datastructure, frees it, and sets `unit` to NULL.
+ * Empties the PS packet datastructure, frees it, and sets `unit` to nullptr.
  *
- * If `unit` is already NULL, does nothing.
+ * If `unit` is already nullptr, does nothing.
  */
 void free_PS_packet(PS_packet_p* packet)
 {
-    if (*packet == NULL)
+    if (*packet == nullptr)
         return;
     clear_PS_packet(*packet);
     free(*packet);
-    *packet = NULL;
+    *packet = nullptr;
 }
 
 /*
@@ -1144,7 +1144,7 @@ static int write_video(TS_writer_p output, struct PS_pack_header* header, byte s
                 h222_stream_type_str(prog_data->video_type));
 
         err = add_stream_to_pmt(
-            prog_data->pmt, prog_data->video_pid, prog_data->video_type, 0, NULL);
+            prog_data->pmt, prog_data->video_pid, prog_data->video_type, 0, nullptr);
         if (err)
             return 1;
         prog_data->pmt->version_number++;
@@ -1423,7 +1423,7 @@ static int write_audio(TS_writer_p output, byte stream_id, struct PS_packet* pac
                 prog_data->pmt, prog_data->audio_pid, audio_stream_type, desc_len, desc);
         } else
             err = add_stream_to_pmt(
-                prog_data->pmt, prog_data->audio_pid, audio_stream_type, 0, NULL);
+                prog_data->pmt, prog_data->audio_pid, audio_stream_type, 0, nullptr);
         if (err)
             return 1;
         prog_data->pmt->version_number++;

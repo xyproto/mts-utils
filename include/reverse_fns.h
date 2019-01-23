@@ -77,7 +77,7 @@ int add_access_unit_reverse_context(access_unit_context_p context, reverse_data_
 /*
  * Free the datastructure we used to remember reversing data
  *
- * Sets `reverse_data` to NULL.
+ * Sets `reverse_data` to nullptr.
  */
 void free_reverse_data(reverse_data_p* reverse_data);
 /*
@@ -124,7 +124,7 @@ int remember_reverse_h264_data(
  *   entry in the `reverse_data` is number 0.
  * - `index` indicates which picture (counted from the start of the file)
  *   this one is (i.e., we're assuming that not all pictures will be stored).
- *   `index` may be passed as NULL if the value is of no interest - i.e.,
+ *   `index` may be passed as nullptr if the value is of no interest - i.e.,
  *   typically when the entry is for an H.262 sequence header.
  * - `start_posn` is the location of the start of the entry in the file,
  * - `length` is the number of bytes in the entry
@@ -132,17 +132,17 @@ int remember_reverse_h264_data(
  *   be the offset backwards to the previous nearest sequence header
  *   (i.e., 1 if the sequence header is the previous entry), and if it is
  *   a sequence header, `seq_offset` will be 0. For H.264 data, the value
- *   will always be 0. `seq_offset` may be passed as NULL if the value is
+ *   will always be 0. `seq_offset` may be passed as nullptr if the value is
  *   of no interest.
  * - for H.262 data, if the entry is a picture, then `afd` will be its
- *   (effective) AFD byte. Otherwise it will be 0. `afd` may be passed as NULL
+ *   (effective) AFD byte. Otherwise it will be 0. `afd` may be passed as nullptr
  *   if the value if of no interest.
  *
  * To clarify, all of the following are legitimate calls::
  *
  *    err = get_reverse_data(reverse_data,10,&index,&start,&length,&offset,&afd);
- *    err = get_reverse_data(reverse_data,10,&index,&start,&length,NULL,NULL);
- *    err = get_reverse_data(reverse_data,10,NULL,&start,&length,NULL,NULL);
+ *    err = get_reverse_data(reverse_data,10,&index,&start,&length,nullptr,nullptr);
+ *    err = get_reverse_data(reverse_data,10,nullptr,&start,&length,nullptr,nullptr);
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */

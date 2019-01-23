@@ -57,11 +57,11 @@ int build_avs_context(ES_p es, avs_context_p* context);
 /*
  * Free an AVS frame reading context.
  *
- * Clears the datastructure, frees it, and returns `context` as NULL.
+ * Clears the datastructure, frees it, and returns `context` as nullptr.
  *
  * Does not free any `reverse_data` datastructure.
  *
- * Does nothing if `context` is already NULL.
+ * Does nothing if `context` is already nullptr.
  */
 void free_avs_context(avs_context_p* context);
 /*
@@ -79,9 +79,9 @@ int rewind_avs_context(avs_context_p context);
 /*
  * Free an AVS "frame".
  *
- * Clears the datastructure, frees it, and returns `frame` as NULL.
+ * Clears the datastructure, frees it, and returns `frame` as nullptr.
  *
- * Does nothing if `frame` is already NULL.
+ * Does nothing if `frame` is already nullptr.
  */
 void free_avs_frame(avs_frame_p* frame);
 /*

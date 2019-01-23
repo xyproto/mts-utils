@@ -199,7 +199,7 @@ void PES_header(uint32_t data_len, byte stream_id, int with_PTS, uint64_t pts, i
  * is not a PES packet).
  *
  * For real data, `data_len` should never be 0 (the exception is when
- * writing NULL packets).
+ * writing nullptr packets).
  *
  * `TS_hdr_len` must never be 0.
  *
@@ -238,7 +238,7 @@ static int write_TS_packet_parts(TS_writer_p output, byte TS_packet[TS_PACKET_SI
  * Write our data as a (series of) Transport Stream PES packets.
  *
  * - `output` is the TS writer context we're using to write our TS data out
- * - `pes_hdr` is NULL if the data to be written out is already PES, and is
+ * - `pes_hdr` is nullptr if the data to be written out is already PES, and is
  *   otherwise a PES header constructed with PES_header()
  * - `pes_hdr_len` is the length of said PES header (or 0)
  * - `data` is (the remainder of) our ES data (e.g., a NAL unit) or PES packet
@@ -404,7 +404,7 @@ static int write_some_TS_PES_packet(TS_writer_p output, byte* pes_hdr, int pes_h
         // Leaving data_len - (184-pes_hdr_len) bytes still to go
         // Is recursion going to be efficient enough?
         if ((data_len - increment) > 0) {
-            err = write_some_TS_PES_packet(output, NULL, 0, &(data[increment]),
+            err = write_some_TS_PES_packet(output, nullptr, 0, &(data[increment]),
                 data_len - increment, FALSE, FALSE, pid, stream_id, FALSE, 0, 0);
             if (err)
                 return err;
@@ -571,7 +571,7 @@ int write_PES_as_TS_PES_packet(TS_writer_p output, byte data[], uint32_t data_le
 #if MPEG1_AS_ES
     if (IS_H222_PES(data)) {
 #endif // MPEG1_AS_ES
-        return write_some_TS_PES_packet(output, NULL, 0, data, data_len, TRUE, TRUE, pid,
+        return write_some_TS_PES_packet(output, nullptr, 0, data, data_len, TRUE, TRUE, pid,
             stream_id, got_pcr, pcr_base, pcr_extn);
 #if MPEG1_AS_ES
     } else {
@@ -675,11 +675,11 @@ int write_TS_program_data(TS_writer_p output, uint32_t transport_stream_id,
     }
 
     pmt = build_pmt((uint16_t)program_number, 0, pid); // Use program stream PID as PCR PID
-    if (pmt == NULL) {
+    if (pmt == nullptr) {
         free_pidint_list(&prog_list);
         return 1;
     }
-    err = add_stream_to_pmt(pmt, pid, stream_type, 0, NULL);
+    err = add_stream_to_pmt(pmt, pid, stream_type, 0, nullptr);
     if (err) {
         free_pidint_list(&prog_list);
         free_pmt(&pmt);
@@ -734,12 +734,12 @@ int write_TS_program_data2(TS_writer_p output, uint32_t transport_stream_id,
     }
 
     pmt = build_pmt((uint16_t)program_number, 0, pcr_pid);
-    if (pmt == NULL) {
+    if (pmt == nullptr) {
         free_pidint_list(&prog_list);
         return 1;
     }
     for (ii = 0; ii < num_progs; ii++) {
-        err = add_stream_to_pmt(pmt, prog_pid[ii], prog_type[ii], 0, NULL);
+        err = add_stream_to_pmt(pmt, prog_pid[ii], prog_type[ii], 0, nullptr);
         if (err) {
             free_pidint_list(&prog_list);
             free_pmt(&pmt);
@@ -838,7 +838,7 @@ int write_pat(TS_writer_p output, uint32_t transport_stream_id, pidint_list_p pr
         return 1;
     }
     err = write_TS_packet_parts(
-        output, TS_packet, TS_hdr_len, NULL, 0, data, data_length, 0x00, FALSE, 0);
+        output, TS_packet, TS_hdr_len, nullptr, 0, data, data_length, 0x00, FALSE, 0);
     if (err) {
         print_err("### Error writing PAT\n");
         return 1;
@@ -946,7 +946,7 @@ int write_pmt(TS_writer_p output, uint32_t pmt_pid, pmt_p pmt)
         return 1;
     }
     err = write_TS_packet_parts(
-        output, TS_packet, TS_hdr_len, NULL, 0, data, data_length, 0x02, FALSE, 0);
+        output, TS_packet, TS_hdr_len, nullptr, 0, data, data_length, 0x02, FALSE, 0);
     if (err) {
         print_err("### Error writing PMT\n");
         return 1;
@@ -1038,7 +1038,7 @@ int write_TS_null_packet(TS_writer_p output)
         TS_packet[ii] = 0xFF;
 
     err = write_TS_packet_parts(
-        output, TS_packet, TS_PACKET_SIZE, NULL, 0, NULL, 0, 0x1FF, FALSE, 0);
+        output, TS_packet, TS_PACKET_SIZE, nullptr, 0, nullptr, 0, 0x1FF, FALSE, 0);
     if (err) {
         print_err("### Error writing null TS packet\n");
         return 1;
@@ -1066,7 +1066,7 @@ static uint64_t TWENTY_SEVEN_MHZ = 27000000;
 static int new_TS_reader(TS_reader_p* tsreader)
 {
     TS_reader_p new2 = (TS_reader_p)malloc(SIZEOF_TS_READER);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate TS read-ahead buffer\n");
         return 1;
     }
@@ -1127,7 +1127,7 @@ int build_TS_reader_with_fns(void* handle, int (*read_fn)(void*, byte*, size_t),
 /*
  * Open a file to read TS packets from.
  *
- * If `filename` is NULL, then the input will be taken from standard input.
+ * If `filename` is nullptr, then the input will be taken from standard input.
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
@@ -1136,7 +1136,7 @@ int open_file_for_TS_read(char* filename, TS_reader_p* tsreader)
     int err;
     int file;
 
-    if (filename == NULL)
+    if (filename == nullptr)
         file = STDIN_FILENO;
     else {
         file = open_binary_file(filename, FALSE);
@@ -1155,16 +1155,16 @@ int open_file_for_TS_read(char* filename, TS_reader_p* tsreader)
 /*
  * Free a TS packet read-ahead buffer
  *
- * Sets `buffer` to NULL.
+ * Sets `buffer` to nullptr.
  */
 void free_TS_reader(TS_reader_p* tsreader)
 {
-    if (*tsreader != NULL) {
-        if ((*tsreader)->pcrbuf != NULL)
+    if (*tsreader != nullptr) {
+        if ((*tsreader)->pcrbuf != nullptr)
             free((*tsreader)->pcrbuf);
         (*tsreader)->file = -1;
         free(*tsreader);
-        *tsreader = NULL;
+        *tsreader = nullptr;
     }
 }
 
@@ -1172,14 +1172,14 @@ void free_TS_reader(TS_reader_p* tsreader)
  * Free a TS packet read-ahead buffer and close the referenced file
  * (if it is not standard input).
  *
- * Sets `buffer` to NULL, whether the file close succeeds or not.
+ * Sets `buffer` to nullptr, whether the file close succeeds or not.
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
 int close_TS_reader(TS_reader_p* tsreader)
 {
     int err = 0;
-    if (*tsreader == NULL)
+    if (*tsreader == nullptr)
         return 0;
     if ((*tsreader)->file != STDIN_FILENO && (*tsreader)->file != -1)
         err = close_file((*tsreader)->file);
@@ -1203,8 +1203,8 @@ int close_TS_reader(TS_reader_p* tsreader)
  */
 int seek_using_TS_reader(TS_reader_p tsreader, offset_t posn)
 {
-    tsreader->read_ahead_ptr = NULL;
-    tsreader->read_ahead_end = NULL;
+    tsreader->read_ahead_ptr = nullptr;
+    tsreader->read_ahead_end = nullptr;
     tsreader->posn = posn;
 
     if (tsreader->seek_fn) {
@@ -1237,7 +1237,7 @@ static int read_next_TS_packets(TS_reader_p tsreader, int start_len, byte* packe
     ssize_t length;
 
     // If we exit with an error make sure we don't return anything valid here!
-    *packet = NULL;
+    *packet = nullptr;
 
     if (tsreader->read_ahead_ptr == tsreader->read_ahead_end) {
         // Try to allow for partial reads
@@ -1352,9 +1352,9 @@ int read_next_TS_packet(TS_reader_p tsreader, byte** packet)
  */
 static int start_TS_packet_buffer(TS_reader_p tsreader)
 {
-    if (tsreader->pcrbuf == NULL) {
+    if (tsreader->pcrbuf == nullptr) {
         tsreader->pcrbuf = (TS_pcr_buffer_p)malloc(SIZEOF_TS_PCR_BUFFER);
-        if (tsreader->pcrbuf == NULL) {
+        if (tsreader->pcrbuf == nullptr) {
             print_err("### Unable to allocate TS PCR read-ahead buffer\n");
             return 1;
         }
@@ -1484,7 +1484,7 @@ int read_first_TS_packet_from_buffer(TS_reader_p tsreader, uint32_t pcr_pid, uin
 {
     int err;
 
-    if (tsreader->pcrbuf == NULL) {
+    if (tsreader->pcrbuf == nullptr) {
         print_err("### TS PCR read-ahead buffer has not been set up\n"
                   "    Make sure prime_read_buffered_TS_packet() has been called\n");
         return 1;
@@ -1539,7 +1539,7 @@ int read_next_TS_packet_from_buffer(
 {
     int err;
 
-    if (tsreader->pcrbuf == NULL) {
+    if (tsreader->pcrbuf == nullptr) {
         print_err("### TS PCR read-ahead buffer has not been set up\n"
                   "    Make sure read_first_TS_packet_from_buffer() has been called\n");
         return 1;
@@ -1704,7 +1704,7 @@ int read_buffered_TS_packet(TS_reader_p tsreader, uint32_t* count, byte* data[TS
  */
 void get_PCR_from_adaptation_field(byte adapt[], int adapt_len, int* got_pcr, uint64_t* pcr)
 {
-    if (adapt_len == 0 || adapt == NULL)
+    if (adapt_len == 0 || adapt == nullptr)
         *got_pcr = FALSE;
     else if (adapt[0] & 0x10) // We have a PCR
     {
@@ -1736,7 +1736,7 @@ void report_adaptation_field(byte adapt[], int adapt_len)
     int got_pcr;
     uint64_t pcr;
 
-    if (adapt_len == 0 || adapt == NULL)
+    if (adapt_len == 0 || adapt == nullptr)
         return;
 
     fprint_msg("  Adaptation field len %3d [flags %02x]", adapt_len, adapt[0]);
@@ -1771,7 +1771,7 @@ void report_adaptation_field(byte adapt[], int adapt_len)
 /*
  * Report on the timing information from this TS packet's adaptation field
  *
- * - if `times` is non-NULL, then timing information (derived from the PCR)
+ * - if `times` is non-nullptr, then timing information (derived from the PCR)
  *   will be calculated and reported
  * - `adapt` is the adaptation field content
  * - `adapt_len` is its length
@@ -1784,7 +1784,7 @@ void report_adaptation_timing(timing_p times, byte adapt[], int adapt_len, int p
     int got_pcr;
     uint64_t pcr;
 
-    if (adapt_len == 0 || adapt == NULL || times == NULL)
+    if (adapt_len == 0 || adapt == nullptr || times == nullptr)
         return;
 
     get_PCR_from_adaptation_field(adapt, adapt_len, &got_pcr, &pcr);
@@ -1869,8 +1869,8 @@ int extract_prog_list_from_pat(int verbose, byte data[], int data_len, pidint_li
         print_err("### PAT data has zero length\n");
         return 1;
     }
-    if (data == NULL) {
-        print_err("### PAT data is NULL\n");
+    if (data == nullptr) {
+        print_err("### PAT data is nullptr\n");
         return 1;
     }
 
@@ -2299,7 +2299,7 @@ too_short:
  *
  * - if `is_msg` then print as a message, otherwise as an error
  * - `leader1` and `leader2` are the text to write at the start of each line
- *   (either or both may be NULL)
+ *   (either or both may be nullptr)
  * - `desc_data` is the data containing the descriptors
  * - `desc_data_len` is its length
  *
@@ -2325,9 +2325,9 @@ int print_descriptors(int is_msg, char* leader1, char* leader2, byte* desc_data,
             return 1; // Hmm - well, maybe
         }
 
-        if (leader1 != NULL)
+        if (leader1 != nullptr)
             fprint_msg_or_err(is_msg, "%s", leader1);
-        if (leader2 != NULL)
+        if (leader2 != nullptr)
             fprint_msg_or_err(is_msg, "%s", leader2);
 
         {
@@ -2524,9 +2524,9 @@ int print_descriptors(int is_msg, char* leader1, char* leader2, byte* desc_data,
                     if (ii == 0)
                         fprint_msg_or_err(is_msg, "Teletext: ");
                     else {
-                        if (leader1 != NULL)
+                        if (leader1 != nullptr)
                             fprint_msg_or_err(is_msg, "%s", leader1);
-                        if (leader2 != NULL)
+                        if (leader2 != nullptr)
                             fprint_msg_or_err(is_msg, "%s", leader2);
                         fprint_msg_or_err(is_msg, "          ");
                     }
@@ -2579,21 +2579,21 @@ int print_descriptors(int is_msg, char* leader1, char* leader2, byte* desc_data,
                     lang[1] = data[ii + 1];
                     lang[2] = data[ii + 2];
                     lang[3] = 0;
-                    if (leader1 != NULL)
+                    if (leader1 != nullptr)
                         fprint_msg_or_err(is_msg, "%s", leader1);
-                    if (leader2 != NULL)
+                    if (leader2 != nullptr)
                         fprint_msg_or_err(is_msg, "%s", leader2);
                     fprint_msg_or_err(
                         is_msg, "  language='%s', subtitling_type=%u\n", lang, subtitling_type);
-                    if (leader1 != NULL)
+                    if (leader1 != nullptr)
                         fprint_msg_or_err(is_msg, "%s", leader1);
-                    if (leader2 != NULL)
+                    if (leader2 != nullptr)
                         fprint_msg_or_err(is_msg, "%s", leader2);
                     fprint_msg_or_err(
                         is_msg, "    (%s)\n", dvb_component_type3_str(subtitling_type));
-                    if (leader1 != NULL)
+                    if (leader1 != nullptr)
                         fprint_msg_or_err(is_msg, "%s", leader1);
-                    if (leader2 != NULL)
+                    if (leader2 != nullptr)
                         fprint_msg_or_err(is_msg, "%s", leader2);
                     fprint_msg_or_err(is_msg, "  composition_page_id=%u, ancillary_page_id=%u\n",
                         composition_page_id, ancillary_page_id);
@@ -2639,11 +2639,11 @@ int print_descriptors(int is_msg, char* leader1, char* leader2, byte* desc_data,
  * - regardless, `payload_len` is the actual length of the payload.
  * - `pid` is the PID of this TS packet.
  * - `data` is the data array for the whole of the data of this PSI.
- *   If it is passed as NULL, then the TS packet must be the first for
+ *   If it is passed as nullptr, then the TS packet must be the first for
  *   this PSI, and this function will malloc an array of the appropriate
- *   length (and return it here). If it is non-NULL, then it is partially
+ *   length (and return it here). If it is non-nullptr, then it is partially
  *   full.
- * - `data_len` is the actual length of the `data` array -- if `data` is NULL
+ * - `data_len` is the actual length of the `data` array -- if `data` is nullptr
  *   then this will be set by the function.
  * - `data_used` is how many bytes of data are already in the `data` array.
  *   This will be updated by this function - if it is returned as equal to
@@ -2653,7 +2653,7 @@ int print_descriptors(int is_msg, char* leader1, char* leader2, byte* desc_data,
  *
  *  If a PSI packet has PUSI set, then it is the first packet of said PSI
  *  (which, for our purposes, means PAT or PMT). If it does not, then it
- *  is a continuation. If PUSI was set, call this with ``data`` NULL, otherwise
+ *  is a continuation. If PUSI was set, call this with ``data`` nullptr, otherwise
  *  pass it some previous data to continue.
  *
  * Returns 0 if all went well, 1 if something went wrong.
@@ -2670,12 +2670,12 @@ int build_psi_data(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_l
         print_err("### PMT payload has zero length\n");
         return 1;
     }
-    if (payload == NULL) {
-        print_err("### PMT payload is NULL\n");
+    if (payload == nullptr) {
+        print_err("### PMT payload is nullptr\n");
         return 1;
     }
 
-    if (*data == NULL) {
+    if (*data == nullptr) {
         // We have the first section of a PSI packet, which contains the pointer
         // field - deal with it
         pointer = payload[0];
@@ -2711,7 +2711,7 @@ int build_psi_data(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_l
         else
             *data_used = packet_data_len;
         *data = (byte*)malloc(*data_len);
-        if (*data == NULL) {
+        if (*data == nullptr) {
             print_err("### Unable to malloc PSI data array\n");
             return 1;
         }
@@ -2778,8 +2778,8 @@ int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt
         print_err("### PMT data has zero length\n");
         return 1;
     }
-    if (data == NULL) {
-        print_err("### PMT data is NULL\n");
+    if (data == nullptr) {
+        print_err("### PMT data is nullptr\n");
         return 1;
     }
 
@@ -2812,7 +2812,7 @@ int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt
         }
         // Best we can do is to pretend it didn't happen
         *pmt = build_pmt(0, 0, 0); // empty "PMT" with program number 0, PCR PID 0
-        if (*pmt == NULL)
+        if (*pmt == nullptr)
             return 1;
         return 0;
     }
@@ -2885,7 +2885,7 @@ int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt
 
     if (verbose && program_info_length > 0) {
         print_msg("  Program info:\n");
-        print_descriptors(TRUE, "    ", NULL, &data[12], program_info_length);
+        print_descriptors(TRUE, "    ", nullptr, &data[12], program_info_length);
     }
 
     // 32 bits at the end of a program association section is reserved for a CRC
@@ -2914,7 +2914,7 @@ int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt
     // print_data(TRUE,"Rest:",stream_data,stream_data_len,1000);
 
     *pmt = build_pmt(program_number, version_number, pcr_pid);
-    if (*pmt == NULL)
+    if (*pmt == nullptr)
         return 1;
 
     if (program_info_length > 0) {
@@ -2935,7 +2935,7 @@ int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt
             fprint_msg("    PID %04x -> Stream %02x %s\n", pid, stream_type,
                 h222_stream_type_str(stream_type));
             if (ES_info_length > 0)
-                print_descriptors(TRUE, "        ", NULL, &stream_data[5], ES_info_length);
+                print_descriptors(TRUE, "        ", nullptr, &stream_data[5], ES_info_length);
         }
         err = add_stream_to_pmt(*pmt, pid, stream_type, ES_info_length, stream_data + 5);
         if (err) {
@@ -2988,8 +2988,8 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
         print_err("### PMT payload has zero length\n");
         return 1;
     }
-    if (payload == NULL) {
-        print_err("### PMT payload is NULL\n");
+    if (payload == nullptr) {
+        print_err("### PMT payload is nullptr\n");
         return 1;
     }
     pointer = payload[0];
@@ -3034,7 +3034,7 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
         // Best we can do is to pretend it didn't happen
         *program_number = 0;
         *pcr_pid = 0;
-        *stream_list = NULL;
+        *stream_list = nullptr;
         return 0;
     }
 
@@ -3104,7 +3104,7 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
 
     if (verbose && program_info_length > 0) {
         print_msg("  Program info:\n");
-        print_descriptors(TRUE, "    ", NULL, &data[12], program_info_length);
+        print_descriptors(TRUE, "    ", nullptr, &data[12], program_info_length);
     }
 
     // 32 bits at the end of a program association section is reserved for a CRC
@@ -3145,12 +3145,12 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
 #define SARRAYSIZE 40
             char buf[SARRAYSIZE];
             snprintf(buf, SARRAYSIZE, "(%s)", h222_stream_type_str(stream_type));
-            // On Windows, snprintf does not guarantee to write a terminating NULL
+            // On Windows, snprintf does not guarantee to write a terminating nullptr
             buf[SARRAYSIZE - 1] = '\0';
 #undef SARRAYSIZE
             fprint_msg("    Stream %02x %-40s -> PID %04x\n", stream_type, buf, pid);
             if (ES_info_length > 0)
-                print_descriptors(TRUE, "        ", NULL, &stream_data[5], ES_info_length);
+                print_descriptors(TRUE, "        ", nullptr, &stream_data[5], ES_info_length);
         }
         // For the moment, we shan't bother to remember the extra info.
         err = append_to_pidint_list(*stream_list, pid, stream_type);
@@ -3171,12 +3171,12 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
  *   packet forms the start of a PES packet. Its meaning is not significant
  *   if there is no payload, or if the payload is not (part of) a PES packet.
  * - `adapt` is an offset into `buf`, acting as an array of the actual
- *   adaptation control bytes. It will be NULL if there are no adaptation
+ *   adaptation control bytes. It will be nullptr if there are no adaptation
  *   controls.
  * - `adapt_len` is the length of the adaptation controls (i.e., the
  *   number of bytes). It will be 0 if there are no adaptation controls.
  * - `payload` is an offset into `buf`, acting as an array of the actual
- *   payload bytes. It will be NULL if there is no payload.
+ *   payload bytes. It will be nullptr if there is no payload.
  * - `payload_len` is the length of the payload *in this packet* (i.e., the
  *   number of bytes. It will be 0 if there is no payload.
  *
@@ -3197,9 +3197,9 @@ int split_TS_packet(byte buf[TS_PACKET_SIZE], uint32_t* pid, int* payload_unit_s
     if (*pid == 0x1FFF) {
         // Null packets don't contain any data, so let's not allow "spurious"
         // interpretation of their innards
-        *adapt = NULL;
+        *adapt = nullptr;
         *adapt_len = 0;
-        *payload = NULL;
+        *payload = nullptr;
         *payload_len = 0;
         return 0;
     }
@@ -3210,14 +3210,14 @@ int split_TS_packet(byte buf[TS_PACKET_SIZE], uint32_t* pid, int* payload_unit_s
         fprint_err("### Packet PID %04x has adaptation field control = 0\n"
                    "    which is a reserved value (no payload, no adaptation field)\n",
             *pid);
-        *adapt = NULL;
+        *adapt = nullptr;
         *adapt_len = 0;
-        *payload = NULL;
+        *payload = nullptr;
         *payload_len = 0;
         break;
     case 1:
         // Payload only
-        *adapt = NULL;
+        *adapt = nullptr;
         *adapt_len = 0;
         *payload = buf + 4;
         *payload_len = TS_PACKET_SIZE - 4;
@@ -3226,17 +3226,17 @@ int split_TS_packet(byte buf[TS_PACKET_SIZE], uint32_t* pid, int* payload_unit_s
         // Adaptation field only
         *adapt_len = buf[4];
         if (*adapt_len == 0)
-            *adapt = NULL;
+            *adapt = nullptr;
         else
             *adapt = buf + 5;
-        *payload = NULL;
+        *payload = nullptr;
         *payload_len = 0;
         break;
     case 3:
         // Payload and adaptation field
         *adapt_len = buf[4];
         if (*adapt_len == 0)
-            *adapt = NULL;
+            *adapt = nullptr;
         else
             *adapt = buf + 5;
         *payload = buf + 5 + buf[4];
@@ -3266,12 +3266,12 @@ int split_TS_packet(byte buf[TS_PACKET_SIZE], uint32_t* pid, int* payload_unit_s
  *   packet forms the start of a PES packet. Its meaning is not significant
  *   if there is no payload, or if the payload is not (part of) a PES packet.
  * - `adapt` is an offset into `buf`, acting as an array of the actual
- *   adaptation control bytes. It will be NULL if there are no adaptation
+ *   adaptation control bytes. It will be nullptr if there are no adaptation
  *   controls.
  * - `adapt_len` is the length of the adaptation controls (i.e., the
  *   number of bytes). It will be 0 if there are no adaptation controls.
  * - `payload` is an offset into `buf`, acting as an array of the actual
- *   payload bytes. It will be NULL if there is no payload.
+ *   payload bytes. It will be nullptr if there is no payload.
  * - `payload_len` is the length of the payload *in this packet* (i.e., the
  *   number of bytes. It will be 0 if there is no payload.
  *
@@ -3304,7 +3304,7 @@ int get_next_TS_packet(TS_reader_p tsreader, uint32_t* pid, int* payload_unit_st
  * - if `quiet` is true, then don't output normal informational messages
  * - `num_read` is the number of packets read to find the PAT (or before
  *   giving up)
- * - `prog_list` is the program list from the PAT, or NULL if none was found
+ * - `prog_list` is the program list from the PAT, or nullptr if none was found
  *
  * Returns 0 if all went well, EOF if no PAT was found,
  * 1 if something else went wrong.
@@ -3313,11 +3313,11 @@ int find_pat(
     TS_reader_p tsreader, int max, int verbose, int quiet, int* num_read, pidint_list_p* prog_list)
 {
     int err;
-    byte* pat_data = NULL;
+    byte* pat_data = nullptr;
     int pat_data_len = 0;
     int pat_data_used = 0;
 
-    *prog_list = NULL;
+    *prog_list = nullptr;
     *num_read = 0;
     if (!quiet)
         print_msg("Locating first PAT\n");
@@ -3357,7 +3357,7 @@ int find_pat(
                 // Lose any data we started but didn't complete
                 print_err("!!! Discarding previous (uncompleted) PAT data\n");
                 free(pat_data);
-                pat_data = NULL;
+                pat_data = nullptr;
                 pat_data_len = 0;
                 pat_data_used = 0;
             } else if (!payload_unit_start_indicator && !pat_data) {
@@ -3415,11 +3415,11 @@ int find_next_pmt(TS_reader_p tsreader, uint32_t pmt_pid, int program_number, in
     int quiet, int* num_read, pmt_p* pmt)
 {
     int err;
-    byte* pmt_data = NULL;
+    byte* pmt_data = nullptr;
     int pmt_data_len = 0;
     int pmt_data_used = 0;
 
-    *pmt = NULL;
+    *pmt = nullptr;
     *num_read = 0;
     if (!quiet)
         print_msg("Locating next PMT\n");
@@ -3464,7 +3464,7 @@ int find_next_pmt(TS_reader_p tsreader, uint32_t pmt_pid, int program_number, in
                 // Lose any data we started but didn't complete
                 print_err("!!! Discarding previous (uncompleted) PMT data\n");
                 free(pmt_data);
-                pmt_data = NULL;
+                pmt_data = nullptr;
                 pmt_data_len = 0;
                 pmt_data_used = 0;
             } else if (!payload_unit_start_indicator && !pmt_data) {
@@ -3486,11 +3486,11 @@ int find_next_pmt(TS_reader_p tsreader, uint32_t pmt_pid, int program_number, in
                 int pmt_program_number;
 
                 err = extract_pmt(verbose, pmt_data, pmt_data_len, pid, pmt);
-                pmt_program_number = *pmt == NULL ? -1 : (int)((*pmt)->program_number);
+                pmt_program_number = *pmt == nullptr ? -1 : (int)((*pmt)->program_number);
 
                 if (pmt_data) {
                     free(pmt_data);
-                    pmt_data = NULL;
+                    pmt_data = nullptr;
                 }
 
                 // Check we've got the right program number - it would appear to be
@@ -3541,12 +3541,12 @@ int find_pmt(TS_reader_p tsreader, const int req_prog_no, int max, int verbose, 
     int* num_read, pmt_p* pmt)
 {
     int err;
-    pidint_list_p prog_list = NULL;
+    pidint_list_p prog_list = nullptr;
     int sofar;
     int prog_index = 0;
     int prog_no = 0;
 
-    *pmt = NULL;
+    *pmt = nullptr;
 
     err = find_pat(tsreader, max, verbose, quiet, &sofar, &prog_list);
 
@@ -3561,7 +3561,7 @@ int find_pmt(TS_reader_p tsreader, const int req_prog_no, int max, int verbose, 
 
     if (!quiet) {
         print_msg("\n");
-        report_pidint_list(prog_list, "Program list", "Program", FALSE);
+        report_pidint_list(prog_list, (char*)"Program list", (char*)"Program", FALSE);
         print_msg("\n");
     }
 

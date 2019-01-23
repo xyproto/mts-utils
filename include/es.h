@@ -53,7 +53,7 @@ static inline int get_more_data(ES_p es);
  * Open an ES file and build an elementary stream datastructure to read
  * it with.
  *
- * - `filename` is the ES files name. As a special case, if this is NULL
+ * - `filename` is the ES files name. As a special case, if this is nullptr
  *   then standard input (STDIN_FILENO) will be read from.
  *
  * Opens the file for read, builds the datastructure, and reads the first 3
@@ -67,7 +67,7 @@ int open_elementary_stream(char* filename, ES_p* es)
     int err;
     int input;
 
-    if (filename == NULL)
+    if (filename == nullptr)
         input = STDIN_FILENO;
     else {
         input = open_binary_file(filename, FALSE);
@@ -90,9 +90,9 @@ static int setup_readahead(ES_p es)
     es->read_ahead_len = 0;
     es->read_ahead_posn = 0;
 
-    es->data = NULL;
-    es->data_end = NULL;
-    es->data_ptr = NULL;
+    es->data = nullptr;
+    es->data_end = nullptr;
+    es->data_ptr = nullptr;
 
     es->last_packet_posn = 0;
     es->last_packet_es_data_len = 0;
@@ -143,14 +143,14 @@ static int setup_readahead(ES_p es)
 int build_elementary_stream_file(int input, ES_p* es)
 {
     ES_p new2 = (ES_p)malloc(SIZEOF_ES);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate elementary stream datastructure\n");
         return 1;
     }
 
     new2->reading_ES = TRUE;
     new2->input = input;
-    new2->reader = NULL;
+    new2->reader = nullptr;
 
     setup_readahead(new2);
 
@@ -174,7 +174,7 @@ int build_elementary_stream_file(int input, ES_p* es)
 int build_elementary_stream_PES(PES_reader_p reader, ES_p* es)
 {
     ES_p new2 = (ES_p)malloc(SIZEOF_ES);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate elementary stream datastructure\n");
         return 1;
     }
@@ -195,7 +195,7 @@ int build_elementary_stream_PES(PES_reader_p reader, ES_p* es)
  * Specifically:
  *
  * - free the datastructure
- * - set `es` to NULL
+ * - set `es` to nullptr
  *
  * No return status is given, since there's not much one can do if anything
  * *did* go wrong, and if something went wrong and the program is continuing,
@@ -205,7 +205,7 @@ void free_elementary_stream(ES_p* es)
 {
     (*es)->input = -1; // "forget" our input
     free(*es);
-    *es = NULL;
+    *es = nullptr;
 }
 
 /*
@@ -223,7 +223,7 @@ void free_elementary_stream(ES_p* es)
 void close_elementary_stream(ES_p* es)
 {
     int input;
-    if (*es == NULL)
+    if (*es == nullptr)
         return;
     input = (*es)->input;
     if (input != -1 && input != STDIN_FILENO)
@@ -247,7 +247,7 @@ int es_command_changed(ES_p es)
     if (es->reading_ES)
         return FALSE;
 
-    if (es->reader->tswriter == NULL)
+    if (es->reader->tswriter == nullptr)
         return FALSE;
 
     return tswrite_command_changed(es->reader->tswriter);
@@ -266,7 +266,7 @@ int es_command_changed(ES_p es)
 int setup_ES_unit(ES_unit_p unit)
 {
     unit->data = (byte*)malloc(ES_UNIT_DATA_START_SIZE);
-    if (unit->data == NULL) {
+    if (unit->data == nullptr) {
         print_err("### Unable to allocate ES unit data buffer\n");
         return 1;
     }
@@ -286,9 +286,9 @@ int setup_ES_unit(ES_unit_p unit)
  */
 void clear_ES_unit(ES_unit_p unit)
 {
-    if (unit->data != NULL) {
+    if (unit->data != nullptr) {
         free(unit->data);
-        unit->data = NULL;
+        unit->data = nullptr;
         unit->data_size = 0;
         unit->data_len = 0;
     }
@@ -303,7 +303,7 @@ int build_ES_unit(ES_unit_p* unit)
 {
     int err;
     ES_unit_p new2 = (ES_unit_p)malloc(SIZEOF_ES_UNIT);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate ES unit datastructure\n");
         return 1;
     }
@@ -327,12 +327,12 @@ int build_ES_unit(ES_unit_p* unit)
 int build_ES_unit_from_data(ES_unit_p* unit, byte* data, uint32_t data_len)
 {
     ES_unit_p new2 = (ES_unit_p)malloc(SIZEOF_ES_UNIT);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate ES unit datastructure\n");
         return 1;
     }
     new2->data = (byte*)malloc(data_len);
-    if (new2->data == NULL) {
+    if (new2->data == nullptr) {
         print_err("### Unable to allocate ES unit data buffer\n");
         return 1;
     }
@@ -350,17 +350,17 @@ int build_ES_unit_from_data(ES_unit_p* unit, byte* data, uint32_t data_len)
 /*
  * Tidy up and free an ES unit datastructure after we've finished with it.
  *
- * Empties the ES unit datastructure, frees it, and sets `unit` to NULL.
+ * Empties the ES unit datastructure, frees it, and sets `unit` to nullptr.
  *
- * If `unit` is already NULL, does nothing.
+ * If `unit` is already nullptr, does nothing.
  */
 void free_ES_unit(ES_unit_p* unit)
 {
-    if (*unit == NULL)
+    if (*unit == nullptr)
         return;
     clear_ES_unit(*unit);
     free(*unit);
-    *unit = NULL;
+    *unit = nullptr;
 }
 
 /*
@@ -405,7 +405,7 @@ static inline int get_next_pes_packet(ES_p es)
     PES_reader_p reader = es->reader;
 
     // Before reading the *next* packet, remember where the last one was
-    if (reader->packet == NULL) {
+    if (reader->packet == nullptr) {
         // What can we do if there was no last packet?
         es->last_packet_posn = 0;
         es->last_packet_es_data_len = 0;
@@ -575,7 +575,7 @@ static int find_ES_unit_end(ES_p es, ES_unit_p unit)
             if (unit->data_len == unit->data_size) {
                 int newsize = unit->data_size + ES_UNIT_DATA_INCREMENT;
                 unit->data = (byte*)realloc(unit->data, newsize);
-                if (unit->data == NULL) {
+                if (unit->data == nullptr) {
                     print_err("### Unable to extend ES unit data array\n");
                     return 1;
                 }
@@ -658,7 +658,7 @@ int find_next_ES_unit(ES_p es, ES_unit_p unit)
  * Find and read the next ES unit into a new datastructure.
  *
  * - `es` is the elementary stream we're reading from.
- * - `unit` is the datastructure containing the ES unit found, or NULL
+ * - `unit` is the datastructure containing the ES unit found, or nullptr
  *   if there was none.
  *
  * Returns 0 if it succeeds, EOF if the end-of-file is read (i.e., there
@@ -719,14 +719,14 @@ static int seek_in_PES(ES_p es, ES_offset where)
 {
     int err;
 
-    if (es->reader == NULL) {
+    if (es->reader == nullptr) {
         print_err("### Attempt to seek in PES for an ES reader that"
                   " is not attached to a PES reader\n");
         return 1;
     }
 
     // Force the reader to forget its current packet
-    if (es->reader->packet != NULL)
+    if (es->reader->packet != nullptr)
         free_PES_packet_data(&es->reader->packet);
 
     // Seek to the right packet in the PES data
@@ -767,7 +767,7 @@ static inline void deduce_correct_position(ES_p es)
 
     if (es->reading_ES) {
         // For ES data, we want to force new data to be read in from the file
-        es->data_ptr = es->data_end = NULL;
+        es->data_ptr = es->data_end = nullptr;
         es->read_ahead_len = 0; // to stop the read ahead posn being incremented
         es->read_ahead_posn = es->posn_of_next_byte.infile;
     } else {
@@ -871,13 +871,13 @@ static int read_bytes_from_PES(ES_p es, byte* data, uint32_t num_bytes)
  * - `es` is where to read our data from
  * - `start_posn` is the file offset to start reading at
  * - `num_bytes` is how many bytes we want to read
- * - `data_len` may be NULL or a pointer to a value.
- *   If it is NULL, then the data array will be reallocated to size
- *   `num_bytes` regardless. If it is non-NULL, it should be passed *in*
+ * - `data_len` may be nullptr or a pointer to a value.
+ *   If it is nullptr, then the data array will be reallocated to size
+ *   `num_bytes` regardless. If it is non-nullptr, it should be passed *in*
  *    as the size that `data` *was*, and will be returned as the size
  *    that `data` is when the function returns.
- * - `data` is the data array to read into. If this is NULL, or if `num_bytes`
- *   is NULL, or if `num_bytes` is greater than `data_len`, then it will be
+ * - `data` is the data array to read into. If this is nullptr, or if `num_bytes`
+ *   is nullptr, or if `num_bytes` is greater than `data_len`, then it will be
  *   reallocated to size `num_bytes`.
  *
  * Returns 0 if all went well, 1 if something went wrong.
@@ -886,13 +886,13 @@ int read_ES_data(
     ES_p es, ES_offset start_posn, uint32_t num_bytes, uint32_t* data_len, byte** data)
 {
     int err;
-    if (*data == NULL || data_len == NULL || num_bytes > *data_len) {
+    if (*data == nullptr || data_len == nullptr || num_bytes > *data_len) {
         *data = (byte*)realloc(*data, num_bytes);
-        if (*data == NULL) {
+        if (*data == nullptr) {
             print_err("### Unable to reallocate data space\n");
             return 1;
         }
-        if (data_len != NULL)
+        if (data_len != nullptr)
             *data_len = num_bytes;
     }
     err = seek_ES(es, start_posn);
@@ -938,7 +938,7 @@ int read_ES_data(
  * - `data` is the ES data remaining (to be read) in the current PES packet.
  *   It is up to the caller to free this data.
  * - `data_len` is the length of said data. If this is 0, then `data`
- *   will be NULL.
+ *   will be nullptr.
  *
  * Returns 0 if all goes well, 1 if an error occurs.
  */
@@ -951,9 +951,9 @@ int get_end_of_underlying_PES_packet(ES_p es, byte** data, int* data_len)
                    " is direct ES, not ES read from PES\n");
         return 1;
     }
-    if (es->reader->packet == NULL) {
+    if (es->reader->packet == nullptr) {
         // This is naughty, but we'll pretend to cope
-        *data = NULL;
+        *data = nullptr;
         *data_len = 0;
         return 0;
     }
@@ -992,7 +992,7 @@ int get_end_of_underlying_PES_packet(ES_p es, byte** data, int* data_len)
     // three bytes at the start of the data we return
     *data_len = es->reader->packet->es_data_len - offset + 3;
     *data = (byte*)malloc(*data_len);
-    if (*data == NULL) {
+    if (*data == nullptr) {
         print_err("### Cannot allocate space for rest of PES packet\n");
         return 1;
     }
@@ -1015,7 +1015,7 @@ int get_end_of_underlying_PES_packet(ES_p es, byte** data, int* data_len)
 int build_ES_unit_list(ES_unit_list_p* list)
 {
     ES_unit_list_p new2 = (ES_unit_list_p)malloc(SIZEOF_ES_UNIT_LIST);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate ES unit list datastructure\n");
         return 1;
     }
@@ -1023,7 +1023,7 @@ int build_ES_unit_list(ES_unit_list_p* list)
     new2->length = 0;
     new2->size = ES_UNIT_LIST_START_SIZE;
     new2->array = (ES_unit_p)malloc(SIZEOF_ES_UNIT * ES_UNIT_LIST_START_SIZE);
-    if (new2->array == NULL) {
+    if (new2->array == nullptr) {
         free(new2);
         print_err("### Unable to allocate array in ES unit list datastructure\n");
         return 1;
@@ -1046,7 +1046,7 @@ int append_to_ES_unit_list(ES_unit_list_p list, ES_unit_p unit)
     if (list->length == list->size) {
         int newsize = list->size + ES_UNIT_LIST_INCREMENT;
         list->array = (ES_unit_p)realloc(list->array, newsize * SIZEOF_ES_UNIT);
-        if (list->array == NULL) {
+        if (list->array == nullptr) {
             print_err("### Unable to extend ES unit list array\n");
             return 1;
         }
@@ -1057,7 +1057,7 @@ int append_to_ES_unit_list(ES_unit_list_p list, ES_unit_p unit)
     *ptr = *unit;
     // But some need adjusting
     ptr->data = (byte*)malloc(unit->data_len);
-    if (ptr->data == NULL) {
+    if (ptr->data == nullptr) {
         print_err("### Unable to copy ES unit data array\n");
         return 1;
     }
@@ -1071,13 +1071,13 @@ int append_to_ES_unit_list(ES_unit_list_p list, ES_unit_p unit)
  */
 static inline void clear_ES_unit_list(ES_unit_list_p list)
 {
-    if (list->array != NULL) {
+    if (list->array != nullptr) {
         int ii;
         for (ii = 0; ii < list->length; ii++) {
             clear_ES_unit(&list->array[ii]);
         }
         free(list->array);
-        list->array = NULL;
+        list->array = nullptr;
     }
     list->length = 0;
     list->size = 0;
@@ -1088,7 +1088,7 @@ static inline void clear_ES_unit_list(ES_unit_list_p list)
  */
 void reset_ES_unit_list(ES_unit_list_p list)
 {
-    if (list->array != NULL) {
+    if (list->array != nullptr) {
         int ii;
         for (ii = 0; ii < list->length; ii++) {
             clear_ES_unit(&list->array[ii]);
@@ -1102,17 +1102,17 @@ void reset_ES_unit_list(ES_unit_list_p list)
 /*
  * Tidy up and free an ES unit list datastructure after we've finished with it.
  *
- * Clears the datastructure, frees it and returns `list` as NULL.
+ * Clears the datastructure, frees it and returns `list` as nullptr.
  *
- * Does nothing if `list` is already NULL.
+ * Does nothing if `list` is already nullptr.
  */
 void free_ES_unit_list(ES_unit_list_p* list)
 {
-    if (*list == NULL)
+    if (*list == nullptr)
         return;
     clear_ES_unit_list(*list);
     free(*list);
-    *list = NULL;
+    *list = nullptr;
 }
 
 /*
@@ -1124,7 +1124,7 @@ void free_ES_unit_list(ES_unit_list_p* list)
 void report_ES_unit_list(char* name, ES_unit_list_p list)
 {
     fprint_msg("ES unit list '%s': ", name);
-    if (list->array == NULL)
+    if (list->array == nullptr)
         print_msg("<empty>\n");
     else {
         int ii;
@@ -1150,7 +1150,7 @@ void report_ES_unit_list(char* name, ES_unit_list_p list)
 int get_ES_unit_list_bounds(ES_unit_list_p list, ES_offset* start, uint32_t* length)
 {
     int ii;
-    if (list->array == NULL || list->length == 0) {
+    if (list->array == nullptr || list->length == 0) {
         print_err("### Cannot determine bounds of an ES unit list with no content\n");
         return 1;
     }
@@ -1181,8 +1181,8 @@ int same_ES_unit_list(ES_unit_list_p list1, ES_unit_list_p list2)
     if (list1 == list2)
         return TRUE;
 
-    if (list1->array == NULL)
-        return (list2->array == NULL);
+    if (list1->array == nullptr)
+        return (list2->array == nullptr);
 
     if (list1->length != list2->length)
         return FALSE;
@@ -1465,7 +1465,7 @@ int decide_ES_file_video_type(int input, int print_dots, int show_reasoning, int
 {
     offset_t start_posn;
     int err;
-    ES_p es = NULL;
+    ES_p es = nullptr;
 
     start_posn = tell_file(input);
     if (start_posn == -1) {

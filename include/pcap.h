@@ -129,14 +129,14 @@ typedef struct _pcap_io_ctx* PCAP_reader_p;
 
 /*! Attempt to open a pcap file and read the header.
  *
- * \param filename IN Filename or NULL for stdin.
+ * \param filename IN Filename or nullptr for stdin.
  * \return 0 on success, non-zero on failure.
  */
 int pcap_open(PCAP_reader_p* ctx_p, pcap_hdr_t* out_hdr, const char* filename);
 
 /*! Read the next packet from a pcap file. The returned data is
  *  malloc()d and must be free()d. If we fail, returned data will
- *  be NULL.
+ *  be nullptr.
  *
  * \return 1 on success, 0 if we've reached EOF, < 0 on error.
  */

@@ -59,15 +59,16 @@ int remove_from_pidint_list(pidint_list_p list, uint32_t pid);
 /*
  * Tidy up and free a pid/int list datastructure after we've finished with it
  *
- * Clears the datastructure, frees it and returns `list` as NULL.
+ * Clears the datastructure, frees it and returns `list` as nullptr.
  *
- * Does nothing if `list` is already NULL.
+ * Does nothing if `list` is already nullptr.
  */
 void free_pidint_list(pidint_list_p* list);
 /*
  * Report on a pid/int list's contents
  */
-void report_pidint_list(pidint_list_p list, char* list_name, char* int_name, int pid_first);
+void report_pidint_list(
+    pidint_list_p list, const char* list_name, const char* int_name, int pid_first);
 /*
  * Lookup a PID to find the corresponding integer value in a pid/int list.
  *
@@ -77,7 +78,7 @@ int pid_int_in_pidint_list(pidint_list_p list, uint32_t pid, int* number);
 /*
  * Lookup a PID to find its index in a pid/int list.
  *
- * Note that if `list` is NULL, then -1 will be returned - this is to
+ * Note that if `list` is nullptr, then -1 will be returned - this is to
  * allow the caller to make a query before they have read a list from the
  * bitstream.
  *
@@ -87,7 +88,7 @@ int pid_index_in_pidint_list(pidint_list_p list, uint32_t pid);
 /*
  * Lookup a PID to see if it is in a pid/int list.
  *
- * Note that if `list` is NULL, then FALSE will be returned - this is to
+ * Note that if `list` is nullptr, then FALSE will be returned - this is to
  * allow the caller to make a query before they have read a list from the
  * bitstream.
  *
@@ -100,7 +101,7 @@ int pid_in_pidint_list(pidint_list_p list, uint32_t pid);
  * Note that:
  *
  *  - a list always compares as the same as itself
- *  - two NULL lists compare as the same
+ *  - two nullptr lists compare as the same
  *  - the *order* of PID/int pairs in the lists does not matter
  *
  * Returns TRUE if the two have the same content, FALSE otherwise.
@@ -110,7 +111,7 @@ int same_pidint_list(pidint_list_p list1, pidint_list_p list2);
  * Report on a program stream list (a specialisation of report_pidint_list).
  *
  * - `list` is the stream list to report on
- * - `prefix` is NULL or a string to put before each line printed
+ * - `prefix` is nullptr or a string to put before each line printed
  */
 void report_stream_list(pidint_list_p list, char* prefix);
 
@@ -127,7 +128,7 @@ void report_stream_list(pidint_list_p list, char* prefix);
  * 0x1FFE, or 0x1FFF to indicate "unset". However, for convenience, the
  * value 0 will also be accepted, and converted to 0x1FFF.
  *
- * Returns (a pointer to) the new PMT datastructure, or NULL if some error
+ * Returns (a pointer to) the new PMT datastructure, or nullptr if some error
  * occurs.
  */
 pmt_p build_pmt(uint16_t program_number, byte version_number, uint32_t PCR_pid);
@@ -160,15 +161,15 @@ int remove_stream_from_pmt(pmt_p pmt, uint32_t pid);
 /*
  * Tidy up and free a PMT datastructure after we've finished with it
  *
- * Clears the datastructure, frees it and returns `pmt` as NULL.
+ * Clears the datastructure, frees it and returns `pmt` as nullptr.
  *
- * Does nothing if `pmt` is already NULL.
+ * Does nothing if `pmt` is already nullptr.
  */
 void free_pmt(pmt_p* pmt);
 /*
  * Lookup a PID to find its index in a PMT datastructure.
  *
- * Note that if `pmt` is NULL, then -1 will be returned.
+ * Note that if `pmt` is nullptr, then -1 will be returned.
  *
  * Returns its index (0 or more) if the PID is in the list, -1 if it is not.
  */
@@ -177,13 +178,13 @@ int pid_index_in_pmt(pmt_p pmt, uint32_t pid);
  * Lookup a PID to find the corresponding program stream information.
  *
  * Returns a pointer to the stream information if the PID is in the list,
- * NULL if it is not.
+ * nullptr if it is not.
  */
 pmt_stream_p pid_stream_in_pmt(pmt_p pmt, uint32_t pid);
 /*
  * Lookup a PID to see if it is in a PMT datastructure.
  *
- * Note that if `pmt` is NULL, then FALSE will be returned.
+ * Note that if `pmt` is nullptr, then FALSE will be returned.
  *
  * Returns TRUE if the PID is in the PMT's stream list, FALSE if it is not.
  */
@@ -194,7 +195,7 @@ int pid_in_pmt(pmt_p pmt, uint32_t pid);
  * Note that:
  *
  *  - a PMT datastructure always compares as the same as itself
- *  - two NULL datastructures compare as the same
+ *  - two nullptr datastructures compare as the same
  *  - the *order* of program streams in the PMTs does not matter
  *  - descriptors must be identical as well, and byte order therein
  *    does matter (this may need changing later on)
@@ -206,7 +207,7 @@ int same_pmt(pmt_p pmt1, pmt_p pmt2);
  * Report on a PMT datastructure.
  *
  * - if `is_msg`, report as a message, otherwise as an error
- * - `prefix` is NULL or a string to put before each line printed
+ * - `prefix` is nullptr or a string to put before each line printed
  * - `pmt` is the PMT to report on
  */
 void report_pmt(int is_msg, char* prefix, pmt_p pmt);

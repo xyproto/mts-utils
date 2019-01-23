@@ -40,9 +40,9 @@ int build_audio_frame(audio_frame_p* frame);
 /*
  * Tidy up and free an audio frame datastructure when we've finished with it
  *
- * Empties the datastructure, frees it, and sets `frame` to NULL.
+ * Empties the datastructure, frees it, and sets `frame` to nullptr.
  *
- * If `frame` is already NULL, does nothing.
+ * If `frame` is already nullptr, does nothing.
  */
 void free_audio_frame(audio_frame_p* frame);
 /*

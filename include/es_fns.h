@@ -88,7 +88,7 @@ int build_elementary_stream_PES(PES_reader_p reader, ES_p* es);
  * Specifically:
  *
  * - free the datastructure
- * - set `es` to NULL
+ * - set `es` to nullptr
  *
  * No return status is given, since there's not much one can do if anything
  * *did* go wrong, and if something went wrong and the program is continuing,
@@ -162,9 +162,9 @@ int build_ES_unit_from_data(ES_unit_p* unit, byte* data, uint32_t data_len);
 /*
  * Tidy up and free an ES unit datastructure after we've finished with it.
  *
- * Empties the ES unit datastructure, frees it, and sets `unit` to NULL.
+ * Empties the ES unit datastructure, frees it, and sets `unit` to nullptr.
  *
- * If `unit` is already NULL, does nothing.
+ * If `unit` is already nullptr, does nothing.
  */
 void free_ES_unit(ES_unit_p* unit);
 
@@ -182,7 +182,7 @@ void report_ES_unit(int is_msg, ES_unit_p unit);
  * - `data` is the ES data remaining (to be read) in the current PES packet.
  *   It is up to the caller to free this data.
  * - `data_len` is the length of said data. If this is 0, then `data`
- *   will be NULL.
+ *   will be nullptr.
  *
  * Returns 0 if all goes well, 1 if an error occurs.
  */
@@ -209,7 +209,7 @@ int find_next_ES_unit(ES_p es, ES_unit_p unit);
  * - `es` is the elementary stream we're reading from.
  * - `count` is an integer to use as an id for this ES unit - typically
  *   its index in the input stream
- * - `unit` is the datastructure containing the ES unit found, or NULL
+ * - `unit` is the datastructure containing the ES unit found, or nullptr
  *   if there was none.
  *
  * Returns 0 if it succeeds, EOF if the end-of-file is read (i.e., there
@@ -264,13 +264,13 @@ int seek_ES(ES_p es, ES_offset where);
  * - `es` is where to read our data from
  * - `start_posn` is the file offset to start reading at
  * - `num_bytes` is how many bytes we want to read
- * - `data_len` may be NULL or a pointer to a value.
- *   If it is NULL, then the data array will be reallocated to size
- *   `num_bytes` regardless. If it is non-NULL, it should be passed *in*
+ * - `data_len` may be nullptr or a pointer to a value.
+ *   If it is nullptr, then the data array will be reallocated to size
+ *   `num_bytes` regardless. If it is non-nullptr, it should be passed *in*
  *    as the size that `data` *was*, and will be returned as the size
  *    that `data` is when the function returns.
- * - `data` is the data array to read into. If this is NULL, or if `num_bytes`
- *   is NULL, or if `num_bytes` is greater than `data_len`, then it will be
+ * - `data` is the data array to read into. If this is nullptr, or if `num_bytes`
+ *   is nullptr, or if `num_bytes` is greater than `data_len`, then it will be
  *   reallocated to size `num_bytes`.
  *
  * Returns 0 if all went well, 1 if something went wrong.
@@ -306,9 +306,9 @@ void reset_ES_unit_list(ES_unit_list_p list);
 /*
  * Tidy up and free an ES unit list datastructure after we've finished with it.
  *
- * Clears the datastructure, frees it and returns `list` as NULL.
+ * Clears the datastructure, frees it and returns `list` as nullptr.
  *
- * Does nothing if `list` is already NULL.
+ * Does nothing if `list` is already nullptr.
  */
 void free_ES_unit_list(ES_unit_list_p* list);
 

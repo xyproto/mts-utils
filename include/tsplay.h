@@ -161,15 +161,15 @@ static int find_PCR_PID(TS_reader_p tsreader, TS_writer_p tswriter, uint32_t* pc
     int payload_len;
     int got_PAT = FALSE;
 
-    pidint_list_p prog_list = NULL;
-    pmt_p pmt = NULL;
+    pidint_list_p prog_list = nullptr;
+    pmt_p pmt = nullptr;
     uint32_t pmt_pid = 0; // safe initial value
 
-    byte* pat_data = NULL;
+    byte* pat_data = nullptr;
     int pat_data_len = 0;
     int pat_data_used = 0;
 
-    byte* pmt_data = NULL;
+    byte* pmt_data = nullptr;
     int pmt_data_len = 0;
     int pmt_data_used = 0;
     int pmt_program_number = -1;
@@ -219,7 +219,7 @@ static int find_PCR_PID(TS_reader_p tsreader, TS_writer_p tswriter, uint32_t* pc
                 // started one, so throw its data away
                 print_err("!!! Discarding previous (uncompleted) PAT data\n");
                 free(pat_data);
-                pat_data = NULL;
+                pat_data = nullptr;
                 pat_data_len = 0;
                 pat_data_used = 0;
             } else if (!payload_unit_start_indicator && !pat_data) {
@@ -260,7 +260,7 @@ static int find_PCR_PID(TS_reader_p tsreader, TS_writer_p tswriter, uint32_t* pc
             got_PAT = TRUE;
             free_pidint_list(&prog_list);
             free(pat_data);
-            pat_data = NULL;
+            pat_data = nullptr;
             pat_data_len = 0;
             pat_data_used = 0;
         } else if (got_PAT && pid == pmt_pid) {
@@ -273,7 +273,7 @@ static int find_PCR_PID(TS_reader_p tsreader, TS_writer_p tswriter, uint32_t* pc
                 // started one, so throw its data away
                 print_err("!!! Discarding previous (uncompleted) PMT data\n");
                 free(pmt_data);
-                pmt_data = NULL;
+                pmt_data = nullptr;
                 pmt_data_len = 0;
                 pmt_data_used = 0;
             } else if (!payload_unit_start_indicator && !pmt_data) {
@@ -299,7 +299,7 @@ static int find_PCR_PID(TS_reader_p tsreader, TS_writer_p tswriter, uint32_t* pc
 
             err = extract_pmt(FALSE, pmt_data, pmt_data_len, pmt_pid, &pmt);
             free(pmt_data);
-            pmt_data = NULL;
+            pmt_data = nullptr;
             if (err)
                 return err;
 
@@ -375,7 +375,7 @@ static int play_buffered_TS_packets(TS_reader_p tsreader, TS_writer_p tswriter,
     // thinking about the compiler warning, but I also know that these values
     // *will* be set by the function, so I don't want them reinitialised
     // every time round the loop. So hoist them back up to here...
-    byte* data = NULL;
+    byte* data = nullptr;
     uint32_t pid = 0;
     uint64_t pcr = 0;
 

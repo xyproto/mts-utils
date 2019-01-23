@@ -52,7 +52,7 @@ static int MASK[] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
 int build_bitdata(bitdata_p* bitdata, byte data[], int data_len)
 {
     bitdata_p new2 = (bitdata_p)malloc(SIZEOF_BITDATA);
-    if (new2 == NULL) {
+    if (new2 == nullptr) {
         print_err("### Unable to allocate bitdata datastructure\n");
         return 1;
     }
@@ -69,19 +69,19 @@ int build_bitdata(bitdata_p* bitdata, byte data[], int data_len)
 /*
  * Tidy up and free a bitdata datastructure after we've finished with it.
  *
- * Clears the bitdata datastructure, frees it, and sets `bitdata` to NULL.
+ * Clears the bitdata datastructure, frees it, and sets `bitdata` to nullptr.
  *
- * Does nothing if `bitdata` is already NULL.
+ * Does nothing if `bitdata` is already nullptr.
  */
 void free_bitdata(bitdata_p* bitdata)
 {
-    if (*bitdata == NULL)
+    if (*bitdata == nullptr)
         return;
-    (*bitdata)->data = NULL;
+    (*bitdata)->data = nullptr;
     (*bitdata)->cur_byte = 0;
     (*bitdata)->cur_bit = -1;
     free(*bitdata);
-    *bitdata = NULL;
+    *bitdata = nullptr;
 }
 
 /*
