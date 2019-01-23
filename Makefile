@@ -1,4 +1,4 @@
-.PHONY: build check install-man install clean
+.PHONY: build check clean install install-man test
 
 DESTDIR ?=
 PREFIX ?= /usr
@@ -27,7 +27,9 @@ build:
 	cxx -C tsreport opt
 	cxx -C tsserve opt
 
-check:
+check: test
+
+test:
 	cxx -C common test
 
 install-man:
