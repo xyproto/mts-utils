@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * Miscellaneous useful functions.
  *
@@ -25,12 +27,10 @@
  *
  * ***** END LICENSE BLOCK *****
  */
-#ifndef _misc_fns
-#define _misc_fns
-
 #include "es_defns.h"
 #include "misc_defns.h"
-#include <stdint.h>
+
+#include <cstdint>
 
 #define CRC32_POLY 0x04c11db7L
 
@@ -348,24 +348,24 @@ int ipv4_string_to_addr(uint32_t* dest, const char* addr);
 // Byte order handling
 // ============================================================
 
-static inline uint32_t uint_32_be(const uint8_t* const p)
+inline uint32_t uint_32_be(const uint8_t* const p)
 {
     return (((int)p[0] & 0xff) << 24) | (((int)p[1] & 0xff) << 16) | (((int)p[2] & 0xff) << 8)
         | (((int)p[3] & 0xff));
 }
 
-static inline uint32_t uint_32_le(const uint8_t* const p)
+inline uint32_t uint_32_le(const uint8_t* const p)
 {
     return (((int)p[0] & 0xff) | (((int)p[1] & 0xff) << 8) | (((int)p[2] & 0xff) << 16)
         | (((int)p[3] & 0xff) << 24));
 }
 
-static inline uint16_t uint_16_be(const uint8_t* const p)
+inline uint16_t uint_16_be(const uint8_t* const p)
 {
     return ((((int)p[0]) & 0xff) << 8) | ((((int)p[1]) & 0xff));
 }
 
-static inline uint16_t uint_16_le(const uint8_t* const p)
+inline uint16_t uint_16_le(const uint8_t* const p)
 {
     return (((int)p[0] & 0xff) | ((int)p[1] & 0xff) << 8);
 }
@@ -377,7 +377,7 @@ static inline uint16_t uint_16_le(const uint8_t* const p)
 #define PCR_UNSIGNED_WRAP (300ULL * (1ULL << 33))
 
 // (x - y) with allowance for PCR wrap - unsigned version
-static inline uint64_t pcr_unsigned_diff(uint64_t x, uint64_t y)
+inline uint64_t pcr_unsigned_diff(uint64_t x, uint64_t y)
 {
     return x > y ? x - y : 300ULL * (1ULL << 33) - (y - x);
 }
@@ -387,7 +387,7 @@ static inline uint64_t pcr_unsigned_diff(uint64_t x, uint64_t y)
 #define PCR_SIGNED_MIN (-PCR_SIGNED_WRAP / 2LL)
 
 // (x - y) with allowance for PCR wrap - signed version
-static inline int64_t pcr_signed_diff(uint64_t x, uint64_t y)
+inline int64_t pcr_signed_diff(uint64_t x, uint64_t y)
 {
     int64_t r = x - y;
 
@@ -395,22 +395,13 @@ static inline int64_t pcr_signed_diff(uint64_t x, uint64_t y)
 }
 
 // Deal with simple overflow
-static inline uint64_t pcr_unsigned_wrap(uint64_t x)
+inline uint64_t pcr_unsigned_wrap(uint64_t x)
 {
     return x >= PCR_UNSIGNED_WRAP ? x - PCR_UNSIGNED_WRAP : x;
 }
 
-static inline int64_t pts_signed_diff(uint64_t x, uint64_t y)
+inline int64_t pts_signed_diff(uint64_t x, uint64_t y)
 {
     int64_t r = x - y;
     return (r << 31) >> 31;
 }
-
-#endif // _misc_fns
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

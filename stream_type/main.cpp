@@ -222,11 +222,7 @@ static int check_if_PS(int input, int verbose, int* decided, int* result)
 static int determine_packet_type(int input, int verbose, int* decided, int* result)
 {
     int err;
-#ifdef _WIN32
-    int length;
-#else
     ssize_t length;
-#endif
     byte first_byte;
     int video_type;
 

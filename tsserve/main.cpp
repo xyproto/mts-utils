@@ -2566,56 +2566,9 @@ static int tsserve_child_process(struct server_args* args)
         }
     }
 
-#ifdef _WIN32
-    // The original ("parent") thread does not know when we have finished,
-    // so it cannot free the resources we are using. Of course, *we* know
-    // we've now finished, so we can...
-    free(args);
-#endif
-
     return (had_err ? 1 : 0);
 }
 
-#ifdef _WIN32
-// ============================================================
-// Windows threading ("fork" alternative)
-// ============================================================
-/*
- * Wrapper for tsserve_child_process, used to coerce args, etc.
- */
-static void child_thread_fn(void_p varg)
-{
-    struct server_args* args = (struct server_args*)varg;
-    (void)tsserve_child_process(args);
-}
-
-/*
- * Start up the child thread, to serve a single client
- */
-static int start_child(tsserve_context_p context, TS_writer_p tswriter, int verbose, int quiet)
-{
-    HANDLE child_thread;
-    struct server_args* args;
-
-    args = malloc(sizeof(struct server_args));
-    if (args == NULL) {
-        print_err("### Unable to allocate memory for child datastructure\n");
-        return 1;
-    }
-
-    args->context = context;
-    args->tswriter = tswriter;
-    args->verbose = verbose;
-    args->quiet = quiet;
-
-    child_thread = (HANDLE)_beginthread(child_thread_fn, 0, (void_p)args);
-    if (child_thread == (HANDLE)-1) {
-        fprint_err("Error creating child process: %s\n", strerror(errno));
-        return 1;
-    }
-    return 0;
-}
-#else // _WIN32
 // ============================================================
 // Unix forking ("thread" alternative)
 // ============================================================
@@ -2683,7 +2636,6 @@ static void set_child_exit_handler()
     if (ret < 0)
         print_err("!!! tsserve: Error starting signal handler to reap child processes\n");
 }
-#endif // _WIN32
 
 /*
  * Run as a server
@@ -2694,48 +2646,24 @@ static int run_server(tsserve_context_p context, int listen_port, int verbose, i
     SOCKET server_socket;
     struct sockaddr_in ipaddr;
 
-#ifdef _WIN32
-    err = winsock_startup();
-    if (err)
-        return 1;
-#else
     set_child_exit_handler();
-#endif
 
     // Create a socket.
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1) {
-#ifdef _WIN32
-        err = WSAGetLastError();
-        print_err("### Unable to create socket: ");
-        print_winsock_err(err);
-        print_err("\n");
-#else // _WIN32
         fprint_err("### Unable to create socket: %s\n", strerror(errno));
-#endif // _WIN32
         return 1;
     }
 
     // Bind it to port `listen_port` on this machine
     memset(&ipaddr, 0, sizeof(ipaddr));
-#if !defined(__linux__) && !defined(_WIN32)
-    // On BSD, the length is defined in the datastructure
-    ipaddr.sin_len = sizeof(struct sockaddr_in);
-#endif
     ipaddr.sin_family = AF_INET;
     ipaddr.sin_port = htons(listen_port);
     ipaddr.sin_addr.s_addr = INADDR_ANY; // any interface
 
     err = bind(server_socket, (struct sockaddr*)&ipaddr, sizeof(ipaddr));
     if (err == -1) {
-#ifdef _WIN32
-        err = WSAGetLastError();
-        fprint_err("### Unable to bind to port %d: ", listen_port);
-        print_winsock_err(err);
-        print_err("\n");
-#else // _WIN32
         fprint_err("### Unable to bind to port %d: %s\n", listen_port, strerror(errno));
-#endif // _WIN32
         return 1;
     }
 
@@ -2746,17 +2674,6 @@ static int run_server(tsserve_context_p context, int listen_port, int verbose, i
             fprint_msg("\nListening for a connection on port %d"
                        " with socket %d\n",
                 listen_port, server_socket);
-
-#ifdef _WIN32
-        // tswrite_close calls winsock_cleanup(), so we need to make sure that
-        // we call an *extra* winsock_startup to match that (and leave the
-        // call made before this loop "in scope")
-        err = winsock_startup();
-        if (err) {
-            print_err("### Error calling winsock_startup before listening\n");
-            return 1;
-        }
-#endif // _WIN32
 
         err = tswrite_wait_for_client(server_socket, quiet, &tswriter);
         if (err) {
@@ -2774,17 +2691,6 @@ static int run_server(tsserve_context_p context, int listen_port, int verbose, i
             print_err("### Error spawning child server\n");
             return 1;
         }
-#if 0 // The following was a temporary fix to stop zombies without a signal handler
-#ifndef _WIN32
-    // If we've forked, then we need to free our "copy" of the tswriter
-    err = tswrite_close(tswriter,TRUE);
-    if (err)
-    {
-      print_err("### Error closing socket in parent process\n");
-      return 1;
-    }
-#endif
-#endif
     }
     return 0;
 }
@@ -2867,7 +2773,6 @@ static int command_reader(
         tswriter->drop_number = context->drop_number;
     }
 
-#ifndef _WIN32
     // Maybe enable command input from stdin
     if (use_stdin) {
         if (!quiet)
@@ -2890,9 +2795,7 @@ static int command_reader(
             (void)tswrite_close(tswriter, TRUE);
             return 1;
         }
-    } else
-#endif // _WIN32
-    {
+    } else {
         err = tswrite_start_input(tswriter, tswriter->where.socket);
         if (err) {
             fprint_err("### Unable to start command input from %s\n", output_name);

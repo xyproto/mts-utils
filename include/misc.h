@@ -229,13 +229,8 @@ double log2(double x)
  */
 int read_bytes(int input, int num_bytes, byte* data)
 {
-#ifdef _WIN32
-    int total = 0;
-    int length;
-#else
     ssize_t total = 0;
     ssize_t length;
-#endif
 
     // Make some allowance for short reads - for instance, if we're reading
     // from a pipe and going just a bit faster than the sender
@@ -298,11 +293,7 @@ int seek_file(int filedes, offset_t posn)
  */
 offset_t tell_file(int filedes)
 {
-#ifdef _WIN32
-    offset_t newposn = _tell(filedes);
-#else
     offset_t newposn = lseek(filedes, 0, SEEK_CUR);
-#endif
     if (newposn == -1)
         fprint_err("### Error determining current position in file: %s\n", strerror(errno));
     return newposn;
@@ -326,11 +317,7 @@ offset_t tell_file(int filedes)
  */
 int open_binary_file(char* filename, int for_write)
 {
-#ifdef _WIN32
-    int flags = O_BINARY;
-#else
     int flags = 0;
-#endif
     int filedes;
     if (for_write) {
         flags = flags | O_WRONLY | O_CREAT | O_TRUNC;
@@ -869,62 +856,17 @@ int host_value(char* prefix, char* cmd, char* arg, char** hostname, int* port)
  */
 int connect_socket(char* hostname, int port, int use_tcpip, char* multicast_ifaddr)
 {
-#ifdef _WIN32
-    SOCKET output;
-#else // _WIN32
     int output;
-#endif // _WIN32
     int result;
     struct hostent* hp;
     struct sockaddr_in ipaddr;
 
-#ifdef _WIN32
-    int err = winsock_startup();
-    if (err)
-        return 1;
-#endif
-
     output = socket(AF_INET, (use_tcpip ? SOCK_STREAM : SOCK_DGRAM), 0);
-#ifdef _WIN32
-    if (output == INVALID_SOCKET) {
-        err = WSAGetLastError();
-        print_err("### Unable to create socket: ");
-        print_winsock_err(err);
-        print_err("\n");
-        return -1;
-    }
-#else // _WIN32
     if (output == -1) {
         fprint_err("### Unable to create socket: %s\n", strerror(errno));
         return -1;
     }
-#endif // _WIN32
 
-#if _WIN32
-    // On Windows, apparently, gethostbyname will not work for numeric IP addresses.
-    // The clever solution would be to move to using getaddrinfo for all forms of
-    // host address, but the simpler solution is just to do:
-    {
-        unsigned long addr = inet_addr(hostname);
-        if (addr != INADDR_NONE) // i.e., success
-        {
-            ipaddr.sin_addr.s_addr = addr;
-            ipaddr.sin_family = AF_INET;
-        } else {
-            hp = gethostbyname(hostname);
-            if (hp == NULL) {
-                err = WSAGetLastError();
-                fprint_err("### Unable to resolve host %s: ", hostname);
-                print_winsock_err(err);
-                print_err("\n");
-                return -1;
-            }
-            memcpy(&ipaddr.sin_addr.s_addr, hp->h_addr, hp->h_length);
-            ipaddr.sin_family = hp->h_addrtype;
-        }
-    }
-    ipaddr.sin_port = htons(port);
-#else // _WIN32
     hp = gethostbyname(hostname);
     if (hp == NULL) {
         fprint_err("### Unable to resolve host %s: %s\n", hostname, hstrerror(h_errno));
@@ -932,85 +874,34 @@ int connect_socket(char* hostname, int port, int use_tcpip, char* multicast_ifad
     }
     memcpy(&ipaddr.sin_addr.s_addr, hp->h_addr, hp->h_length);
     ipaddr.sin_family = hp->h_addrtype;
-#if !defined(__linux__)
-    // On BSD, the length is defined in the datastructure
-    ipaddr.sin_len = sizeof(struct sockaddr_in);
-#endif // __linux__
     ipaddr.sin_port = htons(port);
-#endif // _WIN32
 
     if (IN_CLASSD(ntohl(ipaddr.sin_addr.s_addr))) {
         // Needed if we're doing multicast
         byte ttl = 16;
         result = setsockopt(output, IPPROTO_IP, IP_MULTICAST_TTL, (char*)&ttl, sizeof(ttl));
-#ifdef _WIN32
-        if (result == SOCKET_ERROR) {
-            err = WSAGetLastError();
-            print_err("### Error setting socket for IP_MULTICAST_TTL: ");
-            print_winsock_err(err);
-            print_err("\n");
-            return -1;
-        }
-#else // _WIN32
         if (result < 0) {
             fprint_err("### Error setting socket for IP_MULTICAST_TTL: %s\n", strerror(errno));
             return -1;
         }
-#endif // _WIN32
 
         if (multicast_ifaddr) {
-#ifdef _WIN32
-            unsigned long addr;
-            print_err("!!! Specifying the multicast interface is not supported on "
-                      "some versions of Windows\n");
-            // Also, choosing an invalid address is not (may not be) detected on Windows
-            addr = inet_addr(multicast_ifaddr);
-            if (addr == INADDR_NONE) {
-                err = WSAGetLastError();
-                fprint_err(
-                    "### Error translating '%s' as a dotted IP address: ", multicast_ifaddr);
-                print_winsock_err(err);
-                print_err("\n");
-                return -1;
-            }
-#else // _WIN32
             struct in_addr addr;
             inet_aton(multicast_ifaddr, &addr);
-#endif // _WIN32
             result = setsockopt(output, IPPROTO_IP, IP_MULTICAST_IF, (char*)&addr, sizeof(addr));
-#ifdef _WIN32
-            if (result == SOCKET_ERROR) {
-                err = WSAGetLastError();
-                fprint_err("### Unable to set multicast interface %s: ");
-                print_winsock_err(err);
-                print_err("\n");
-                return -1;
-            }
-#else // _WIN32
             if (result < 0) {
                 fprint_err("### Unable to set multicast interface %s: %s\n", multicast_ifaddr,
                     strerror(errno));
                 return -1;
             }
-#endif // _WIN32
         }
     }
 
     result = connect(output, (struct sockaddr*)&ipaddr, sizeof(ipaddr));
-#ifdef _WIN32
-    if (result == SOCKET_ERROR) {
-        err = WSAGetLastError();
-        fprint_err("### Unable to connect to host %s: ", hostname);
-        print_winsock_err(err);
-        print_err("\n");
-        return -1;
-    }
-#else // _WIN32
     if (result < 0) {
         fprint_err("### Unable to connect to host %s: %s\n", hostname, strerror(errno));
         return -1;
     }
-#endif // _WIN32
     return output;
 }
 

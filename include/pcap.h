@@ -1,3 +1,5 @@
+#pragma once
+
 /* pcap.h */
 /*
  * Read pcap files
@@ -29,12 +31,9 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#ifndef _pcap_h
-#define _pcap_h
-
 #include "compat.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 //! Out of memory.
 #define PCAP_ERR_OUT_OF_MEMORY (-8)
@@ -146,12 +145,3 @@ int pcap_read_next(
 
 /*! Close the pcap file */
 int pcap_close(PCAP_reader_p* const ctx_p);
-
-#endif
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

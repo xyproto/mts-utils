@@ -32,25 +32,25 @@
 #include "pcap.h"
 #include "misc_fns.h"
 
-static inline uint32_t uint_32_ctx(const struct _pcap_io_ctx* const ctx, const void* v)
+inline uint32_t uint_32_ctx(const struct _pcap_io_ctx* const ctx, const void* v)
 {
     return ctx->is_be ? uint_32_be(static_cast<const uint8_t*>(v))
                       : uint_32_le(static_cast<const uint8_t*>(v));
 }
 
-static inline uint16_t uint_16_ctx(const struct _pcap_io_ctx* const ctx, const void* v)
+inline uint16_t uint_16_ctx(const struct _pcap_io_ctx* const ctx, const void* v)
 {
     return ctx->is_be ? uint_16_be(static_cast<const uint8_t*>(v))
                       : uint_16_le(static_cast<const uint8_t*>(v));
 }
 
 // Hi-32, Lo-32 but native within!
-static inline uint64_t uint_64_be_ctx(const struct _pcap_io_ctx* const ctx, const void* v)
+inline uint64_t uint_64_be_ctx(const struct _pcap_io_ctx* const ctx, const void* v)
 {
     return ((uint64_t)uint_32_ctx(ctx, v) << 32) | (uint64_t)uint_32_ctx(ctx, (const char*)v + 4);
 }
 
-static inline uint64_t uint_64_ctx(const struct _pcap_io_ctx* const ctx, const void* v)
+inline uint64_t uint_64_ctx(const struct _pcap_io_ctx* const ctx, const void* v)
 {
     return ctx->is_be ? ((uint64_t)uint_32_be(static_cast<const uint8_t*>(v)) << 32)
             | (uint64_t)uint_32_be(static_cast<const uint8_t*>(v) + 4)
@@ -188,9 +188,9 @@ static int do_section_header(struct _pcap_io_ctx* const ctx, uint32_t length,
         return PCAP_ERR_INVALID_MAGIC;
     }
 
-#if SIZEOF_PCAP_HDR_ON_DISC != 24
-#error I am confused
-#endif
+    //#if SIZEOF_PCAP_HDR_ON_DISC != 24
+    //#error I am confused
+    //#endif
 
     // Length here includes headers
     if (length < 28) {

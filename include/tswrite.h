@@ -300,23 +300,6 @@ struct buffered_TS_output {
     pcr_pace_env pcr_pace;
 };
 
-#ifdef _WIN32
-// ============================================================
-// Windows specific - gettimeofday replacement
-// ============================================================
-/*
- * Windows does not provide gettimeofday, but it has equivalent functionality,
- * and does provide timeval, so wae can pretend...
- */
-static inline void gettimeofday(struct timeval* tv, void* timezone)
-{
-    struct _timeb timebuffer;
-    _ftime(&timebuffer);
-    tv->tv_sec = (long)timebuffer.time;
-    tv->tv_usec = timebuffer.millitm * 1000;
-}
-#endif
-
 // ============================================================
 // Low level circular buffer support
 // ============================================================
@@ -334,7 +317,7 @@ static inline void gettimeofday(struct timeval* tv, void* timezone)
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static int map_circular_buffer(circular_buffer_p* circular, int circ_buf_size, int TS_in_packet,
+int map_circular_buffer(circular_buffer_p* circular, int circ_buf_size, int TS_in_packet,
     int maxnowait, int waitfor, const tswrite_pkt_hdr_type_t hdr_type)
 {
     // Rather than map a file, we'll map anonymous memory
@@ -401,30 +384,24 @@ static int map_circular_buffer(circular_buffer_p* circular, int circ_buf_size, i
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static int unmap_circular_buffer(circular_buffer_p circular)
+int unmap_circular_buffer(circular_buffer_p circular)
 {
     int base_size = SIZEOF_CIRCULAR_BUFFER + (circular->size * SIZEOF_CIRCULAR_BUFFER_ITEM);
     int data_size = circular->size * circular->item_size;
     int total_size = base_size + data_size;
-#ifdef _WIN32
-    // Under Windows, we're using threading to manage our parent/child
-    // processes, so we malloced our circular buffer
-    free(circular);
-#else // _WIN32
     int err = munmap(circular, total_size);
     if (err) {
         fprint_err(
             "### Error unmapping circular buffer from shared memory: %s\n", strerror(errno));
         return 1;
     }
-#endif // _WIN32
     return 0;
 }
 
 /*
  * Is the buffer empty?
  */
-static inline int circular_buffer_empty(circular_buffer_p circular)
+inline int circular_buffer_empty(circular_buffer_p circular)
 {
     return (circular->start == (circular->end + 1) % circular->size);
 }
@@ -432,13 +409,13 @@ static inline int circular_buffer_empty(circular_buffer_p circular)
 /*
  * Is the buffer full?
  */
-static inline int circular_buffer_full(circular_buffer_p circular)
+inline int circular_buffer_full(circular_buffer_p circular)
 {
     return ((circular->pending + 2) % circular->size == circular->start);
 }
 
 // Is the buffer full and never going to empty?
-static inline int circular_buffer_jammed(circular_buffer_p circular)
+inline int circular_buffer_jammed(circular_buffer_p circular)
 {
     return ((circular->pending + 1) % circular->size == circular->end);
 }
@@ -448,13 +425,11 @@ static inline int circular_buffer_jammed(circular_buffer_p circular)
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static inline int wait_if_buffer_empty(circular_buffer_p circular)
+inline int wait_if_buffer_empty(circular_buffer_p circular)
 {
     static int count = 0;
-#ifndef _WIN32
     struct timespec time = { 0, global_child_wait * ONE_MS_AS_NANOSECONDS };
     int err;
-#endif // _WIN32
 
     while (circular_buffer_empty(circular) && !circular->eos) {
 #if DISPLAY_BUFFER
@@ -465,15 +440,11 @@ static inline int wait_if_buffer_empty(circular_buffer_p circular)
             print_msg("<-- wait\n");
         count++;
 
-#ifdef _WIN32
-        Sleep(global_child_wait);
-#else // _WIN32
         err = nanosleep(&time, NULL);
         if (err == -1 && errno == EINVAL) {
             fprint_err("### Child: bad value (%ld) for wait time\n", time.tv_nsec);
             return 1;
         }
-#endif // _WIN32
 
         // If we wait for a *very* long time, maybe our parent has crashed
         if (count > CHILD_GIVE_UP_AFTER) {
@@ -490,13 +461,11 @@ static inline int wait_if_buffer_empty(circular_buffer_p circular)
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static inline int wait_for_buffer_to_fill(circular_buffer_p circular)
+inline int wait_for_buffer_to_fill(circular_buffer_p circular)
 {
     static int count = 0;
-#ifndef _WIN32
     struct timespec time = { 0, global_child_wait * ONE_MS_AS_NANOSECONDS };
     int err;
-#endif // _WIN32
 
     while (!circular_buffer_full(circular) && !circular->eos) {
 #if DISPLAY_BUFFER
@@ -507,15 +476,11 @@ static inline int wait_for_buffer_to_fill(circular_buffer_p circular)
             print_msg("<-- wait for buffer to fill\n");
         count++;
 
-#ifdef _WIN32
-        Sleep(global_child_wait);
-#else // _WIN32
         err = nanosleep(&time, NULL);
         if (err == -1 && errno == EINVAL) {
             fprint_err("### Child: bad value (%ld) for wait time\n", time.tv_nsec);
             return 1;
         }
-#endif // _WIN32
 
         // If we wait for a *very* long time, maybe our parent has crashed
         if (count > CHILD_GIVE_UP_AFTER) {
@@ -532,13 +497,11 @@ static inline int wait_for_buffer_to_fill(circular_buffer_p circular)
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static inline int wait_if_buffer_full(circular_buffer_p circular)
+inline int wait_if_buffer_full(circular_buffer_p circular)
 {
     static int count = 0;
-#ifndef _WIN32
-    struct timespec time = { 0, global_parent_wait * ONE_MS_AS_NANOSECONDS };
+    struct timespec time = { 0, global_child_wait * ONE_MS_AS_NANOSECONDS };
     int err;
-#endif // _WIN32
 
     while (circular_buffer_full(circular)) {
 #if DISPLAY_BUFFER
@@ -549,15 +512,11 @@ static inline int wait_if_buffer_full(circular_buffer_p circular)
             print_msg("--> wait\n");
         count++;
 
-#ifdef _WIN32
-        Sleep(global_parent_wait);
-#else // _WIN32
         err = nanosleep(&time, NULL);
         if (err == -1 && errno == EINVAL) {
             fprint_err("### Parent: bad value (%ld) for wait time\n", time.tv_nsec);
             return 1;
         }
-#endif // _WIN32
 
         if (circular_buffer_jammed(circular)) {
             print_err("### Circular buffer jammed: No PCRs found\n");
@@ -578,7 +537,7 @@ static inline int wait_if_buffer_full(circular_buffer_p circular)
 /*
  * Print out the buffer contents, prefixed by a prefix string
  */
-static void print_circular_buffer(char* prefix, circular_buffer_p circular)
+void print_circular_buffer(char* prefix, circular_buffer_p circular)
 {
     int ii;
     if (prefix != NULL)
@@ -599,7 +558,7 @@ static void print_circular_buffer(char* prefix, circular_buffer_p circular)
 // Low level buffered TS output support
 // ============================================================
 
-static void reset_pcr_time(pcr_pace_env* const ppe, const uint64_t next_pcr_base)
+void reset_pcr_time(pcr_pace_env* const ppe, const uint64_t next_pcr_base)
 {
     memset(ppe, 0, sizeof(*ppe));
     ppe->pcr_base = next_pcr_base;
@@ -629,9 +588,9 @@ static void reset_pcr_time(pcr_pace_env* const ppe, const uint64_t next_pcr_base
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int build_buffered_TS_output(buffered_TS_output_p* writer, int circ_buf_size,
-    int TS_in_packet, int maxnowait, int waitfor, int rate, tswrite_pcr_mode pcr_mode,
-    int prime_size, int prime_speedup, double pcr_scale, const tswrite_pkt_hdr_type_t hdr_type)
+int build_buffered_TS_output(buffered_TS_output_p* writer, int circ_buf_size, int TS_in_packet,
+    int maxnowait, int waitfor, int rate, tswrite_pcr_mode pcr_mode, int prime_size,
+    int prime_speedup, double pcr_scale, const tswrite_pkt_hdr_type_t hdr_type)
 {
     int err, ii;
     circular_buffer_p circular;
@@ -682,7 +641,7 @@ static int build_buffered_TS_output(buffered_TS_output_p* writer, int circ_buf_s
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int free_buffered_TS_output(buffered_TS_output_p* writer)
+int free_buffered_TS_output(buffered_TS_output_p* writer)
 {
     if ((*writer)->buffer != NULL) {
         int err = unmap_circular_buffer((*writer)->buffer);
@@ -718,7 +677,7 @@ static inline uint64_t pcr_delta_u(const uint64_t a, const uint64_t b)
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static int set_buffer_item_time_pcr1(buffered_TS_output_p writer)
+int set_buffer_item_time_pcr1(buffered_TS_output_p writer)
 {
     int ii;
     circular_buffer_p circular = writer->buffer;
@@ -896,7 +855,7 @@ static inline void set_16_be(uint8_t* const p, const unsigned int x)
 // Set times on all packets between where we were and where we are now
 // Sets the time on both the first & last packets
 // Returns the index of the last circ buffer entry modified
-static int set_circ_times(const circular_buffer_p circ, const uint32_t index_start,
+int set_circ_times(const circular_buffer_p circ, const uint32_t index_start,
     const uint32_t len_bytes, const int32_t pcr1_byte_offset, const uint64_t pcr1,
     const uint64_t pcr_gap, const uint32_t gap_bytes, const int64_t prime_last_pcr,
     const int prime_speed, uint64_t* const pNew_pcr_base)
@@ -941,7 +900,7 @@ static int set_circ_times(const circular_buffer_p circ, const uint32_t index_sta
     return idx;
 }
 
-static int finalize_pcr_time(buffered_TS_output_p writer, pcr_pace_env* const ppe)
+int finalize_pcr_time(buffered_TS_output_p writer, pcr_pace_env* const ppe)
 {
     const circular_buffer_p circ = writer->buffer;
     int idx = -1;
@@ -967,12 +926,12 @@ static int finalize_pcr_time(buffered_TS_output_p writer, pcr_pace_env* const pp
     return idx;
 }
 
-static int discontinuity_pkt_pcr_time(buffered_TS_output_p writer, pcr_pace_env* const ppe)
+int discontinuity_pkt_pcr_time(buffered_TS_output_p writer, pcr_pace_env* const ppe)
 {
     return finalize_pcr_time(writer, ppe);
 }
 
-static int add_pkt_pcr_time(buffered_TS_output_p writer, pcr_pace_env* const ppe)
+int add_pkt_pcr_time(buffered_TS_output_p writer, pcr_pace_env* const ppe)
 {
     const circular_buffer_p circ = writer->buffer;
     const circular_buffer_item_p item = circ->item + writer->which;
@@ -1058,7 +1017,7 @@ retry:
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static int set_buffer_item_time_plain(buffered_TS_output_p writer)
+int set_buffer_item_time_plain(buffered_TS_output_p writer)
 {
     static uint32_t last_time = 0; // The last circular buffer time stamp
     circular_buffer_p circular = writer->buffer;
@@ -1076,7 +1035,7 @@ static int set_buffer_item_time_plain(buffered_TS_output_p writer)
  *
  * Returns new idx that can be written or -1 if unchanged
  */
-static int set_buffer_item_time(const buffered_TS_output_p writer, const int finalize)
+int set_buffer_item_time(const buffered_TS_output_p writer, const int finalize)
 {
     switch (writer->pcr_mode) {
     case TSWRITE_PCR_MODE_PCR2:
@@ -1103,7 +1062,7 @@ static int set_buffer_item_time(const buffered_TS_output_p writer, const int fin
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int add_eof_entry(buffered_TS_output_p writer)
+int add_eof_entry(buffered_TS_output_p writer)
 {
     circular_buffer_p circular = writer->buffer;
 
@@ -1150,7 +1109,7 @@ static int add_eof_entry(buffered_TS_output_p writer)
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static void internal_flush_buffered_TS_output(const buffered_TS_output_p writer)
+void internal_flush_buffered_TS_output(const buffered_TS_output_p writer)
 {
     const circular_buffer_p circular = writer->buffer;
     int idx;
@@ -1175,7 +1134,7 @@ static void internal_flush_buffered_TS_output(const buffered_TS_output_p writer)
     writer->packet[0].got_pcr = FALSE; // Careful or paranoid?
 }
 
-static void discontinuity_buffered_TS_output(buffered_TS_output_p writer)
+void discontinuity_buffered_TS_output(buffered_TS_output_p writer)
 {
     circular_buffer_p circular = writer->buffer;
     int idx;
@@ -1203,7 +1162,7 @@ static void discontinuity_buffered_TS_output(buffered_TS_output_p writer)
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int write_EOF_to_buffered_TS_output(buffered_TS_output_p writer)
+int write_EOF_to_buffered_TS_output(buffered_TS_output_p writer)
 {
     int err;
 
@@ -1233,7 +1192,7 @@ static int write_EOF_to_buffered_TS_output(buffered_TS_output_p writer)
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int write_to_buffered_TS_output(buffered_TS_output_p writer, byte packet[TS_PACKET_SIZE],
+int write_to_buffered_TS_output(buffered_TS_output_p writer, byte packet[TS_PACKET_SIZE],
     int count, uint32_t pid, int got_pcr, uint64_t pcr)
 {
     int err;
@@ -1309,13 +1268,8 @@ static int write_to_buffered_TS_output(buffered_TS_output_p writer, byte packet[
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static void wait_microseconds(int microseconds)
+void wait_microseconds(int microseconds)
 {
-#ifdef _WIN32
-    // Best we can (easily) do is to wait for the nearest (rounded down!)
-    // number of milliseconds - hopefully this will do
-    Sleep(microseconds / 1000);
-#else // _WIN32
     struct timespec time = { 0 };
     struct timespec remaining;
     uint32_t nanoseconds = microseconds * 1000;
@@ -1332,7 +1286,6 @@ static void wait_microseconds(int microseconds)
         time = remaining;
         err = nanosleep(&time, &remaining);
     }
-#endif // _WIN32
     return;
 }
 
@@ -1345,7 +1298,7 @@ static void wait_microseconds(int microseconds)
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int write_file_data(TS_writer_p tswriter, byte data[], size_t data_len)
+int write_file_data(TS_writer_p tswriter, byte data[], size_t data_len)
 {
     size_t written = 0;
     errno = 0;
@@ -1366,7 +1319,7 @@ static int write_file_data(TS_writer_p tswriter, byte data[], size_t data_len)
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int write_socket_data(SOCKET output, byte data[], int data_len)
+int write_socket_data(SOCKET output, byte data[], int data_len)
 {
     ssize_t written = 0;
     ssize_t left = data_len;
@@ -1406,7 +1359,7 @@ static int write_socket_data(SOCKET output, byte data[], int data_len)
  * Returns 0 if all goes well, 1 if there is an error, and EOF if end-of-file
  * is read.
  */
-static int read_command(SOCKET command_socket, byte* command, int* command_changed)
+int read_command(SOCKET command_socket, byte* command, int* command_changed)
 {
     byte thing;
     ssize_t length = read(command_socket, &thing, 1);
@@ -1625,7 +1578,7 @@ static int read_command(SOCKET command_socket, byte* command, int* command_chang
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int write_tcp_data(TS_writer_p tswriter, byte data[], int data_len)
+int write_tcp_data(TS_writer_p tswriter, byte data[], int data_len)
 {
     int err;
 
@@ -1756,7 +1709,7 @@ int wait_for_command(TS_writer_p tswriter)
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int write_circular_data(const SOCKET output, const circular_buffer_p circular)
+int write_circular_data(const SOCKET output, const circular_buffer_p circular)
 {
     int err;
     byte* buffer
@@ -1817,7 +1770,7 @@ static int write_circular_data(const SOCKET output, const circular_buffer_p circ
  * Returns TRUE if we have received an end-of-file indicator, FALSE
  * if not.
  */
-static int received_EOF(circular_buffer_p circular)
+int received_EOF(circular_buffer_p circular)
 {
     byte* buffer = circular->item_data + circular->start * circular->item_size;
     int length = circular->item[circular->start].length;
@@ -1842,7 +1795,7 @@ static int received_EOF(circular_buffer_p circular)
 /*
  * Calculate a value to perturb time by. Returns a number of microseconds.
  */
-static int32_t perturb_time_by(void)
+int32_t perturb_time_by(void)
 {
     static int first_time = TRUE;
     unsigned double_range;
@@ -1885,7 +1838,7 @@ static int32_t perturb_time_by(void)
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int write_from_circular(SOCKET output, circular_buffer_p circular, int quiet, int* had_eof)
+int write_from_circular(SOCKET output, circular_buffer_p circular, int quiet, int* had_eof)
 {
     int err;
 
@@ -2095,7 +2048,7 @@ static int write_from_circular(SOCKET output, circular_buffer_p circular, int qu
  * Returns the value that should be returned by the the child process
  * (0 for success, 1 for failure).
  */
-static int tswrite_child_process(TS_writer_p tswriter)
+int tswrite_child_process(TS_writer_p tswriter)
 {
     int had_eof = FALSE;
     for (;;) {
@@ -2114,7 +2067,7 @@ static int tswrite_child_process(TS_writer_p tswriter)
 /*
  * Start up the child fork, to handle the circular buffering
  */
-static int start_child(TS_writer_p tswriter)
+int start_child(TS_writer_p tswriter)
 {
     pid_t pid;
 
@@ -2137,7 +2090,7 @@ static int start_child(TS_writer_p tswriter)
 /*
  * Wait for the child fork to exit
  */
-static int wait_for_child_to_exit(TS_writer_p tswriter, int quiet)
+int wait_for_child_to_exit(TS_writer_p tswriter, int quiet)
 {
     int err;
     pid_t result;
@@ -2165,7 +2118,7 @@ static int wait_for_child_to_exit(TS_writer_p tswriter, int quiet)
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-static int tswrite_build(TS_WRITER_TYPE how, int quiet, TS_writer_p* tswriter)
+int tswrite_build(TS_WRITER_TYPE how, int quiet, TS_writer_p* tswriter)
 {
     TS_writer_p new2 = NULL;
     new2 = (TS_writer_p)malloc(SIZEOF_TS_WRITER);
@@ -2481,11 +2434,7 @@ int tswrite_start_buffering_from_context(TS_writer_p tswriter, TS_context_p cont
 int tswrite_start_input(TS_writer_p tswriter, SOCKET input)
 {
     int err;
-#ifdef _WIN32
-    u_long one = 1;
-#else
     int flags;
-#endif // _WIN32
 
     if (tswriter->how != TS_W_TCP) {
         print_err("### Command input is only supported for TCP/IP\n");
@@ -2493,16 +2442,6 @@ int tswrite_start_input(TS_writer_p tswriter, SOCKET input)
     }
 
     // Make our output socket non-blocking
-#ifdef _WIN32
-    err = ioctlsocket(tswriter->where.socket, FIONBIO, &one);
-    if (err == SOCKET_ERROR) {
-        err = WSAGetLastError();
-        print_err("### Unable to set socket nonblocking: ");
-        print_winsock_err(err);
-        print_err("\n");
-        return 1;
-    }
-#else // _WIN32
     flags = fcntl(tswriter->where.socket, F_GETFL, 0);
     if (flags == -1) {
         fprint_err("### Error getting flags for output socket: %s\n", strerror(errno));
@@ -2513,7 +2452,6 @@ int tswrite_start_input(TS_writer_p tswriter, SOCKET input)
         fprint_err("### Error setting output socket non-blocking: %s\n", strerror(errno));
         return 1;
     }
-#endif // _WIN32
 
     tswriter->command_socket = input;
     tswriter->command = COMMAND_PAUSE;
@@ -2562,7 +2500,7 @@ int tswrite_command_changed(TS_writer_p tswriter)
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-static int tswrite_close_child(TS_writer_p tswriter, int quiet)
+int tswrite_close_child(TS_writer_p tswriter, int quiet)
 {
     int err;
 
@@ -2583,7 +2521,6 @@ static int tswrite_close_child(TS_writer_p tswriter, int quiet)
         }
     }
 
-#ifndef _WIN32
     // On Linux/BSD, we have forked, and thus it is reasonable for the parent
     // process to tidy up when it has finished (since the child process is in
     // separate memory space). On Windows, this has to be done by the "child".
@@ -2603,7 +2540,6 @@ static int tswrite_close_child(TS_writer_p tswriter, int quiet)
             return 1;
         }
     }
-#endif // not _WIN32
     return 0;
 }
 
@@ -2614,7 +2550,7 @@ static int tswrite_close_child(TS_writer_p tswriter, int quiet)
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-static int tswrite_close_file(TS_writer_p tswriter)
+int tswrite_close_file(TS_writer_p tswriter)
 {
     int err;
 
@@ -2668,42 +2604,22 @@ int tswrite_close(TS_writer_p tswriter, int quiet)
     err = tswrite_close_child(tswriter, quiet);
     if (err) {
         print_err("### Error closing child process\n");
-#ifdef _WIN32
-        if (!tswriter->writer) {
-#endif
-            (void)tswrite_close_file(tswriter);
-            free(tswriter);
-#ifdef _WIN32
-        }
-#endif
+        (void)tswrite_close_file(tswriter);
+        free(tswriter);
         return 1;
     }
 
-#ifdef _WIN32
-    if (tswriter->writer) {
-        // We're doing buffered output. On Windows, this means that we are using a
-        // parent thread and a child thread. Only one thread should close/free the
-        // remaining resources, and since only the child thread knows when it
-        // stops, it has to be the child thread that does it. This function is
-        // called by the parent thread, so it should not. Moreover, having asked
-        // the child thread to shut down (above), it cannot tell when the child
-        // will have free the tswriter, so it must not refer to it again...
-    } else {
-#endif
-        err = tswrite_close_file(tswriter);
-        if (err) {
-            print_err("### Error closing output\n");
-            free(tswriter);
-            return 1;
-        }
-
-        if (!quiet)
-            fprint_msg("Output %d TS packets\n", tswriter->count);
-
+    err = tswrite_close_file(tswriter);
+    if (err) {
+        print_err("### Error closing output\n");
         free(tswriter);
-#ifdef _WIN32
+        return 1;
     }
-#endif
+
+    if (!quiet)
+        fprint_msg("Output %d TS packets\n", tswriter->count);
+
+    free(tswriter);
     return 0;
 }
 
