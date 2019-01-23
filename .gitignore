@@ -4,6 +4,10 @@
 *.bak
 *.backup
 
+*.pro
+*.pro.user
+build-*/
+
 common/es_test
 common/nal_unit_list_test
 common/pes_test
