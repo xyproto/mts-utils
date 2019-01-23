@@ -567,7 +567,7 @@ int close_input_as_ES(char* name, ES_p* es)
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int unsigned_value(char* prefix, char* cmd, char* arg, int base, uint32_t* value)
+int unsigned_value(const char* prefix, const char* cmd, const char* arg, int base, uint32_t* value)
 {
     char* ptr;
     unsigned long val;
@@ -781,11 +781,11 @@ int double_value(char* prefix, char* cmd, char* arg, int positive, double* value
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int host_value(char* prefix, char* cmd, char* arg, char** hostname, int* port)
+int host_value(const char* prefix, const char* cmd, const char* arg, char** hostname, int* port)
 {
-    char* p = strchr(arg, ':');
+    char* p = strchr((char*)arg, ':');
 
-    *hostname = arg;
+    *hostname = (char*)arg;
 
     if (p != nullptr) {
         char* ptr;

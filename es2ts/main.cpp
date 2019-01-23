@@ -162,11 +162,11 @@ int main(int argc, char** argv)
     int use_stdout = FALSE;
     int use_tcpip = FALSE;
     int port = 88; // Useful default port number
-    char* input_name = NULL;
-    char* output_name = NULL;
+    char* input_name = nullptr;
+    char* output_name = nullptr;
     int had_input_name = FALSE;
     int had_output_name = FALSE;
-    TS_writer_p output = NULL;
+    TS_writer_p output = nullptr;
     ES_p es;
     int verbose = FALSE;
     int quiet = FALSE;
@@ -291,7 +291,7 @@ int main(int argc, char** argv)
     }
 
     if (use_stdin)
-        err = open_elementary_stream(NULL, &es);
+        err = open_elementary_stream(nullptr, &es);
     else
         err = open_elementary_stream(input_name, &es);
     if (err) {
@@ -308,7 +308,7 @@ int main(int argc, char** argv)
         if (!quiet)
             print_msg("Reading input as ");
     } else {
-        int video_type;
+        // int video_type;
         err = decide_ES_file_video_type(es->input, FALSE, verbose, &video_type);
         if (err) {
             print_err("### es2ts: Error deciding on stream type\n");
@@ -344,11 +344,11 @@ int main(int argc, char** argv)
     }
 
     if (use_stdout)
-        err = tswrite_open(TS_W_STDOUT, NULL, NULL, 0, quiet, &output);
+        err = tswrite_open(TS_W_STDOUT, nullptr, nullptr, 0, quiet, &output);
     else if (use_tcpip)
-        err = tswrite_open(TS_W_TCP, output_name, NULL, port, quiet, &output);
+        err = tswrite_open(TS_W_TCP, output_name, nullptr, port, quiet, &output);
     else
-        err = tswrite_open(TS_W_FILE, output_name, NULL, 0, quiet, &output);
+        err = tswrite_open(TS_W_FILE, output_name, nullptr, 0, quiet, &output);
     if (err) {
         close_elementary_stream(&es);
         fprint_err("### es2ts: Unable to open %s\n", output_name);

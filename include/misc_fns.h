@@ -3,29 +3,6 @@
 /*
  * Miscellaneous useful functions.
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 #include "es_defns.h"
 #include "misc_defns.h"
@@ -232,7 +209,8 @@ int close_input_as_ES(char* name, ES_p* es);
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int unsigned_value(char* prefix, char* cmd, char* arg, int base, uint32_t* value);
+int unsigned_value(const char* prefix, const char* cmd, const char* arg, int base, uint32_t* value);
+
 /*
  * Read in an integer value, checking for extraneous characters.
  *
@@ -306,7 +284,7 @@ int double_value(char* prefix, char* cmd, char* arg, int positive, double* value
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int host_value(char* prefix, char* cmd, char* arg, char** hostname, int* port);
+int host_value(const char* prefix, const char* cmd, const char* arg, char** hostname, int* port);
 
 // ============================================================
 // Sockets
