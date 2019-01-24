@@ -162,7 +162,7 @@ typedef struct _picture* picture_p;
 /*
  * Note that `program_number` should be 1 or more.
  */
-static int build_stream(ES_p es, int is_h262, int program_number, stream_context* stream)
+int build_stream(ES_p es, bool is_h262, int program_number, stream_context* stream)
 {
     int err;
     stream->is_h262 = is_h262;
@@ -183,7 +183,7 @@ static int build_stream(ES_p es, int is_h262, int program_number, stream_context
     return 0;
 }
 
-static void close_stream(stream_context stream)
+void close_stream(stream_context stream)
 {
     if (stream.is_h262)
         free_h262_context(&(stream.u.h262));
@@ -191,7 +191,7 @@ static void close_stream(stream_context stream)
         free_access_unit_context(&(stream.u.h264));
 }
 
-static int build_and_attach_reverse(stream_context stream, reverse_data_p* reverse_data)
+int build_and_attach_reverse(stream_context stream, reverse_data_p* reverse_data)
 {
     int err;
     err = build_reverse_data(reverse_data, !stream.is_h262);
@@ -208,8 +208,8 @@ static int build_and_attach_reverse(stream_context stream, reverse_data_p* rever
     return 0;
 }
 
-static int build_filter_context(
-    stream_context stream, int is_strip, int frequency, filter_context* fcontext)
+int build_filter_context(
+    stream_context stream, bool is_strip, int frequency, filter_context* fcontext)
 {
     int err;
     fcontext->is_h262 = stream.is_h262;
@@ -227,7 +227,7 @@ static int build_filter_context(
     return err;
 }
 
-static void free_filter_context(filter_context fcontext)
+void free_filter_context(filter_context fcontext)
 {
     if (fcontext.is_h262)
         free_h262_filter_context(&(fcontext.u.h262));
@@ -239,7 +239,7 @@ static void free_filter_context(filter_context fcontext)
  * "Reset" a stream, such that the picture reading contexts do not contain
  * any past memory.
  */
-static inline void reset_stream(stream_context stream)
+inline void reset_stream(stream_context stream)
 {
     if (stream.is_h262) {
         if (stream.u.h262->last_item)
@@ -253,7 +253,7 @@ static inline void reset_stream(stream_context stream)
  * Retrieve the next picture. Doesn't distinguish H.262 sequence headers
  * and pictures.
  */
-static inline int get_next_picture(stream_context stream, bool verbose, bool quiet, picture* pic)
+inline int get_next_picture(stream_context stream, bool verbose, bool quiet, picture* pic)
 {
     int err;
     if (stream.is_h262) {
@@ -278,7 +278,7 @@ static inline int get_next_picture(stream_context stream, bool verbose, bool qui
     return 0;
 }
 
-static inline void free_picture(picture* pic)
+inline void free_picture(picture* pic)
 {
     if (pic->is_h262)
         free_h262_picture(&pic->u.h262);
@@ -291,27 +291,28 @@ static inline void free_picture(picture* pic)
  * Needs to be told if the picture is H.262 or not, because this may be
  * called on an unused instance of the picture data structure.
  */
-static inline void unset_picture(int is_h262, picture* pic)
+inline void unset_picture(bool is_h262, picture* pic)
 {
-    if (is_h262)
+    if (is_h262) {
         pic->u.h262 = nullptr;
-    else
+    } else {
         pic->u.h264 = nullptr;
+    }
     pic->is_h262 = is_h262;
 }
 
-static inline int is_null_picture(picture pic)
+inline bool is_null_picture(picture pic)
 {
-    if (pic.is_h262)
+    if (pic.is_h262) {
         return pic.u.h262 == nullptr;
-    else
-        return pic.u.h264 == nullptr;
+    }
+    return pic.u.h264 == nullptr;
 }
 
 // NB: there is already a macro called "is_seq_header"
-static inline int is_non_frame(picture pic) { return (pic.is_h262 && pic.type == 0xff); }
+inline bool is_non_frame(picture pic) { return (pic.is_h262 && pic.type == 0xff); }
 
-static inline int is_reference_picture(picture pic)
+inline bool is_reference_picture(picture pic)
 {
     if (pic.is_h262)
         return (pic.type == 1 || pic.type == 2);

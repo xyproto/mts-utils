@@ -391,7 +391,7 @@ int main(int argc, char** argv)
     bool use_server = false;
 
     int want_data = VIDEO_H262;
-    bool is_data = false;
+    int data_type = 0;
     bool force_stream_type = false;
     byte stream_type;
 
@@ -509,15 +509,15 @@ int main(int argc, char** argv)
     }
 
     err = open_input_as_ES(
-        input_name, use_pes, quiet, force_stream_type, want_data, &is_data, &es);
+        input_name, use_pes, quiet, force_stream_type, want_data, &data_type, &es);
     if (err) {
         print_err("### esreverse: Error opening input file\n");
         return 1;
     }
 
-    if (is_data == VIDEO_H262)
+    if (data_type == VIDEO_H262)
         stream_type = MPEG2_VIDEO_STREAM_TYPE;
-    else if (is_data == VIDEO_H264)
+    else if (data_type == VIDEO_H264)
         stream_type = AVC_VIDEO_STREAM_TYPE;
     else {
         print_err("### esreverse: Unexpected type of video data\n");
@@ -554,7 +554,7 @@ int main(int argc, char** argv)
         fprint_msg("Filtering freqency %d\n", frequency);
         if (max)
             fprint_msg("Stopping as soon after %d %s as possible\n", max,
-                (is_data == VIDEO_H262 ? "MPEG2 items" : "NAL units"));
+                (data_type == VIDEO_H262 ? "MPEG2 items" : "NAL units"));
     }
 
     if (use_pes) {
@@ -607,7 +607,7 @@ int main(int argc, char** argv)
         }
     }
 
-    if (is_data == VIDEO_H262)
+    if (data_type == VIDEO_H262)
         err = reverse_h262(es, output, max, frequency, as_TS, verbose, quiet);
     else
         err = reverse_access_units(es, output, max, frequency, as_TS, verbose, quiet);
