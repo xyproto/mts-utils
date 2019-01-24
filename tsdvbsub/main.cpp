@@ -17,8 +17,6 @@
 #include <string>
 #include <unistd.h>
 
-using namespace std::string_literals;
-
 #include "accessunit.h"
 #include "bitdata.h"
 #include "compat.h"
@@ -36,6 +34,8 @@ using namespace std::string_literals;
 #include "ts.h"
 #include "tswrite.h"
 #include "version.h"
+
+using namespace std::string_literals;
 
 // A three-way choice for what to output by PID
 enum class Extract {
