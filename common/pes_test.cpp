@@ -190,11 +190,11 @@ int test1(PES_reader_p reader, bool verbose)
         if (verbose) {
             printf(
                 "\n>> PS packet at " OFFSET_T_FORMAT " is %02x (", packet->posn, packet->data[3]);
-            print_stream_id(TRUE, packet->data[3]);
+            print_stream_id(true, packet->data[3]);
             printf(")\n");
-            print_data(TRUE, "   Data", packet->data, packet->data_len, 20);
+            print_data(true, "   Data", packet->data, packet->data_len, 20);
 
-            err = report_PES_data_array("", packet->data, packet->data_len, FALSE);
+            err = report_PES_data_array("", packet->data, packet->data_len, false);
             if (err)
                 return 1;
         }
@@ -208,9 +208,9 @@ int test1(PES_reader_p reader, bool verbose)
     packet = reader->packet;
     if (verbose) {
         printf("\n>> PS packet at " OFFSET_T_FORMAT " is %02x (", packet->posn, packet->data[3]);
-        print_stream_id(TRUE, packet->data[3]);
+        print_stream_id(true, packet->data[3]);
         printf(")\n");
-        print_data(TRUE, "   Data", packet->data, packet->data_len, 20);
+        print_data(true, "   Data", packet->data, packet->data_len, 20);
     }
 
     old_data = (byte*)malloc(packet->data_len);
@@ -241,9 +241,9 @@ int test1(PES_reader_p reader, bool verbose)
     packet = reader->packet;
     if (verbose) {
         printf("\n>> PS packet at " OFFSET_T_FORMAT " is %02x (", packet->posn, packet->data[3]);
-        print_stream_id(TRUE, packet->data[3]);
+        print_stream_id(true, packet->data[3]);
         printf(")\n");
-        print_data(TRUE, "   Data", packet->data, packet->data_len, 20);
+        print_data(true, "   Data", packet->data, packet->data_len, 20);
     }
     if (packet->data_len != old_data_len) {
         fprintf(stderr, "### Test1: first packet length %d, second packet length %d\n",
@@ -252,8 +252,8 @@ int test1(PES_reader_p reader, bool verbose)
         return 1;
     } else if (memcmp(packet->data, old_data, packet->data_len)) {
         fprintf(stderr, "### Test1: packet data differs\n");
-        print_data(FALSE, "    Packet 1", old_data, old_data_len, 50);
-        print_data(FALSE, "    Packet 2", packet->data, packet->data_len, 50);
+        print_data(false, "    Packet 1", old_data, old_data_len, 50);
+        print_data(false, "    Packet 2", packet->data, packet->data_len, 50);
         free(old_data);
         return 1;
     }
@@ -292,15 +292,15 @@ int main(int argc, char** argv)
 {
     char* input_name = nullptr;
     char* output_name = nullptr;
-    int had_input_name = FALSE;
-    int had_output_name = FALSE;
+    int had_input_name = false;
+    int had_output_name = false;
     int port = 88; // Useful default port number
     PES_reader_p reader = nullptr;
     TS_writer_p output = nullptr;
-    int quiet = FALSE;
-    bool verbose = FALSE;
-    int video_only = FALSE;
-    int want_output = TRUE;
+    bool quiet = false;
+    bool verbose = false;
+    int video_only = false;
+    int want_output = true;
 
     int err;
     int ii = 1;
@@ -316,15 +316,15 @@ int main(int argc, char** argv)
                 print_usage();
                 return 0;
             } else if (!strcmp("-quiet", argv[ii]) || !strcmp("-q", argv[ii])) {
-                quiet = TRUE;
-                verbose = FALSE;
+                quiet = true;
+                verbose = false;
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
-                verbose = TRUE;
-                quiet = FALSE;
+                verbose = true;
+                quiet = false;
             } else if (!strcmp("-noaudio", argv[ii])) {
-                video_only = TRUE;
+                video_only = true;
             } else if (!strcmp("-nohost", argv[ii])) {
-                want_output = FALSE;
+                want_output = false;
             } else {
                 fprintf(stderr,
                     "### test_pes: "
@@ -340,11 +340,11 @@ int main(int argc, char** argv)
                 err = host_value("test_pes", nullptr, argv[ii], &output_name, &port);
                 if (err)
                     return 1;
-                had_output_name = TRUE; // more or less
+                had_output_name = true; // more or less
                 ii++;
             } else {
                 input_name = argv[ii];
-                had_input_name = TRUE;
+                had_input_name = true;
             }
         }
         ii++;
@@ -383,7 +383,7 @@ int main(int argc, char** argv)
     if (err) {
         fprintf(stderr, "### test_pes: Test 1 failed\n");
         (void)close_PES_reader(&reader);
-        (void)tswrite_close(output, TRUE);
+        (void)tswrite_close(output, true);
         return 1;
     }
     if (!quiet)
@@ -400,7 +400,7 @@ int main(int argc, char** argv)
         if (err) {
             fprintf(stderr, "### test_pes: Error playing PES packets\n");
             (void)close_PES_reader(&reader);
-            (void)tswrite_close(output, TRUE);
+            (void)tswrite_close(output, true);
             return 1;
         }
     }

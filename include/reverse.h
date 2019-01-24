@@ -61,7 +61,7 @@ using namespace std::string_literals;
  * Build the internal arrays to remember video sequence bounds in,
  * for reversing.
  *
- * Builds a new `reverse_data` datastructure. If `is_h264` is FALSE (i.e., the
+ * Builds a new `reverse_data` datastructure. If `is_h264` is false (i.e., the
  * data to be reversed is not MPEG-1 or MPEG-2), then this datastructure may
  * be smaller.
  *
@@ -573,7 +573,7 @@ int get_reverse_data(reverse_data_p reverse_data, int which, uint32_t* index,
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int collect_reverse_h262(h262_context_p h262, int max, bool verbose, int quiet)
+int collect_reverse_h262(h262_context_p h262, int max, bool verbose, bool quiet)
 {
     int err = 0;
     // In order to stop after `max` items, we need to count pictures
@@ -623,7 +623,7 @@ int collect_reverse_h262(h262_context_p h262, int max, bool verbose, int quiet)
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int collect_reverse_access_units(access_unit_context_p acontext, int max, bool verbose, int quiet)
+int collect_reverse_access_units(access_unit_context_p acontext, int max, bool verbose, bool quiet)
 {
     int err = 0;
     int access_unit_count = 0;
@@ -768,10 +768,10 @@ static int read_h262_picture(
     context->reverse_data = nullptr;
 
     // But we *do* want to insist that the picture contain an AFD
-    context->add_fake_afd = TRUE;
+    context->add_fake_afd = true;
     context->last_afd = afd; // the value to use if the picture doesn't have one
 
-    err = get_next_h262_frame(context, verbose, TRUE, picture);
+    err = get_next_h262_frame(context, verbose, true, picture);
 
     context->reverse_data = reverse_data;
 
@@ -847,7 +847,7 @@ static int output_sequence_header(ES_p es, WRITER output, int as_TS, bool verbos
  *
  * Returns 0 if all went well, or 1 if something went wrong.
  */
-static int output_from_reverse_data(ES_p es, WRITER output, int as_TS, bool verbose, int quiet,
+static int output_from_reverse_data(ES_p es, WRITER output, int as_TS, bool verbose, bool quiet,
     uint32_t offset, reverse_data_p reverse_data)
 {
     int with_sequence_headers = (!reverse_data->is_h264 && reverse_data->output_sequence_headers);
@@ -979,12 +979,12 @@ static int output_from_reverse_data(ES_p es, WRITER output, int as_TS, bool verb
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int output_from_reverse_data_as_TS(ES_p es, TS_writer_p tswriter, bool verbose, int quiet,
+int output_from_reverse_data_as_TS(ES_p es, TS_writer_p tswriter, bool verbose, bool quiet,
     uint32_t offset, reverse_data_p reverse_data)
 {
     WRITER writer;
     writer.ts_output = tswriter;
-    return output_from_reverse_data(es, writer, TRUE, verbose, quiet, offset, reverse_data);
+    return output_from_reverse_data(es, writer, true, verbose, quiet, offset, reverse_data);
 }
 
 /*
@@ -1010,11 +1010,11 @@ int output_from_reverse_data_as_TS(ES_p es, TS_writer_p tswriter, bool verbose, 
  * if the current command has changed.
  */
 int output_from_reverse_data_as_ES(
-    ES_p es, FILE* output, bool verbose, int quiet, uint32_t offset, reverse_data_p reverse_data)
+    ES_p es, FILE* output, bool verbose, bool quiet, uint32_t offset, reverse_data_p reverse_data)
 {
     WRITER writer;
     writer.es_output = output;
-    return output_from_reverse_data(es, writer, FALSE, verbose, quiet, offset, reverse_data);
+    return output_from_reverse_data(es, writer, false, verbose, quiet, offset, reverse_data);
 }
 
 /*
@@ -1043,7 +1043,7 @@ int output_from_reverse_data_as_ES(
  * has changed, or 1 if something went wrong.
  */
 static int output_in_reverse(ES_p es, WRITER output, int as_TS, int frequency, bool verbose,
-    int quiet, int32_t start_with, int max, reverse_data_p reverse_data)
+    bool quiet, int32_t start_with, int max, reverse_data_p reverse_data)
 {
     int ii;
     int with_sequence_headers = reverse_data->output_sequence_headers;
@@ -1119,7 +1119,7 @@ static int output_in_reverse(ES_p es, WRITER output, int as_TS, int frequency, b
 
     for (ii = start_index; ii >= first_actual_picture_index; ii--) {
         int err;
-        int keep = FALSE;
+        int keep = false;
         uint32_t index;
         ES_offset start_posn;
         uint32_t num_bytes;
@@ -1197,20 +1197,20 @@ static int output_in_reverse(ES_p es, WRITER output, int as_TS, int frequency, b
                         reverse_data->pictures_written++;
                     }
                 }
-                keep = TRUE;
+                keep = true;
                 if (verbose)
                     fprint_msg("++ %d/%d KEEP: writing out\n", gap, frequency);
                 last_index = index;
             }
         } else
-            keep = TRUE; // i.e., because frequency == 0
+            keep = true; // i.e., because frequency == 0
 
         // *But* always output the *first* picture, since if we reach it we've
         // "run out" of pictures to present
         if (ii == first_actual_picture_index) {
             if (verbose && !keep)
                 print_msg("++ but KEEP first picture regardless\n");
-            keep = TRUE;
+            keep = true;
         }
 
         if (keep) {
@@ -1337,13 +1337,13 @@ static int output_in_reverse(ES_p es, WRITER output, int as_TS, int frequency, b
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int output_in_reverse_as_TS(ES_p es, TS_writer_p tswriter, int frequency, bool verbose, int quiet,
+int output_in_reverse_as_TS(ES_p es, TS_writer_p tswriter, int frequency, bool verbose, bool quiet,
     int32_t start_with, int max, reverse_data_p reverse_data)
 {
     WRITER writer;
     writer.ts_output = tswriter;
     return output_in_reverse(
-        es, writer, TRUE, frequency, verbose, quiet, start_with, max, reverse_data);
+        es, writer, true, frequency, verbose, quiet, start_with, max, reverse_data);
 }
 
 /*
@@ -1372,11 +1372,11 @@ int output_in_reverse_as_TS(ES_p es, TS_writer_p tswriter, int frequency, bool v
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int output_in_reverse_as_ES(ES_p es, FILE* output, int frequency, bool verbose, int quiet,
+int output_in_reverse_as_ES(ES_p es, FILE* output, int frequency, bool verbose, bool quiet,
     int32_t start_with, int max, reverse_data_p reverse_data)
 {
     WRITER writer;
     writer.es_output = output;
     return output_in_reverse(
-        es, writer, FALSE, frequency, verbose, quiet, start_with, max, reverse_data);
+        es, writer, false, frequency, verbose, quiet, start_with, max, reverse_data);
 }

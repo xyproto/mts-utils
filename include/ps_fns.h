@@ -26,7 +26,7 @@
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-int build_PS_reader(int input, int quiet, PS_reader_p* ps);
+int build_PS_reader(int input, bool quiet, PS_reader_p* ps);
 /*
  * Tidy up the PS read-ahead context after we've finished with it.
  *
@@ -47,7 +47,7 @@ void free_PS_reader(PS_reader_p* ps);
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-int open_PS_file(const std::string name, int quiet, PS_reader_p* ps);
+int open_PS_file(const std::string name, bool quiet, PS_reader_p* ps);
 /*
  * Close a PS file, and free the reader context
  *
@@ -286,4 +286,4 @@ int identify_private1_data(struct PS_packet* packet, int is_dvd, bool verbose,
 int ps_to_ts(PS_reader_p ps, TS_writer_p output, int pad_start, int program_repeat, int video_type,
     int is_dvd, int video_stream, int audio_stream, int want_ac3_audio, int dolby_is_dvb,
     uint32_t pmt_pid, uint32_t pcr_pid, uint32_t video_pid, int keep_audio, uint32_t audio_pid,
-    int max, bool verbose, int quiet);
+    int max, bool verbose, bool quiet);

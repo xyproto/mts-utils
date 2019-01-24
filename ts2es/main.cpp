@@ -44,7 +44,7 @@ typedef enum pid_extract EXTRACT;
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int extract_av_via_pes(char* input_name, char* output_name, int want_video, int quiet)
+static int extract_av_via_pes(char* input_name, char* output_name, int want_video, bool quiet)
 {
     int err;
     PES_reader_p reader = nullptr;
@@ -69,7 +69,7 @@ static int extract_av_via_pes(char* input_name, char* output_name, int want_vide
         return 1;
     }
 
-    set_PES_reader_video_only(reader, TRUE);
+    set_PES_reader_video_only(reader, true);
 
     // Wrap our PES stream up as an ES stream
     err = build_elementary_stream_PES(reader, &es);
@@ -116,16 +116,16 @@ static int extract_av_via_pes(char* input_name, char* output_name, int want_vide
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int extract_pid_packets(
-    TS_reader_p tsreader, FILE* output, uint32_t pid_wanted, int max, bool verbose, int quiet)
+    TS_reader_p tsreader, FILE* output, uint32_t pid_wanted, int max, bool verbose, bool quiet)
 {
     int err;
     int count = 0;
     int extracted = 0;
     int pes_packet_len = 0;
-    int got_pes_packet_len = FALSE;
+    int got_pes_packet_len = false;
     // It doesn't make sense to start outputting data for our PID until we
     // get the start of a packet
-    int need_packet_start = TRUE;
+    int need_packet_start = true;
 
     for (;;) {
         uint32_t pid;
@@ -173,7 +173,7 @@ static int extract_pid_packets(
                 int offset;
 
                 if (need_packet_start)
-                    need_packet_start = FALSE;
+                    need_packet_start = false;
 
                 pes_packet_len = (payload[4] << 8) | payload[5];
                 if (verbose)
@@ -191,7 +191,7 @@ static int extract_pid_packets(
                 data = &payload[offset];
                 data_len = payload_len - offset;
                 if (verbose)
-                    print_data(TRUE, "data", data, data_len, 1000);
+                    print_data(true, "data", data, data_len, 1000);
             } else {
                 // If we haven't *started* a packet, we can't use this,
                 // since it will just look like random bytes when written out.
@@ -202,14 +202,14 @@ static int extract_pid_packets(
                 data = payload;
                 data_len = payload_len;
                 if (verbose)
-                    print_data(TRUE, "Data", payload, payload_len, 1000);
+                    print_data(true, "Data", payload, payload_len, 1000);
 
                 if (got_pes_packet_len) {
                     // Try not to write more data than the PES packet declares
                     if (data_len > pes_packet_len) {
                         data_len = pes_packet_len;
                         if (verbose)
-                            print_data(TRUE, "Reduced data", data, data_len, 1000);
+                            print_data(true, "Reduced data", data, data_len, 1000);
                         pes_packet_len = 0;
                     } else
                         pes_packet_len -= data_len;
@@ -243,7 +243,7 @@ static int extract_pid_packets(
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int extract_av(int input, FILE* output, int want_video, int max, bool verbose, int quiet)
+static int extract_av(int input, FILE* output, int want_video, int max, bool verbose, bool quiet)
 {
     int err, ii;
     int max_to_read = max;
@@ -324,7 +324,7 @@ static int extract_av(int input, FILE* output, int want_video, int max, bool ver
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int extract_pid(
-    int input, FILE* output, uint32_t pid_wanted, int max, bool verbose, int quiet)
+    int input, FILE* output, uint32_t pid_wanted, int max, bool verbose, bool quiet)
 {
     int err;
     TS_reader_p tsreader = nullptr;
@@ -379,12 +379,12 @@ static void print_usage()
 
 int main(int argc, char** argv)
 {
-    int use_stdout = FALSE;
-    int use_stdin = FALSE;
+    int use_stdout = false;
+    int use_stdin = false;
     char* input_name = nullptr;
     char* output_name = nullptr;
-    int had_input_name = FALSE;
-    int had_output_name = FALSE;
+    int had_input_name = false;
+    int had_output_name = false;
     char* action_switch = "None";
 
     EXTRACT extract = EXTRACT_VIDEO; // What we're meant to extract
@@ -392,9 +392,9 @@ int main(int argc, char** argv)
     FILE* output = nullptr; // The stream we're writing to (if any)
     int max = 0; // The maximum number of TS packets to read (or 0)
     uint32_t pid = 0; // The PID of the (single) stream to extract
-    int quiet = FALSE; // True => be as quiet as possible
-    bool verbose = FALSE; // True => output diagnostic/progress messages
-    int use_pes = FALSE;
+    bool quiet = false; // True => be as quiet as possible
+    bool verbose = false; // True => output diagnostic/progress messages
+    int use_pes = false;
 
     int err = 0;
     int ii = 1;
@@ -411,19 +411,19 @@ int main(int argc, char** argv)
                 print_usage();
                 return 0;
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
-                verbose = TRUE;
-                quiet = FALSE;
+                verbose = true;
+                quiet = false;
             } else if (!strcmp("-quiet", argv[ii]) || !strcmp("-q", argv[ii])) {
-                verbose = FALSE;
-                quiet = TRUE;
+                verbose = false;
+                quiet = true;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
                 MustARG("ts2es", ii, argc, argv);
-                err = int_value("ts2es", argv[ii], argv[ii + 1], TRUE, 10, &max);
+                err = int_value("ts2es", argv[ii], argv[ii + 1], true, 10, &max);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-pes", argv[ii]) || !strcmp("-ps", argv[ii])) {
-                use_pes = TRUE;
+                use_pes = true;
             } else if (!strcmp("-pid", argv[ii])) {
                 MustARG("ts2es", ii, argc, argv);
                 err = unsigned_value("ts2es", argv[ii], argv[ii + 1], 0, &pid);
@@ -436,11 +436,11 @@ int main(int argc, char** argv)
             } else if (!strcmp("-audio", argv[ii])) {
                 extract = EXTRACT_AUDIO;
             } else if (!strcmp("-stdin", argv[ii])) {
-                use_stdin = TRUE;
-                had_input_name = TRUE; // so to speak
+                use_stdin = true;
+                had_input_name = true; // so to speak
             } else if (!strcmp("-stdout", argv[ii])) {
-                use_stdout = TRUE;
-                had_output_name = TRUE; // so to speak
+                use_stdout = true;
+                had_output_name = true; // so to speak
                 redirect_output_stderr();
             } else if (!strcmp("-err", argv[ii])) {
                 MustARG("ts2es", ii, argc, argv);
@@ -469,10 +469,10 @@ int main(int argc, char** argv)
             } else if (had_input_name) // shouldn't do this if had -stdout
             {
                 output_name = argv[ii];
-                had_output_name = TRUE;
+                had_output_name = true;
             } else {
                 input_name = argv[ii];
-                had_input_name = TRUE;
+                had_input_name = true;
             }
         }
         ii++;
@@ -516,14 +516,14 @@ int main(int argc, char** argv)
 
     // Try to stop extraneous data ending up in our output stream
     if (use_stdout) {
-        verbose = FALSE;
-        quiet = TRUE;
+        verbose = false;
+        quiet = true;
     }
 
     if (use_stdin)
         input = STDIN_FILENO;
     else {
-        input = open_binary_file(input_name, FALSE);
+        input = open_binary_file(input_name, false);
         if (input == -1) {
             fprint_err("### ts2es: Unable to open input file %s\n", input_name);
             return 1;

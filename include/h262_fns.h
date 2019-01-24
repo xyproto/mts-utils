@@ -103,7 +103,7 @@ void free_h262_picture(h262_picture_p* picture);
  * read from different locations in the input stream may be considered the
  * same if their data content is identical.
  *
- * Returns TRUE if the lists contain identical content, FALSE otherwise.
+ * Returns true if the lists contain identical content, false otherwise.
  */
 int same_h262_picture(h262_picture_p picture1, h262_picture_p picture2);
 /*
@@ -164,7 +164,7 @@ int get_next_h262_single_picture(h262_context_p context, bool verbose, h262_pict
  * Returns 0 if it succeeds, EOF if we reach the end of file, or 1 if some
  * error occurs.
  */
-int get_next_h262_frame(h262_context_p context, bool verbose, int quiet, h262_picture_p* picture);
+int get_next_h262_frame(h262_context_p context, bool verbose, bool quiet, h262_picture_p* picture);
 /*
  * Write out an H.262 picture as TS
  *

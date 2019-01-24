@@ -112,7 +112,7 @@ struct PES_reader {
     // reading in PS data (which has no TS program information), and writing
     // out TS data with *different* program information.
     // If we're reading TS data, the default is to use the program data we
-    // find therein. If `override_program_data` is TRUE, then we ignore that,
+    // find therein. If `override_program_data` is true, then we ignore that,
     // and use the values given by the user instead.
     int override_program_data;
     // Regardless, the following are the values to use when writing TS data out:
@@ -155,7 +155,7 @@ struct PES_reader {
     // When being used by a server, we want PES packets to be written out
     // as a "side effect" of reading them in to analyse their contents.
     // Thus we provide:
-    int write_PES_packets; // TRUE if to write them out to:
+    int write_PES_packets; // true if to write them out to:
     TS_writer_p tswriter; // this TS writer context
     int program_freq; // how often to write PAT/PMT out
     int program_index; // how long since we last did so

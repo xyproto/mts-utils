@@ -118,7 +118,7 @@ void free_h264_filter_context(h264_filter_context_p* fcontext);
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int get_next_stripped_h262_frame(h262_filter_context_p fcontext, bool verbose, int quiet,
+int get_next_stripped_h262_frame(h262_filter_context_p fcontext, bool verbose, bool quiet,
     h262_picture_p* seq_hdr, h262_picture_p* frame, int* frames_seen);
 /*
  * Retrieve the next I frame, from the H.262 ES, aiming for an "apparent" kept
@@ -158,7 +158,7 @@ int get_next_stripped_h262_frame(h262_filter_context_p fcontext, bool verbose, i
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int get_next_filtered_h262_frame(h262_filter_context_p fcontext, bool verbose, int quiet,
+int get_next_filtered_h262_frame(h262_filter_context_p fcontext, bool verbose, bool quiet,
     h262_picture_p* seq_hdr, h262_picture_p* frame, int* frames_seen);
 /*
  * Return the next IDR or I (and maybe any reference) frame from this H.264 ES.
@@ -181,7 +181,7 @@ int get_next_filtered_h262_frame(h262_filter_context_p fcontext, bool verbose, i
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int get_next_stripped_h264_frame(h264_filter_context_p fcontext, bool verbose, int quiet,
+int get_next_stripped_h264_frame(h264_filter_context_p fcontext, bool verbose, bool quiet,
     access_unit_p* frame, int* frames_seen);
 /*
  * Retrieve the next frame from the H.264 (MPEG-4/AVC) ES, aiming
@@ -212,5 +212,5 @@ int get_next_stripped_h264_frame(h264_filter_context_p fcontext, bool verbose, i
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int get_next_filtered_h264_frame(h264_filter_context_p fcontext, bool verbose, int quiet,
+int get_next_filtered_h264_frame(h264_filter_context_p fcontext, bool verbose, bool quiet,
     access_unit_p* frame, int* frames_seen);

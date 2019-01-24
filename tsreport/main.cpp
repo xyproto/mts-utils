@@ -165,7 +165,7 @@ static void avg_rate_add(avg_rate_t* ar, uint64_t time, uint64_t bytes)
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, int max,
-    bool verbose, int quiet, char* output_name, uint32_t continuity_cnt_pid, uint64_t report_mask)
+    bool verbose, bool quiet, char* output_name, uint32_t continuity_cnt_pid, uint64_t report_mask)
 {
     pmt_p pmt = nullptr;
     int err;
@@ -208,7 +208,7 @@ static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, i
     uint64_t max_pcr_gap = 0;
     unsigned int bad_pcr_gap_count = 0;
 
-    int first = TRUE;
+    int first = true;
     offset_t posn = 0;
     offset_t start_posn = 0;
     uint32_t count = 0;
@@ -240,7 +240,7 @@ static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, i
     }
 
     // First we need to determine what we're taking our data from.
-    err = find_pmt(tsreader, req_prog_no, max, FALSE, quiet, &pmt_at, &pmt);
+    err = find_pmt(tsreader, req_prog_no, max, false, quiet, &pmt_at, &pmt);
     if (err)
         return 1;
 
@@ -287,7 +287,7 @@ static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, i
         byte* packet;
         byte *adapt, *payload;
         int adapt_len, payload_len;
-        int got_pcr = FALSE;
+        int got_pcr = false;
         uint64_t acc_pcr = 0; // The accurate PCR per TS packet
 
         if (max > 0 && count >= (uint32_t)max) {
@@ -301,7 +301,7 @@ static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, i
             err = read_first_TS_packet_from_buffer(
                 tsreader, pcr_pid, start_count, &packet, &pid, &acc_pcr, &count);
             posn = start_posn + (count - start_count) * TS_PACKET_SIZE;
-            first = FALSE;
+            first = false;
         } else {
             err = read_next_TS_packet_from_buffer(tsreader, &packet, &pid, &acc_pcr);
             count++;
@@ -361,7 +361,7 @@ static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, i
                         int delta_bytes = (int)(posn - predict.prev_pcr_posn);
                         predict.pcr_rate
                             = ((double)delta_bytes * 27.0 / (double)delta_pcr) * 1000000.0;
-                        predict.know_pcr_rate = TRUE;
+                        predict.know_pcr_rate = true;
 
                         if (delta_pcr > max_pcr_gap)
                             max_pcr_gap = delta_pcr;
@@ -384,7 +384,7 @@ static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, i
                         fprint_msg("First PCR at " OFFSET_T_FORMAT "\n", posn);
                     first_pcr = adapt_pcr;
                     first_pcr_posn = posn;
-                    predict.had_a_pcr = TRUE;
+                    predict.had_a_pcr = true;
                 }
                 predict.prev_pcr = adapt_pcr;
                 predict.prev_pcr_posn = posn;
@@ -393,7 +393,7 @@ static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, i
             {
                 int i;
                 for (i = 0; i != num_streams; ++i) {
-                    stats[i].pcr_seen = TRUE;
+                    stats[i].pcr_seen = true;
                 }
             }
         } // end of working with a PCR PID packet
@@ -456,7 +456,7 @@ static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, i
                 for (i = 0; i < 188; i += 16, a += 16, b += 16)
                 {
                   int j;
-                  const int n = min(16, 188 - i);
+                  const int n = std::min(16, 188 - i);
                   for (j = 0; j < n; ++j)
                   {
                     fprint_msg("%c%02x", a[j] == b[j] ? ' ' : '*', a[j]);
@@ -508,7 +508,7 @@ static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, i
 
         if (index != -1) {
             if (stats[index].pcr_seen) {
-                stats[index].pcr_seen = FALSE;
+                stats[index].pcr_seen = false;
                 avg_rate_add(&stats[index].rate, acc_pcr, stats[index].ts_bytes);
             }
             if (stats[index].first_pcr == ~(uint64_t)0)
@@ -578,7 +578,7 @@ static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, i
                    index,posn);
 #endif
                 stats[index].first_pts = stats[index].pts;
-                stats[index].had_a_pts = TRUE;
+                stats[index].had_a_pts = true;
             }
             if (got_dts && !stats[index].had_a_dts) {
 #if 0 // XXX Sometimes useful to know
@@ -586,14 +586,14 @@ static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, i
                    index,posn);
 #endif
                 stats[index].first_dts = stats[index].dts;
-                stats[index].had_a_dts = TRUE;
+                stats[index].had_a_dts = true;
             }
             if (got_pts != got_dts || (got_pts && stats[index].pts != stats[index].dts))
-                stats[index].pts_ne_dts = TRUE;
+                stats[index].pts_ne_dts = true;
 
             if (file) {
                 // At the moment, we only report any ESCR to the file
-                int got_escr = FALSE;
+                int got_escr = false;
                 uint64_t escr;
                 (void)find_ESCR_in_PES(payload, payload_len, &got_escr, &escr);
 
@@ -856,7 +856,7 @@ static int report_ts(TS_reader_p tsreader, int max, bool verbose, int show_data,
                     fprint_err("### Internal error: stream for PID %0x returned nullptr"
                                " in PMT\n",
                         pid);
-                    report_pmt(FALSE, "    ", pmt);
+                    report_pmt(false, "    ", pmt);
                     free_pidint_list(&prog_list);
                     free_pmt(&pmt);
                     if (pmt_data)
@@ -1011,7 +1011,7 @@ static int report_ts(TS_reader_p tsreader, int max, bool verbose, int show_data,
             pmt_data_used = 0;
 #if 0
       print_msg("PMT data read as:\n");
-      report_pmt(TRUE,"  ",pmt);
+      report_pmt(true,"  ",pmt);
       print_msg("\n");
 #endif
         } else if (verbose) {
@@ -1024,7 +1024,7 @@ static int report_ts(TS_reader_p tsreader, int max, bool verbose, int show_data,
             report_payload(
                 show_data, stream_type, payload, payload_len, payload_unit_start_indicator);
             if (!show_data && payload_unit_start_indicator) {
-                print_data(TRUE, "  Data", payload, payload_len, 20);
+                print_data(true, "  Data", payload, payload_len, 20);
             }
 #if 0 // XXX
         print_end_of_data("      ",payload,payload_len,20);
@@ -1044,7 +1044,7 @@ static int report_ts(TS_reader_p tsreader, int max, bool verbose, int show_data,
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int report_single_pid(TS_reader_p tsreader, int max, int quiet, uint32_t just_pid)
+static int report_single_pid(TS_reader_p tsreader, int max, bool quiet, uint32_t just_pid)
 {
     int err;
     int count = 0;
@@ -1084,8 +1084,8 @@ static int report_single_pid(TS_reader_p tsreader, int max, int quiet, uint32_t 
                 (payload_unit_start_indicator ? " [pusi]" : ""));
 
             if (adapt_len > 0)
-                print_data(TRUE, "    Adapt", adapt, adapt_len, adapt_len);
-            print_data(TRUE, "  Payload", payload, payload_len, payload_len);
+                print_data(true, "    Adapt", adapt, adapt_len, adapt_len);
+            print_data(true, "  Payload", payload, payload_len, payload_len);
         }
     }
     fprint_msg("Read %d TS packet%s, %d with PID %0x\n", count, (count == 1 ? "" : "s"), pid_count,
@@ -1164,25 +1164,25 @@ static void print_usage()
 
 int main(int argc, char** argv)
 {
-    int use_stdin = FALSE;
+    int use_stdin = false;
     char* input_name = nullptr;
-    int had_input_name = FALSE;
+    int had_input_name = false;
 
     TS_reader_p tsreader = nullptr;
 
     int max = 0; // The maximum number of TS packets to read (or 0)
-    bool verbose = FALSE; // True => output diagnostic/progress messages
-    int quiet = FALSE;
-    int report_timing = FALSE;
-    int report_buffering = FALSE;
-    int show_data = FALSE;
+    bool verbose = false; // True => output diagnostic/progress messages
+    bool quiet = false;
+    int report_timing = false;
+    int report_buffering = false;
+    int show_data = false;
     char* output_name = nullptr;
     uint32_t continuity_cnt_pid = INVALID_PID;
     int req_prog_no = 1;
 
     uint64_t report_mask = ~0; // report as many bits as we get
 
-    int select_pid = FALSE;
+    int select_pid = false;
     uint32_t just_pid = 0;
 
     int err = 0;
@@ -1200,8 +1200,8 @@ int main(int argc, char** argv)
                 print_usage();
                 return 0;
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
-                verbose = TRUE;
-                quiet = FALSE;
+                verbose = true;
+                quiet = false;
             } else if (!strcmp("-err", argv[ii])) {
                 MustARG("tsreport", ii, argc, argv);
                 if (!strcmp(argv[ii + 1], "stderr"))
@@ -1217,11 +1217,11 @@ int main(int argc, char** argv)
                 }
                 ii++;
             } else if (!strcmp("-timing", argv[ii]) || !strcmp("-t", argv[ii])) {
-                report_timing = TRUE;
-                quiet = FALSE;
+                report_timing = true;
+                quiet = false;
             } else if (!strcmp("-buffering", argv[ii]) || !strcmp("-b", argv[ii])) {
-                report_buffering = TRUE;
-                quiet = FALSE;
+                report_buffering = true;
+                quiet = false;
             } else if (!strcmp("-o", argv[ii])) {
                 MustARG("tsreport", ii, argc, argv);
                 output_name = argv[ii + 1];
@@ -1233,12 +1233,12 @@ int main(int argc, char** argv)
                     return 1;
                 fprint_msg("Reporting on continuity_counter for pid = %04x (%u)\n",
                     continuity_cnt_pid, continuity_cnt_pid);
-                report_buffering = TRUE;
-                quiet = FALSE;
+                report_buffering = true;
+                quiet = false;
                 ii++;
             } else if (!strcmp("-data", argv[ii])) {
-                show_data = TRUE;
-                quiet = FALSE;
+                show_data = true;
+                quiet = false;
             } else if (!strcmp("-32", argv[ii])) {
                 report_mask = 0xFFFFFFFF; // i.e., bottom 32 bits only
             } else if (!strcmp("-tfmt", argv[ii])) {
@@ -1260,23 +1260,23 @@ int main(int argc, char** argv)
                 err = unsigned_value("tsreport", argv[ii], argv[ii + 1], 0, &just_pid);
                 if (err)
                     return 1;
-                select_pid = TRUE;
+                select_pid = true;
                 ii++;
             } else if (!strcmp("-quiet", argv[ii]) || !strcmp("-q", argv[ii])) {
-                verbose = FALSE;
-                quiet = TRUE;
+                verbose = false;
+                quiet = true;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
                 MustARG("tsreport", ii, argc, argv);
-                err = int_value("tsreport", argv[ii], argv[ii + 1], TRUE, 10, &max);
+                err = int_value("tsreport", argv[ii], argv[ii + 1], true, 10, &max);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-stdin", argv[ii])) {
-                use_stdin = TRUE;
-                had_input_name = TRUE; // so to speak
+                use_stdin = true;
+                had_input_name = true; // so to speak
             } else if (!strcmp("-prog", argv[ii])) {
                 MustARG("tsreport", ii, argc, argv);
-                err = int_value("tsreport", argv[ii], argv[ii + 1], TRUE, 10, &req_prog_no);
+                err = int_value("tsreport", argv[ii], argv[ii + 1], true, 10, &req_prog_no);
                 if (err)
                     return 1;
                 ii++;
@@ -1292,7 +1292,7 @@ int main(int argc, char** argv)
                 return 1;
             } else {
                 input_name = argv[ii];
-                had_input_name = TRUE;
+                had_input_name = true;
             }
         }
         ii++;

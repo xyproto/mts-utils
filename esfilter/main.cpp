@@ -55,7 +55,7 @@ typedef enum actions ACTION;
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-static int copy_h262(ES_p es, WRITER output, int as_TS, int max, int quiet)
+static int copy_h262(ES_p es, WRITER output, int as_TS, int max, bool quiet)
 {
     int err;
     int count = 0;
@@ -131,7 +131,7 @@ static int write_h262_picture(WRITER output, int as_TS, h262_picture_p picture)
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
 static int strip_h262(
-    ES_p es, WRITER output, int as_TS, int max, int keep_p, bool verbose, int quiet)
+    ES_p es, WRITER output, int as_TS, int max, int keep_p, bool verbose, bool quiet)
 {
     int err;
     int count;
@@ -234,7 +234,7 @@ static int strip_h262(
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
 static int filter_h262(
-    ES_p es, WRITER output, int as_TS, int frequency, int max, bool verbose, int quiet)
+    ES_p es, WRITER output, int as_TS, int frequency, int max, bool verbose, bool quiet)
 {
     int err;
     int count = 0;
@@ -351,7 +351,7 @@ static int filter_h262(
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int copy_nal_units(ES_p es, WRITER output, int as_TS, int max, bool verbose, int quiet)
+static int copy_nal_units(ES_p es, WRITER output, int as_TS, int max, bool verbose, bool quiet)
 {
     int err = 0;
     nal_unit_context_p context = nullptr;
@@ -408,7 +408,7 @@ static int copy_nal_units(ES_p es, WRITER output, int as_TS, int max, bool verbo
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int strip_access_units(
-    ES_p es, WRITER output, int as_TS, int max, int keep_all_ref, bool verbose, int quiet)
+    ES_p es, WRITER output, int as_TS, int max, int keep_all_ref, bool verbose, bool quiet)
 {
     int err = 0;
     int count;
@@ -489,7 +489,7 @@ static int strip_access_units(
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int filter_access_units(
-    ES_p es, WRITER output, int as_TS, int max, int frequency, bool verbose, int quiet)
+    ES_p es, WRITER output, int as_TS, int max, int frequency, bool verbose, bool quiet)
 {
     int err = 0;
     int count;
@@ -594,7 +594,7 @@ static int filter_access_units(
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int do_action(ACTION action, ES_p es, WRITER output, int max, int frequency, int is_h262,
-    int as_TS, int keep_all_ref, byte stream_type, bool verbose, int quiet)
+    int as_TS, int keep_all_ref, byte stream_type, bool verbose, bool quiet)
 {
     int err = 0;
 
@@ -710,30 +710,30 @@ int main(int argc, char** argv)
 {
     char* input_name = nullptr;
     char* output_name = nullptr;
-    int had_input_name = FALSE;
-    int had_output_name = FALSE;
+    int had_input_name = false;
+    int had_output_name = false;
     auto action_switch = "None"s;
-    int use_stdin = FALSE;
-    int use_stdout = FALSE;
-    int use_tcpip = FALSE;
+    int use_stdin = false;
+    int use_stdout = false;
+    int use_tcpip = false;
     int port = 88; // Useful default port number
     int err = 0;
     ES_p es = nullptr;
     WRITER output;
     int max = 0;
     ACTION action = ACTION_UNDEFINED;
-    int as_TS = FALSE;
-    int keep_all_ref = FALSE;
+    int as_TS = false;
+    int keep_all_ref = false;
     int frequency = 8; // The default as stated in the usage
-    int quiet = FALSE;
-    bool verbose = FALSE;
+    bool quiet = false;
+    bool verbose = false;
     int ii = 1;
 
-    int use_pes = FALSE;
+    int use_pes = false;
 
     int want_data = VIDEO_H262;
     int is_data;
-    int force_stream_type = FALSE;
+    int force_stream_type = false;
     byte stream_type;
 
     if (argc < 2) {
@@ -750,13 +750,13 @@ int main(int argc, char** argv)
                 print_usage();
                 return 0;
             } else if (!strcmp("-avc", argv[ii]) || !strcmp("-h264", argv[ii])) {
-                force_stream_type = TRUE;
+                force_stream_type = true;
                 want_data = VIDEO_H264;
             } else if (!strcmp("-h262", argv[ii])) {
-                force_stream_type = TRUE;
+                force_stream_type = true;
                 want_data = VIDEO_H262;
             } else if (!strcmp("-pes", argv[ii]) || !strcmp("-ts", argv[ii]))
-                use_pes = TRUE;
+                use_pes = true;
             else if (!strcmp("-copy", argv[ii])) {
                 action = ACTION_COPY;
                 action_switch = argv[ii];
@@ -767,13 +767,13 @@ int main(int argc, char** argv)
                 action = ACTION_STRIP;
                 action_switch = argv[ii];
             } else if (!strcmp("-tsout", argv[ii]))
-                as_TS = TRUE;
+                as_TS = true;
             else if (!strcmp("-stdin", argv[ii])) {
-                had_input_name = TRUE; // more or less
-                use_stdin = TRUE;
+                had_input_name = true; // more or less
+                use_stdin = true;
             } else if (!strcmp("-stdout", argv[ii])) {
-                had_output_name = TRUE; // more or less
-                use_stdout = TRUE;
+                had_output_name = true; // more or less
+                use_stdout = true;
                 redirect_output_stderr();
             } else if (!strcmp("-err", argv[ii])) {
                 MustARG("esfilter", ii, argc, argv);
@@ -794,27 +794,27 @@ int main(int argc, char** argv)
                 err = host_value("esfilter", argv[ii], argv[ii + 1], &output_name, &port);
                 if (err)
                     return 1;
-                had_output_name = TRUE; // more or less
-                use_tcpip = TRUE;
-                as_TS = TRUE;
+                had_output_name = true; // more or less
+                use_tcpip = true;
+                as_TS = true;
                 ii++;
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
-                verbose = TRUE;
-                quiet = FALSE;
+                verbose = true;
+                quiet = false;
             } else if (!strcmp("-quiet", argv[ii]) || !strcmp("-q", argv[ii])) {
-                verbose = FALSE;
-                quiet = TRUE;
+                verbose = false;
+                quiet = true;
             } else if (!strcmp("-allref", argv[ii])) {
-                keep_all_ref = TRUE;
+                keep_all_ref = true;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
                 MustARG("esfilter", ii, argc, argv);
-                err = int_value("esfilter", argv[ii], argv[ii + 1], TRUE, 10, &max);
+                err = int_value("esfilter", argv[ii], argv[ii + 1], true, 10, &max);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-freq", argv[ii])) {
                 MustARG("esfilter", ii, argc, argv);
-                err = int_value("esfilter", argv[ii], argv[ii + 1], TRUE, 10, &frequency);
+                err = int_value("esfilter", argv[ii], argv[ii + 1], true, 10, &frequency);
                 if (err)
                     return 1;
                 ii++;
@@ -830,10 +830,10 @@ int main(int argc, char** argv)
                 return 1;
             } else if (had_input_name) {
                 output_name = argv[ii];
-                had_output_name = TRUE;
+                had_output_name = true;
             } else {
                 input_name = argv[ii];
-                had_input_name = TRUE;
+                had_input_name = true;
             }
         }
         ii++;
@@ -855,8 +855,8 @@ int main(int argc, char** argv)
 
     // Try to stop extraneous data ending up in our output stream
     if (use_stdout) {
-        verbose = FALSE;
-        quiet = TRUE;
+        verbose = false;
+        quiet = true;
     }
 
     err = open_input_as_ES((use_stdin ? nullptr : input_name), use_pes, quiet, force_stream_type,
@@ -870,7 +870,7 @@ int main(int argc, char** argv)
     // - this may make things slightly faster, and will allow us to ignore
     // any errors in the non-video packets
     if (use_pes)
-        set_PES_reader_video_only(es->reader, TRUE);
+        set_PES_reader_video_only(es->reader, true);
 
     if (is_data == VIDEO_H262)
         stream_type = MPEG2_VIDEO_STREAM_TYPE;
@@ -933,7 +933,7 @@ int main(int argc, char** argv)
         fprint_err("### esfilter: Error doing '%s'\n", action_switch);
         (void)close_input_as_ES(input_name, &es);
         if (as_TS)
-            (void)tswrite_close(output.ts_output, TRUE);
+            (void)tswrite_close(output.ts_output, true);
         else if (had_output_name && !use_stdout) {
             err = fclose(output.es_output);
             if (err)

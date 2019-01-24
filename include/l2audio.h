@@ -216,7 +216,7 @@ int read_next_l2audio_frame(int file, audio_frame_p* frame)
 
 #if DEBUG
     print_msg("MPEG layer 2 frame\n");
-    print_data(TRUE, "Start", header, JUST_ENOUGH, JUST_ENOUGH);
+    print_data(true, "Start", header, JUST_ENOUGH, JUST_ENOUGH);
 #endif
 
     while (header[0] != 0xFF || (header[1] & 0xe0) != 0xe0) {

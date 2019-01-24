@@ -51,7 +51,7 @@ int build_nal_unit_context(ES_p es, nal_unit_context_p* context)
     }
     new2->es = es;
     new2->count = 0;
-    new2->show_nal_details = FALSE;
+    new2->show_nal_details = false;
     err = build_param_dict(&new2->seq_param_dict);
     if (err) {
         free(new2);
@@ -139,10 +139,10 @@ int build_nal_unit(nal_unit_p* nal)
 
     new2->nal_unit_type = NAL_UNSPECIFIED;
 
-    new2->starts_picture_decided = FALSE;
-    new2->starts_picture = FALSE;
+    new2->starts_picture_decided = false;
+    new2->starts_picture = false;
     new2->start_reason = nullptr;
-    new2->decoded = FALSE;
+    new2->decoded = false;
 
     *nal = new2;
     return 0;
@@ -348,14 +348,14 @@ static int read_slice_data(
 
     data->field_pic_flag = 0; // value if not present - i.e., a frame
     data->bottom_field_flag = 0;
-    data->bottom_field_flag_present = FALSE;
+    data->bottom_field_flag_present = false;
     if (!seq_param_data->frame_mbs_only_flag) {
         err = read_bit(bd, &data->field_pic_flag);
         CHECK("field_pic_flag");
         if (show_nal_details)
             fprint_msg("   field_pic_flag %d\n", data->field_pic_flag);
         if (data->field_pic_flag) {
-            data->bottom_field_flag_present = TRUE;
+            data->bottom_field_flag_present = true;
             err = read_bit(bd, &data->bottom_field_flag);
             CHECK("bottom_field_flag");
             if (show_nal_details)
@@ -405,16 +405,16 @@ static int read_slice_data(
     // it, we can grumble about/ignore redundant pictures if we get them,
     // which seems a useful thing to be able to do.
     data->redundant_pic_cnt = 0;
-    data->redundant_pic_cnt_present = FALSE;
+    data->redundant_pic_cnt_present = false;
     if (pic_param_data->redundant_pic_cnt_present_flag) {
-        data->redundant_pic_cnt_present = TRUE;
+        data->redundant_pic_cnt_present = true;
         err = read_exp_golomb(bd, &data->redundant_pic_cnt);
         CHECK("redundant_pic_cnt");
         if (show_nal_details)
             fprint_msg("   redundant_pic_cnt %u\n", data->redundant_pic_cnt);
     }
 
-    nal->decoded = TRUE;
+    nal->decoded = true;
     return 0;
 }
 
@@ -586,7 +586,7 @@ static int read_pic_param_set_data(nal_unit_p nal, int show_nal_details)
     if (show_nal_details)
         fprint_msg("   redundant_pic_cnt_present_flag %d\n", data->redundant_pic_cnt_present_flag);
 
-    nal->decoded = TRUE;
+    nal->decoded = true;
     return 0;
 }
 
@@ -633,7 +633,7 @@ static int read_seq_param_set_data(nal_unit_p nal, int show_nal_details)
         fprint_err("### reserved_zero_5bits not zero (%d) in sequence"
                    " parameter set NAL unit at " OFFSET_T_FORMAT "/%d\n",
             reserved_zero_5bits, nal->unit.start_posn.infile, nal->unit.start_posn.inpacket);
-        print_data(FALSE, "   Data", nal->bit_data->data, nal->bit_data->data_len, 20);
+        print_data(false, "   Data", nal->bit_data->data, nal->bit_data->data_len, 20);
         // Should we carry on or give up? On the whole, if this is broken
         // we can't really trust the rest of its data...
         return 1;
@@ -726,7 +726,7 @@ static int read_seq_param_set_data(nal_unit_p nal, int show_nal_details)
     if (show_nal_details)
         fprint_msg("   frame_mbs_only_flag %d\n", data->frame_mbs_only_flag);
 
-    nal->decoded = TRUE;
+    nal->decoded = true;
     return 0;
 }
 
@@ -759,7 +759,7 @@ static int read_SEI_recovery_point(nal_unit_p nal, int payloadSize, int show_nal
     err = read_bits(bd, 2, &data->changing_slice_group_idc);
     CHECK("changing_slice_group_idc");
 
-    nal->decoded = TRUE;
+    nal->decoded = true;
 
     if (show_nal_details) {
         print_msg("@@ Recovery Point SEI\n");
@@ -984,7 +984,7 @@ int nal_is_first_VCL_NAL(nal_unit_p nal, nal_unit_p last)
     if (!nal->decoded) {
         print_err("### Cannot decide if NAL unit is first VCL NAL\n"
                   "    its RBSP data has not been interpreted\n");
-        return FALSE;
+        return false;
     }
 
     // Since we intend to transmit all sequence and picture parameter
@@ -995,19 +995,19 @@ int nal_is_first_VCL_NAL(nal_unit_p nal, nal_unit_p last)
     // ignore them as well (at least, so I hope)
 
     if (nal->nal_unit_type != NAL_NON_IDR && nal->nal_unit_type != NAL_IDR) {
-        nal->starts_picture = FALSE;
-        nal->starts_picture_decided = TRUE;
-        return FALSE;
+        nal->starts_picture = false;
+        nal->starts_picture_decided = true;
+        return false;
     }
 
-    nal->starts_picture = TRUE; // let's be optimistic...
-    nal->starts_picture_decided = TRUE;
+    nal->starts_picture = true; // let's be optimistic...
+    nal->starts_picture_decided = true;
 
     if (last == nullptr) {
         // With nothing else to compare to, we shall assume that we do
         // "start" a picture
         nal->start_reason = "First slice in data stream";
-        return TRUE;
+        return true;
     }
 
     this2 = &(nal->u.slice);
@@ -1042,7 +1042,7 @@ int nal_is_first_VCL_NAL(nal_unit_p nal, nal_unit_p last)
         && this2->idr_pic_id != that->idr_pic_id)
         nal->start_reason = "Different IDRs";
     else
-        nal->starts_picture = FALSE;
+        nal->starts_picture = false;
 
     return nal->starts_picture;
 }
@@ -1116,7 +1116,7 @@ static void check_profile(nal_unit_p nal, int show_nal_details)
     } else if (nal->nal_unit_type != 7) {
         print_err("### Attempt to check profile on a NAL unit that is not a "
                   "sequence parameter set\n");
-        report_nal(FALSE, nal);
+        report_nal(false, nal);
         return;
     } else if (!nal->decoded) {
         // Note that we believe ourselves safe in passing nullptrs for the
@@ -1247,7 +1247,7 @@ int setup_NAL_data(bool verbose, nal_unit_p nal)
  */
 int find_next_NAL_unit(nal_unit_context_p context, bool verbose, nal_unit_p* nal)
 {
-    static int need_first_seq_param_set = TRUE;
+    static int need_first_seq_param_set = true;
     int err;
 
     err = build_nal_unit(nal);
@@ -1278,7 +1278,7 @@ int find_next_NAL_unit(nal_unit_context_p context, bool verbose, nal_unit_p* nal
     if (nal_is_seq_param_set(*nal)) {
         if (need_first_seq_param_set) {
             check_profile(*nal, context->show_nal_details);
-            need_first_seq_param_set = FALSE;
+            need_first_seq_param_set = false;
         }
     }
 
@@ -1299,7 +1299,7 @@ int find_next_NAL_unit(nal_unit_context_p context, bool verbose, nal_unit_p* nal
             context->pic_param_dict, (*nal)->u.pic.pic_parameter_set_id, *nal);
         if (err) {
             print_err("### Error remembering picture parameter set ");
-            report_nal(FALSE, *nal);
+            report_nal(false, *nal);
             free_nal_unit(nal);
             return 1;
         }
@@ -1308,7 +1308,7 @@ int find_next_NAL_unit(nal_unit_context_p context, bool verbose, nal_unit_p* nal
             context->seq_param_dict, (*nal)->u.seq.seq_parameter_set_id, *nal);
         if (err) {
             print_err("### Error remembering sequence parameter set ");
-            report_nal(FALSE, *nal);
+            report_nal(false, *nal);
             free_nal_unit(nal);
             return 1;
         }

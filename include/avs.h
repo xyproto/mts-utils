@@ -220,8 +220,8 @@ static int build_avs_frame(avs_context_p context, avs_frame_p* frame, ES_unit_p 
     new2->start_code = unit->start_code;
     if (is_avs_frame_item(unit)) {
         new2->picture_coding_type = avs_picture_coding_type(unit);
-        new2->is_frame = TRUE;
-        new2->is_sequence_header = FALSE;
+        new2->is_frame = true;
+        new2->is_sequence_header = false;
         if (new2->picture_coding_type != AVS_I_PICTURE_CODING)
             new2->picture_distance = (data[6] << 2) | ((data[7] & 0xC0) >> 6);
         else
@@ -229,8 +229,8 @@ static int build_avs_frame(avs_context_p context, avs_frame_p* frame, ES_unit_p 
             // and it takes more work to find it...
             new2->picture_distance = 0;
     } else if (is_avs_seq_header_item(unit)) {
-        new2->is_frame = FALSE;
-        new2->is_sequence_header = TRUE;
+        new2->is_frame = false;
+        new2->is_sequence_header = true;
         new2->picture_coding_type = 0xFF; // Meaningless value, just in case
         new2->aspect_ratio = (data[10] & 0x3C) >> 2;
         new2->frame_rate_code = ((data[10] & 0x03) << 2) | ((data[11] & 0xC0) >> 4);
@@ -239,14 +239,14 @@ static int build_avs_frame(avs_context_p context, avs_frame_p* frame, ES_unit_p 
             new2->frame_rate_code, avs_frame_rate(new2->frame_rate_code));
 #endif
     } else if (is_avs_seq_end_item(unit)) {
-        new2->is_frame = FALSE;
-        new2->is_sequence_header = FALSE;
+        new2->is_frame = false;
+        new2->is_sequence_header = false;
         new2->picture_coding_type = 0xFF; // Meaningless value, just in case
     } else {
         fprint_err("!!! Building AVS frame that starts with a %s (%02x)\n",
             avs_start_code_str(unit->start_code), unit->start_code);
-        new2->is_frame = FALSE;
-        new2->is_sequence_header = FALSE;
+        new2->is_frame = false;
+        new2->is_sequence_header = false;
         new2->picture_coding_type = 0xFF; // Meaningless value, just in case
     }
 
@@ -326,16 +326,16 @@ static int get_next_avs_single_frame(avs_context_p context, bool verbose, avs_fr
 {
     int err = 0;
 
-    int in_sequence_header = FALSE;
-    int in_sequence_end = FALSE;
-    int in_frame = FALSE;
-    int last_was_slice = FALSE;
+    int in_sequence_header = false;
+    int in_sequence_end = false;
+    int in_frame = false;
+    int last_was_slice = false;
 
     ES_unit_p item = context->last_item;
 
 #if DEBUG_GET_NEXT_PICTURE
     int num_slices = 0;
-    int had_slice = FALSE;
+    int had_slice = false;
     int last_slice_start_code = 0;
     if (verbose && context->last_item)
         print_msg("__ reuse last item\n");
@@ -351,13 +351,13 @@ static int get_next_avs_single_frame(avs_context_p context, bool verbose, avs_fr
                 return err;
         }
         if (is_avs_frame_item(item)) {
-            in_frame = TRUE;
+            in_frame = true;
             break;
         } else if (is_avs_seq_header_item(item)) {
-            in_sequence_header = TRUE;
+            in_sequence_header = true;
             break;
         } else if (is_avs_seq_end_item(item)) {
-            in_sequence_end = TRUE;
+            in_sequence_end = true;
             break;
         }
 #if DEBUG_GET_NEXT_PICTURE
@@ -422,7 +422,7 @@ static int get_next_avs_single_frame(avs_context_p context, bool verbose, avs_fr
                 num_slices++;
                 last_slice_start_code = item->start_code;
                 if (!had_slice)
-                    had_slice = TRUE;
+                    had_slice = true;
             }
         }
 #endif
@@ -487,7 +487,7 @@ static int get_next_avs_single_frame(avs_context_p context, bool verbose, avs_fr
  * Returns 0 if it succeeds, EOF if we reach the end of file, or 1 if some
  * error occurs.
  */
-int get_next_avs_frame(avs_context_p context, bool verbose, int quiet, avs_frame_p* frame)
+int get_next_avs_frame(avs_context_p context, bool verbose, bool quiet, avs_frame_p* frame)
 {
     int err;
 
@@ -550,9 +550,9 @@ int write_avs_frame_as_TS(TS_writer_p tswriter, avs_frame_p frame, uint32_t pid)
  * - `frame` is the frame to write out
  * - `tswriter` is the TS context to write with
  * - `video_pid` is the PID to use to write the data
- * - `got_pts` is TRUE if we have a PTS value, in which case
+ * - `got_pts` is true if we have a PTS value, in which case
  * - `pts` is said PTS value
- * - `got_dts` is TRUE if we also have DTS, in which case
+ * - `got_dts` is true if we also have DTS, in which case
  * - `dts` is said DTS value.
  *
  * If we are given a DTS (which must, by definition, always go up) we will also

@@ -157,7 +157,7 @@ int report_streams(TS_reader_p tsreader, int max, bool verbose)
                 else if (!verbose)
                     fprint_msg("\nPacket %d is PAT\n", ii + 1);
 
-                report_pidint_list(this_prog_list, "Program list", "Program", FALSE);
+                report_pidint_list(this_prog_list, "Program list", "Program", false);
 
                 if (this_prog_list->length == 0)
                     fprint_msg("No programs defined in PAT (packet %d)\n", ii + 1);
@@ -237,7 +237,7 @@ int report_streams(TS_reader_p tsreader, int max, bool verbose)
             else if (!verbose)
                 fprint_msg("\nPacket %d is PMT with PID %04x (%d)\n", ii + 1, pid, pid);
 
-            report_pmt(TRUE, (char*)"  ", this_pmt);
+            report_pmt(true, (char*)"  ", this_pmt);
 
             free_pmt(&last_pmt);
             last_pmt = this_pmt;
@@ -276,11 +276,11 @@ void print_usage()
 
 int main(int argc, char** argv)
 {
-    int use_stdin = FALSE;
+    int use_stdin = false;
     char* input_name = nullptr;
-    int had_input_name = FALSE;
+    int had_input_name = false;
     int max = 10000;
-    bool verbose = FALSE; // True => output diagnostic/progress messages
+    bool verbose = false; // True => output diagnostic/progress messages
     int lookfor = 1;
     int err = 0;
 
@@ -314,22 +314,22 @@ int main(int argc, char** argv)
                 }
                 ii++;
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
-                verbose = TRUE;
+                verbose = true;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
                 MustARG("tsinfo", ii, argc, argv);
-                err = int_value("tsinfo", argv[ii], argv[ii + 1], TRUE, 10, &max);
+                err = int_value("tsinfo", argv[ii], argv[ii + 1], true, 10, &max);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-repeat", argv[ii])) {
                 MustARG("tsinfo", ii, argc, argv);
-                err = int_value("tsinfo", argv[ii], argv[ii + 1], TRUE, 10, &lookfor);
+                err = int_value("tsinfo", argv[ii], argv[ii + 1], true, 10, &lookfor);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-stdin", argv[ii])) {
-                use_stdin = TRUE;
-                had_input_name = TRUE; // so to speak
+                use_stdin = true;
+                had_input_name = true; // so to speak
             } else {
                 fprint_err("### tsinfo: "
                            "Unrecognised command line switch '%s'\n",
@@ -342,7 +342,7 @@ int main(int argc, char** argv)
                 return 1;
             } else {
                 input_name = argv[ii];
-                had_input_name = TRUE;
+                had_input_name = true;
             }
         }
         ii++;

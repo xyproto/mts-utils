@@ -34,17 +34,9 @@ typedef off_t offset_t;
 #define LLD_FORMAT_STUMP "lld"
 #define LLU_FORMAT_STUMP "llu"
 
-// Useful macros, but not side-effect free
-#define max(i, j) ((i) > (j) ? (i) : (j))
-#define min(i, j) ((i) < (j) ? (i) : (j))
-
 // Other useful things
 
 typedef void* void_p;
-
-// TODO: Remove this definition
-#define TRUE true
-#define FALSE false
 
 // The following defaults are common, and it's difficult
 // to decide which other header file they might belong in

@@ -81,7 +81,7 @@ static int check_if_TS(int input, byte cur_byte, bool verbose, int* decided, int
     }
     if (verbose)
         print_msg("The checked packets all start with 0x47 - looks like TS\n");
-    *decided = TRUE;
+    *decided = true;
     *result = STREAM_IS_TS;
     return 0;
 }
@@ -175,7 +175,7 @@ static int check_if_PS(int input, bool verbose, int* decided, int* result)
     if (verbose)
         print_msg("  Start of second packet found at right place - looks like PS\n");
 
-    *decided = TRUE;
+    *decided = true;
     *result = STREAM_IS_PS;
     return 0;
 }
@@ -187,7 +187,7 @@ static int check_if_PS(int input, bool verbose, int* decided, int* result)
  * - `input` is the input stream to inspect
  * - if `verbose` is true, the caller wants details of how the decision
  *   is being made
- * - `decided` is returned TRUE if the function believes it has identified
+ * - `decided` is returned true if the function believes it has identified
  *   the stream type, in which case:
  * - `result` will an appropriate value indicating what we've decided
  *
@@ -251,19 +251,19 @@ static int determine_packet_type(int input, bool verbose, int* decided, int* res
     switch (video_type) {
     case VIDEO_H264:
         *result = STREAM_IS_H264;
-        *decided = TRUE;
+        *decided = true;
         break;
     case VIDEO_H262:
         *result = STREAM_IS_H262;
-        *decided = TRUE;
+        *decided = true;
         break;
     case VIDEO_AVS:
         *result = STREAM_IS_AVS;
-        *decided = TRUE;
+        *decided = true;
         break;
     case VIDEO_UNKNOWN:
         *result = STREAM_IS_UNSURE;
-        *decided = FALSE;
+        *decided = false;
         if (verbose)
             print_msg("Still not sure\n");
         break;
@@ -326,13 +326,13 @@ static void print_usage()
 int main(int argc, char** argv)
 {
     char* input_name = nullptr;
-    int had_input_name = FALSE;
+    int had_input_name = false;
     int input = -1;
-    bool verbose = FALSE;
-    int quiet = FALSE;
+    bool verbose = false;
+    bool quiet = false;
     int err = 0;
     int ii = 1;
-    int decided = FALSE;
+    int decided = false;
     int result = STREAM_IS_ERROR;
 
     if (argc < 2) {
@@ -347,8 +347,8 @@ int main(int argc, char** argv)
                 print_usage();
                 return STREAM_IS_ERROR;
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
-                verbose = TRUE;
-                quiet = FALSE;
+                verbose = true;
+                quiet = false;
             } else if (!strcmp("-err", argv[ii])) {
                 MustARG("stream_type", ii, argc, argv);
                 if (!strcmp(argv[ii + 1], "stderr"))
@@ -364,8 +364,8 @@ int main(int argc, char** argv)
                 }
                 ii++;
             } else if (!strcmp("-quiet", argv[ii]) || !strcmp("-q", argv[ii])) {
-                verbose = FALSE;
-                quiet = TRUE;
+                verbose = false;
+                quiet = true;
             } else {
                 fprint_err("### stream_type: "
                            "Unrecognised command line switch '%s'\n",
@@ -378,7 +378,7 @@ int main(int argc, char** argv)
                 return STREAM_IS_ERROR;
             } else {
                 input_name = argv[ii];
-                had_input_name = TRUE;
+                had_input_name = true;
             }
         }
         ii++;
@@ -389,7 +389,7 @@ int main(int argc, char** argv)
         return STREAM_IS_ERROR;
     }
 
-    input = open_binary_file(input_name, FALSE);
+    input = open_binary_file(input_name, false);
     if (input == -1) {
         fprint_err("### stream_type: Unable to open input file %s\n", input_name);
         return 1;

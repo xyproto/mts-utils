@@ -32,7 +32,7 @@
  * Report on the given file
  *
  * - `ps` represents the PS file we're reading
- * - if `is_dvd` is TRUE, then assume that data in private_stream_1 is
+ * - if `is_dvd` is true, then assume that data in private_stream_1 is
  *   stored using the DVD "substream" convention
  * - if `max` is more than zero, then it is the maximum number of PS packs
  *   we want to read
@@ -46,7 +46,7 @@ static int report_ps(PS_reader_p ps, int is_dvd, int max, bool verbose)
     int err;
     offset_t posn = 0; // The location in the input file of the current packet
     byte stream_id; // The packet's stream id
-    int end_of_file = FALSE;
+    int end_of_file = false;
 
     struct PS_packet packet = { 0 };
     struct PS_pack_header header = { 0 };
@@ -132,7 +132,7 @@ static int report_ps(PS_reader_p ps, int is_dvd, int max, bool verbose)
     if (stream_id != 0xba) {
         print_err("### Program stream does not start with pack header\n");
         fprint_err("    First packet has stream id %02X (", stream_id);
-        print_stream_id(FALSE, stream_id);
+        print_stream_id(false, stream_id);
         print_err(")\n");
         return 1;
     }
@@ -165,7 +165,7 @@ static int report_ps(PS_reader_p ps, int is_dvd, int max, bool verbose)
         for (;;) {
             err = read_PS_packet_start(ps, verbose, &posn, &stream_id);
             if (err == EOF) {
-                end_of_file = TRUE;
+                end_of_file = true;
                 break;
             } else if (err)
                 goto give_up;
@@ -205,9 +205,9 @@ static int report_ps(PS_reader_p ps, int is_dvd, int max, bool verbose)
             if (verbose) {
                 fprint_msg(
                     OFFSET_T_FORMAT_08 ": PS Packet %2d stream %02X (", posn, count, stream_id);
-                print_stream_id(TRUE, stream_id);
+                print_stream_id(true, stream_id);
                 print_msg(")\n");
-                print_data(TRUE, "          Packet", packet.data, packet.data_len, 20);
+                print_data(true, "          Packet", packet.data, packet.data_len, 20);
 #if 1 // XXX
                 print_end_of_data("                ", packet.data, packet.data_len, 20);
 #endif
@@ -215,7 +215,7 @@ static int report_ps(PS_reader_p ps, int is_dvd, int max, bool verbose)
 #if 1 // XXX
                     report_PES_data_array2(-1, packet.data, packet.data_len, 20);
 #else
-                    report_PES_data_array("          ", packet.data, packet.data_len, TRUE);
+                    report_PES_data_array("          ", packet.data, packet.data_len, true);
 #endif
             }
 
@@ -302,7 +302,7 @@ static int report_ps(PS_reader_p ps, int is_dvd, int max, bool verbose)
             }
             err = read_PS_packet_start(ps, verbose, &posn, &stream_id);
             if (err == EOF) {
-                end_of_file = TRUE;
+                end_of_file = true;
                 break;
             } else if (err)
                 goto give_up;
@@ -421,14 +421,14 @@ static void print_usage()
 
 int main(int argc, char** argv)
 {
-    int use_stdin = FALSE;
+    int use_stdin = false;
     char* input_name = nullptr;
-    int had_input_name = FALSE;
+    int had_input_name = false;
 
     PS_reader_p ps; // The PS file we're reading
     int max = 0; // The maximum number of PS packets to read (or 0)
-    bool verbose = FALSE; // True => output diagnostic/progress messages
-    int is_dvd = TRUE;
+    bool verbose = false; // True => output diagnostic/progress messages
+    int is_dvd = true;
 
     int err = 0;
     int ii = 1;
@@ -459,20 +459,20 @@ int main(int argc, char** argv)
                 }
                 ii++;
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
-                verbose = TRUE;
+                verbose = true;
             } else if (!strcmp("-dvd", argv[ii])) {
-                is_dvd = TRUE;
+                is_dvd = true;
             } else if (!strcmp("-notdvd", argv[ii]) || !strcmp("-nodvd", argv[ii])) {
-                is_dvd = FALSE;
+                is_dvd = false;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
                 MustARG("psreport", ii, argc, argv);
-                err = int_value("psreport", argv[ii], argv[ii + 1], TRUE, 10, &max);
+                err = int_value("psreport", argv[ii], argv[ii + 1], true, 10, &max);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-stdin", argv[ii])) {
-                use_stdin = TRUE;
-                had_input_name = TRUE; // so to speak
+                use_stdin = true;
+                had_input_name = true; // so to speak
             } else {
                 fprint_err("### psreport: "
                            "Unrecognised command line switch '%s'\n",
@@ -485,7 +485,7 @@ int main(int argc, char** argv)
                 return 1;
             } else {
                 input_name = argv[ii];
-                had_input_name = TRUE;
+                had_input_name = true;
             }
         }
         ii++;
@@ -496,7 +496,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    err = open_PS_file(input_name, FALSE, &ps);
+    err = open_PS_file(input_name, false, &ps);
     if (err) {
         fprint_err(
             "### psreport: Unable to open input file %s\n", (use_stdin ? "<stdin>" : input_name));

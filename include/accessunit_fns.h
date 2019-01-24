@@ -198,7 +198,7 @@ int write_access_unit_as_TS_with_PCR(access_unit_p access_unit, access_unit_cont
  * Note that `ret_access_unit` will be nullptr if EOF is returned.
  */
 int get_next_access_unit(
-    access_unit_context_p context, int quiet, int show_details, access_unit_p* ret_access_unit);
+    access_unit_context_p context, bool quiet, int show_details, access_unit_p* ret_access_unit);
 /*
  * Retrieve the next H.264 frame from the given elementary stream.
  *
@@ -244,11 +244,11 @@ int get_next_access_unit(
  * Note that `ret_access_unit` will be nullptr if EOF is returned.
  */
 int get_next_h264_frame(
-    access_unit_context_p context, int quiet, int show_details, access_unit_p* frame);
+    access_unit_context_p context, bool quiet, int show_details, access_unit_p* frame);
 /*
  * If this access unit was read from PES, did any of its PES packets contain
  * a PTS?
  *
- * Returns TRUE if so, FALSE if not.
+ * Returns true if so, false if not.
  */
 int access_unit_has_PTS(access_unit_p access_unit);

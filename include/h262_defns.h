@@ -49,7 +49,7 @@ struct _h262_picture {
     byte afd; // its "Active Format Description" value
               // (NB: with 0xF0 bits set at top of byte)
     byte is_real_afd; // was it a *real* AFD?
-    int was_two_fields; // TRUE if it's a frame merged from two fields
+    int was_two_fields; // true if it's a frame merged from two fields
 
     // Data defined for a sequence header/extension
     // Note that H.262 requires that data given in one sequence extension
@@ -203,7 +203,7 @@ struct h262_context {
 
     // When we are reading an H.262 picture back in, for reversing purposes, or
     // reading frames for filtering, it is useful to *insist* that an AFD be
-    // found for the picture. Thus, if `add_fake_afd` is TRUE, a dummy AFD,
+    // found for the picture. Thus, if `add_fake_afd` is true, a dummy AFD,
     // containing the value in `last_afd`, will be inserted into the picture's
     // ES unit `list` (of course, if the picture contains a *real* AFD, this is
     // not necessary). Beware that the ES unit inserted won't stand up to close

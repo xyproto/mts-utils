@@ -47,7 +47,7 @@
  * - if `quiet` is true, then only errors will be reported
  * - if `count_sizes` is true, then a summary of frame sizes will be kept
  */
-static void report_avs_frames(ES_p es, int max, bool verbose, int quiet, int count_sizes)
+static void report_avs_frames(ES_p es, int max, bool verbose, bool quiet, int count_sizes)
 {
     int err;
     int count = 0;
@@ -93,9 +93,9 @@ static void report_avs_frames(ES_p es, int max, bool verbose, int quiet, int cou
         count++;
 
         if (!quiet)
-            report_avs_frame(frame, FALSE);
+            report_avs_frame(frame, false);
         else if (verbose)
-            report_avs_frame(frame, TRUE);
+            report_avs_frame(frame, true);
 
         if (frame->is_frame) {
             if (count_sizes) {
@@ -193,7 +193,7 @@ static void report_avs_frames(ES_p es, int max, bool verbose, int quiet, int cou
  * - if `verbose` is true, then extra information will be output
  * - if `quiet` is true, then only errors will be reported
  */
-static void report_ES_units(ES_p es, int max, bool verbose, int quiet)
+static void report_ES_units(ES_p es, int max, bool verbose, bool quiet)
 {
     int err;
     int count = 0;
@@ -212,10 +212,10 @@ static void report_ES_units(ES_p es, int max, bool verbose, int quiet)
         count++;
 
         if (!quiet)
-            report_ES_unit(TRUE, &unit);
+            report_ES_unit(true, &unit);
 
         if (verbose)
-            print_data(TRUE, "        Data", unit.data, unit.data_len, 10);
+            print_data(true, "        Data", unit.data, unit.data_len, 10);
 
         if (max > 0 && count >= max)
             break;
@@ -297,7 +297,7 @@ static void find_h262_fields(ES_p es, int max, bool verbose)
  * - if `quiet` is true, then only errors will be reported
  * - if `count_sizes` is true, then a summary of frame sizes will be kept
  */
-static void report_h262_frames(ES_p es, int max, bool verbose, int quiet, int count_sizes)
+static void report_h262_frames(ES_p es, int max, bool verbose, bool quiet, int count_sizes)
 {
     int err;
     int count = 0;
@@ -344,9 +344,9 @@ static void report_h262_frames(ES_p es, int max, bool verbose, int quiet, int co
         count++;
 
         if (!quiet)
-            report_h262_picture(picture, FALSE);
+            report_h262_picture(picture, false);
         else if (verbose)
-            report_h262_picture(picture, TRUE);
+            report_h262_picture(picture, true);
 
         if (picture->is_picture) {
             if (count_sizes) {
@@ -443,7 +443,7 @@ static void report_h262_frames(ES_p es, int max, bool verbose, int quiet, int co
  * - if `verbose` is true, then extra information will be output
  * - if `quiet` is true, then only errors will be reported
  */
-static void report_h262_afds(ES_p es, int max, bool verbose, int quiet)
+static void report_h262_afds(ES_p es, int max, bool verbose, bool quiet)
 {
     int err;
     int frames = 0;
@@ -481,7 +481,7 @@ static void report_h262_afds(ES_p es, int max, bool verbose, int quiet)
             int minutes = (int)(total_seconds / 60);
             double seconds = total_seconds - 60 * minutes;
             fprint_msg("%dm %4.1fs (frame %d @ %.2fs): ", minutes, seconds, frames, total_seconds);
-            report_h262_picture(picture, FALSE);
+            report_h262_picture(picture, false);
             afd = picture->afd;
         }
 
@@ -509,7 +509,7 @@ static void report_h262_afds(ES_p es, int max, bool verbose, int quiet)
  * - if `verbose` is true, then extra information will be output
  * - if `quiet` is true, then only errors will be reported
  */
-static void report_h262_items(ES_p es, int max, bool verbose, int quiet)
+static void report_h262_items(ES_p es, int max, bool verbose, bool quiet)
 {
     int err;
     int count = 0;
@@ -529,7 +529,7 @@ static void report_h262_items(ES_p es, int max, bool verbose, int quiet)
             report_h262_item(item);
 
         if (verbose)
-            print_data(TRUE, "        Data", item->unit.data, item->unit.data_len, 10);
+            print_data(true, "        Data", item->unit.data, item->unit.data_len, 10);
         free_h262_item(&item);
 
         if (max > 0 && count >= max)
@@ -541,7 +541,7 @@ static void report_h262_items(ES_p es, int max, bool verbose, int quiet)
 /*
  * Report on the data by NAL units.
  */
-static void report_by_nal_unit(ES_p es, int max, int quiet, int show_nal_details)
+static void report_by_nal_unit(ES_p es, int max, bool quiet, int show_nal_details)
 {
     int err = 0;
 
@@ -558,7 +558,7 @@ static void report_by_nal_unit(ES_p es, int max, int quiet, int show_nal_details
     }
 
     if (show_nal_details)
-        set_show_nal_reading_details(context, TRUE);
+        set_show_nal_reading_details(context, true);
 
     for (;;) {
         nal_unit_p nal;
@@ -625,7 +625,7 @@ static void report_by_nal_unit(ES_p es, int max, int quiet, int show_nal_details
  * - if `max` is non-zero, then reporting will stop after `max` MPEG items
  * - if `quiet` is true, then only errors will be reported
  */
-static void find_h264_fields(ES_p es, int max, int quiet, bool verbose, int show_nal_details)
+static void find_h264_fields(ES_p es, int max, bool quiet, bool verbose, int show_nal_details)
 {
     int err;
     int count = 0;
@@ -639,7 +639,7 @@ static void find_h264_fields(ES_p es, int max, int quiet, bool verbose, int show
         return;
 
     if (show_nal_details)
-        set_show_nal_reading_details(context->nac, TRUE);
+        set_show_nal_reading_details(context->nac, true);
 
     for (;;) {
         access_unit_p access_unit;
@@ -679,7 +679,7 @@ static void find_h264_fields(ES_p es, int max, int quiet, bool verbose, int show
 /*
  * Report on data by access unit.
  */
-static void report_h264_frames(ES_p es, int max, int quiet, bool verbose, int show_nal_details,
+static void report_h264_frames(ES_p es, int max, bool quiet, bool verbose, int show_nal_details,
     int count_sizes, int count_types)
 {
     int err = 0;
@@ -711,7 +711,7 @@ static void report_h264_frames(ES_p es, int max, int quiet, bool verbose, int sh
         return;
 
     if (show_nal_details)
-        set_show_nal_reading_details(context->nac, TRUE);
+        set_show_nal_reading_details(context->nac, true);
 
     for (;;) {
         access_unit_p access_unit;
@@ -919,29 +919,29 @@ static void print_usage()
 int main(int argc, char** argv)
 {
     char* input_name = nullptr;
-    int had_input_name = FALSE;
-    int use_stdin = FALSE;
+    int had_input_name = false;
+    int use_stdin = false;
     int err = 0;
     ES_p es = nullptr;
     int max = 0;
-    int by_frame = FALSE;
-    int find_fields = FALSE;
-    int quiet = FALSE;
-    bool verbose = FALSE;
-    int show_nal_details = FALSE;
-    int give_pes_info = FALSE;
-    int report_afds = FALSE;
-    int report_framesize = FALSE;
-    int report_frametype = FALSE;
-    int report_pes_headers = FALSE;
-    int report_ES = FALSE;
+    int by_frame = false;
+    int find_fields = false;
+    bool quiet = false;
+    bool verbose = false;
+    int show_nal_details = false;
+    int give_pes_info = false;
+    int report_afds = false;
+    int report_framesize = false;
+    int report_frametype = false;
+    int report_pes_headers = false;
+    int report_ES = false;
     int ii = 1;
 
-    int use_pes = FALSE;
+    int use_pes = false;
 
     int want_data = VIDEO_H262;
     int is_data;
-    int force_stream_type = FALSE;
+    int force_stream_type = false;
 
     if (argc < 2) {
         print_usage();
@@ -968,52 +968,52 @@ int main(int argc, char** argv)
                 }
                 ii++;
             } else if (!strcmp("-avc", argv[ii]) || !strcmp("-h264", argv[ii])) {
-                force_stream_type = TRUE;
+                force_stream_type = true;
                 want_data = VIDEO_H264;
             } else if (!strcmp("-h262", argv[ii])) {
-                force_stream_type = TRUE;
+                force_stream_type = true;
                 want_data = VIDEO_H262;
             } else if (!strcmp("-avs", argv[ii])) {
-                force_stream_type = TRUE;
+                force_stream_type = true;
                 want_data = VIDEO_AVS;
             } else if (!strcmp("-es", argv[ii])) {
-                report_ES = TRUE;
+                report_ES = true;
             } else if (!strcmp("-frames", argv[ii]))
-                by_frame = TRUE;
+                by_frame = true;
             else if (!strcmp("-framesize", argv[ii])) {
-                by_frame = TRUE;
-                report_framesize = TRUE;
+                by_frame = true;
+                report_framesize = true;
             } else if (!strcmp("-frametype", argv[ii])) {
-                by_frame = TRUE;
-                report_frametype = TRUE;
+                by_frame = true;
+                report_frametype = true;
             } else if (!strcmp("-afd", argv[ii]) || !strcmp("-afds", argv[ii]))
-                report_afds = TRUE;
+                report_afds = true;
             else if (!strcmp("-findfields", argv[ii]))
-                find_fields = TRUE;
+                find_fields = true;
             else if (!strcmp("-stdin", argv[ii])) {
-                had_input_name = TRUE; // more or less
-                use_stdin = TRUE;
+                had_input_name = true; // more or less
+                use_stdin = true;
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
-                verbose = TRUE;
+                verbose = true;
             } else if (!strcmp("-quiet", argv[ii]) || !strcmp("-q", argv[ii])) {
-                quiet = TRUE;
+                quiet = true;
             } else if (!strcmp("-x", argv[ii])) {
-                show_nal_details = TRUE;
+                show_nal_details = true;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
                 MustARG("esreport", ii, argc, argv);
-                err = int_value("esreport", argv[ii], argv[ii + 1], TRUE, 10, &max);
+                err = int_value("esreport", argv[ii], argv[ii + 1], true, 10, &max);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-pes", argv[ii]) || !strcmp("-ts", argv[ii]))
-                use_pes = TRUE;
+                use_pes = true;
             else if (!strcmp("-pesreport", argv[ii])) {
-                report_pes_headers = TRUE;
-                use_pes = TRUE;
-                quiet = TRUE;
+                report_pes_headers = true;
+                use_pes = true;
+                quiet = true;
             } else if (!strcmp("-pesinfo", argv[ii])) {
-                give_pes_info = TRUE;
-                use_pes = TRUE;
+                give_pes_info = true;
+                use_pes = true;
             } else {
                 fprint_err("### esreport: "
                            "Unrecognised command line switch '%s'\n",
@@ -1026,7 +1026,7 @@ int main(int argc, char** argv)
                 return 1;
             } else {
                 input_name = argv[ii];
-                had_input_name = TRUE;
+                had_input_name = true;
             }
         }
         ii++;
@@ -1045,11 +1045,11 @@ int main(int argc, char** argv)
     }
 
     if (report_pes_headers) {
-        es->reader->debug_read_packets = TRUE;
+        es->reader->debug_read_packets = true;
     }
 
     if (give_pes_info) {
-        es->reader->give_info = TRUE;
+        es->reader->give_info = true;
     }
 
     if (report_ES) {
