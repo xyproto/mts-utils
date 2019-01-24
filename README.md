@@ -68,6 +68,7 @@ The following utilites are available:
 - [ ] Fix all warnings.
 - [ ] Remove `static` from functions that don't need it.
 - [ ] Restructure header files, make `*_fns.h` just `*_.h` and place the function bodies that are not `inline` in `.cpp` files.
+- [ ] Use `enum class` for all enums.
 
 # Additional info
 
