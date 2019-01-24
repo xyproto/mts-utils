@@ -28,7 +28,7 @@ void free_PES_packet_data(PES_packet_data_p* data);
  *
  * Returns 0 if all goes well, 1 if there was an error.
  */
-int determine_if_TS_file(int input, int* is_TS);
+int determine_if_TS_file(int input, bool* is_TS);
 /*
  * Build a PES reader datastructure for PS data
  *
@@ -75,7 +75,7 @@ int build_TS_PES_reader(TS_reader_p tsreader, int give_info, int give_warnings,
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int build_PES_reader(int input, int is_TS, int give_info, int give_warnings,
+int build_PES_reader(int input, bool is_TS, int give_info, int give_warnings,
     uint16_t program_number, PES_reader_p* reader);
 /*
  * Open a Transport Stream file for PES packet reading
@@ -216,7 +216,7 @@ void set_PES_reader_video_type(PES_reader_p reader, int video_type);
  *
  * This call only has effect if Dolby audio data is actually selected.
  */
-void set_PES_reader_dolby_stream_type(PES_reader_p reader, int is_dvb);
+void set_PES_reader_dolby_stream_type(PES_reader_p reader, bool is_dvb);
 /*
  * Reposition the PES reader to an earlier packet
  *

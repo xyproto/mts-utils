@@ -18,7 +18,7 @@ struct PES_packet_data {
     int32_t data_len; // The length of the `data` array [1]
     int32_t length; // Its length
     offset_t posn; // The offset of its start in the file [2]
-    int is_video; // Is this video data? (as opposed to audio)
+    bool is_video; // Is this video data? (as opposed to audio)
 
     // For convenience, it's useful to be able to get at the PES packet's
     // "payload" (i.e., the ES data) as if it were a separate array. This
@@ -61,7 +61,7 @@ typedef struct peslist* peslist_p;
 // A PES "reader" datastructure is the interface through which one reads
 // PES packets from a TS or PS file
 struct PES_reader {
-    int is_TS; // Is it is TS (as opposed to PS)?
+    bool is_TS; // Is it is TS (as opposed to PS)?
 
     // If it is TS, we read via a TS read-ahead buffer
     TS_reader_p tsreader;
@@ -78,7 +78,7 @@ struct PES_reader {
     offset_t posn;
 
     // For PS data, we need to know if it is H.264 (MPEG-4/AVC) or not
-    int is_h264; // for backwards compatibility
+    bool is_h264; // for backwards compatibility
     int video_type; // the actual (believed) video type
 
     // For PS and TS, we can choose to ignore audio entirely

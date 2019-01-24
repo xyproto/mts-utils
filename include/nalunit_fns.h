@@ -291,11 +291,11 @@ void free_nal_unit_list(nal_unit_list_p* list, int deep);
 /*
  * Report on a NAL unit list's contents, to the given stream.
  */
-void report_nal_unit_list(int is_msg, const std::string prefix, nal_unit_list_p list);
+void report_nal_unit_list(bool is_msg, const std::string prefix, nal_unit_list_p list);
 
 /*
  * Print out useful information about this NAL unit, on the given stream.
  *
  * This is intended as a single line of information.
  */
-void report_nal(int is_msg, nal_unit_p nal);
+void report_nal(bool is_msg, nal_unit_p nal);

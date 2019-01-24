@@ -22,7 +22,7 @@
 #include "compat.h"
 #include "es_fns.h"
 #include "misc_fns.h"
-#include "printing_fns.h"
+#include "printing.h"
 #include "reverse_fns.h"
 #include "ts_fns.h"
 
@@ -298,7 +298,7 @@ static void _show_item(ES_unit_p unit)
     if (is_avs_frame_item(unit))
         fprint_msg("%s frame", AVS_PICTURE_CODING_STR(avs_picture_coding_type(unit)));
     else
-        fprint_msg("%s", avs_start_code_str(unit->start_code));
+        print_msg(avs_start_code_str(unit->start_code));
     fprint_msg(" at " OFFSET_T_FORMAT "/%d for %d\n", unit->start_posn.infile,
         unit->start_posn.inpacket, unit->data_len);
 }

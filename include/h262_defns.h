@@ -37,8 +37,8 @@ struct _h262_picture {
     // An H.262 "picture" might be a "proper" picture, a sequence header,
     // or (just) a sequence end item. It's useful to be able to identify
     // the two more common cases easily
-    int is_picture;
-    int is_sequence_header;
+    bool is_picture;
+    bool is_sequence_header;
 
     // Data defined for a picture. When a picture is composed of the data
     // from two fields, then these will be the values taken from the first

@@ -90,10 +90,10 @@ typedef struct pcapng_hdr_interface_s {
 /*! Used to store I/O parameters for pcap I/O */
 typedef struct _pcap_io_ctx {
     // pcap or pcapng?
-    int is_ng;
+    bool is_ng;
 
     /*! Endianness of the file */
-    int is_be;
+    bool is_be;
 
     /*! The FILE* for this file */
     FILE* file;

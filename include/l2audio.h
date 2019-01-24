@@ -21,7 +21,7 @@
 #include "compat.h"
 #include "l2audio_fns.h"
 #include "misc_fns.h"
-#include "printing_fns.h"
+#include "printing.h"
 
 #define DEBUG 0
 

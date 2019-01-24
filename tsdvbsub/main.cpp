@@ -574,7 +574,7 @@ static int extract_pid(int input, uint32_t pid_wanted, int max, bool verbose, bo
 static void print_usage()
 {
     std::string usage = "Usage: "s + PROGNAME + " [switches] <infile>\n\n";
-    print_msg(usage.c_str());
+    print_msg(usage);
     REPORT_VERSION(PROGNAME);
     print_msg(R"(
 Parse & dump the contents of a single DVB subtitling stream from a Transport
@@ -596,7 +596,7 @@ General switches:
   -verbose, -v       Output informational/diagnostic messages
   -quiet, -q         Only output error messages
   -max <n>, -m <n>   Maximum number of TS packets to read
-)"s.c_str());
+)"s);
 }
 
 int main(int argc, char** argv)

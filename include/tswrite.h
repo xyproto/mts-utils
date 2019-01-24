@@ -28,7 +28,7 @@
 
 #include "compat.h"
 #include "misc_fns.h"
-#include "printing_fns.h"
+#include "printing.h"
 #include "ts_fns.h"
 #include "tswrite_fns.h"
 
@@ -519,15 +519,17 @@ void print_circular_buffer(const std::string prefix, circular_buffer_p circular)
 {
     int ii;
     if (!prefix.empty()) {
-        fprint_msg("%s ", prefix);
+        print_msg(prefix);
+        print_msg(" ");
     }
     for (ii = 0; ii < circular->size; ii++) {
         byte* offset = circular->item_data + (ii * circular->item_size);
-        fprint_msg("%s", (circular->start == ii ? "[" : " "));
-        if (*offset == 0)
+        print_msg((circular->start == ii ? "[" : " "));
+        if (*offset == 0) {
             print_msg("..");
-        else
+        } else {
             fprint_msg("%02x", *offset);
+        }
         fprint_msg("%s ", (circular->end == ii ? "]" : " "));
     }
     print_msg("\n");

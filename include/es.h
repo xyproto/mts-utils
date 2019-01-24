@@ -16,7 +16,7 @@
 #include "es_fns.h"
 #include "misc_fns.h"
 #include "pes_fns.h"
-#include "printing_fns.h"
+#include "printing.h"
 #include "tswrite_fns.h"
 
 #define DEBUG 0
@@ -343,7 +343,7 @@ void free_ES_unit(ES_unit_p* unit)
 /*
  * Print out some information this ES unit, on normal or error output
  */
-void report_ES_unit(int is_msg, ES_unit_p unit)
+void report_ES_unit(bool is_msg, ES_unit_p unit)
 {
     byte s = unit->start_code;
     fprint_msg_or_err(is_msg, OFFSET_T_FORMAT_08 "/%4d: ES unit (%02x '%d%d%d%d %d%d%d%d')",

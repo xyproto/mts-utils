@@ -372,27 +372,27 @@ int main(int argc, char** argv)
 {
     char* input_name = nullptr;
     char* output_name = nullptr;
-    int had_input_name = false;
-    int had_output_name = false;
-    int use_stdout = false;
-    int use_tcpip = false;
+    bool had_input_name = false;
+    bool had_output_name = false;
+    bool use_stdout = false;
+    bool use_tcpip = false;
     int port = 88; // Useful default port number
     int err = 0;
     ES_p es = nullptr;
     WRITER output;
     int max = 0;
-    int as_TS = false;
+    bool as_TS = false;
     int frequency = 8; // The default as stated in the usage
     bool quiet = false;
     bool verbose = false;
     int ii = 1;
 
-    int use_pes = false;
-    int use_server = false;
+    bool use_pes = false;
+    bool use_server = false;
 
     int want_data = VIDEO_H262;
-    int is_data;
-    int force_stream_type = false;
+    bool is_data = false;
+    bool force_stream_type = false;
     byte stream_type;
 
     if (argc < 2) {

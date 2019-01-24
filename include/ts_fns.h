@@ -458,7 +458,7 @@ void report_payload(int show_data, int stream_type, byte payload[MAX_TS_PAYLOAD_
  *
  * Returns 0 if all went well, 1 if something went wrong
  */
-int print_descriptors(int is_msg, const std::string leader1, const std::string leader2,
+int print_descriptors(bool is_msg, const std::string leader1, const std::string leader2,
     byte* desc_data, int desc_data_len);
 /*
  * Extract the program list from a PAT packet (PID 0x0000).

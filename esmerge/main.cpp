@@ -57,7 +57,7 @@
 #if TEST_PTS_DTS
 #include "pes_fns.h"
 
-static int check(uint64_t value)
+int check(uint64_t value)
 {
     int err;
     byte data[5];
@@ -78,7 +78,7 @@ static int check(uint64_t value)
     return 0;
 }
 
-static int test_pts()
+int test_pts()
 {
     if (check(0))
         return 1;
@@ -115,12 +115,12 @@ static int test_pts()
 }
 #endif // TEST_PTS_DTS
 
-static int is_avs_I_frame(avs_frame_p frame)
+inline bool is_avs_I_frame(avs_frame_p frame)
 {
     return (frame->is_frame && frame->start_code == 0xB3);
 }
 
-static int is_I_or_IDR_frame(access_unit_p frame)
+inline bool is_I_or_IDR_frame(access_unit_p frame)
 {
     return (frame->primary_start != nullptr && frame->primary_start->nal_ref_idc != 0
         && (frame->primary_start->nal_unit_type == NAL_IDR || all_slices_I(frame)));
@@ -131,7 +131,7 @@ static int is_I_or_IDR_frame(access_unit_p frame)
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static int merge_with_avs(avs_context_p video_context, int audio_file, TS_writer_p output,
+int merge_with_avs(avs_context_p video_context, int audio_file, TS_writer_p output,
     int audio_type, int audio_samples_per_frame, int audio_sample_rate, double video_frame_rate,
     int pat_pmt_freq, bool quiet, bool verbose, int debugging)
 {
@@ -334,7 +334,7 @@ static int merge_with_avs(avs_context_p video_context, int audio_file, TS_writer
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static int merge_with_h264(access_unit_context_p video_context, int audio_file, TS_writer_p output,
+int merge_with_h264(access_unit_context_p video_context, int audio_file, TS_writer_p output,
     int audio_type, int audio_samples_per_frame, int audio_sample_rate, int video_frame_rate,
     int pat_pmt_freq, bool quiet, bool verbose, int debugging)
 {
@@ -520,7 +520,7 @@ static int merge_with_h264(access_unit_context_p video_context, int audio_file, 
     return 0;
 }
 
-static void print_usage()
+void print_usage()
 {
     print_msg("Usage:\n"
               "    esmerge <video-file> <audio-file> <output-file>\n"

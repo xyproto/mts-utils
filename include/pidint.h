@@ -13,7 +13,7 @@
 #include "h222_defns.h"
 #include "misc_fns.h"
 #include "pidint_fns.h"
-#include "printing_fns.h"
+#include "printing.h"
 #include "ts_fns.h"
 
 // ============================================================================
@@ -265,7 +265,7 @@ int same_pidint_list(pidint_list_p list1, pidint_list_p list2)
 void report_stream_list(pidint_list_p list, const std::string prefix)
 {
     if (!prefix.empty()) {
-        print_msg(prefix.c_str());
+        print_msg(prefix);
     }
     if (list == nullptr)
         print_msg("Program stream list is nullptr\n");
@@ -276,7 +276,7 @@ void report_stream_list(pidint_list_p list, const std::string prefix)
         print_msg("Program streams:\n");
         for (ii = 0; ii < list->length; ii++) {
             if (!prefix.empty()) {
-                print_msg(prefix.c_str());
+                print_msg(prefix);
             }
             fprint_msg("    PID %04x (%d) -> Stream type %3d (%s)\n", list->pid[ii], list->pid[ii],
                 list->number[ii], h222_stream_type_str(list->number[ii]));
@@ -627,13 +627,13 @@ int same_pmt(pmt_p pmt1, pmt_p pmt2)
  * - `prefix` is nullptr or a string to put before each line printed
  * - `pmt` is the PMT to report on
  */
-void report_pmt(int is_msg, const std::string prefix, pmt_p pmt)
+void report_pmt(bool is_msg, const std::string prefix, pmt_p pmt)
 {
     if (!prefix.empty()) {
-        fprint_msg_or_err(is_msg, prefix.c_str());
+        print_msg_or_err(is_msg, prefix);
     }
     if (pmt == nullptr) {
-        fprint_msg_or_err(is_msg, "PMT is nullptr\n");
+        print_msg_or_err(is_msg, "PMT is nullptr\n"s);
         return;
     } else
         fprint_msg_or_err(is_msg, "Program %d, version %d, PCR PID %04x (%d)\n",
@@ -641,7 +641,7 @@ void report_pmt(int is_msg, const std::string prefix, pmt_p pmt)
 
     if (pmt->program_info_length > 0) {
         if (!prefix.empty()) {
-            fprint_msg_or_err(is_msg, prefix.c_str());
+            print_msg_or_err(is_msg, prefix);
         }
         print_data(is_msg, "   Program info", pmt->program_info, pmt->program_info_length,
             pmt->program_info_length);
@@ -651,12 +651,12 @@ void report_pmt(int is_msg, const std::string prefix, pmt_p pmt)
     if (pmt->num_streams > 0) {
         int ii;
         if (!prefix.empty()) {
-            fprint_msg_or_err(is_msg, prefix.c_str());
+            print_msg_or_err(is_msg, prefix);
         }
         fprint_msg_or_err(is_msg, "Program streams:\n");
         for (ii = 0; ii < pmt->num_streams; ii++) {
             if (!prefix.empty()) {
-                fprint_msg_or_err(is_msg, prefix.c_str());
+                print_msg_or_err(is_msg, prefix);
             }
             fprint_msg_or_err(is_msg, "  PID %04x (%4d) -> Stream type %02x (%3d) %s\n",
                 pmt->streams[ii].elementary_PID, pmt->streams[ii].elementary_PID,
@@ -664,7 +664,7 @@ void report_pmt(int is_msg, const std::string prefix, pmt_p pmt)
                 h222_stream_type_str(pmt->streams[ii].stream_type));
             if (pmt->streams[ii].ES_info_length > 0) {
                 if (!prefix.empty()) {
-                    fprint_msg_or_err(is_msg, prefix.c_str());
+                    print_msg_or_err(is_msg, prefix);
                 }
                 print_data(is_msg, "      ES info", pmt->streams[ii].ES_info,
                     pmt->streams[ii].ES_info_length, pmt->streams[ii].ES_info_length);

@@ -24,7 +24,7 @@
 #include "es_fns.h"
 #include "misc_fns.h"
 #include "pes_fns.h"
-#include "printing_fns.h"
+#include "printing.h"
 #include "version.h"
 
 using namespace std::string_literals;
@@ -331,7 +331,7 @@ int close_file(int filedes)
 // More complex file I/O utilities
 // ============================================================
 static int open_input_as_ES_using_PES(const std::string name, bool quiet, int force_stream_type,
-    int want_data, int* is_data, ES_p* es)
+    int want_data, bool* is_data, ES_p* es)
 {
     int err;
     PES_reader_p reader = nullptr;
@@ -375,7 +375,7 @@ static int open_input_as_ES_using_PES(const std::string name, bool quiet, int fo
 }
 
 static int open_input_as_ES_direct(const std::string name, bool quiet, int force_stream_type,
-    int want_data, int* is_data, ES_p* es)
+    int want_data, bool* is_data, ES_p* es)
 {
     int err;
     bool use_stdin = name.empty();
@@ -489,7 +489,7 @@ static int open_input_as_ES_direct(const std::string name, bool quiet, int force
  * suitable messages will have been written out to standard error.
  */
 int open_input_as_ES(const std::string name, int use_pes, bool quiet, int force_stream_type,
-    int want_data, int* is_data, ES_p* es)
+    int want_data, bool* is_data, ES_p* es)
 {
     if (use_pes)
         return open_input_as_ES_using_PES(name, quiet, force_stream_type, want_data, is_data, es);
@@ -550,7 +550,7 @@ int unsigned_value(
     if (errno) {
         print_err("### ");
         if (!prefix.empty()) {
-            fprint_err("%s: ", prefix);
+            fprint_err("%s: ", prefix.c_str());
         }
         if (errno == ERANGE && val == 0)
             fprint_err(
@@ -564,7 +564,7 @@ int unsigned_value(
     if (ptr[0] != '\0') {
         print_err("### ");
         if (!prefix.empty()) {
-            fprint_err("%s: ", prefix);
+            fprint_err("%s: ", prefix.c_str());
         }
         if (ptr - arg == 0)
             fprint_err("Argument to %s should be a number, in %s %s\n", cmd, cmd, arg);
@@ -604,7 +604,7 @@ int int_value(
     if (errno) {
         print_err("### ");
         if (!prefix.empty()) {
-            fprint_err("%s: ", prefix);
+            fprint_err("%s: ", prefix.c_str());
         }
         if (errno == ERANGE && val == 0)
             fprint_err("String cannot be converted to (long) integer in %s %s\n", cmd, arg);
@@ -617,7 +617,7 @@ int int_value(
     if (ptr[0] != '\0') {
         print_err("### ");
         if (!prefix.empty()) {
-            fprint_err("%s: ", prefix);
+            fprint_err("%s: ", prefix.c_str());
         }
         if (ptr - arg == 0)
             fprint_err("Argument to %s should be a number, in %s %s\n", cmd, cmd, arg);
@@ -630,7 +630,7 @@ int int_value(
     if (val > INT_MAX || val < INT_MIN) {
         print_err("### ");
         if (!prefix.empty()) {
-            fprint_err("%s: ", prefix);
+            fprint_err("%s: ", prefix.c_str());
         }
         fprint_err("Value %ld (in %s %s) is too large (to fit into 'int')\n", val, cmd, arg);
         return 1;
@@ -639,7 +639,7 @@ int int_value(
     if (positive && val < 0) {
         print_err("### ");
         if (!prefix.empty()) {
-            fprint_err("%s: ", prefix);
+            fprint_err("%s: ", prefix.c_str());
         }
         fprint_err("Value %ld (in %s %s) is less than zero\n", val, cmd, arg);
         return 1;
@@ -676,7 +676,7 @@ int int_value_in_range(
     if (temp > maximum || temp < minimum) {
         print_err("### ");
         if (!prefix.empty()) {
-            fprint_err("%s: ", prefix);
+            fprint_err("%s: ", prefix.c_str());
         }
         fprint_err("Value %d (in %s %s) is not in range %d..%d (0x%x..0x%x)\n", temp, cmd, arg,
             minimum, maximum, minimum, maximum);
@@ -709,7 +709,7 @@ int double_value(const std::string prefix, char* cmd, char* arg, int positive, d
     if (errno) {
         print_err("### ");
         if (!prefix.empty()) {
-            fprint_err("%s: ", prefix);
+            fprint_err("%s: ", prefix.c_str());
         }
         if (errno == ERANGE && val == 0)
             fprint_err("String cannot be converted to (double) float in %s %s\n", cmd, arg);
@@ -722,7 +722,7 @@ int double_value(const std::string prefix, char* cmd, char* arg, int positive, d
     if (ptr[0] != '\0') {
         print_err("### ");
         if (!prefix.empty()) {
-            fprint_err("%s: ", prefix);
+            fprint_err("%s: ", prefix.c_str());
         }
         fprint_err("Unexpected characters ('%s') after the %.*s in %s %s\n", ptr, (int)(ptr - arg),
             arg, cmd, arg);
@@ -732,7 +732,7 @@ int double_value(const std::string prefix, char* cmd, char* arg, int positive, d
     if (positive && val < 0) {
         print_err("### ");
         if (!prefix.empty()) {
-            fprint_err("%s: ", prefix);
+            fprint_err("%s: ", prefix.c_str());
         }
         fprint_err("Value %f (in %s %s) is less than zero\n", val, cmd, arg);
         return 1;
@@ -780,7 +780,7 @@ int host_value(
             p[0] = ':';
             print_err("### ");
             if (!prefix.empty()) {
-                fprint_err("%s: ", prefix);
+                fprint_err("%s: ", prefix.c_str());
             }
             if (cmd)
                 fprint_err("Cannot read port number in %s %s (%s)\n", cmd, arg, strerror(errno));
@@ -792,7 +792,7 @@ int host_value(
             p[0] = ':';
             print_err("### ");
             if (!prefix.empty()) {
-                fprint_err("%s: ", prefix);
+                fprint_err("%s: ", prefix.c_str());
             }
             if (cmd)
                 fprint_err("Unexpected characters in port number in %s %s\n", cmd, arg);
@@ -804,7 +804,7 @@ int host_value(
             p[0] = ':';
             print_err("### ");
             if (!prefix.empty()) {
-                fprint_err("%s: ", prefix);
+                fprint_err("%s: ", prefix.c_str());
             }
             if (cmd)
                 fprint_err("Negative port number in %s %s\n", cmd, arg);

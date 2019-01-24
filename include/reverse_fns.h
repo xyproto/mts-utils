@@ -24,7 +24,7 @@
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_reverse_data(reverse_data_p* reverse_data, int is_h264);
+int build_reverse_data(reverse_data_p* reverse_data, bool is_h264);
 /*
  * Set the video PID and stream id for TS output.
  *

@@ -18,7 +18,7 @@
 #include "misc_fns.h"
 #include "pes_fns.h"
 #include "pidint_fns.h"
-#include "printing_fns.h"
+#include "printing.h"
 #include "ps_fns.h"
 #include "ts_fns.h"
 
@@ -55,7 +55,7 @@ struct program_data {
     int want_ac3; // True means audio_stream is private_1/AC3 substream
     int audio_substream; // Which substream id if DVD and want_ac3
     int video_type; // Is our video H.264, H.262, etc. (user must decide)
-    int is_dvd; // Is our data DVD program stream (ditto)
+    bool is_dvd; // Is our data DVD program stream (ditto)
     int output_dolby_as_dvb; // Output Dolby (AC-3) audio as DVB or ATSC?
     // Information derived from the data
     // PAT and PMT data
@@ -229,7 +229,7 @@ int close_PS_file(PS_reader_p* ps)
  * Returns 0 if all goes well, 1 if there was an error (including the
  * stream not appearing to be either).
  */
-int determine_if_PS_is_h264(PS_reader_p ps, int* is_h264)
+int determine_if_PS_is_h264(PS_reader_p ps, bool* is_h264)
 {
     int err;
     PES_reader_p reader;
@@ -379,7 +379,7 @@ static int read_PS_bytes(PS_reader_p ps, int num_bytes, byte* buffer, offset_t* 
  * Print out a stream id in a manner consistent with the PS usages
  * of the stream id values.
  */
-void print_stream_id(int is_msg, byte stream_id)
+void print_stream_id(bool is_msg, byte stream_id)
 {
     byte number;
     auto str = ""s;
@@ -470,7 +470,7 @@ void print_stream_id(int is_msg, byte stream_id)
     }
 
     if (!str.empty()) {
-        fprint_msg_or_err(is_msg, str.c_str());
+        print_msg_or_err(is_msg, str);
     } else if (stream_id >= 0xC0 && stream_id <= 0xDF) {
         number = stream_id & 0x1F;
         fprint_msg_or_err(is_msg, "Audio stream 0x%02X", number);
@@ -947,7 +947,7 @@ static inline void determine_ac3_details(byte* data, bool verbose, byte* bsmod, 
  *
  * Returns one of the SUBSTREAM_* values.
  */
-int identify_private1_data(struct PS_packet* packet, int is_dvd, bool verbose,
+int identify_private1_data(struct PS_packet* packet, bool is_dvd, bool verbose,
     int* substream_index, byte* bsmod, byte* acmod)
 {
     // If this packet contains the start of a data packet, then
@@ -1286,7 +1286,7 @@ static int write_audio(TS_writer_p output, byte stream_id, struct PS_packet* pac
     int substream_index = -1;
     byte bsmod = 0xFF;
     byte asmod = 0xFF;
-    int is_h222_pes = IS_H222_PES(packet->data);
+    bool is_h222_pes = IS_H222_PES(packet->data);
 
     // For MPEG audio, unless the user has requested a particular audio stream,
     // we want to use the first we find.
@@ -1693,7 +1693,7 @@ static int _ps_to_ts(PS_reader_p ps, TS_writer_p output, struct program_data* pr
  * Returns 0 if all went well, 1 if something went wrong.
  */
 int ps_to_ts(PS_reader_p ps, TS_writer_p output, int pad_start, int program_repeat, int video_type,
-    int is_dvd, int video_stream, int audio_stream, int want_ac3_audio, int output_dolby_as_dvb,
+    bool is_dvd, int video_stream, int audio_stream, int want_ac3_audio, int output_dolby_as_dvb,
     uint32_t pmt_pid, uint32_t pcr_pid, uint32_t video_pid, int keep_audio, uint32_t audio_pid,
     int max, bool verbose, bool quiet)
 {

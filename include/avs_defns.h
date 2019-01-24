@@ -29,8 +29,8 @@ struct _avs_frame {
     // An AVS "picture" might be a "proper" picture, a sequence header,
     // or (just) a sequence end item. It's useful to be able to identify
     // the two more common cases easily
-    int is_frame;
-    int is_sequence_header;
+    bool is_frame;
+    bool is_sequence_header;
 
     // It's also useful to remember what the first ES unit is
     int start_code;
