@@ -95,5 +95,4 @@ The tools are focused on:
 
 # Version
 
-* 2.0.2
-
+* 2.1.0
