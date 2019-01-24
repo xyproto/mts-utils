@@ -185,7 +185,7 @@ void PES_header(uint32_t data_len, byte stream_id, int with_PTS, uint64_t pts, i
  * Returns 0 if it worked, 1 if something went wrong.
  */
 int write_TS_packet_parts(TS_writer_p output, byte TS_packet[TS_PACKET_SIZE], int TS_hdr_len,
-    byte pes_hdr[], int pes_hdr_len, byte data[], size_t data_len, uint32_t pid, int got_pcr,
+    byte pes_hdr[], int pes_hdr_len, byte data[], size_t data_len, uint32_t pid, bool got_pcr,
     uint64_t pcr)
 {
     int err;
@@ -531,7 +531,7 @@ int write_ES_as_TS_PES_packet_with_pcr(TS_writer_p output, byte data[], uint32_t
  * Returns 0 if it worked, 1 if something went wrong.
  */
 int write_PES_as_TS_PES_packet(TS_writer_p output, byte data[], uint32_t data_len, uint32_t pid,
-    byte stream_id, int got_pcr, uint64_t pcr_base, uint32_t pcr_extn)
+    byte stream_id, bool got_pcr, uint64_t pcr_base, uint32_t pcr_extn)
 {
 // Should we write MPEG-1 packet data out as ES (wrapped in MPEG-2 PES in TS),
 // rather than writing the packets out directly in TS? (that latter doesn't
@@ -1359,7 +1359,7 @@ int fill_TS_packet_buffer(TS_reader_p tsreader)
     for (ii = 0; ii < PCR_READ_AHEAD_SIZE; ii++) {
         byte* data;
         uint32_t pid;
-        int got_pcr;
+        bool got_pcr;
         uint64_t pcr;
         int payload_unit_start_indicator;
         byte* adapt;
@@ -1681,7 +1681,7 @@ int read_buffered_TS_packet(TS_reader_p tsreader, uint32_t* count, byte* data[TS
  * - `got_PCR` is true if the adaptation field contains a PCR
  * - `pcr` is then the PCR value itself
  */
-void get_PCR_from_adaptation_field(byte adapt[], int adapt_len, int* got_pcr, uint64_t* pcr)
+void get_PCR_from_adaptation_field(byte adapt[], int adapt_len, bool* got_pcr, uint64_t* pcr)
 {
     if (adapt_len == 0 || adapt == nullptr)
         *got_pcr = false;
@@ -1712,7 +1712,7 @@ void get_PCR_from_adaptation_field(byte adapt[], int adapt_len, int* got_pcr, ui
  */
 void report_adaptation_field(byte adapt[], int adapt_len)
 {
-    int got_pcr;
+    bool got_pcr;
     uint64_t pcr;
 
     if (adapt_len == 0 || adapt == nullptr)
@@ -1760,7 +1760,7 @@ void report_adaptation_field(byte adapt[], int adapt_len)
  */
 void report_adaptation_timing(timing_p times, byte adapt[], int adapt_len, int packet_count)
 {
-    int got_pcr;
+    bool got_pcr;
     uint64_t pcr;
 
     if (adapt_len == 0 || adapt == nullptr || times == nullptr)

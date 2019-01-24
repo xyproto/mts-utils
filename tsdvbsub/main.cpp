@@ -243,22 +243,27 @@ static const uint8_t* subtitling_segment(dvbdata_t* const dvbd, const uint8_t* p
 
     switch (segment_type) {
     case 0x10:
+        print_msg("got segment type 0x10");
         p2 = page_composition_segment(p, segment_length);
         break;
 
     case 0x11:
+        print_msg("got segment type 0x11");
         p2 = region_composition_segment(p, segment_length);
         break;
 
     case 0x12:
+        print_msg("got segment type 0x12");
         p2 = CLUT_definition_segment(p, segment_length);
         break;
 
     case 0x13:
+        print_msg("got segment type 0x13");
         p2 = object_data_segment(dvbd, p, segment_length);
         break;
 
     default:
+        print_msg("got segment type default");
         print_data(true, "data"s, p, segment_length, segment_length);
         p2 = p + segment_length;
         break;
@@ -268,7 +273,7 @@ static const uint8_t* subtitling_segment(dvbdata_t* const dvbd, const uint8_t* p
     p += segment_length;
 
     if (p != p2) {
-        fprint_msg("### parse length mismatch\n");
+        fprint_msg("### parse length mismatch: %d and %d\n", p, p2);
     }
 
     return p;

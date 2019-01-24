@@ -15,10 +15,10 @@
 #include <fcntl.h>
 #include <netdb.h>
 #include <netinet/in.h>
-#include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <string>
 
 #include "compat.h"
 #include "es_fns.h"
@@ -765,11 +765,12 @@ int double_value(const std::string prefix, char* cmd, char* arg, int positive, d
  * explaining will have been written to stderr).
  */
 int host_value(
-    const std::string prefix, const char* cmd, const char* arg, char** hostname, int* port)
+    const std::string prefix, const char* cmd, const char* arg, std::string* hostname, int* port)
 {
     char* p = strchr((char*)arg, ':');
 
-    *hostname = (char*)arg;
+    std::string h = (char*)arg;
+    *hostname = h;
 
     if (p != nullptr) {
         char* ptr;
@@ -842,7 +843,7 @@ int host_value(
  * succeeds, or -1 if it fails, in which case it will have complained on
  * stderr.
  */
-int connect_socket(const std::string hostname, int port, int use_tcpip, char* multicast_ifaddr)
+int connect_socket(const char* hostname, int port, int use_tcpip, char* multicast_ifaddr)
 {
     int output;
     int result;
@@ -855,7 +856,7 @@ int connect_socket(const std::string hostname, int port, int use_tcpip, char* mu
         return -1;
     }
 
-    hp = gethostbyname(hostname.c_str());
+    hp = gethostbyname(hostname);
     if (hp == nullptr) {
         fprint_err("### Unable to resolve host %s: %s\n", hostname, hstrerror(h_errno));
         return -1;

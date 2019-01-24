@@ -51,8 +51,8 @@
  * Returns 0 if all went well, 1 if something went wrong, EOF if `loop` is
  * false and either EOF was read, or `max` TS packets were read.
  */
-static int read_TS_packet(TS_reader_p tsreader, uint32_t* count, byte* data[TS_PACKET_SIZE],
-    uint32_t* pid, int* got_pcr, uint64_t* pcr, int max, int loop, offset_t start_posn,
+int read_TS_packet(TS_reader_p tsreader, uint32_t* count, byte* data[TS_PACKET_SIZE],
+    uint32_t* pid, bool* got_pcr, uint64_t* pcr, int max, int loop, offset_t start_posn,
     uint32_t start_count, bool quiet)
 {
     int err;
@@ -439,8 +439,8 @@ static int play_buffered_TS_packets(TS_reader_p tsreader, TS_writer_p tswriter,
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int play_TS_packets(TS_reader_p tsreader, TS_writer_p tswriter,
-    const tsplay_output_pace_mode pace_mode, uint32_t pid_to_ignore, int max, int loop, bool quiet,
+int play_TS_packets(TS_reader_p tsreader, TS_writer_p tswriter,
+    const tsplay_output_pace_mode pace_mode, uint32_t pid_to_ignore, int max, bool loop, bool quiet,
     bool verbose)
 {
     int err;
@@ -475,7 +475,7 @@ static int play_TS_packets(TS_reader_p tsreader, TS_writer_p tswriter,
     for (;;) {
         byte* data;
         uint32_t pid;
-        int got_pcr;
+        bool got_pcr;
         uint64_t pcr = 0;
 
         err = read_TS_packet(tsreader, &count, &data, &pid, &got_pcr, &pcr, max, loop, start_posn,
@@ -573,7 +573,7 @@ static int play_TS_packets(TS_reader_p tsreader, TS_writer_p tswriter,
  * Returns 0 if all went well, 1 if something went wrong.
  */
 int play_TS_stream(int input, TS_writer_p tswriter, const tsplay_output_pace_mode pace_mode,
-    uint32_t pid_to_ignore, uint32_t override_pcr_pid, int max, int loop, bool quiet, bool verbose)
+    uint32_t pid_to_ignore, uint32_t override_pcr_pid, int max, bool loop, bool quiet, bool verbose)
 {
     int err;
     TS_reader_p tsreader;

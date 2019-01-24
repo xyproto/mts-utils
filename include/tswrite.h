@@ -2175,23 +2175,23 @@ int tswrite_open(TS_WRITER_TYPE how, const std::string name, char* multicast_if,
         break;
     case TS_W_FILE:
         if (!quiet)
-            fprint_msg("Writing to file %s\n", name);
+            fprint_msg("Writing to file %s\n", name.c_str());
         new2->where.file = fopen(name.c_str(), "wb");
         if (new2->where.file == nullptr) {
-            fprint_err("### Unable to open output file %s: %s\n", name, strerror(errno));
+            fprint_err("### Unable to open output file %s: %s\n", name.c_str(), strerror(errno));
             return 1;
         }
         break;
     case TS_W_TCP:
         if (!quiet)
-            fprint_msg("Connecting to %s via TCP/IP on port %d\n", name, port);
-        new2->where.socket = connect_socket(name, port, true, nullptr);
+            fprint_msg("Connecting to %s via TCP/IP on port %d\n", name.c_str(), port);
+        new2->where.socket = connect_socket(name.c_str(), port, true, nullptr);
         if (new2->where.socket == -1) {
-            fprint_err("### Unable to connect to %s\n", name);
+            fprint_err("### Unable to connect to %s\n", name.c_str());
             return 1;
         }
         if (!quiet)
-            fprint_msg("Writing    to %s via TCP/IP\n", name);
+            fprint_msg("Writing to %s via TCP/IP\n", name.c_str());
         break;
     case TS_W_UDP:
         if (!quiet) {
@@ -2199,18 +2199,18 @@ int tswrite_open(TS_WRITER_TYPE how, const std::string name, char* multicast_if,
             // but we'll assume the user only specifies `multicast_if` is it is, for
             // the purposes of these messages (amending `connect_socket`, which does
             // know, to output this message iff `!quiet` is a bit overkill)
-            fprint_msg("Connecting to %s via UDP on port %d", name, port);
+            fprint_msg("Connecting to %s via UDP on port %d", name.c_str(), port);
             if (multicast_if)
                 fprint_msg(" (multicast interface %s)", multicast_if);
             print_msg("\n");
         }
-        new2->where.socket = connect_socket(name, port, false, multicast_if);
+        new2->where.socket = connect_socket(name.c_str(), port, false, multicast_if);
         if (new2->where.socket == -1) {
-            fprint_err("### Unable to connect to %s\n", name);
+            fprint_err("### Unable to connect to %s\n", name.c_str());
             return 1;
         }
         if (!quiet)
-            fprint_msg("Writing    to %s via UDP\n", name);
+            fprint_msg("Writing    to %s via UDP\n", name.c_str());
         break;
     default:
         fprint_err("### Unexpected writer type %d to tswrite_open()\n", how);
