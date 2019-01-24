@@ -1,33 +1,9 @@
+#pragma once
+
 /*
  * Datastructures for reading PES packets from TS or PS files
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
-
-#ifndef _pes_defns
-#define _pes_defns
 
 #include "compat.h"
 #include "pidint_defns.h"
@@ -221,12 +197,3 @@ typedef struct PES_reader* PES_reader_p;
 // <packet_length>), decide if this PES packet is MPEG-1 (11172-1) or
 // H.222.0 (13818-1)
 #define IS_H222_PES(data) ((data[6] & 0xC0) == 0x80)
-
-#endif // _pes_defns
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

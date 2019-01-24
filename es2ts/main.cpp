@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
+#include <string>
 #include <unistd.h>
 
 #include "accessunit.h"
@@ -28,6 +29,8 @@
 #include "tswrite.h"
 #include "version.h"
 
+using namespace std::string_literals;
+
 /*
  * Write (copy) the current ES data unit to the output stream, wrapped up in a
  * PES within TS.
@@ -46,7 +49,7 @@ static int write_ES_unit_as_TS(TS_writer_p output, ES_unit_p unit, uint32_t vide
 }
 
 static int transfer_data(ES_p es, TS_writer_p output, uint32_t pmt_pid, uint32_t video_pid,
-    byte stream_type, int max2, int verbose, int quiet)
+    byte stream_type, int max2, bool verbose, int quiet)
 {
     int err = 0;
     int count = 0;
@@ -168,7 +171,7 @@ int main(int argc, char** argv)
     int had_output_name = FALSE;
     TS_writer_p output = nullptr;
     ES_p es;
-    int verbose = FALSE;
+    bool verbose = FALSE;
     int quiet = FALSE;
     int max2 = 0;
     uint32_t video_pid = 0x68;
@@ -209,7 +212,7 @@ int main(int argc, char** argv)
                 use_stdout = TRUE;
                 redirect_output_stderr();
             } else if (!strcmp("-err", argv[ii])) {
-                CHECKARG("es2ts", ii);
+                MustARG("es2ts"s, ii, argc, argv);
                 if (!strcmp(argv[ii + 1], "stderr"))
                     redirect_output_stderr();
                 else if (!strcmp(argv[ii + 1], "stdout"))
@@ -223,8 +226,8 @@ int main(int argc, char** argv)
                 }
                 ii++;
             } else if (!strcmp("-host", argv[ii])) {
-                CHECKARG("es2ts", ii);
-                err = host_value("es2ts", argv[ii], argv[ii + 1], &output_name, &port);
+                MustARG("es2ts"s, ii, argc, argv);
+                err = host_value("es2ts"s, argv[ii], argv[ii + 1], &output_name, &port);
                 if (err)
                     return 1;
                 had_output_name = TRUE; // more or less
@@ -237,20 +240,20 @@ int main(int argc, char** argv)
                 verbose = FALSE;
                 quiet = TRUE;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
-                CHECKARG("es2ts", ii);
-                err = int_value("es2ts", argv[ii], argv[ii + 1], TRUE, 10, &max2);
+                MustARG("es2ts"s, ii, argc, argv);
+                err = int_value("es2ts"s, argv[ii], argv[ii + 1], TRUE, 10, &max2);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-pid", argv[ii])) {
-                CHECKARG("es2ts", ii);
-                err = unsigned_value("es2ts", argv[ii], argv[ii + 1], 0, &video_pid);
+                MustARG("es2ts"s, ii, argc, argv);
+                err = unsigned_value("es2ts"s, argv[ii], argv[ii + 1], 0, &video_pid);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-pmt", argv[ii])) {
-                CHECKARG("es2ts", ii);
-                err = unsigned_value("es2ts", argv[ii], argv[ii + 1], 0, &pmt_pid);
+                MustARG("es2ts"s, ii, argc, argv);
+                err = unsigned_value("es2ts"s, argv[ii], argv[ii + 1], 0, &pmt_pid);
                 if (err)
                     return 1;
                 ii++;
@@ -290,81 +293,92 @@ int main(int argc, char** argv)
         quiet = TRUE;
     }
 
-    if (use_stdin)
+    if (use_stdin) {
         err = open_elementary_stream(nullptr, &es);
-    else
+    } else {
         err = open_elementary_stream(input_name, &es);
+    }
     if (err) {
         print_err("### es2ts: "
                   "Problem starting elementary stream - abandoning reading\n");
         return 1;
     }
 
-    if (!quiet)
+    if (!quiet) {
         fprint_msg("Reading from  %s\n", (use_stdin ? "<stdin>" : input_name));
+    }
 
     // Decide if the input stream is H.262 or H.264
     if (force_stream_type || use_stdin) {
-        if (!quiet)
+        if (!quiet) {
             print_msg("Reading input as ");
+        }
     } else {
         // int video_type;
-        err = decide_ES_file_video_type(es->input, FALSE, verbose, &video_type);
-        if (err) {
+        if (err = decide_ES_file_video_type(es->input, FALSE, verbose, &video_type); err) {
             print_err("### es2ts: Error deciding on stream type\n");
             close_elementary_stream(&es);
             return 1;
         }
-        if (!quiet)
+        if (!quiet) {
             print_msg("Input appears to be ");
+        }
     }
 
     switch (video_type) {
     case VIDEO_H262:
         stream_type = MPEG2_VIDEO_STREAM_TYPE;
-        if (!quiet)
+        if (!quiet) {
             print_msg("MPEG-2 (H.262)\n");
+        }
         break;
     case VIDEO_H264:
         stream_type = AVC_VIDEO_STREAM_TYPE;
-        if (!quiet)
+        if (!quiet) {
             print_msg("MPEG-4/AVC (H.264)\n");
+        }
         break;
     case VIDEO_AVS:
         stream_type = AVS_VIDEO_STREAM_TYPE;
-        if (!quiet)
+        if (!quiet) {
             print_msg("AVS\n");
+        }
         break;
     case VIDEO_UNKNOWN:
-        if (!quiet)
+        if (!quiet) {
             print_msg("Unknown\n");
+        }
         print_err("### es2ts: Input video type is not recognised\n");
         close_elementary_stream(&es);
         return 1;
     }
 
-    if (use_stdout)
+    if (use_stdout) {
         err = tswrite_open(TS_W_STDOUT, nullptr, nullptr, 0, quiet, &output);
-    else if (use_tcpip)
+    } else if (use_tcpip) {
         err = tswrite_open(TS_W_TCP, output_name, nullptr, port, quiet, &output);
-    else
+    } else {
         err = tswrite_open(TS_W_FILE, output_name, nullptr, 0, quiet, &output);
+    }
+
     if (err) {
         close_elementary_stream(&es);
         fprint_err("### es2ts: Unable to open %s\n", output_name);
         return 1;
     }
 
-    if (max2 && !quiet)
+    if (max2 && !quiet) {
         fprint_msg("Stopping after %d ES data units\n", max2);
+    }
 
-    err = transfer_data(es, output, pmt_pid, video_pid, stream_type, max2, verbose, quiet);
-    if (err)
+    if (err = transfer_data(es, output, pmt_pid, video_pid, stream_type, max2, verbose, quiet);
+        err) {
         print_err("### es2ts: Error transferring data\n");
+    }
 
     close_elementary_stream(&es); // Closes the input file for us
-    err2 = tswrite_close(output, quiet);
-    if (err2) {
+
+    if (err2 = tswrite_close(output, quiet); err2) {
         fprint_err("### es2ts: Error closing output %s: %s\n", output_name, strerror(errno));
         return 1;
     }

@@ -1,33 +1,9 @@
+#pragma once
+
 /*
  * Functions for filtering ES data ("fast forward") and writing to ES or TS.
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
-
-#ifndef _filter_fns
-#define _filter_fns
 
 #include "filter_defns.h"
 
@@ -142,7 +118,7 @@ void free_h264_filter_context(h264_filter_context_p* fcontext);
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int get_next_stripped_h262_frame(h262_filter_context_p fcontext, int verbose, int quiet,
+int get_next_stripped_h262_frame(h262_filter_context_p fcontext, bool verbose, int quiet,
     h262_picture_p* seq_hdr, h262_picture_p* frame, int* frames_seen);
 /*
  * Retrieve the next I frame, from the H.262 ES, aiming for an "apparent" kept
@@ -182,7 +158,7 @@ int get_next_stripped_h262_frame(h262_filter_context_p fcontext, int verbose, in
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int get_next_filtered_h262_frame(h262_filter_context_p fcontext, int verbose, int quiet,
+int get_next_filtered_h262_frame(h262_filter_context_p fcontext, bool verbose, int quiet,
     h262_picture_p* seq_hdr, h262_picture_p* frame, int* frames_seen);
 /*
  * Return the next IDR or I (and maybe any reference) frame from this H.264 ES.
@@ -205,7 +181,7 @@ int get_next_filtered_h262_frame(h262_filter_context_p fcontext, int verbose, in
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int get_next_stripped_h264_frame(h264_filter_context_p fcontext, int verbose, int quiet,
+int get_next_stripped_h264_frame(h264_filter_context_p fcontext, bool verbose, int quiet,
     access_unit_p* frame, int* frames_seen);
 /*
  * Retrieve the next frame from the H.264 (MPEG-4/AVC) ES, aiming
@@ -236,14 +212,5 @@ int get_next_stripped_h264_frame(h264_filter_context_p fcontext, int verbose, in
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int get_next_filtered_h264_frame(h264_filter_context_p fcontext, int verbose, int quiet,
+int get_next_filtered_h264_frame(h264_filter_context_p fcontext, bool verbose, int quiet,
     access_unit_p* frame, int* frames_seen);
-
-#endif // _filter_fns
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

@@ -3,29 +3,6 @@
 /*
  * Support for reversing
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 
 /* The reverse-data arrays are populated as a side-effect of processing the
@@ -49,11 +26,12 @@
  */
 
 #include <cerrno>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-
 #include <ctime>
+#include <string>
 
 #include "accessunit_fns.h"
 #include "compat.h"
@@ -65,6 +43,8 @@
 #include "reverse_fns.h"
 #include "ts_fns.h"
 #include "tswrite_fns.h"
+
+using namespace std::string_literals;
 
 #define DEBUG 0
 
@@ -285,10 +265,10 @@ static void debug_reverse_data_problem(
     reverse_data_p reverse_data, uint32_t index, ES_offset start_posn, uint32_t idx)
 {
     FILE* tempfile;
-    char* tempfilename = "tsserve_reverse_problem.txt";
+    const std::string tempfilename = "tsserve_reverse_problem.txt"s;
     int ii;
 
-    tempfile = fopen(tempfilename, "a+");
+    tempfile = fopen(tempfilename.c_str(), "a+");
     if (tempfile == nullptr) {
         fprint_err("### Unable to open file %s - writing diagnostics"
                    " to stderr instead\n",
@@ -593,7 +573,7 @@ int get_reverse_data(reverse_data_p reverse_data, int which, uint32_t* index,
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int collect_reverse_h262(h262_context_p h262, int max, int verbose, int quiet)
+int collect_reverse_h262(h262_context_p h262, int max, bool verbose, int quiet)
 {
     int err = 0;
     // In order to stop after `max` items, we need to count pictures
@@ -643,7 +623,7 @@ int collect_reverse_h262(h262_context_p h262, int max, int verbose, int quiet)
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int collect_reverse_access_units(access_unit_context_p acontext, int max, int verbose, int quiet)
+int collect_reverse_access_units(access_unit_context_p acontext, int max, bool verbose, int quiet)
 {
     int err = 0;
     int access_unit_count = 0;
@@ -705,7 +685,7 @@ int collect_reverse_access_units(access_unit_context_p acontext, int max, int ve
  * used if the data `is_TS`.
  */
 int write_packet_data(
-    WRITER output, int as_TS, byte data[], int data_len, uint32_t pid, byte stream_id)
+    WRITER output, int as_TS, byte data[], size_t data_len, uint32_t pid, byte stream_id)
 {
     int err;
     if (as_TS) {
@@ -765,7 +745,7 @@ static int write_picture_data(WRITER output, int as_TS, h262_picture_p picture, 
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
 static int read_h262_picture(
-    h262_context_p context, ES_offset where, byte afd, int verbose, h262_picture_p* picture)
+    h262_context_p context, ES_offset where, byte afd, bool verbose, h262_picture_p* picture)
 {
     int err;
     reverse_data_p reverse_data = nullptr;
@@ -812,7 +792,7 @@ static int read_h262_picture(
  * - `seq_index` is the index of the sequence header in the `reverse_data`
  * - `reverse_data` contains the list of pictures/access units to reverse.
  */
-static int output_sequence_header(ES_p es, WRITER output, int as_TS, int verbose,
+static int output_sequence_header(ES_p es, WRITER output, int as_TS, bool verbose,
     uint16_t seq_index, reverse_data_p reverse_data)
 {
     int err;
@@ -867,7 +847,7 @@ static int output_sequence_header(ES_p es, WRITER output, int as_TS, int verbose
  *
  * Returns 0 if all went well, or 1 if something went wrong.
  */
-static int output_from_reverse_data(ES_p es, WRITER output, int as_TS, int verbose, int quiet,
+static int output_from_reverse_data(ES_p es, WRITER output, int as_TS, bool verbose, int quiet,
     uint32_t offset, reverse_data_p reverse_data)
 {
     int with_sequence_headers = (!reverse_data->is_h264 && reverse_data->output_sequence_headers);
@@ -999,7 +979,7 @@ static int output_from_reverse_data(ES_p es, WRITER output, int as_TS, int verbo
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int output_from_reverse_data_as_TS(ES_p es, TS_writer_p tswriter, int verbose, int quiet,
+int output_from_reverse_data_as_TS(ES_p es, TS_writer_p tswriter, bool verbose, int quiet,
     uint32_t offset, reverse_data_p reverse_data)
 {
     WRITER writer;
@@ -1030,7 +1010,7 @@ int output_from_reverse_data_as_TS(ES_p es, TS_writer_p tswriter, int verbose, i
  * if the current command has changed.
  */
 int output_from_reverse_data_as_ES(
-    ES_p es, FILE* output, int verbose, int quiet, uint32_t offset, reverse_data_p reverse_data)
+    ES_p es, FILE* output, bool verbose, int quiet, uint32_t offset, reverse_data_p reverse_data)
 {
     WRITER writer;
     writer.es_output = output;
@@ -1062,7 +1042,7 @@ int output_from_reverse_data_as_ES(
  * Returns 0 if all went well, COMMAND_RETURN_CODE if the current "command"
  * has changed, or 1 if something went wrong.
  */
-static int output_in_reverse(ES_p es, WRITER output, int as_TS, int frequency, int verbose,
+static int output_in_reverse(ES_p es, WRITER output, int as_TS, int frequency, bool verbose,
     int quiet, int32_t start_with, int max, reverse_data_p reverse_data)
 {
     int ii;
@@ -1357,7 +1337,7 @@ static int output_in_reverse(ES_p es, WRITER output, int as_TS, int frequency, i
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int output_in_reverse_as_TS(ES_p es, TS_writer_p tswriter, int frequency, int verbose, int quiet,
+int output_in_reverse_as_TS(ES_p es, TS_writer_p tswriter, int frequency, bool verbose, int quiet,
     int32_t start_with, int max, reverse_data_p reverse_data)
 {
     WRITER writer;
@@ -1392,7 +1372,7 @@ int output_in_reverse_as_TS(ES_p es, TS_writer_p tswriter, int frequency, int ve
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int output_in_reverse_as_ES(ES_p es, FILE* output, int frequency, int verbose, int quiet,
+int output_in_reverse_as_ES(ES_p es, FILE* output, int frequency, bool verbose, int quiet,
     int32_t start_with, int max, reverse_data_p reverse_data)
 {
     WRITER writer;

@@ -3,35 +3,13 @@
 /*
  * Utilities for reading H.264 elementary streams.
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <string>
 #include <unistd.h>
 
 #include "compat.h"
@@ -62,21 +40,20 @@ static inline int get_more_data(ES_p es);
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-int open_elementary_stream(char* filename, ES_p* es)
+int open_elementary_stream(const std::string filename, ES_p* es)
 {
     int err;
     int input;
 
-    if (filename == nullptr)
+    if (filename.empty()) {
         input = STDIN_FILENO;
-    else {
+    } else {
         input = open_binary_file(filename, FALSE);
         if (input == -1)
             return 1;
     }
 
-    err = build_elementary_stream_file(input, es);
-    if (err) {
+    if (err = build_elementary_stream_file(input, es); err) {
         fprint_err("### Error building elementary stream for file %s\n", filename);
         return 1;
     }
@@ -378,8 +355,8 @@ void report_ES_unit(int is_msg, ES_unit_p unit)
     // since we know they're 00 00 01 <start-code>
     if (unit->data_len > 0) {
         int ii;
-        int data_len = unit->data_len - 4;
-        int show_len = (data_len > 10 ? 10 : data_len);
+        size_t data_len = unit->data_len - 4;
+        size_t show_len = (data_len > 10 ? 10 : data_len);
         fprint_msg_or_err(is_msg, " %6d:", data_len);
         for (ii = 0; ii < show_len; ii++)
             fprint_msg_or_err(is_msg, " %02x", unit->data[4 + ii]);
@@ -1121,7 +1098,7 @@ void free_ES_unit_list(ES_unit_list_p* list)
  * - `name` is the name of the list (used in the header)
  * - `list` is the list to report on
  */
-void report_ES_unit_list(char* name, ES_unit_list_p list)
+void report_ES_unit_list(const std::string name, ES_unit_list_p list)
 {
     fprint_msg("ES unit list '%s': ", name);
     if (list->array == nullptr)

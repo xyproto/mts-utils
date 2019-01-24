@@ -2,29 +2,6 @@
  * Report on the content of an H.222 program stream (PS) file as a sequence
  * of single characters, representing appropriate entities.
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 
 #include <cerrno>
@@ -62,7 +39,7 @@
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int report_ps_dots(PS_reader_p ps, int max, int verbose)
+static int report_ps_dots(PS_reader_p ps, int max, bool verbose)
 {
     int err;
     int count = 0;
@@ -241,12 +218,12 @@ static void print_usage()
 int main(int argc, char** argv)
 {
     int use_stdin = FALSE;
-    char* input_name = NULL;
+    char* input_name = nullptr;
     int had_input_name = FALSE;
 
     PS_reader_p ps; // The PS file we're reading
     int max = 0; // The maximum number of PS packets to read (or 0)
-    int verbose = FALSE; // True => output diagnostic/progress messages
+    bool verbose = FALSE; // True => output diagnostic/progress messages
 
     int err = 0;
     int ii = 1;
@@ -263,7 +240,7 @@ int main(int argc, char** argv)
                 print_usage();
                 return 0;
             } else if (!strcmp("-err", argv[ii])) {
-                CHECKARG("psdots", ii);
+                MustARG("psdots", ii, argc, argv);
                 if (!strcmp(argv[ii + 1], "stderr"))
                     redirect_output_stderr();
                 else if (!strcmp(argv[ii + 1], "stdout"))
@@ -279,7 +256,7 @@ int main(int argc, char** argv)
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
                 verbose = TRUE;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
-                CHECKARG("psdots", ii);
+                MustARG("psdots", ii, argc, argv);
                 err = int_value("psdots", argv[ii], argv[ii + 1], TRUE, 10, &max);
                 if (err)
                     return 1;

@@ -1,34 +1,12 @@
+#pragma once
+
 /*
  * Functions for working with H.222 Program Stream packets - in particular,
  * for reading PES packets.
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 
-#ifndef _ps_fns
-#define _ps_fns
+#include <string>
 
 #include "compat.h"
 #include "h222_defns.h"
@@ -69,7 +47,7 @@ void free_PS_reader(PS_reader_p* ps);
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-int open_PS_file(char* name, int quiet, PS_reader_p* ps);
+int open_PS_file(const std::string name, int quiet, PS_reader_p* ps);
 /*
  * Close a PS file, and free the reader context
  *
@@ -155,7 +133,7 @@ void print_stream_id(int is_msg, byte stream_id);
  *   * 1 if some error (including the first 3 bytes not being 00 00 01) occurs.
  */
 int find_PS_packet_start(
-    PS_reader_p ps, int verbose, uint32_t max, offset_t* posn, byte* stream_id);
+    PS_reader_p ps, bool verbose, uint32_t max, offset_t* posn, byte* stream_id);
 /*
  * Look for the next PS pack header.
  *
@@ -179,7 +157,7 @@ int find_PS_packet_start(
  *   * EOF if EOF is read, or an MPEG_program_end_code is read, or
  *   * 1 if some error (including the first 3 bytes not being 00 00 01) occurs.
  */
-int find_PS_pack_header_start(PS_reader_p ps, int verbose, uint32_t max, offset_t* posn);
+int find_PS_pack_header_start(PS_reader_p ps, bool verbose, uint32_t max, offset_t* posn);
 /*
  * Read in (the rest of) a PS packet according to its length.
  *
@@ -243,7 +221,7 @@ void free_PS_packet(PS_packet_p* packet);
  *   * 2 if the bytes read are not 00 00 01 `stream_id`, or
  *   * 1 if some other error occurs.
  */
-int read_PS_packet_start(PS_reader_p ps, int verbose, offset_t* posn, byte* stream_id);
+int read_PS_packet_start(PS_reader_p ps, bool verbose, offset_t* posn, byte* stream_id);
 
 /*
  * Inspect the given PS packet, and determine if it contains AC3 or DTS audio data.
@@ -260,8 +238,8 @@ int read_PS_packet_start(PS_reader_p ps, int verbose, offset_t* posn, byte* stre
  *
  * Returns one of the SUBSTREAM_* values.
  */
-int identify_private1_data(struct PS_packet* packet, int is_dvd, int verbose, int* substream_index,
-    byte* bsmod, byte* acmod);
+int identify_private1_data(struct PS_packet* packet, int is_dvd, bool verbose,
+    int* substream_index, byte* bsmod, byte* acmod);
 
 // ============================================================
 // PS to TS functions
@@ -308,13 +286,4 @@ int identify_private1_data(struct PS_packet* packet, int is_dvd, int verbose, in
 int ps_to_ts(PS_reader_p ps, TS_writer_p output, int pad_start, int program_repeat, int video_type,
     int is_dvd, int video_stream, int audio_stream, int want_ac3_audio, int dolby_is_dvb,
     uint32_t pmt_pid, uint32_t pcr_pid, uint32_t video_pid, int keep_audio, uint32_t audio_pid,
-    int max, int verbose, int quiet);
-
-#endif // _ps_fns
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:
+    int max, bool verbose, int quiet);

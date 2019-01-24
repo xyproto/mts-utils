@@ -3,57 +3,31 @@
 /*
  * Miscellaneous useful functions.
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 
-#include <cstdio>
-#include <cstdlib>
-
-// For the command line utilities
+#include <arpa/inet.h>
 #include <cerrno>
 #include <climits>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
-#include <fcntl.h> // O_... flags
-
-//#include <cmath>
-
-#include "version.h"
-
-// For the socket handling
-#include <arpa/inet.h> // inet_aton
+#include <fcntl.h>
 #include <netdb.h>
-#include <netinet/in.h> // sockaddr_in
+#include <netinet/in.h>
+#include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <unistd.h> // open, close
+#include <unistd.h>
 
 #include "compat.h"
 #include "es_fns.h"
 #include "misc_fns.h"
 #include "pes_fns.h"
 #include "printing_fns.h"
+#include "version.h"
+
+using namespace std::string_literals;
 
 #define DEBUG_SEEK 1
 
@@ -129,7 +103,7 @@ uint32_t crc32_block(uint32_t crc, byte* pData, int blk_len)
  * where no more than `max` bytes are to be printed (and "..." is printed
  * if not all bytes were shown).
  */
-void print_data(int is_msg, const char* name, const byte data[], int length, int max)
+void print_data(int is_msg, const std::string name, const byte data[], int length, int max)
 {
     int ii;
 
@@ -167,7 +141,7 @@ void print_data(int is_msg, const char* name, const byte data[], int length, int
  * where no more than `max` bytes are to be printed (and "..." is printed
  * if not all bytes were shown).
  */
-void print_end_of_data(char* name, byte data[], int length, int max)
+void print_end_of_data(const std::string name, byte data[], int length, int max)
 {
     int ii;
     if (length == 0) {
@@ -315,16 +289,16 @@ offset_t tell_file(int filedes)
  * Returns the file descriptor for the file, or -1 if it failed to open
  * the file.
  */
-int open_binary_file(char* filename, int for_write)
+int open_binary_file(const std::string filename, int for_write)
 {
     int flags = 0;
     int filedes;
     if (for_write) {
         flags = flags | O_WRONLY | O_CREAT | O_TRUNC;
-        filedes = open(filename, flags, 00777);
+        filedes = open(filename.c_str(), flags, 00777);
     } else {
         flags = flags | O_RDONLY;
-        filedes = open(filename, flags);
+        filedes = open(filename.c_str(), flags);
     }
     if (filedes == -1)
         fprint_err("### Error opening file %s for %s: %s\n", filename,
@@ -357,24 +331,22 @@ int close_file(int filedes)
 // ============================================================
 // More complex file I/O utilities
 // ============================================================
-static int open_input_as_ES_using_PES(
-    char* name, int quiet, int force_stream_type, int want_data, int* is_data, ES_p* es)
+static int open_input_as_ES_using_PES(const std::string name, int quiet, int force_stream_type,
+    int want_data, int* is_data, ES_p* es)
 {
     int err;
     PES_reader_p reader = nullptr;
 
-    if (name == nullptr) {
+    if (name.empty()) {
         print_err("### Cannot use standard input to read PES\n");
         return 1;
     }
 
-    err = open_PES_reader(name, !quiet, !quiet, &reader);
-    if (err) {
+    if (err = open_PES_reader(name, !quiet, !quiet, &reader); err) {
         fprint_err("### Error trying to build PES reader for input file %s\n", name);
         return 1;
     }
-    err = build_elementary_stream_PES(reader, es);
-    if (err) {
+    if (err = build_elementary_stream_PES(reader, es); err) {
         fprint_err("### Error trying to build ES reader from PES reader\n"
                    "    for input file %s\n",
             name);
@@ -382,8 +354,9 @@ static int open_input_as_ES_using_PES(
         return 1;
     }
 
-    if (!quiet)
+    if (!quiet) {
         fprint_msg("Reading from %s\n", name);
+    }
 
     if (force_stream_type) {
         if (force_stream_type)
@@ -402,47 +375,50 @@ static int open_input_as_ES_using_PES(
     return 0;
 }
 
-static int open_input_as_ES_direct(
-    char* name, int quiet, int force_stream_type, int want_data, int* is_data, ES_p* es)
+static int open_input_as_ES_direct(const std::string name, int quiet, int force_stream_type,
+    int want_data, int* is_data, ES_p* es)
 {
     int err;
-    int use_stdin = (name == nullptr);
+    bool use_stdin = name.empty();
     int input = -1;
 
     if (use_stdin) {
         input = STDIN_FILENO;
     } else {
         input = open_binary_file(name, FALSE);
-        if (input == -1)
+        if (input == -1) {
             return 1;
+        }
     }
 
-    err = build_elementary_stream_file(input, es);
-    if (err) {
+    if (err = build_elementary_stream_file(input, es); err) {
         fprint_err("### Error building elementary stream for %s\n", use_stdin ? "<stdin>" : name);
-        if (!use_stdin)
+        if (!use_stdin) {
             (void)close_file(input);
+        }
         return 1;
     }
 
-    if (!quiet)
+    if (!quiet) {
         fprint_msg("Reading from %s\n", (use_stdin ? "<stdin>" : name));
+    }
 
     if (force_stream_type || use_stdin) {
-        if (force_stream_type)
+        if (force_stream_type) {
             *is_data = want_data;
-        else
+        } else {
             *is_data = VIDEO_H262;
-        if (!quiet)
+        }
+        if (!quiet) {
             fprint_msg("Reading input as %s\n",
                 (*is_data == VIDEO_H262
                         ? "MPEG-2 (H.262)"
                         : *is_data == VIDEO_H264 ? "MPEG-4/AVC (H.264)"
                                                  : *is_data == VIDEO_AVS ? "AVS" : "???"));
+        }
     } else {
         int video_type;
-        err = decide_ES_video_type(*es, FALSE, FALSE, &video_type);
-        if (err) {
+        if (err = decide_ES_video_type(*es, FALSE, FALSE, &video_type); err) {
             fprint_err("### Error deciding on stream type for file %s\n", name);
             close_elementary_stream(es);
             return 1;
@@ -453,28 +429,27 @@ static int open_input_as_ES_direct(
         // recreate our ES context
         free_elementary_stream(es);
 
-        err = seek_file(input, 0);
-        if (err) {
+        if (err = seek_file(input, 0); err) {
             print_err("### Error returning to start position in file after"
                       " working out video type\n");
             (void)close_file(input);
             return 1;
         }
 
-        err = build_elementary_stream_file(input, es);
-        if (err) {
+        if (err = build_elementary_stream_file(input, es); err) {
             fprint_err("### Error (re)building elementary stream for %s\n", name);
             return 1;
         }
 
         *is_data = video_type;
-        if (!quiet)
+        if (!quiet) {
             fprint_msg("Input appears to be %s\n",
                 (*is_data == VIDEO_H262 ? "MPEG-2 (H.262)"
                                         : *is_data == VIDEO_H264 ? "MPEG-4/AVC (H.264)"
                                                                  : *is_data == VIDEO_AVS
                                 ? "AVS"
                                 : *is_data == VIDEO_UNKNOWN ? "Unknown" : "???"));
+        }
     }
     return 0;
 }
@@ -514,8 +489,8 @@ static int open_input_as_ES_direct(
  * Returns 0 if all goes well, 1 if something goes wrong. In the latter case,
  * suitable messages will have been written out to standard error.
  */
-int open_input_as_ES(char* name, int use_pes, int quiet, int force_stream_type, int want_data,
-    int* is_data, ES_p* es)
+int open_input_as_ES(const std::string name, int use_pes, int quiet, int force_stream_type,
+    int want_data, int* is_data, ES_p* es)
 {
     if (use_pes)
         return open_input_as_ES_using_PES(name, quiet, force_stream_type, want_data, is_data, es);
@@ -535,11 +510,10 @@ int open_input_as_ES(char* name, int use_pes, int quiet, int force_stream_type, 
  * Returns 0 if all goes well, 1 if something goes wrong. In the latter case,
  * suitable messages will have been written out to standard error.
  */
-int close_input_as_ES(char* name, ES_p* es)
+int close_input_as_ES(const std::string name, ES_p* es)
 {
     if (!(*es)->reading_ES) {
-        int err = close_PES_reader(&(*es)->reader);
-        if (err) {
+        if (auto err = close_PES_reader(&(*es)->reader); err) {
             fprint_err("### Error closing PES reader for file %s\n", name);
             close_elementary_stream(es);
             return 1;
@@ -567,7 +541,8 @@ int close_input_as_ES(char* name, ES_p* es)
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int unsigned_value(const char* prefix, const char* cmd, const char* arg, int base, uint32_t* value)
+int unsigned_value(
+    const std::string prefix, const char* cmd, const char* arg, int base, uint32_t* value)
 {
     char* ptr;
     unsigned long val;
@@ -575,8 +550,9 @@ int unsigned_value(const char* prefix, const char* cmd, const char* arg, int bas
     val = strtoul(arg, &ptr, base);
     if (errno) {
         print_err("### ");
-        if (prefix != nullptr)
+        if (!prefix.empty()) {
             fprint_err("%s: ", prefix);
+        }
         if (errno == ERANGE && val == 0)
             fprint_err(
                 "String cannot be converted to (long) unsigned integer in %s %s\n", cmd, arg);
@@ -588,8 +564,9 @@ int unsigned_value(const char* prefix, const char* cmd, const char* arg, int bas
     }
     if (ptr[0] != '\0') {
         print_err("### ");
-        if (prefix != nullptr)
+        if (!prefix.empty()) {
             fprint_err("%s: ", prefix);
+        }
         if (ptr - arg == 0)
             fprint_err("Argument to %s should be a number, in %s %s\n", cmd, cmd, arg);
         else
@@ -619,7 +596,7 @@ int unsigned_value(const char* prefix, const char* cmd, const char* arg, int bas
  * explaining will have been written to stderr).
  */
 int int_value(
-    const char* prefix, const char* cmd, const char* arg, int positive, int base, int* value)
+    const std::string prefix, const char* cmd, const char* arg, int positive, int base, int* value)
 {
     char* ptr;
     long val;
@@ -627,8 +604,9 @@ int int_value(
     val = strtol(arg, &ptr, base);
     if (errno) {
         print_err("### ");
-        if (prefix != nullptr)
+        if (!prefix.empty()) {
             fprint_err("%s: ", prefix);
+        }
         if (errno == ERANGE && val == 0)
             fprint_err("String cannot be converted to (long) integer in %s %s\n", cmd, arg);
         else if (errno == ERANGE && (val == LONG_MAX || val == LONG_MIN))
@@ -639,8 +617,9 @@ int int_value(
     }
     if (ptr[0] != '\0') {
         print_err("### ");
-        if (prefix != nullptr)
+        if (!prefix.empty()) {
             fprint_err("%s: ", prefix);
+        }
         if (ptr - arg == 0)
             fprint_err("Argument to %s should be a number, in %s %s\n", cmd, cmd, arg);
         else
@@ -651,16 +630,18 @@ int int_value(
 
     if (val > INT_MAX || val < INT_MIN) {
         print_err("### ");
-        if (prefix != nullptr)
+        if (!prefix.empty()) {
             fprint_err("%s: ", prefix);
+        }
         fprint_err("Value %ld (in %s %s) is too large (to fit into 'int')\n", val, cmd, arg);
         return 1;
     }
 
     if (positive && val < 0) {
         print_err("### ");
-        if (prefix != nullptr)
+        if (!prefix.empty()) {
             fprint_err("%s: ", prefix);
+        }
         fprint_err("Value %ld (in %s %s) is less than zero\n", val, cmd, arg);
         return 1;
     }
@@ -687,17 +668,17 @@ int int_value(
  * explaining will have been written to stderr).
  */
 int int_value_in_range(
-    char* prefix, char* cmd, char* arg, int minimum, int maximum, int base, int* value)
+    const std::string prefix, char* cmd, char* arg, int minimum, int maximum, int base, int* value)
 {
     int err, temp;
-    err = int_value(prefix, cmd, arg, (minimum >= 0), base, &temp);
-    if (err)
+    if (err = int_value(prefix, cmd, arg, (minimum >= 0), base, &temp); err) {
         return err;
-
+    }
     if (temp > maximum || temp < minimum) {
         print_err("### ");
-        if (prefix != nullptr)
+        if (!prefix.empty()) {
             fprint_err("%s: ", prefix);
+        }
         fprint_err("Value %d (in %s %s) is not in range %d..%d (0x%x..0x%x)\n", temp, cmd, arg,
             minimum, maximum, minimum, maximum);
         return 1;
@@ -720,7 +701,7 @@ int int_value_in_range(
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int double_value(char* prefix, char* cmd, char* arg, int positive, double* value)
+int double_value(const std::string prefix, char* cmd, char* arg, int positive, double* value)
 {
     char* ptr;
     double val;
@@ -728,8 +709,9 @@ int double_value(char* prefix, char* cmd, char* arg, int positive, double* value
     val = strtod(arg, &ptr);
     if (errno) {
         print_err("### ");
-        if (prefix != nullptr)
+        if (!prefix.empty()) {
             fprint_err("%s: ", prefix);
+        }
         if (errno == ERANGE && val == 0)
             fprint_err("String cannot be converted to (double) float in %s %s\n", cmd, arg);
         else if (errno == ERANGE && (val == HUGE_VAL || val == -HUGE_VAL))
@@ -740,8 +722,9 @@ int double_value(char* prefix, char* cmd, char* arg, int positive, double* value
     }
     if (ptr[0] != '\0') {
         print_err("### ");
-        if (prefix != nullptr)
+        if (!prefix.empty()) {
             fprint_err("%s: ", prefix);
+        }
         fprint_err("Unexpected characters ('%s') after the %.*s in %s %s\n", ptr, (int)(ptr - arg),
             arg, cmd, arg);
         return 1;
@@ -749,8 +732,9 @@ int double_value(char* prefix, char* cmd, char* arg, int positive, double* value
 
     if (positive && val < 0) {
         print_err("### ");
-        if (prefix != nullptr)
+        if (!prefix.empty()) {
             fprint_err("%s: ", prefix);
+        }
         fprint_err("Value %f (in %s %s) is less than zero\n", val, cmd, arg);
         return 1;
     }
@@ -781,7 +765,8 @@ int double_value(char* prefix, char* cmd, char* arg, int positive, double* value
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int host_value(const char* prefix, const char* cmd, const char* arg, char** hostname, int* port)
+int host_value(
+    const std::string prefix, const char* cmd, const char* arg, char** hostname, int* port)
 {
     char* p = strchr((char*)arg, ':');
 
@@ -795,8 +780,9 @@ int host_value(const char* prefix, const char* cmd, const char* arg, char** host
         if (errno) {
             p[0] = ':';
             print_err("### ");
-            if (prefix != nullptr)
+            if (!prefix.empty()) {
                 fprint_err("%s: ", prefix);
+            }
             if (cmd)
                 fprint_err("Cannot read port number in %s %s (%s)\n", cmd, arg, strerror(errno));
             else
@@ -806,8 +792,9 @@ int host_value(const char* prefix, const char* cmd, const char* arg, char** host
         if (ptr[0] != '\0') {
             p[0] = ':';
             print_err("### ");
-            if (prefix != nullptr)
+            if (!prefix.empty()) {
                 fprint_err("%s: ", prefix);
+            }
             if (cmd)
                 fprint_err("Unexpected characters in port number in %s %s\n", cmd, arg);
             else
@@ -817,8 +804,9 @@ int host_value(const char* prefix, const char* cmd, const char* arg, char** host
         if (*port < 0) {
             p[0] = ':';
             print_err("### ");
-            if (prefix != nullptr)
+            if (!prefix.empty()) {
                 fprint_err("%s: ", prefix);
+            }
             if (cmd)
                 fprint_err("Negative port number in %s %s\n", cmd, arg);
             else
@@ -855,7 +843,7 @@ int host_value(const char* prefix, const char* cmd, const char* arg, char** host
  * succeeds, or -1 if it fails, in which case it will have complained on
  * stderr.
  */
-int connect_socket(char* hostname, int port, int use_tcpip, char* multicast_ifaddr)
+int connect_socket(const std::string hostname, int port, int use_tcpip, char* multicast_ifaddr)
 {
     int output;
     int result;
@@ -868,7 +856,7 @@ int connect_socket(char* hostname, int port, int use_tcpip, char* multicast_ifad
         return -1;
     }
 
-    hp = gethostbyname(hostname);
+    hp = gethostbyname(hostname.c_str());
     if (hp == nullptr) {
         fprint_err("### Unable to resolve host %s: %s\n", hostname, hstrerror(h_errno));
         return -1;

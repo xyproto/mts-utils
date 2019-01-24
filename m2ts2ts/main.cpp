@@ -3,29 +3,6 @@
  * reorder the packets and strip off the time codes to give a normal
  * TS.
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Kynesim Ltd, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 
 #include <cerrno>
@@ -34,6 +11,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
+#include <string>
 #include <unistd.h>
 
 #include "ac3.h"
@@ -83,8 +61,8 @@ static void parse_m2ts_packet(m2ts_packet_buffer_p packet_buffer)
         | (((uint32_t)(packet_buffer->m2ts_packet[2])) << 8)
         | ((uint32_t)(packet_buffer->m2ts_packet[3]));
     packet_buffer->ts_packet = packet_buffer->m2ts_packet + 4;
-    packet_buffer->next = NULL;
-    packet_buffer->prev = NULL;
+    packet_buffer->next = nullptr;
+    packet_buffer->prev = nullptr;
 }
 
 /*
@@ -95,13 +73,13 @@ static void parse_m2ts_packet(m2ts_packet_buffer_p packet_buffer)
  */
 
 static int extract_packets(
-    int input, FILE* output, const unsigned int reorder_buffer_size, int verbose, int quiet)
+    int input, FILE* output, const unsigned int reorder_buffer_size, bool verbose, int quiet)
 {
     int err;
-    m2ts_packet_buffer_p reorder_buffer_head = NULL;
-    m2ts_packet_buffer_p reorder_buffer_tail = NULL;
+    m2ts_packet_buffer_p reorder_buffer_head = nullptr;
+    m2ts_packet_buffer_p reorder_buffer_tail = nullptr;
     int reorder_buffer_entries = 0;
-    m2ts_packet_buffer_p packet_buffer_in_hand = NULL;
+    m2ts_packet_buffer_p packet_buffer_in_hand = nullptr;
     m2ts_packet_buffer_p packet_buffer;
     m2ts_packet_buffer_p p;
     int written;
@@ -109,21 +87,21 @@ static int extract_packets(
     // For test purposes, just grab packets and print the time stamps
     while (1) {
         // Get a new packet buffer
-        if (packet_buffer_in_hand != NULL) {
+        if (packet_buffer_in_hand != nullptr) {
             packet_buffer = packet_buffer_in_hand;
-            packet_buffer_in_hand = NULL;
+            packet_buffer_in_hand = nullptr;
         } else {
             packet_buffer = (m2ts_packet_buffer_p)malloc(sizeof(struct _m2ts_packet_buffer));
             /***DEBUG***/
             fprint_msg("Allocated buffer @ %p\n", packet_buffer);
-            if (packet_buffer == NULL) {
+            if (packet_buffer == nullptr) {
                 print_err("### m2ts2ts: out of memory allocating M2TS packet buffer\n");
-                while (reorder_buffer_head != NULL) {
+                while (reorder_buffer_head != nullptr) {
                     packet_buffer = reorder_buffer_head->next;
                     free(reorder_buffer_head);
                     reorder_buffer_head = packet_buffer;
                 }
-                if (packet_buffer_in_hand != NULL)
+                if (packet_buffer_in_hand != nullptr)
                     free(packet_buffer_in_hand);
                 return 1;
             }
@@ -136,12 +114,12 @@ static int extract_packets(
             break;
         } else if (err) {
             // Badness has occurred, no point in saying more here
-            while (reorder_buffer_head != NULL) {
+            while (reorder_buffer_head != nullptr) {
                 packet_buffer = reorder_buffer_head->next;
                 free(reorder_buffer_head);
                 reorder_buffer_head = packet_buffer;
             }
-            if (packet_buffer_in_hand != NULL)
+            if (packet_buffer_in_hand != nullptr)
                 free(packet_buffer_in_hand);
             return 1;
         }
@@ -153,21 +131,21 @@ static int extract_packets(
         // It's most likely that we'll get an up to date packet,
         // so start at the tail and work to the front
         p = reorder_buffer_tail;
-        if (p != NULL)
+        if (p != nullptr)
             fprint_msg("tail timestamp = 0x%08x @ %p\n", p->timestamp, p);
-        while (p != NULL && p->timestamp > packet_buffer->timestamp) {
+        while (p != nullptr && p->timestamp > packet_buffer->timestamp) {
             p = p->prev;
-            if (p != NULL)
+            if (p != nullptr)
                 fprint_msg("p timestamp = 0x%08x @ %p\n", p->timestamp, p);
         }
 
-        if (p == NULL) {
+        if (p == nullptr) {
             // Insert as the head of queue
             fprint_msg("### Insert %p at head: %p\n", packet_buffer, reorder_buffer_head);
             packet_buffer->next = reorder_buffer_head;
             reorder_buffer_head = packet_buffer;
-            packet_buffer->prev = NULL;
-            if (reorder_buffer_tail == NULL) {
+            packet_buffer->prev = nullptr;
+            if (reorder_buffer_tail == nullptr) {
                 // I.e. this is the only entry on the queue
                 reorder_buffer_tail = packet_buffer;
             } else {
@@ -197,13 +175,13 @@ static int extract_packets(
                 (reorder_buffer_head->next));
             packet_buffer = reorder_buffer_head;
             reorder_buffer_head = reorder_buffer_head->next;
-            reorder_buffer_head->prev = NULL;
+            reorder_buffer_head->prev = nullptr;
             written = fwrite(packet_buffer->ts_packet, TS_PACKET_SIZE, 1, output);
             if (written != 1) {
                 // Major output catastrophe!
                 fprint_err("### m2ts2ts: Error writing TS packet: %s\n", strerror(errno));
                 free(packet_buffer);
-                while (reorder_buffer_head != NULL) {
+                while (reorder_buffer_head != nullptr) {
                     packet_buffer = reorder_buffer_head->next;
                     free(reorder_buffer_head);
                     reorder_buffer_head = packet_buffer;
@@ -222,13 +200,13 @@ static int extract_packets(
     free(packet_buffer_in_hand);
 
     // Write out the remaining packets in the reorder buffer
-    while (reorder_buffer_head != NULL) {
+    while (reorder_buffer_head != nullptr) {
         packet_buffer = reorder_buffer_head->next;
         written = fwrite(reorder_buffer_head->ts_packet, TS_PACKET_SIZE, 1, output);
         if (written != 1) {
             // So close...
             fprint_err("### m2ts2ts: Error writing final TS packets: %s\n", strerror(errno));
-            while (reorder_buffer_head != NULL) {
+            while (reorder_buffer_head != nullptr) {
                 packet_buffer = reorder_buffer_head->next;
                 free(reorder_buffer_head);
                 reorder_buffer_head = packet_buffer;
@@ -268,16 +246,16 @@ int main(int argc, char* argv[])
 {
     int use_stdout = FALSE;
     int use_stdin = FALSE;
-    char* input_name = NULL;
-    char* output_name = NULL;
+    char* input_name = nullptr;
+    char* output_name = nullptr;
     int had_input_name = FALSE;
     int had_output_name = FALSE;
 
     int input = -1; // Our input file descriptor
-    FILE* output = NULL; // Our output stream (if any)
+    FILE* output = nullptr; // Our output stream (if any)
     unsigned int reorder_buff_size = 4; // Number of TS packets to delay output
     int quiet = FALSE; // True => be as quiet as possible
-    int verbose = FALSE; // True => output diagnostic messages
+    bool verbose = FALSE; // True => output diagnostic messages
 
     int err = 0;
     int ii = 1;
@@ -301,7 +279,7 @@ int main(int argc, char* argv[])
                 verbose = FALSE;
                 quiet = TRUE;
             } else if (!strcmp("-buffer", argv[ii]) || !strcmp("-b", argv[ii])) {
-                CHECKARG("m2ts2ts", ii);
+                MustARG("m2ts2ts", ii, argc, argv);
                 err = unsigned_value("m2ts2ts", argv[ii], argv[ii + 1], 0, &reorder_buff_size);
                 if (err)
                     return 1;
@@ -314,7 +292,7 @@ int main(int argc, char* argv[])
                 had_output_name = TRUE; // ish
                 redirect_output_stderr();
             } else if (!strcmp("-err", argv[ii])) {
-                CHECKARG("m2ts2ts", ii);
+                MustARG("m2ts2ts", ii, argc, argv);
                 if (!strcmp(argv[ii + 1], "stderr"))
                     redirect_output_stderr();
                 else if (!strcmp(argv[ii + 1], "stdout"))
@@ -382,7 +360,7 @@ int main(int argc, char* argv[])
         output = stdout;
     } else {
         output = fopen(output_name, "wb");
-        if (output == NULL) {
+        if (output == nullptr) {
             if (!use_stdin)
                 (void)close_file(input);
             fprint_err(
@@ -416,16 +394,9 @@ int main(int argc, char* argv[])
     }
 
     if (!use_stdin) {
-        err = close_file(input);
-        if (err)
+        if (err = close_file(input); err) {
             fprint_err("### m2ts2ts: Error closing input file %s\n", input_name);
+        }
     }
     return 0;
 }
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

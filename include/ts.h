@@ -3,36 +3,15 @@
 /*
  * Utilities for working with H.222 Transport Stream packets
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 
 #include <cctype>
 #include <cerrno>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <string>
 #include <unistd.h>
 
 #include "compat.h"
@@ -51,7 +30,7 @@
 // For the moment, make this a global, since it lets me suppress
 // it easily. There should be some sort of command line switch
 // to set this to FALSE in utilities that it matters for.
-static int report_bad_reserved_bits = FALSE;
+int report_bad_reserved_bits = FALSE;
 
 // ============================================================
 // Suppport for the creation of Transport Streams.
@@ -61,7 +40,7 @@ static int report_bad_reserved_bits = FALSE;
 // (do I really want to have an array of size 8191+1?
 //  and do I want it static? not if this ever becomes a
 //  library module...)
-static int continuity_counter[0x1fff + 1] = { 0 };
+int continuity_counter[0x1fff + 1] = { 0 };
 
 /*
  * Return the next value of continuity_counter for the given pid
@@ -205,9 +184,9 @@ void PES_header(uint32_t data_len, byte stream_id, int with_PTS, uint64_t pts, i
  *
  * Returns 0 if it worked, 1 if something went wrong.
  */
-static int write_TS_packet_parts(TS_writer_p output, byte TS_packet[TS_PACKET_SIZE],
-    int TS_hdr_len, byte pes_hdr[], int pes_hdr_len, byte data[], int data_len, uint32_t pid,
-    int got_pcr, uint64_t pcr)
+int write_TS_packet_parts(TS_writer_p output, byte TS_packet[TS_PACKET_SIZE], int TS_hdr_len,
+    byte pes_hdr[], int pes_hdr_len, byte data[], size_t data_len, uint32_t pid, int got_pcr,
+    uint64_t pcr)
 {
     int err;
     int total_len = TS_hdr_len + pes_hdr_len + data_len;
@@ -258,7 +237,7 @@ static int write_TS_packet_parts(TS_writer_p output, byte TS_packet[TS_PACKET_SI
  *
  * Returns 0 if it worked, 1 if something went wrong.
  */
-static int write_some_TS_PES_packet(TS_writer_p output, byte* pes_hdr, int pes_hdr_len, byte* data,
+int write_some_TS_PES_packet(TS_writer_p output, byte* pes_hdr, int pes_hdr_len, byte* data,
     uint32_t data_len, int start, int set_pusi, uint32_t pid, byte stream_id, int got_PCR,
     uint64_t PCR_base, uint32_t PCR_extn)
 {
@@ -605,8 +584,8 @@ int write_PES_as_TS_PES_packet(TS_writer_p output, byte data[], uint32_t data_le
  *
  * Returns 0 if it worked, 1 if something went wrong.
  */
-static int TS_program_packet_hdr(
-    uint32_t pid, int data_len, byte TS_hdr[TS_PACKET_SIZE], int* TS_hdr_len)
+int TS_program_packet_hdr(
+    uint32_t pid, size_t data_len, byte TS_hdr[TS_PACKET_SIZE], int* TS_hdr_len)
 {
     uint32_t controls = 0;
     int pointer, ii;
@@ -888,7 +867,7 @@ int write_pmt(TS_writer_p output, uint32_t pmt_pid, pmt_p pmt)
         section_length += 5 + pmt->streams[ii].ES_info_length;
     if (section_length > 1021) {
         print_err("### PMT data is too long - will not fit in 1021 bytes\n");
-        report_pmt(FALSE, "    ", pmt);
+        report_pmt(FALSE, (char*)"    ", pmt);
         return 1;
     }
 
@@ -1063,7 +1042,7 @@ static uint64_t TWENTY_SEVEN_MHZ = 27000000;
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static int new_TS_reader(TS_reader_p* tsreader)
+int new_TS_reader(TS_reader_p* tsreader)
 {
     TS_reader_p new2 = (TS_reader_p)malloc(SIZEOF_TS_READER);
     if (new2 == nullptr) {
@@ -1131,21 +1110,21 @@ int build_TS_reader_with_fns(void* handle, int (*read_fn)(void*, byte*, size_t),
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int open_file_for_TS_read(char* filename, TS_reader_p* tsreader)
+int open_file_for_TS_read(const std::string filename, TS_reader_p* tsreader)
 {
     int err;
     int file;
 
-    if (filename == nullptr)
+    if (filename.empty()) {
         file = STDIN_FILENO;
-    else {
+    } else {
         file = open_binary_file(filename, FALSE);
-        if (file == -1)
+        if (file == -1) {
             return 1;
+        }
     }
 
-    err = build_TS_reader(file, tsreader);
-    if (err) {
+    if (err = build_TS_reader(file, tsreader); err) {
         (void)close_file(file);
         return 1;
     }
@@ -1231,7 +1210,7 @@ int seek_using_TS_reader(TS_reader_p tsreader, offset_t posn)
  * other error occurred (in which case it will already have output a message
  * on stderr about the problem).
  */
-static int read_next_TS_packets(TS_reader_p tsreader, int start_len, byte* packet[TS_PACKET_SIZE])
+int read_next_TS_packets(TS_reader_p tsreader, int start_len, byte* packet[TS_PACKET_SIZE])
 {
     ssize_t total = start_len;
     ssize_t length;
@@ -1350,7 +1329,7 @@ int read_next_TS_packet(TS_reader_p tsreader, byte** packet)
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int start_TS_packet_buffer(TS_reader_p tsreader)
+int start_TS_packet_buffer(TS_reader_p tsreader)
 {
     if (tsreader->pcrbuf == nullptr) {
         tsreader->pcrbuf = (TS_pcr_buffer_p)malloc(SIZEOF_TS_PCR_BUFFER);
@@ -1368,7 +1347,7 @@ static int start_TS_packet_buffer(TS_reader_p tsreader)
  *
  * Returns 0 if all went well, 1 if something went wrong, EOF if EOF was read.
  */
-static int fill_TS_packet_buffer(TS_reader_p tsreader)
+int fill_TS_packet_buffer(TS_reader_p tsreader)
 {
     int ii;
 
@@ -1849,11 +1828,12 @@ void report_payload(int show_data, int stream_type, byte payload[MAX_TS_PAYLOAD_
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int extract_prog_list_from_pat(int verbose, byte data[], int data_len, pidint_list_p* prog_list)
+int extract_prog_list_from_pat(
+    bool verbose, byte data[], size_t data_len, pidint_list_p* prog_list)
 {
     int table_id;
     int section_syntax_indicator, zero_bit, reserved1;
-    int section_length;
+    size_t section_length;
     int transport_stream_id;
     int version_number;
     int current_next_indicator;
@@ -2307,7 +2287,8 @@ too_short:
  *
  * If you want to interpret more descriptors then ITU-T J.94 is the standard
  */
-int print_descriptors(int is_msg, char* leader1, char* leader2, byte* desc_data, int desc_data_len)
+int print_descriptors(int is_msg, const std::string leader1, const std::string leader2,
+    byte* desc_data, int desc_data_len)
 {
     byte data_len = desc_data_len;
     byte* data = desc_data;
@@ -2325,10 +2306,12 @@ int print_descriptors(int is_msg, char* leader1, char* leader2, byte* desc_data,
             return 1; // Hmm - well, maybe
         }
 
-        if (leader1 != nullptr)
+        if (!leader1.empty()) {
             fprint_msg_or_err(is_msg, "%s", leader1);
-        if (leader2 != nullptr)
+        }
+        if (!leader2.empty()) {
             fprint_msg_or_err(is_msg, "%s", leader2);
+        }
 
         {
             int ii;
@@ -2524,11 +2507,13 @@ int print_descriptors(int is_msg, char* leader1, char* leader2, byte* desc_data,
                     if (ii == 0)
                         fprint_msg_or_err(is_msg, "Teletext: ");
                     else {
-                        if (leader1 != nullptr)
+                        if (!leader1.empty()) {
                             fprint_msg_or_err(is_msg, "%s", leader1);
-                        if (leader2 != nullptr)
+                        }
+                        if (!leader2.empty()) {
                             fprint_msg_or_err(is_msg, "%s", leader2);
-                        fprint_msg_or_err(is_msg, "          ");
+                        }
+                        fprint_msg_or_err(is_msg, (char*)"          ");
                     }
                     fprint_msg_or_err(is_msg, "language=");
                     for (jj = ii; jj < ii + 3; jj++) {
@@ -2579,22 +2564,28 @@ int print_descriptors(int is_msg, char* leader1, char* leader2, byte* desc_data,
                     lang[1] = data[ii + 1];
                     lang[2] = data[ii + 2];
                     lang[3] = 0;
-                    if (leader1 != nullptr)
+                    if (!leader1.empty()) {
                         fprint_msg_or_err(is_msg, "%s", leader1);
-                    if (leader2 != nullptr)
+                    }
+                    if (!leader2.empty()) {
                         fprint_msg_or_err(is_msg, "%s", leader2);
+                    }
                     fprint_msg_or_err(
                         is_msg, "  language='%s', subtitling_type=%u\n", lang, subtitling_type);
-                    if (leader1 != nullptr)
+                    if (!leader1.empty()) {
                         fprint_msg_or_err(is_msg, "%s", leader1);
-                    if (leader2 != nullptr)
+                    }
+                    if (!leader2.empty()) {
                         fprint_msg_or_err(is_msg, "%s", leader2);
+                    }
                     fprint_msg_or_err(
                         is_msg, "    (%s)\n", dvb_component_type3_str(subtitling_type));
-                    if (leader1 != nullptr)
+                    if (!leader1.empty()) {
                         fprint_msg_or_err(is_msg, "%s", leader1);
-                    if (leader2 != nullptr)
+                    }
+                    if (!leader2.empty()) {
                         fprint_msg_or_err(is_msg, "%s", leader2);
+                    }
                     fprint_msg_or_err(is_msg, "  composition_page_id=%u, ancillary_page_id=%u\n",
                         composition_page_id, ancillary_page_id);
                 }
@@ -2658,7 +2649,7 @@ int print_descriptors(int is_msg, char* leader1, char* leader2, byte* desc_data,
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int build_psi_data(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_len, uint32_t pid,
+int build_psi_data(bool verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_len, uint32_t pid,
     byte** data, int* data_len, int* data_used)
 {
     byte* packet_data;
@@ -2756,13 +2747,13 @@ int build_psi_data(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_l
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt)
+int extract_pmt(bool verbose, byte data[], size_t data_len, uint32_t pid, pmt_p* pmt)
 {
     int table_id;
     int section_syntax_indicator, zero_bit, reserved;
     uint16_t program_number;
     uint32_t pcr_pid;
-    int section_length;
+    size_t section_length;
     int version_number;
     int current_next_indicator;
     int section_number;
@@ -2885,7 +2876,7 @@ int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt
 
     if (verbose && program_info_length > 0) {
         print_msg("  Program info:\n");
-        print_descriptors(TRUE, "    ", nullptr, &data[12], program_info_length);
+        print_descriptors(TRUE, (char*)"    ", nullptr, &data[12], program_info_length);
     }
 
     // 32 bits at the end of a program association section is reserved for a CRC
@@ -2935,7 +2926,8 @@ int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt
             fprint_msg("    PID %04x -> Stream %02x %s\n", pid, stream_type,
                 h222_stream_type_str(stream_type));
             if (ES_info_length > 0)
-                print_descriptors(TRUE, "        ", nullptr, &stream_data[5], ES_info_length);
+                print_descriptors(
+                    TRUE, (char*)"        ", nullptr, &stream_data[5], ES_info_length);
         }
         err = add_stream_to_pmt(*pmt, pid, stream_type, ES_info_length, stream_data + 5);
         if (err) {
@@ -2964,15 +2956,15 @@ int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_len,
+int extract_stream_list_from_pmt(bool verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_len,
     uint32_t pid, int* program_number, uint32_t* pcr_pid, pidint_list_p* stream_list)
 {
     byte* data;
-    int data_len;
+    size_t data_len;
     int pointer;
     int table_id;
     int section_syntax_indicator, zero_bit, reserved;
-    int section_length;
+    size_t section_length;
     int version_number;
     int current_next_indicator;
     int section_number;
@@ -3017,7 +3009,7 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
         {
             if (verbose) {
                 fprint_msg("    'PMT' with PID %04x is user private table %02x\n", pid, table_id);
-                print_data(TRUE, "    Data", data, data_len, 20);
+                print_data(TRUE, (char*)"    Data", data, data_len, 20);
             }
         } else {
             if (0x03 <= table_id && table_id <= 0x3F)
@@ -3029,7 +3021,7 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
                     (table_id == 0x00
                             ? "PAT"
                             : table_id == 0x01 ? "CAT" : table_id == 0xFF ? "Forbidden" : "???"));
-            print_data(FALSE, "    Data", data, data_len, 20);
+            print_data(FALSE, (char*)"    Data", data, data_len, 20);
         }
         // Best we can do is to pretend it didn't happen
         *program_number = 0;
@@ -3104,7 +3096,7 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
 
     if (verbose && program_info_length > 0) {
         print_msg("  Program info:\n");
-        print_descriptors(TRUE, "    ", nullptr, &data[12], program_info_length);
+        print_descriptors(TRUE, (char*)"    ", nullptr, &data[12], program_info_length);
     }
 
     // 32 bits at the end of a program association section is reserved for a CRC
@@ -3150,7 +3142,8 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
 #undef SARRAYSIZE
             fprint_msg("    Stream %02x %-40s -> PID %04x\n", stream_type, buf, pid);
             if (ES_info_length > 0)
-                print_descriptors(TRUE, "        ", nullptr, &stream_data[5], ES_info_length);
+                print_descriptors(
+                    TRUE, (char*)"        ", nullptr, &stream_data[5], ES_info_length);
         }
         // For the moment, we shan't bother to remember the extra info.
         err = append_to_pidint_list(*stream_list, pid, stream_type);
@@ -3309,8 +3302,8 @@ int get_next_TS_packet(TS_reader_p tsreader, uint32_t* pid, int* payload_unit_st
  * Returns 0 if all went well, EOF if no PAT was found,
  * 1 if something else went wrong.
  */
-int find_pat(
-    TS_reader_p tsreader, int max, int verbose, int quiet, int* num_read, pidint_list_p* prog_list)
+int find_pat(TS_reader_p tsreader, int max, bool verbose, int quiet, int* num_read,
+    pidint_list_p* prog_list)
 {
     int err;
     byte* pat_data = nullptr;
@@ -3411,8 +3404,8 @@ int find_pat(
  * Returns 0 if all went well, EOF if no PMT was found,
  * 1 if something else went wrong.
  */
-int find_next_pmt(TS_reader_p tsreader, uint32_t pmt_pid, int program_number, int max, int verbose,
-    int quiet, int* num_read, pmt_p* pmt)
+int find_next_pmt(TS_reader_p tsreader, uint32_t pmt_pid, int program_number, int max,
+    bool verbose, int quiet, int* num_read, pmt_p* pmt)
 {
     int err;
     byte* pmt_data = nullptr;
@@ -3537,7 +3530,7 @@ int find_next_pmt(TS_reader_p tsreader, uint32_t pmt_pid, int program_number, in
  * no program stream), -2 if a PAT was found but it did not contain any
  * programs, 1 if something else went wrong.
  */
-int find_pmt(TS_reader_p tsreader, const int req_prog_no, int max, int verbose, int quiet,
+int find_pmt(TS_reader_p tsreader, const int req_prog_no, int max, bool verbose, int quiet,
     int* num_read, pmt_p* pmt)
 {
     int err;
@@ -3615,7 +3608,7 @@ int find_pmt(TS_reader_p tsreader, const int req_prog_no, int max, int verbose, 
     if (!quiet) {
         print_msg("\n");
         print_msg("Program map\n");
-        report_pmt(TRUE, "  ", *pmt);
+        report_pmt(TRUE, (char*)"  ", *pmt);
         print_msg("\n");
     }
     return 0;

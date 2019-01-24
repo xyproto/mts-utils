@@ -1,29 +1,6 @@
 /*
  * Convert a Program Stream to Transport Stream.
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 
 #include <cerrno>
@@ -32,6 +9,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
+#include <string>
 #include <unistd.h>
 
 #include "accessunit.h"
@@ -165,13 +143,13 @@ int main(int argc, char** argv)
     int use_stdout = FALSE;
     int use_tcpip = FALSE;
     int port = 88; // Useful default port number
-    char* input_name = NULL;
-    char* output_name = NULL;
+    char* input_name = nullptr;
+    char* output_name = nullptr;
     int had_input_name = FALSE;
     int had_output_name = FALSE;
-    PS_reader_p ps = NULL;
-    TS_writer_p output = NULL;
-    int verbose = FALSE;
+    PS_reader_p ps = nullptr;
+    TS_writer_p output = nullptr;
+    bool verbose = FALSE;
     int quiet = FALSE;
     int max = 0;
     uint32_t pmt_pid = 0x66;
@@ -212,7 +190,7 @@ int main(int argc, char** argv)
                 force_stream_type = TRUE;
                 video_type = VIDEO_H262;
             } else if (!strcmp("-vtype", argv[ii])) {
-                CHECKARG("ps2ts", ii);
+                MustARG("ps2ts", ii, argc, argv);
                 err = int_value("ps2ts", argv[ii], argv[ii + 1], TRUE, 0, &video_type);
                 if (err)
                     return 1;
@@ -222,7 +200,7 @@ int main(int argc, char** argv)
                 force_stream_type = TRUE;
                 video_type = VIDEO_MPEG4_PART2;
             } else if (!strcmp("-dolby", argv[ii])) {
-                CHECKARG("ps2ts", ii);
+                MustARG("ps2ts", ii, argc, argv);
                 if (!strcmp("dvb", argv[ii + 1]))
                     want_dolby_as_dvb = TRUE;
                 else if (!strcmp("atsc", argv[ii + 1]))
@@ -240,7 +218,7 @@ int main(int argc, char** argv)
                 use_stdout = TRUE;
                 redirect_output_stderr();
             } else if (!strcmp("-err", argv[ii])) {
-                CHECKARG("ps2ts", ii);
+                MustARG("ps2ts", ii, argc, argv);
                 if (!strcmp(argv[ii + 1], "stderr"))
                     redirect_output_stderr();
                 else if (!strcmp(argv[ii + 1], "stdout"))
@@ -258,7 +236,7 @@ int main(int argc, char** argv)
             } else if (!strcmp("-notdvd", argv[ii]) || !strcmp("-nodvd", argv[ii])) {
                 input_is_dvd = FALSE;
             } else if (!strcmp("-host", argv[ii])) {
-                CHECKARG("ps2ts", ii);
+                MustARG("ps2ts", ii, argc, argv);
                 err = host_value("ps2ts", argv[ii], argv[ii + 1], &output_name, &port);
                 if (err)
                     return 1;
@@ -272,37 +250,37 @@ int main(int argc, char** argv)
                 verbose = FALSE;
                 quiet = TRUE;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
-                CHECKARG("ps2ts", ii);
+                MustARG("ps2ts", ii, argc, argv);
                 err = int_value("ps2ts", argv[ii], argv[ii + 1], TRUE, 10, &max);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-prepeat", argv[ii])) {
-                CHECKARG("ps2ts", ii);
+                MustARG("ps2ts", ii, argc, argv);
                 err = int_value("ps2ts", argv[ii], argv[ii + 1], TRUE, 10, &repeat_program_every);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-pad", argv[ii])) {
-                CHECKARG("ps2ts", ii);
+                MustARG("ps2ts", ii, argc, argv);
                 err = int_value("ps2ts", argv[ii], argv[ii + 1], TRUE, 10, &pad_start);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-vpid", argv[ii])) {
-                CHECKARG("ps2ts", ii);
+                MustARG("ps2ts", ii, argc, argv);
                 err = unsigned_value("ps2ts", argv[ii], argv[ii + 1], 0, &video_pid);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-apid", argv[ii])) {
-                CHECKARG("ps2ts", ii);
+                MustARG("ps2ts", ii, argc, argv);
                 err = unsigned_value("ps2ts", argv[ii], argv[ii + 1], 0, &audio_pid);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-pmt", argv[ii])) {
-                CHECKARG("ps2ts", ii);
+                MustARG("ps2ts", ii, argc, argv);
                 err = unsigned_value("ps2ts", argv[ii], argv[ii + 1], 0, &pmt_pid);
                 if (err)
                     return 1;
@@ -310,14 +288,14 @@ int main(int argc, char** argv)
             } else if (!strcmp("-noaudio", argv[ii])) {
                 keep_audio = FALSE;
             } else if (!strcmp("-vstream", argv[ii])) {
-                CHECKARG("ps2ts", ii);
+                MustARG("ps2ts", ii, argc, argv);
                 err = int_value_in_range(
                     "ps2ts", argv[ii], argv[ii + 1], 0, 0xF, 0, &video_stream);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-astream", argv[ii])) {
-                CHECKARG("ps2ts", ii);
+                MustARG("ps2ts", ii, argc, argv);
                 err = int_value_in_range(
                     "ps2ts", argv[ii], argv[ii + 1], 0, 0x1F, 0, &audio_stream);
                 if (err)
@@ -325,7 +303,7 @@ int main(int argc, char** argv)
                 want_ac3_audio = FALSE;
                 ii++;
             } else if (!strcmp("-ac3stream", argv[ii])) {
-                CHECKARG("ps2ts", ii);
+                MustARG("ps2ts", ii, argc, argv);
                 err = int_value_in_range(
                     "ps2ts", argv[ii], argv[ii + 1], 0, 0x7, 0, &audio_stream);
                 if (err)
@@ -422,11 +400,11 @@ int main(int argc, char** argv)
     }
 
     if (use_stdout)
-        err = tswrite_open(TS_W_STDOUT, NULL, NULL, 0, quiet, &output);
+        err = tswrite_open(TS_W_STDOUT, nullptr, nullptr, 0, quiet, &output);
     else if (use_tcpip)
-        err = tswrite_open(TS_W_TCP, output_name, NULL, port, quiet, &output);
+        err = tswrite_open(TS_W_TCP, output_name, nullptr, port, quiet, &output);
     else
-        err = tswrite_open(TS_W_FILE, output_name, NULL, 0, quiet, &output);
+        err = tswrite_open(TS_W_FILE, output_name, nullptr, 0, quiet, &output);
     if (err) {
         fprint_err("### ps2ts: Unable to open %s\n", output_name);
         (void)close_PS_file(&ps);
@@ -447,8 +425,8 @@ int main(int argc, char** argv)
     err = tswrite_close(output, quiet);
     if (err)
         fprint_err("### ps2ts: Error closing output %s: %s\n", output_name, strerror(errno));
-    err = close_PS_file(&ps);
-    if (err)
+    if (err = close_PS_file(&ps); err) {
         fprint_err("### ps2ts: Error closing input %s\n", (use_stdin ? "<stdin>" : input_name));
+    }
     return 0;
 }

@@ -1,33 +1,9 @@
+#pragma once
+
 /*
  * Prototypes for reading AVS elementary streams.
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
-
-#ifndef _avs_fns
-#define _avs_fns
 
 #include "avs_defns.h"
 
@@ -110,7 +86,7 @@ void free_avs_frame(avs_frame_p* frame);
  * Returns 0 if it succeeds, EOF if we reach the end of file, or 1 if some
  * error occurs.
  */
-int get_next_avs_frame(avs_context_p context, int verbose, int quiet, avs_frame_p* frame);
+int get_next_avs_frame(avs_context_p context, bool verbose, int quiet, avs_frame_p* frame);
 /*
  * Write out an AVS frame as TS
  *
@@ -169,12 +145,3 @@ int write_avs_frame_as_ES(FILE* output, avs_frame_p frame);
  * - if `report_data`, then the component ES units will be printed out as well
  */
 void report_avs_frame(avs_frame_p frame, int report_data);
-
-#endif // _avs_fns
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

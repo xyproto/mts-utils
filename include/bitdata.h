@@ -6,34 +6,13 @@
  *
  * See H.264 clause 10.
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 
 #include <cassert>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <string>
 
 #include "bitdata_fns.h"
 #include "compat.h"
@@ -49,7 +28,7 @@ static int MASK[] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_bitdata(bitdata_p* bitdata, byte data[], int data_len)
+int build_bitdata(bitdata_p* bitdata, byte data[], size_t data_len)
 {
     bitdata_p new2 = (bitdata_p)malloc(SIZEOF_BITDATA);
     if (new2 == nullptr) {

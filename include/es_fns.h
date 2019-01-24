@@ -1,33 +1,11 @@
+#pragma once
+
 /*
  * Prototypes for handling H.264 elementary streams.
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 
-#ifndef _es_fns
-#define _es_fns
+#include <string>
 
 #include "es_defns.h"
 
@@ -49,7 +27,7 @@
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-int open_elementary_stream(char* filename, ES_p* es);
+int open_elementary_stream(const std::string filename, ES_p* es);
 
 /*
  * Build an elementary stream datastructure attached to an input file.
@@ -318,7 +296,7 @@ void free_ES_unit_list(ES_unit_list_p* list);
  * - `name` is the name of the list (used in the header)
  * - `list` is the list to report on
  */
-void report_ES_unit_list(char* name, ES_unit_list_p list);
+void report_ES_unit_list(const std::string name, ES_unit_list_p list);
 
 /*
  * Retrieve the bounds of this ES unit list in the file it was read from.
@@ -391,11 +369,3 @@ int decide_ES_video_type(ES_p es, int print_dots, int show_reasoning, int* video
  * Returns 0 if all goes well, 1 if something goes wrong
  */
 int decide_ES_file_video_type(int input, int print_dots, int show_reasoning, int* video_type);
-#endif // _es_fns
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

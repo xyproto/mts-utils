@@ -4,10 +4,12 @@
  *
  */
 
+#include <cmath>
+#include <cstring>
+#include <string>
+
 #include "ethernet.h"
 #include "misc_fns.h"
-
-#include <cstring>
 
 int ethernet_packet_from_pcap(pcaprec_hdr_t* hdr, const uint8_t* data, const uint32_t len,
     ethernet_packet_t* pkt, uint32_t* out_st, uint32_t* out_len)

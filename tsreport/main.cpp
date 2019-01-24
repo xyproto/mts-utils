@@ -1,29 +1,6 @@
 /*
  * Report on an H.222 transport stream (TS) file.
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 
 #include <cerrno>
@@ -157,7 +134,7 @@ static void avg_rate_add(avg_rate_t* ar, uint64_t time, uint64_t bytes)
     uint64_t delta_t;
     uint64_t rate;
 
-    if (ar->els == NULL) {
+    if (ar->els == nullptr) {
         ar->max_els = 1024;
         ar->els = (avg_rate_el_t*)calloc(ar->max_els, sizeof(ar->els[0]));
     }
@@ -188,13 +165,13 @@ static void avg_rate_add(avg_rate_t* ar, uint64_t time, uint64_t bytes)
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, int max,
-    int verbose, int quiet, char* output_name, uint32_t continuity_cnt_pid, uint64_t report_mask)
+    bool verbose, int quiet, char* output_name, uint32_t continuity_cnt_pid, uint64_t report_mask)
 {
-    pmt_p pmt = NULL;
+    pmt_p pmt = nullptr;
     int err;
-    FILE* file = NULL;
+    FILE* file = nullptr;
     int num_streams = 0;
-    FILE* file_cnt = NULL;
+    FILE* file_cnt = nullptr;
 
     // Define an arbitrary maximum number of streams we support
     // -- this is simpler than coping with changing the array sizes
@@ -254,7 +231,7 @@ static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, i
 
     if (output_name) {
         file = fopen(output_name, "w");
-        if (file == NULL) {
+        if (file == nullptr) {
             fprint_err("### tsreport: Unable to open file %s: %s\n", output_name, strerror(errno));
             return 1;
         }
@@ -299,7 +276,7 @@ static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, i
 
     if (continuity_cnt_pid != INVALID_PID) {
         file_cnt = fopen("continuity_counter.txt", "w");
-        if (file_cnt == NULL) {
+        if (file_cnt == nullptr) {
             print_err("### tsreport: Unable to open file continuity_counter.txt\n");
             return 1;
         }
@@ -427,7 +404,7 @@ static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, i
         if (index != -1) {
             // Do continuity counter checking
             const int cc = packet[3] & 15;
-            const int is_discontinuity = (adapt != NULL && (adapt[0] & 0x80) != 0);
+            const int is_discontinuity = (adapt != nullptr && (adapt[0] & 0x80) != 0);
             struct stream_data* const ss = stats + index;
 
             // Log if required
@@ -809,21 +786,21 @@ static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, i
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int report_ts(TS_reader_p tsreader, int max, int verbose, int show_data, int report_timing)
+static int report_ts(TS_reader_p tsreader, int max, bool verbose, int show_data, int report_timing)
 {
     struct timing times = { 0 };
-    pidint_list_p prog_list = NULL;
-    pmt_p pmt = NULL;
+    pidint_list_p prog_list = nullptr;
+    pmt_p pmt = nullptr;
     int err;
     int count = 0;
-    timing_p time_ptr = NULL;
+    timing_p time_ptr = nullptr;
 
-    byte* pat_data = NULL;
+    byte* pat_data = nullptr;
     int pat_data_len = 0;
     int pat_data_used = 0;
 
     uint32_t unfinished_pmt_pid = 0;
-    byte* pmt_data = NULL;
+    byte* pmt_data = nullptr;
     int pmt_data_len = 0;
     int pmt_data_used = 0;
 
@@ -875,8 +852,8 @@ static int report_ts(TS_reader_p tsreader, int max, int verbose, int show_data, 
                 print_msg(" PMT\n");
             else if (pid_in_pmt(pmt, pid)) {
                 pmt_stream_p stream = pid_stream_in_pmt(pmt, pid);
-                if (stream == NULL) {
-                    fprint_err("### Internal error: stream for PID %0x returned NULL"
+                if (stream == nullptr) {
+                    fprint_err("### Internal error: stream for PID %0x returned nullptr"
                                " in PMT\n",
                         pid);
                     report_pmt(FALSE, "    ", pmt);
@@ -910,7 +887,7 @@ static int report_ts(TS_reader_p tsreader, int max, int verbose, int show_data, 
             if (payload_unit_start_indicator && pat_data) {
                 // Lose any data we started but didn't complete
                 free(pat_data);
-                pat_data = NULL;
+                pat_data = nullptr;
                 pat_data_len = 0;
                 pat_data_used = 0;
             } else if (!payload_unit_start_indicator && !pat_data) {
@@ -952,7 +929,7 @@ static int report_ts(TS_reader_p tsreader, int max, int verbose, int show_data, 
 
             if (pat_data)
                 free(pat_data);
-            pat_data = NULL;
+            pat_data = nullptr;
             pat_data_len = 0;
             pat_data_used = 0;
         } else if (pid_in_pidint_list(prog_list, pid)) {
@@ -980,7 +957,7 @@ static int report_ts(TS_reader_p tsreader, int max, int verbose, int show_data, 
             if (payload_unit_start_indicator && pmt_data) {
                 // Lose any data we started but didn't complete
                 free(pmt_data);
-                pmt_data = NULL;
+                pmt_data = nullptr;
                 pmt_data_len = 0;
                 pmt_data_used = 0;
             } else if (!payload_unit_start_indicator && !pmt_data) {
@@ -1029,7 +1006,7 @@ static int report_ts(TS_reader_p tsreader, int max, int verbose, int show_data, 
 
             if (pmt_data)
                 free(pmt_data);
-            pmt_data = NULL;
+            pmt_data = nullptr;
             pmt_data_len = 0;
             pmt_data_used = 0;
 #if 0
@@ -1040,7 +1017,7 @@ static int report_ts(TS_reader_p tsreader, int max, int verbose, int show_data, 
         } else if (verbose) {
             pmt_stream_p stream = pid_stream_in_pmt(pmt, pid);
             int stream_type;
-            if (stream == NULL)
+            if (stream == nullptr)
                 stream_type = -1;
             else
                 stream_type = stream->stream_type;
@@ -1188,18 +1165,18 @@ static void print_usage()
 int main(int argc, char** argv)
 {
     int use_stdin = FALSE;
-    char* input_name = NULL;
+    char* input_name = nullptr;
     int had_input_name = FALSE;
 
-    TS_reader_p tsreader = NULL;
+    TS_reader_p tsreader = nullptr;
 
     int max = 0; // The maximum number of TS packets to read (or 0)
-    int verbose = FALSE; // True => output diagnostic/progress messages
+    bool verbose = FALSE; // True => output diagnostic/progress messages
     int quiet = FALSE;
     int report_timing = FALSE;
     int report_buffering = FALSE;
     int show_data = FALSE;
-    char* output_name = NULL;
+    char* output_name = nullptr;
     uint32_t continuity_cnt_pid = INVALID_PID;
     int req_prog_no = 1;
 
@@ -1226,7 +1203,7 @@ int main(int argc, char** argv)
                 verbose = TRUE;
                 quiet = FALSE;
             } else if (!strcmp("-err", argv[ii])) {
-                CHECKARG("tsreport", ii);
+                MustARG("tsreport", ii, argc, argv);
                 if (!strcmp(argv[ii + 1], "stderr"))
                     redirect_output_stderr();
                 else if (!strcmp(argv[ii + 1], "stdout"))
@@ -1246,11 +1223,11 @@ int main(int argc, char** argv)
                 report_buffering = TRUE;
                 quiet = FALSE;
             } else if (!strcmp("-o", argv[ii])) {
-                CHECKARG("tsreport", ii);
+                MustARG("tsreport", ii, argc, argv);
                 output_name = argv[ii + 1];
                 ii++;
             } else if (!strcmp("-cnt", argv[ii])) {
-                CHECKARG("tsreport", ii);
+                MustARG("tsreport", ii, argc, argv);
                 err = unsigned_value("tsreport", argv[ii], argv[ii + 1], 10, &continuity_cnt_pid);
                 if (err)
                     return 1;
@@ -1265,21 +1242,21 @@ int main(int argc, char** argv)
             } else if (!strcmp("-32", argv[ii])) {
                 report_mask = 0xFFFFFFFF; // i.e., bottom 32 bits only
             } else if (!strcmp("-tfmt", argv[ii])) {
-                CHECKARG("tsreport", ii);
+                MustARG("tsreport", ii, argc, argv);
                 if ((tfmt_diff = fmtx_str_to_timestamp_flags(argv[ii + 1])) < 0) {
                     fprint_msg("### tsreport: Bad timestamp format '%s'\n", argv[ii + 1]);
                     return 1;
                 }
                 ii++;
             } else if (!strcmp("-tafmt", argv[ii])) {
-                CHECKARG("tsreport", ii);
+                MustARG("tsreport", ii, argc, argv);
                 if ((tfmt_abs = fmtx_str_to_timestamp_flags(argv[ii + 1])) < 0) {
                     fprint_msg("### tsreport: Bad timestamp format '%s'\n", argv[ii + 1]);
                     return 1;
                 }
                 ii++;
             } else if (!strcmp("-justpid", argv[ii])) {
-                CHECKARG("tsreport", ii);
+                MustARG("tsreport", ii, argc, argv);
                 err = unsigned_value("tsreport", argv[ii], argv[ii + 1], 0, &just_pid);
                 if (err)
                     return 1;
@@ -1289,7 +1266,7 @@ int main(int argc, char** argv)
                 verbose = FALSE;
                 quiet = TRUE;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
-                CHECKARG("tsreport", ii);
+                MustARG("tsreport", ii, argc, argv);
                 err = int_value("tsreport", argv[ii], argv[ii + 1], TRUE, 10, &max);
                 if (err)
                     return 1;
@@ -1298,7 +1275,7 @@ int main(int argc, char** argv)
                 use_stdin = TRUE;
                 had_input_name = TRUE; // so to speak
             } else if (!strcmp("-prog", argv[ii])) {
-                CHECKARG("tsreport", ii);
+                MustARG("tsreport", ii, argc, argv);
                 err = int_value("tsreport", argv[ii], argv[ii + 1], TRUE, 10, &req_prog_no);
                 if (err)
                     return 1;
@@ -1326,7 +1303,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    err = open_file_for_TS_read((use_stdin ? NULL : input_name), &tsreader);
+    err = open_file_for_TS_read((use_stdin ? nullptr : input_name), &tsreader);
     if (err) {
         fprint_err("### tsreport: Unable to open input file %s for reading TS\n",
             use_stdin ? "<stdin>" : input_name);

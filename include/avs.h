@@ -9,35 +9,14 @@
  * XXX h262.c.
  * XXX And, also, reversing is not yet supported for AVS, anyway.
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 
 #include <cerrno>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <string>
 
 #include "avs_fns.h"
 #include "compat.h"
@@ -343,7 +322,7 @@ static void _show_item(ES_unit_p unit)
  * Returns 0 if it succeeds, EOF if we reach the end of file, or 1 if some
  * error occurs.
  */
-static int get_next_avs_single_frame(avs_context_p context, int verbose, avs_frame_p* frame)
+static int get_next_avs_single_frame(avs_context_p context, bool verbose, avs_frame_p* frame)
 {
     int err = 0;
 
@@ -508,7 +487,7 @@ static int get_next_avs_single_frame(avs_context_p context, int verbose, avs_fra
  * Returns 0 if it succeeds, EOF if we reach the end of file, or 1 if some
  * error occurs.
  */
-int get_next_avs_frame(avs_context_p context, int verbose, int quiet, avs_frame_p* frame)
+int get_next_avs_frame(avs_context_p context, bool verbose, int quiet, avs_frame_p* frame)
 {
     int err;
 

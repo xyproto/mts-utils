@@ -1,7 +1,7 @@
 /*
  * A simple test for the NAL unit lists from nalunit.c
  *
-  */
+ */
 
 #include <cerrno>
 #include <cmath>
@@ -32,8 +32,8 @@ int main(int argc, char** argv)
 {
     int err, ii;
     int max = NAL_UNIT_LIST_START_SIZE + NAL_UNIT_LIST_INCREMENT + 3;
-    nal_unit_list_p list = NULL;
-    nal_unit_p unit = NULL;
+    nal_unit_list_p list = nullptr;
+    nal_unit_p unit = nullptr;
 
     printf("NAL unit lists are now handled as NAL unit lists, so...\n");
     printf("Testing NAL unit list\n");
@@ -73,8 +73,8 @@ int main(int argc, char** argv)
         printf("Test failed - list length is %d, not 0\n", list->length);
         return 1;
     }
-    if (list->array[0] != NULL) {
-        printf("Test failed - list->array[0] is %p, not NULL\n", list->array[0]);
+    if (list->array[0] != nullptr) {
+        printf("Test failed - list->array[0] is %p, not nullptr\n", list->array[0]);
         return 1;
     }
 

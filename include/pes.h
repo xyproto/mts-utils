@@ -3,29 +3,6 @@
 /*
  * PES reading facilities
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 
 #include <cerrno>
@@ -143,7 +120,7 @@ static inline int extend_PES_packet_data(PES_packet_data_p data, byte bytes[], i
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-static inline int build_dummy_PES_packet_data(PES_packet_data_p* data, int data_len)
+static inline int build_dummy_PES_packet_data(PES_packet_data_p* data, size_t data_len)
 {
     int err;
     static PES_packet_data_p local_data = nullptr;
@@ -694,11 +671,11 @@ static int refine_TS_program_info(PES_reader_p reader, pmt_p pmt)
 #if DEBUG_PROGRAM_INFO
         if (reader->give_info) {
             fprint_msg("PMT packet at " OFFSET_T_FORMAT ": first PMT, used as-is\n", reader->posn);
-            report_pmt(TRUE, "    ", reader->program_map);
+            report_pmt(TRUE, (char*)"    ", reader->program_map);
         }
 #else
         if (reader->give_info)
-            report_pmt(TRUE, "    ", reader->program_map);
+            report_pmt(TRUE, (char*)"    ", reader->program_map);
 #endif
         // And use its information to determine our video/audio PIDs
         decide_pids(reader);
@@ -1705,7 +1682,7 @@ int build_PES_reader(int input, int is_TS, int give_info, int give_warnings,
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int open_PES_reader_for_TS(char* filename, uint16_t program_number, int give_info,
+int open_PES_reader_for_TS(const std::string filename, uint16_t program_number, int give_info,
     int give_warnings, PES_reader_p* reader)
 {
     int err;
@@ -1735,7 +1712,8 @@ int open_PES_reader_for_TS(char* filename, uint16_t program_number, int give_inf
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int open_PES_reader_for_PS(char* filename, int give_info, int give_warnings, PES_reader_p* reader)
+int open_PES_reader_for_PS(
+    const std::string filename, int give_info, int give_warnings, PES_reader_p* reader)
 {
     int input = open_binary_file(filename, FALSE);
     if (input == -1) {
@@ -1784,7 +1762,8 @@ int open_PES_reader_for_PS(char* filename, int give_info, int give_warnings, PES
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int open_PES_reader(char* filename, int give_info, int give_warnings, PES_reader_p* reader)
+int open_PES_reader(
+    const std::string filename, int give_info, int give_warnings, PES_reader_p* reader)
 {
     int err;
     int input;
@@ -2187,7 +2166,7 @@ int read_next_PES_packet(PES_reader_p reader)
  * Returns the required offset (i.e., packet[offset] is the first byte
  * of the ES data within the PES packet).
  */
-int calc_mpeg1_pes_offset(byte* data, int data_len)
+int calc_mpeg1_pes_offset(byte* data, size_t data_len)
 {
     int posn = 6;
 
@@ -2349,7 +2328,7 @@ int decode_pts_dts(byte data[], int required_guard, uint64_t* value)
 {
     uint64_t pts1, pts2, pts3;
     int marker;
-    char* what;
+    auto what = ""s;
     int guard = (data[0] & 0xF0) >> 4;
 
     // Rather than try to use casts to make the arithmetic come out right on both
@@ -2363,42 +2342,42 @@ int decode_pts_dts(byte data[], int required_guard, uint64_t* value)
 
     switch (required_guard) {
     case 2:
-        what = "PTS";
+        what = "PTS"s;
         break; // standalone
     case 3:
-        what = "PTS";
+        what = "PTS"s;
         break; // before a DTS
     case 1:
-        what = "DTS";
+        what = "DTS"s;
         break; // always after a PTS
     default:
-        what = "PTS/DTS";
+        what = "PTS/DTS"s;
         break; // surely some mistake?
     }
 
     if (guard != required_guard) {
-        fprint_err(
-            "!!! Guard bits at start of %s data are %x, not %x\n", what, guard, required_guard);
+        fprint_err("!!! Guard bits at start of %s data are %x, not %x\n", what.c_str(), guard,
+            required_guard);
     }
 
     pts1 = (data0 & 0x0E) >> 1;
     marker = data0 & 0x01;
     if (marker != 1) {
-        fprint_err("### First %s marker is not 1", what);
+        fprint_err("### First %s marker is not 1", what.c_str());
         return 1;
     }
 
     pts2 = (data1 << 7) | ((data2 & 0xFE) >> 1);
     marker = data2 & 0x01;
     if (marker != 1) {
-        fprint_err("### Second %s marker is not 1", what);
+        fprint_err("### Second %s marker is not 1", what.c_str());
         return 1;
     }
 
     pts3 = (data3 << 7) | ((data4 & 0xFE) >> 1);
     marker = data4 & 0x01;
     if (marker != 1) {
-        fprint_err("### Third %s marker is not 1", what);
+        fprint_err("### Third %s marker is not 1", what.c_str());
         return 1;
     }
 
@@ -2421,27 +2400,27 @@ void encode_pts_dts(byte data[], int guard_bits, uint64_t value)
 #define MAX_PTS_VALUE 0x1FFFFFFFFLL
 
     if (value > MAX_PTS_VALUE) {
-        char* what;
+        auto what = ""s;
         uint64_t temp = value;
         while (temp > MAX_PTS_VALUE)
             temp -= MAX_PTS_VALUE;
         switch (guard_bits) {
         case 2:
-            what = "PTS alone";
+            what = "PTS alone"s;
             break;
         case 3:
-            what = "PTS before DTS";
+            what = "PTS before DTS"s;
             break;
         case 1:
-            what = "DTS after PTS";
+            what = "DTS after PTS"s;
             break;
         default:
-            what = "PTS/DTS/???";
+            what = "PTS/DTS/???"s;
             break;
         }
         fprint_err("!!! value " LLU_FORMAT " for %s is more than " LLU_FORMAT
                    " - reduced to " LLU_FORMAT "\n",
-            value, what, MAX_PTS_VALUE, temp);
+            value, what.c_str(), MAX_PTS_VALUE, temp);
         value = temp;
     }
 
@@ -2543,7 +2522,7 @@ int PES_packet_has_PTS(PES_packet_data_p packet)
  *
  * Returns 0 if all went well, 1 if an error occurs.
  */
-int report_PES_data_array(char* prefix, byte* data, int data_len, int show_data)
+int report_PES_data_array(const std::string prefix, byte* data, size_t data_len, int show_data)
 {
     // This code was originally translated from the Python code in TS.py
 
@@ -2589,7 +2568,7 @@ int report_PES_data_array(char* prefix, byte* data, int data_len, int show_data)
     case STREAM_ID_DSMCC_STREAM:
     case STREAM_ID_H222_E_STREAM:
         print_msg("\n    Just data bytes\n");
-        print_data(TRUE, "    ", bytes, packet_length, 20);
+        print_data(TRUE, (char*)"    ", bytes, packet_length, 20);
         return 0; // Just data bytes
     case STREAM_ID_PADDING_STREAM:
         print_msg("\n");
@@ -2674,9 +2653,10 @@ int report_PES_data_array(char* prefix, byte* data, int data_len, int show_data)
 
         if (show_data) {
             bytes += 3 + PES_header_data_length;
-            if (prefix && strlen(prefix) > 0)
+            if (!prefix.empty()) {
                 fprint_msg("%s", prefix);
-            print_data(TRUE, "    ", bytes, packet_length - 3 - PES_header_data_length, 20);
+            }
+            print_data(TRUE, (char*)"    ", bytes, packet_length - 3 - PES_header_data_length, 20);
         }
     } else {
         // We assume it's MPEG-1
@@ -2727,9 +2707,10 @@ int report_PES_data_array(char* prefix, byte* data, int data_len, int show_data)
 
             if (show_data) {
                 bytes += posn;
-                if (prefix && strlen(prefix) > 0)
+                if (!prefix.empty()) {
                     fprint_msg("%s", prefix);
-                print_data(TRUE, "    ", bytes, packet_length - posn, 20);
+                }
+                print_data(TRUE, (char*)"    ", bytes, packet_length - posn, 20);
             }
         }
     }
@@ -2761,7 +2742,7 @@ void report_PES_data_array2(int stream_type, byte* payload, int payload_len, int
     uint64_t pts, dts;
     int PES_packet_length;
     byte* data = nullptr;
-    int data_len = 0;
+    size_t data_len = 0;
     byte stream_id;
 
     if (payload_len == 0) {
@@ -2792,7 +2773,7 @@ void report_PES_data_array2(int stream_type, byte* payload, int payload_len, int
         case STREAM_ID_DSMCC_STREAM:
         case STREAM_ID_H222_E_STREAM:
             print_msg("    Just data bytes\n");
-            print_data(TRUE, "    Data", payload + 6, payload_len - 6, 1000);
+            print_data(TRUE, (char*)"    Data", payload + 6, payload_len - 6, 1000);
             return; // Just data bytes
         case STREAM_ID_PADDING_STREAM:
             print_msg("    Padding stream\n");
@@ -2931,7 +2912,7 @@ void report_PES_data_array2(int stream_type, byte* payload, int payload_len, int
         }
     }
     if (show_data_len)
-        print_data(TRUE, "    Data", data, data_len, show_data_len);
+        print_data(TRUE, (char*)"    Data", data, data_len, show_data_len);
 }
 
 /*

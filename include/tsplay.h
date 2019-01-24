@@ -5,29 +5,6 @@
  *
  * It is abstracted here so that it can be used in other contexts.
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 
 #include <cerrno>
@@ -35,10 +12,10 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <fcntl.h>
+#include <string>
 #include <unistd.h>
-
-#include <ctime> // Sleeping and timing
 
 #include "compat.h"
 #include "misc_fns.h"
@@ -312,7 +289,7 @@ static int find_PCR_PID(TS_reader_p tsreader, TS_writer_p tswriter, uint32_t* pc
             }
 
             if (!quiet)
-                report_pmt(TRUE, "  ", pmt);
+                report_pmt(TRUE, (char*)"  ", pmt);
             *pcr_pid = pmt->PCR_pid;
             free_pmt(&pmt);
             if (!quiet)
@@ -360,7 +337,7 @@ static int find_PCR_PID(TS_reader_p tsreader, TS_writer_p tswriter, uint32_t* pc
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int play_buffered_TS_packets(TS_reader_p tsreader, TS_writer_p tswriter,
-    uint32_t pid_to_ignore, uint32_t override_pcr_pid, int max, int loop, int quiet, int verbose)
+    uint32_t pid_to_ignore, uint32_t override_pcr_pid, int max, int loop, int quiet, bool verbose)
 {
     int err;
     int total = 0;
@@ -464,7 +441,7 @@ static int play_buffered_TS_packets(TS_reader_p tsreader, TS_writer_p tswriter,
  */
 static int play_TS_packets(TS_reader_p tsreader, TS_writer_p tswriter,
     const tsplay_output_pace_mode pace_mode, uint32_t pid_to_ignore, int max, int loop, int quiet,
-    int verbose)
+    bool verbose)
 {
     int err;
     int total = 0;
@@ -596,7 +573,7 @@ static int play_TS_packets(TS_reader_p tsreader, TS_writer_p tswriter,
  * Returns 0 if all went well, 1 if something went wrong.
  */
 int play_TS_stream(int input, TS_writer_p tswriter, const tsplay_output_pace_mode pace_mode,
-    uint32_t pid_to_ignore, uint32_t override_pcr_pid, int max, int loop, int quiet, int verbose)
+    uint32_t pid_to_ignore, uint32_t override_pcr_pid, int max, int loop, int quiet, bool verbose)
 {
     int err;
     TS_reader_p tsreader;
@@ -667,7 +644,7 @@ int play_TS_stream(int input, TS_writer_p tswriter, const tsplay_output_pace_mod
 int play_PS_stream(int input, TS_writer_p output, int pad_start, int program_repeat,
     int force_stream_type, int want_h262, int input_is_dvd, int video_stream, int audio_stream,
     int want_ac3_audio, int want_dolby_as_dvb, uint32_t pmt_pid, uint32_t pcr_pid,
-    uint32_t video_pid, int keep_audio, uint32_t audio_pid, int max, int loop, int verbose,
+    uint32_t video_pid, int keep_audio, uint32_t audio_pid, int max, int loop, bool verbose,
     int quiet)
 {
     int err;

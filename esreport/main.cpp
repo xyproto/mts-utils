@@ -47,7 +47,7 @@
  * - if `quiet` is true, then only errors will be reported
  * - if `count_sizes` is true, then a summary of frame sizes will be kept
  */
-static void report_avs_frames(ES_p es, int max, int verbose, int quiet, int count_sizes)
+static void report_avs_frames(ES_p es, int max, bool verbose, int quiet, int count_sizes)
 {
     int err;
     int count = 0;
@@ -193,7 +193,7 @@ static void report_avs_frames(ES_p es, int max, int verbose, int quiet, int coun
  * - if `verbose` is true, then extra information will be output
  * - if `quiet` is true, then only errors will be reported
  */
-static void report_ES_units(ES_p es, int max, int verbose, int quiet)
+static void report_ES_units(ES_p es, int max, bool verbose, int quiet)
 {
     int err;
     int count = 0;
@@ -232,7 +232,7 @@ static void report_ES_units(ES_p es, int max, int verbose, int quiet)
  * - if `verbose` is true, then extra information will be output
  * - if `quiet` is true, then only errors will be reported
  */
-static void find_h262_fields(ES_p es, int max, int verbose)
+static void find_h262_fields(ES_p es, int max, bool verbose)
 {
     int err;
     int count = 0;
@@ -297,7 +297,7 @@ static void find_h262_fields(ES_p es, int max, int verbose)
  * - if `quiet` is true, then only errors will be reported
  * - if `count_sizes` is true, then a summary of frame sizes will be kept
  */
-static void report_h262_frames(ES_p es, int max, int verbose, int quiet, int count_sizes)
+static void report_h262_frames(ES_p es, int max, bool verbose, int quiet, int count_sizes)
 {
     int err;
     int count = 0;
@@ -443,7 +443,7 @@ static void report_h262_frames(ES_p es, int max, int verbose, int quiet, int cou
  * - if `verbose` is true, then extra information will be output
  * - if `quiet` is true, then only errors will be reported
  */
-static void report_h262_afds(ES_p es, int max, int verbose, int quiet)
+static void report_h262_afds(ES_p es, int max, bool verbose, int quiet)
 {
     int err;
     int frames = 0;
@@ -509,7 +509,7 @@ static void report_h262_afds(ES_p es, int max, int verbose, int quiet)
  * - if `verbose` is true, then extra information will be output
  * - if `quiet` is true, then only errors will be reported
  */
-static void report_h262_items(ES_p es, int max, int verbose, int quiet)
+static void report_h262_items(ES_p es, int max, bool verbose, int quiet)
 {
     int err;
     int count = 0;
@@ -545,7 +545,7 @@ static void report_by_nal_unit(ES_p es, int max, int quiet, int show_nal_details
 {
     int err = 0;
 
-    nal_unit_context_p context = NULL;
+    nal_unit_context_p context = nullptr;
 
     int ref_idcs[4] = { 0 }; // values 0,1,2,3
     int unit_types[15] = { 0 };
@@ -625,7 +625,7 @@ static void report_by_nal_unit(ES_p es, int max, int quiet, int show_nal_details
  * - if `max` is non-zero, then reporting will stop after `max` MPEG items
  * - if `quiet` is true, then only errors will be reported
  */
-static void find_h264_fields(ES_p es, int max, int quiet, int verbose, int show_nal_details)
+static void find_h264_fields(ES_p es, int max, int quiet, bool verbose, int show_nal_details)
 {
     int err;
     int count = 0;
@@ -679,7 +679,7 @@ static void find_h264_fields(ES_p es, int max, int quiet, int verbose, int show_
 /*
  * Report on data by access unit.
  */
-static void report_h264_frames(ES_p es, int max, int quiet, int verbose, int show_nal_details,
+static void report_h264_frames(ES_p es, int max, int quiet, bool verbose, int show_nal_details,
     int count_sizes, int count_types)
 {
     int err = 0;
@@ -736,7 +736,7 @@ static void report_h264_frames(ES_p es, int max, int quiet, int verbose, int sho
             sum_frame_size += length;
         }
 
-        if (count_types && access_unit->primary_start != NULL) {
+        if (count_types && access_unit->primary_start != nullptr) {
             if (access_unit->primary_start->nal_ref_idc == 0) {
                 slice_categories[I_NON_REF]++;
                 if (all_slices_I(access_unit))
@@ -918,16 +918,16 @@ static void print_usage()
 
 int main(int argc, char** argv)
 {
-    char* input_name = NULL;
+    char* input_name = nullptr;
     int had_input_name = FALSE;
     int use_stdin = FALSE;
     int err = 0;
-    ES_p es = NULL;
+    ES_p es = nullptr;
     int max = 0;
     int by_frame = FALSE;
     int find_fields = FALSE;
     int quiet = FALSE;
-    int verbose = FALSE;
+    bool verbose = FALSE;
     int show_nal_details = FALSE;
     int give_pes_info = FALSE;
     int report_afds = FALSE;
@@ -954,7 +954,7 @@ int main(int argc, char** argv)
                 print_usage();
                 return 0;
             } else if (!strcmp("-err", argv[ii])) {
-                CHECKARG("esreport", ii);
+                MustARG("esreport", ii, argc, argv);
                 if (!strcmp(argv[ii + 1], "stderr"))
                     redirect_output_stderr();
                 else if (!strcmp(argv[ii + 1], "stdout"))
@@ -1000,7 +1000,7 @@ int main(int argc, char** argv)
             } else if (!strcmp("-x", argv[ii])) {
                 show_nal_details = TRUE;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
-                CHECKARG("esreport", ii);
+                MustARG("esreport", ii, argc, argv);
                 err = int_value("esreport", argv[ii], argv[ii + 1], TRUE, 10, &max);
                 if (err)
                     return 1;
@@ -1037,7 +1037,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    err = open_input_as_ES((use_stdin ? NULL : input_name), use_pes, quiet, force_stream_type,
+    err = open_input_as_ES((use_stdin ? nullptr : input_name), use_pes, quiet, force_stream_type,
         want_data, &is_data, &es);
     if (err) {
         print_err("### esreport: Error opening input file\n");

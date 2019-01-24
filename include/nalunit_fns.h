@@ -1,33 +1,9 @@
+#pragma once
+
 /*
  * Prototypes for manipulating NAL units in H.264 elementary streams.
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
-
-#ifndef _nalunit_fns
-#define _nalunit_fns
 
 #include "nalunit_defns.h"
 
@@ -93,7 +69,7 @@ void free_nal_unit(nal_unit_p* nal);
  *   (specifically, if the NAL unit's RBSP data cannot be understood),
  * * 1 if some other error occurs.
  */
-int find_next_NAL_unit(nal_unit_context_p context, int verbose, nal_unit_p* nal);
+int find_next_NAL_unit(nal_unit_context_p context, bool verbose, nal_unit_p* nal);
 
 /*
  * Write (copy) the current NAL unit to the ES output stream.
@@ -315,7 +291,7 @@ void free_nal_unit_list(nal_unit_list_p* list, int deep);
 /*
  * Report on a NAL unit list's contents, to the given stream.
  */
-void report_nal_unit_list(int is_msg, char* prefix, nal_unit_list_p list);
+void report_nal_unit_list(int is_msg, const std::string prefix, nal_unit_list_p list);
 
 /*
  * Print out useful information about this NAL unit, on the given stream.
@@ -323,12 +299,3 @@ void report_nal_unit_list(int is_msg, char* prefix, nal_unit_list_p list);
  * This is intended as a single line of information.
  */
 void report_nal(int is_msg, nal_unit_p nal);
-
-#endif // _nalunit_fns
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

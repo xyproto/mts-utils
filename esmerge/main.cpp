@@ -122,7 +122,7 @@ static int is_avs_I_frame(avs_frame_p frame)
 
 static int is_I_or_IDR_frame(access_unit_p frame)
 {
-    return (frame->primary_start != NULL && frame->primary_start->nal_ref_idc != 0
+    return (frame->primary_start != nullptr && frame->primary_start->nal_ref_idc != 0
         && (frame->primary_start->nal_unit_type == NAL_IDR || all_slices_I(frame)));
 }
 
@@ -133,7 +133,7 @@ static int is_I_or_IDR_frame(access_unit_p frame)
  */
 static int merge_with_avs(avs_context_p video_context, int audio_file, TS_writer_p output,
     int audio_type, int audio_samples_per_frame, int audio_sample_rate, double video_frame_rate,
-    int pat_pmt_freq, int quiet, int verbose, int debugging)
+    int pat_pmt_freq, int quiet, bool verbose, int debugging)
 {
     int ii;
     int err;
@@ -336,7 +336,7 @@ static int merge_with_avs(avs_context_p video_context, int audio_file, TS_writer
  */
 static int merge_with_h264(access_unit_context_p video_context, int audio_file, TS_writer_p output,
     int audio_type, int audio_samples_per_frame, int audio_sample_rate, int video_frame_rate,
-    int pat_pmt_freq, int quiet, int verbose, int debugging)
+    int pat_pmt_freq, int quiet, bool verbose, int debugging)
 {
     int ii;
     int err;
@@ -575,17 +575,17 @@ int main(int argc, char** argv)
     int had_video_name = FALSE;
     int had_audio_name = FALSE;
     int had_output_name = FALSE;
-    char* video_name = NULL;
-    char* audio_name = NULL;
-    char* output_name = NULL;
+    char* video_name = nullptr;
+    char* audio_name = nullptr;
+    char* output_name = nullptr;
     int err = 0;
-    ES_p video_es = NULL;
-    access_unit_context_p h264_video_context = NULL;
-    avs_context_p avs_video_context = NULL;
+    ES_p video_es = nullptr;
+    access_unit_context_p h264_video_context = nullptr;
+    avs_context_p avs_video_context = nullptr;
     int audio_file = -1;
-    TS_writer_p output = NULL;
+    TS_writer_p output = nullptr;
     int quiet = FALSE;
-    int verbose = FALSE;
+    bool verbose = FALSE;
     int debugging = FALSE;
     int audio_samples_per_frame = ADTS_SAMPLES_PER_FRAME;
     int audio_sample_rate = CD_RATE;
@@ -612,7 +612,7 @@ int main(int argc, char** argv)
                 print_usage();
                 return 0;
             } else if (!strcmp("-err", argv[ii])) {
-                CHECKARG("esmerge", ii);
+                MustARG("esmerge", ii, argc, argv);
                 if (!strcmp(argv[ii + 1], "stderr"))
                     redirect_output_stderr();
                 else if (!strcmp(argv[ii + 1], "stdout"))
@@ -633,7 +633,7 @@ int main(int argc, char** argv)
                 debugging = TRUE;
                 quiet = FALSE;
             } else if (!strcmp("-rate", argv[ii])) {
-                CHECKARG("esmerge", ii);
+                MustARG("esmerge", ii, argc, argv);
                 err = int_value("esmerge", argv[ii], argv[ii + 1], TRUE, 10, &audio_sample_rate);
                 if (err)
                     return 1;
@@ -643,7 +643,7 @@ int main(int argc, char** argv)
             } else if (!strcmp("-dat", argv[ii])) {
                 audio_sample_rate = DAT_RATE;
             } else if (!strcmp("-vidrate", argv[ii])) {
-                CHECKARG("esmerge", ii);
+                MustARG("esmerge", ii, argc, argv);
                 err = int_value("esmerge", argv[ii], argv[ii + 1], TRUE, 10, &video_frame_rate);
                 if (err)
                     return 1;
@@ -663,7 +663,7 @@ int main(int argc, char** argv)
             } else if (!strcmp("-avs", argv[ii])) {
                 video_type = VIDEO_AVS;
             } else if (!strcmp("-patpmtfreq", argv[ii])) {
-                CHECKARG("esmerge", ii);
+                MustARG("esmerge", ii, argc, argv);
                 err = int_value("esmerge", argv[ii], argv[ii + 1], TRUE, 10, &pat_pmt_freq);
                 if (err) {
                     return 1;
@@ -744,7 +744,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    err = tswrite_open(TS_W_FILE, output_name, NULL, 0, quiet, &output);
+    err = tswrite_open(TS_W_FILE, output_name, nullptr, 0, quiet, &output);
     if (err) {
         fprint_err("### esmerge: "
                    "Problem opening output file %s - abandoning reading\n",

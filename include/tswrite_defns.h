@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * Support for writing out TS packets, to file, or over TCP/IP or UDP
  *
@@ -7,17 +9,14 @@
  *
  */
 
-#ifndef _tswrite_defns
-#define _tswrite_defns
+typedef int SOCKET;
 
 #include <cstdio>
+#include <termios.h>
 
 #include "compat.h"
 #include "h222_defns.h"
 #include "ts_defns.h"
-
-typedef int SOCKET; // for compatibility with Windows
-#include <termios.h> // for struct termios
 
 struct buffered_TS_output;
 typedef struct buffered_TS_output* buffered_TS_output_p;
@@ -169,12 +168,3 @@ typedef struct TS_context* TS_context_p;
 
 // Arguments processed by tswrite_process_args are set to:
 #define TSWRITE_PROCESSED (char*)"<processed>"
-
-#endif // _tswrite_defns
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:

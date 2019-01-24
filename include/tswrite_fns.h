@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * Support for writing out TS packets, to file, or over TCP/IP or UDP
  *
@@ -5,33 +7,9 @@
  * behaviour via a circular buffer, optionally taking timing from the
  * TS PCR entries.
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 
-#ifndef _tswrite_fns
-#define _tswrite_fns
+#include <string>
 
 #include "tswrite_defns.h"
 
@@ -70,8 +48,8 @@
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-int tswrite_open(TS_WRITER_TYPE how, char* name, char* multicast_if, int port, int quiet,
-    TS_writer_p* tswriter);
+int tswrite_open(TS_WRITER_TYPE how, const std::string name, char* multicast_if, int port,
+    int quiet, TS_writer_p* tswriter);
 /*
  * Open a network connection for TS output.
  *
@@ -92,7 +70,8 @@ int tswrite_open(TS_WRITER_TYPE how, char* name, char* multicast_if, int port, i
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-int tswrite_open_connection(int use_tcp, char* name, int port, int quiet, TS_writer_p* tswriter);
+int tswrite_open_connection(
+    int use_tcp, const std::string name, int port, int quiet, TS_writer_p* tswriter);
 /*
  * Open a file for TS output.
  *
@@ -108,7 +87,7 @@ int tswrite_open_connection(int use_tcp, char* name, int port, int quiet, TS_wri
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-int tswrite_open_file(char* name, int quiet, TS_writer_p* tswriter);
+int tswrite_open_file(const std::string name, int quiet, TS_writer_p* tswriter);
 /*
  * Wait for a client to connect and then both write TS data to it and
  * listen for command from it. Uses TCP/IP.
@@ -314,13 +293,4 @@ void tswrite_report_args(TS_context_p context);
  * Returns 0 if all goes well, 1 if there was an error. Note that not
  * specifying an output file or host counts as an error.
  */
-int tswrite_process_args(char* prefix, int argc, char* argv[], TS_context_p context);
-
-#endif // _tswrite_fns
-
-// Local Variables:
-// tab-width: 8
-// indent-tabs-mode: nil
-// c-basic-offset: 2
-// End:
-// vim: set tabstop=8 shiftwidth=2 expandtab:
+int tswrite_process_args(const std::string prefix, int argc, char* argv[], TS_context_p context);

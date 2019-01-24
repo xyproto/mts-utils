@@ -2,29 +2,6 @@
  * Locate the PAT and PMT packets in an H.222 transport stream (TS),
  * and report on their contents (i.e., the program and stream info).
  *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Amino Communications Ltd, Swavesey, Cambridge UK
- *
- * ***** END LICENSE BLOCK *****
  */
 
 #include <cerrno>
@@ -58,7 +35,7 @@
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int report_streams(TS_reader_p tsreader, int max, int verbose)
+int report_streams(TS_reader_p tsreader, int max, bool verbose)
 {
     int err;
     int ii;
@@ -260,7 +237,7 @@ int report_streams(TS_reader_p tsreader, int max, int verbose)
             else if (!verbose)
                 fprint_msg("\nPacket %d is PMT with PID %04x (%d)\n", ii + 1, pid, pid);
 
-            report_pmt(TRUE, "  ", this_pmt);
+            report_pmt(TRUE, (char*)"  ", this_pmt);
 
             free_pmt(&last_pmt);
             last_pmt = this_pmt;
@@ -303,7 +280,7 @@ int main(int argc, char** argv)
     char* input_name = nullptr;
     int had_input_name = FALSE;
     int max = 10000;
-    int verbose = FALSE; // True => output diagnostic/progress messages
+    bool verbose = FALSE; // True => output diagnostic/progress messages
     int lookfor = 1;
     int err = 0;
 
@@ -323,7 +300,7 @@ int main(int argc, char** argv)
                 print_usage();
                 return 0;
             } else if (!strcmp("-err", argv[ii])) {
-                CHECKARG("tsinfo", ii);
+                MustARG("tsinfo", ii, argc, argv);
                 if (!strcmp(argv[ii + 1], "stderr"))
                     redirect_output_stderr();
                 else if (!strcmp(argv[ii + 1], "stdout"))
@@ -339,13 +316,13 @@ int main(int argc, char** argv)
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
                 verbose = TRUE;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
-                CHECKARG("tsinfo", ii);
+                MustARG("tsinfo", ii, argc, argv);
                 err = int_value("tsinfo", argv[ii], argv[ii + 1], TRUE, 10, &max);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-repeat", argv[ii])) {
-                CHECKARG("tsinfo", ii);
+                MustARG("tsinfo", ii, argc, argv);
                 err = int_value("tsinfo", argv[ii], argv[ii + 1], TRUE, 10, &lookfor);
                 if (err)
                     return 1;

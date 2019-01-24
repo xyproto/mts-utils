@@ -131,12 +131,12 @@ static int write_h262_picture(WRITER output, int as_TS, h262_picture_p picture)
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
 static int strip_h262(
-    ES_p es, WRITER output, int as_TS, int max, int keep_p, int verbose, int quiet)
+    ES_p es, WRITER output, int as_TS, int max, int keep_p, bool verbose, int quiet)
 {
     int err;
     int count;
-    h262_context_p h262 = NULL;
-    h262_filter_context_p fcontext = NULL;
+    h262_context_p h262 = nullptr;
+    h262_filter_context_p fcontext = nullptr;
 
     // Keep a count of the pictures we encounter, regardless of picture type
     // (but note that, for the moment at least, we don't distinguish frame
@@ -159,8 +159,8 @@ static int strip_h262(
     }
 
     for (count = 1;; count++) {
-        h262_picture_p seq_hdr = NULL;
-        h262_picture_p picture = NULL;
+        h262_picture_p seq_hdr = nullptr;
+        h262_picture_p picture = nullptr;
         int delta_pictures_seen;
         err = get_next_stripped_h262_frame(
             fcontext, verbose, quiet, &seq_hdr, &picture, &delta_pictures_seen);
@@ -178,7 +178,7 @@ static int strip_h262(
         pictures_seen += delta_pictures_seen;
         pictures_kept++;
 
-        if (seq_hdr != NULL) {
+        if (seq_hdr != nullptr) {
             err = write_h262_picture(output, as_TS, seq_hdr);
             if (err) {
                 print_err("### Error writing picture\n");
@@ -234,12 +234,12 @@ static int strip_h262(
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
 static int filter_h262(
-    ES_p es, WRITER output, int as_TS, int frequency, int max, int verbose, int quiet)
+    ES_p es, WRITER output, int as_TS, int frequency, int max, bool verbose, int quiet)
 {
     int err;
     int count = 0;
-    h262_context_p h262 = NULL;
-    h262_filter_context_p fcontext = NULL;
+    h262_context_p h262 = nullptr;
+    h262_filter_context_p fcontext = nullptr;
 
     // Keep a count of the pictures we encounter, regardless of picture type
     // (but note that, for the moment at least, we don't distinguish frame
@@ -250,9 +250,9 @@ static int filter_h262(
     // And how many we wrote
     int pictures_written = 0;
 
-    h262_picture_p this_picture = NULL;
-    h262_picture_p last_picture = NULL;
-    h262_picture_p seq_hdr = NULL; // *We* mustn't free this one
+    h262_picture_p this_picture = nullptr;
+    h262_picture_p last_picture = nullptr;
+    h262_picture_p seq_hdr = nullptr; // *We* mustn't free this one
 
     err = build_h262_context(es, &h262);
     if (err) {
@@ -284,14 +284,14 @@ static int filter_h262(
 
         pictures_seen += delta_pictures_seen;
 
-        if (this_picture == NULL) {
+        if (this_picture == nullptr) {
             // We need to repeat the last picture
             this_picture = last_picture;
-            last_picture = NULL;
+            last_picture = nullptr;
         } else
             pictures_kept++;
 
-        if (seq_hdr != NULL) {
+        if (seq_hdr != nullptr) {
             err = write_h262_picture(output, as_TS, seq_hdr);
             if (err) {
                 print_err("### Error writing sequence header\n");
@@ -303,7 +303,7 @@ static int filter_h262(
             }
         }
 
-        if (this_picture != NULL) {
+        if (this_picture != nullptr) {
             err = write_h262_picture(output, as_TS, this_picture);
             if (err) {
                 print_err("### Error writing picture\n");
@@ -351,10 +351,10 @@ static int filter_h262(
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int copy_nal_units(ES_p es, WRITER output, int as_TS, int max, int verbose, int quiet)
+static int copy_nal_units(ES_p es, WRITER output, int as_TS, int max, bool verbose, int quiet)
 {
     int err = 0;
-    nal_unit_context_p context = NULL;
+    nal_unit_context_p context = nullptr;
 
     err = build_nal_unit_context(es, &context);
     if (err) {
@@ -408,12 +408,12 @@ static int copy_nal_units(ES_p es, WRITER output, int as_TS, int max, int verbos
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int strip_access_units(
-    ES_p es, WRITER output, int as_TS, int max, int keep_all_ref, int verbose, int quiet)
+    ES_p es, WRITER output, int as_TS, int max, int keep_all_ref, bool verbose, int quiet)
 {
     int err = 0;
     int count;
-    access_unit_context_p acontext = NULL;
-    h264_filter_context_p fcontext = NULL;
+    access_unit_context_p acontext = nullptr;
+    h264_filter_context_p fcontext = nullptr;
 
     // It's nice to output some statistics at the end
     int access_units_seen = 0;
@@ -432,7 +432,7 @@ static int strip_access_units(
     }
 
     for (count = 1;; count++) {
-        access_unit_p access_unit = NULL;
+        access_unit_p access_unit = nullptr;
         int delta_access_units_seen;
         err = get_next_stripped_h264_frame(
             fcontext, verbose, quiet, &access_unit, &delta_access_units_seen);
@@ -489,20 +489,20 @@ static int strip_access_units(
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int filter_access_units(
-    ES_p es, WRITER output, int as_TS, int max, int frequency, int verbose, int quiet)
+    ES_p es, WRITER output, int as_TS, int max, int frequency, bool verbose, int quiet)
 {
     int err = 0;
     int count;
-    access_unit_context_p acontext = NULL;
-    h264_filter_context_p fcontext = NULL;
+    access_unit_context_p acontext = nullptr;
+    h264_filter_context_p fcontext = nullptr;
 
     // It's nice to output some statistics at the end
     int access_units_seen = 0;
     int access_units_kept = 0;
     int access_units_written = 0;
 
-    access_unit_p this_access_unit = NULL;
-    access_unit_p last_access_unit = NULL;
+    access_unit_p this_access_unit = nullptr;
+    access_unit_p last_access_unit = nullptr;
 
     err = build_access_unit_context(es, &acontext);
     if (err) {
@@ -532,14 +532,14 @@ static int filter_access_units(
 
         access_units_seen += delta_access_units_seen;
 
-        if (this_access_unit == NULL) {
+        if (this_access_unit == nullptr) {
             // We need to repeat the last access unit
             this_access_unit = last_access_unit;
-            last_access_unit = NULL;
+            last_access_unit = nullptr;
         } else
             access_units_kept++;
 
-        if (this_access_unit != NULL) {
+        if (this_access_unit != nullptr) {
             if (as_TS)
                 err = write_access_unit_as_TS(this_access_unit, fcontext->access_unit_context,
                     output.ts_output, DEFAULT_VIDEO_PID);
@@ -594,7 +594,7 @@ static int filter_access_units(
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int do_action(ACTION action, ES_p es, WRITER output, int max, int frequency, int is_h262,
-    int as_TS, int keep_all_ref, byte stream_type, int verbose, int quiet)
+    int as_TS, int keep_all_ref, byte stream_type, bool verbose, int quiet)
 {
     int err = 0;
 
@@ -708,17 +708,17 @@ static void print_usage()
 
 int main(int argc, char** argv)
 {
-    char* input_name = NULL;
-    char* output_name = NULL;
+    char* input_name = nullptr;
+    char* output_name = nullptr;
     int had_input_name = FALSE;
     int had_output_name = FALSE;
-    char* action_switch = "None";
+    auto action_switch = "None"s;
     int use_stdin = FALSE;
     int use_stdout = FALSE;
     int use_tcpip = FALSE;
     int port = 88; // Useful default port number
     int err = 0;
-    ES_p es = NULL;
+    ES_p es = nullptr;
     WRITER output;
     int max = 0;
     ACTION action = ACTION_UNDEFINED;
@@ -726,7 +726,7 @@ int main(int argc, char** argv)
     int keep_all_ref = FALSE;
     int frequency = 8; // The default as stated in the usage
     int quiet = FALSE;
-    int verbose = FALSE;
+    bool verbose = FALSE;
     int ii = 1;
 
     int use_pes = FALSE;
@@ -741,7 +741,7 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    output.es_output = NULL;
+    output.es_output = nullptr;
 
     while (ii < argc) {
         if (argv[ii][0] == '-') {
@@ -776,7 +776,7 @@ int main(int argc, char** argv)
                 use_stdout = TRUE;
                 redirect_output_stderr();
             } else if (!strcmp("-err", argv[ii])) {
-                CHECKARG("esfilter", ii);
+                MustARG("esfilter", ii, argc, argv);
                 if (!strcmp(argv[ii + 1], "stderr"))
                     redirect_output_stderr();
                 else if (!strcmp(argv[ii + 1], "stdout"))
@@ -790,7 +790,7 @@ int main(int argc, char** argv)
                 }
                 ii++;
             } else if (!strcmp("-host", argv[ii])) {
-                CHECKARG("esfilter", ii);
+                MustARG("esfilter", ii, argc, argv);
                 err = host_value("esfilter", argv[ii], argv[ii + 1], &output_name, &port);
                 if (err)
                     return 1;
@@ -807,13 +807,13 @@ int main(int argc, char** argv)
             } else if (!strcmp("-allref", argv[ii])) {
                 keep_all_ref = TRUE;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
-                CHECKARG("esfilter", ii);
+                MustARG("esfilter", ii, argc, argv);
                 err = int_value("esfilter", argv[ii], argv[ii + 1], TRUE, 10, &max);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-freq", argv[ii])) {
-                CHECKARG("esfilter", ii);
+                MustARG("esfilter", ii, argc, argv);
                 err = int_value("esfilter", argv[ii], argv[ii + 1], TRUE, 10, &frequency);
                 if (err)
                     return 1;
@@ -859,7 +859,7 @@ int main(int argc, char** argv)
         quiet = TRUE;
     }
 
-    err = open_input_as_ES((use_stdin ? NULL : input_name), use_pes, quiet, force_stream_type,
+    err = open_input_as_ES((use_stdin ? nullptr : input_name), use_pes, quiet, force_stream_type,
         want_data, &is_data, &es);
     if (err) {
         print_err("### esfilter: Error opening input file\n");
@@ -883,11 +883,11 @@ int main(int argc, char** argv)
 
     if (as_TS) {
         if (use_stdout)
-            err = tswrite_open(TS_W_STDOUT, NULL, NULL, 0, quiet, &(output.ts_output));
+            err = tswrite_open(TS_W_STDOUT, nullptr, nullptr, 0, quiet, &(output.ts_output));
         else if (use_tcpip)
-            err = tswrite_open(TS_W_TCP, output_name, NULL, port, quiet, &(output.ts_output));
+            err = tswrite_open(TS_W_TCP, output_name, nullptr, port, quiet, &(output.ts_output));
         else
-            err = tswrite_open(TS_W_FILE, output_name, NULL, 0, quiet, &(output.ts_output));
+            err = tswrite_open(TS_W_FILE, output_name, nullptr, 0, quiet, &(output.ts_output));
         if (err) {
             fprint_err("### esfilter: Unable to open %s\n", output_name);
             (void)close_input_as_ES(input_name, &es);
@@ -895,7 +895,7 @@ int main(int argc, char** argv)
         }
     } else {
         output.es_output = fopen(output_name, "wb");
-        if (output.es_output == NULL) {
+        if (output.es_output == nullptr) {
             fprint_err(
                 "### esfilter: Unable to open output file %s: %s\n", output_name, strerror(errno));
             (void)close_input_as_ES(input_name, &es);
@@ -962,8 +962,7 @@ int main(int argc, char** argv)
         }
     }
 
-    err = close_input_as_ES(input_name, &es);
-    if (err) {
+    if (err = close_input_as_ES(input_name, &es); err) {
         print_err("### esfilter: Error closing input file\n");
         return 1;
     }

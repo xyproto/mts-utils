@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
+#include <string>
 #include <unistd.h>
 
 #include "accessunit.h"
@@ -31,20 +32,22 @@
 #include "tswrite.h"
 #include "version.h"
 
+using namespace std::string_literals;
+
 double frame_rate = 25.0; // default frame rate. this can be modified using the switch "-fr"
 
-static inline int umod(unsigned int a, unsigned int b)
+inline int umod(unsigned int a, unsigned int b)
 {
-    int r = a % b;
+    auto r = a % b;
     return r < 0 ? r + b : r;
 }
 
 /*
  * Print out a single character representative of our item.
  */
-static int h262_item_dot(h262_item_p item, double* delta_gop, int show_gop_time)
+int h262_item_dot(h262_item_p item, double* delta_gop, int show_gop_time)
 {
-    char* str = NULL;
+    auto str = ""s;
 
     static int frames = 0;
     static int temp_frames = 0;
@@ -67,51 +70,53 @@ static int h262_item_dot(h262_item_p item, double* delta_gop, int show_gop_time)
 
     switch (item->unit.start_code) {
     case 0x00:
-        str = (char*)(item->picture_coding_type == 1 ? "i"
-                                                     : item->picture_coding_type == 2
-                    ? "p"
-                    : item->picture_coding_type == 3 ? "b"
-                                                     : item->picture_coding_type == 4 ? "d" : "x");
+        str = (item->picture_coding_type == 1
+                ? "i"s
+                : item->picture_coding_type == 2 ? "p"s
+                                                 : item->picture_coding_type == 3
+                        ? "b"s
+                        : item->picture_coding_type == 4 ? "d"s : "x"s);
         pic_coding_type = item->picture_coding_type;
         break;
     case 0xB0:
-        str = "R";
+        str = "R"s;
         break; // Reserved
     case 0xB1:
-        str = "R";
+        str = "R"s;
         break; // Reserved
     case 0xB2:
-        str = "U";
+        str = "U"s;
         break; // User data
     case 0xB3:
-        str = "[";
+        str = "["s;
         break; // SEQUENCE HEADER
     case 0xB4:
-        str = "X";
+        str = "X"s;
         break; // Sequence error
     case 0xB5:
-        str = "E";
+        str = "E"s;
         break; // Extension start
     case 0xB6:
-        str = "R";
+        str = "R"s;
         break; // Reserved
     case 0xB7:
-        str = "]";
+        str = "]"s;
         break; // SEQUENCE END
     case 0xB8:
-        str = ">";
+        str = ">"s;
         break; // Group start
 
     default:
-        if (str == NULL) {
-            if (item->unit.start_code >= 0x01 && item->unit.start_code <= 0xAF)
+        if (str.empty()) {
+            if (item->unit.start_code >= 0x01 && item->unit.start_code <= 0xAF) {
                 return 0; // str = "."; // Don't report slice data explicitly
-            else
-                str = "?";
+            } else {
+                str = "?"s;
+            }
         }
         break;
     }
-    print_msg(str);
+    print_msg(str.c_str());
     fflush(stdout);
     return pic_coding_type;
 }
@@ -125,7 +130,7 @@ static int h262_item_dot(h262_item_p item, double* delta_gop, int show_gop_time)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-static int report_h262_file_as_dots(ES_p es, int max, int verbose, int show_gop_time)
+static int report_h262_file_as_dots(ES_p es, int max, bool verbose, int show_gop_time)
 {
     int err;
     int count = 0;
@@ -216,7 +221,7 @@ static int report_h262_file_as_dots(ES_p es, int max, int verbose, int show_gop_
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-static int report_avs_file_as_dots(ES_p es, int max, int verbose)
+static int report_avs_file_as_dots(ES_p es, int max, bool verbose)
 {
     int err = 0;
     int count = 0;
@@ -331,7 +336,7 @@ static char choose_nal_type(access_unit_p access_unit, int* gop_start_found)
     // TRUE:  a random access point is identified as an I frame + recovery_point SEI.
     //        The value recovery_frame_cnt is never considered (as if it was 0).
 
-    if (access_unit->primary_start == NULL)
+    if (access_unit->primary_start == nullptr)
         print_msg("_");
     else if (access_unit->primary_start->nal_ref_idc == 0) {
         if (all_slices_I(access_unit))
@@ -385,7 +390,7 @@ static char choose_nal_type(access_unit_p access_unit, int* gop_start_found)
  * (access unit here means frame or coupled fields)
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int dots_by_access_unit(ES_p es, int max, int verbose, int hash_eos, int show_gop_time)
+static int dots_by_access_unit(ES_p es, int max, bool verbose, int hash_eos, int show_gop_time)
 {
 
     int err = 0;
@@ -493,7 +498,7 @@ static int dots_by_access_unit(ES_p es, int max, int verbose, int hash_eos, int 
             if (hash_eos) {
                 print_msg("#");
                 // This should be enough to allow us to keep on after the EOS
-                context->end_of_stream = FALSE;
+                context->end_of_stream = 0; // FALSE;
                 context->no_more_data = FALSE;
             } else {
                 print_msg("\nStopping because found end-of-stream NAL unit\n");
@@ -531,7 +536,7 @@ static int dots_by_access_unit(ES_p es, int max, int verbose, int hash_eos, int 
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-static int report_file_as_ES_dots(ES_p es, int what_data, int max, int verbose)
+static int report_file_as_ES_dots(ES_p es, int what_data, int max, bool verbose)
 {
     int err = 0;
     int count = 0;
@@ -768,13 +773,13 @@ static void print_usage()
 
 int main(int argc, char** argv)
 {
-    char* input_name = NULL;
+    auto input_name = ""s;
     int had_input_name = FALSE;
     int use_stdin = FALSE;
     int err = 0;
-    ES_p es = NULL;
+    ES_p es = nullptr;
     int max = 0;
-    int verbose = FALSE;
+    bool verbose = FALSE;
     int ii = 1;
 
     int use_pes = FALSE;
@@ -799,7 +804,7 @@ int main(int argc, char** argv)
                 print_usage();
                 return 0;
             } else if (!strcmp("-err", argv[ii])) {
-                CHECKARG("esdots", ii);
+                MustARG("esdots"s, ii, argc, argv);
                 if (!strcmp(argv[ii + 1], "stderr"))
                     redirect_output_stderr();
                 else if (!strcmp(argv[ii + 1], "stdout"))
@@ -829,7 +834,7 @@ int main(int argc, char** argv)
             else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii]))
                 verbose = TRUE;
             else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
-                CHECKARG("esdots", ii);
+                MustARG("esdots"s, ii, argc, argv);
                 err = int_value("esdots", argv[ii], argv[ii + 1], TRUE, 10, &max);
                 if (err)
                     return 1;
@@ -841,7 +846,7 @@ int main(int argc, char** argv)
             else if (!strcmp("-gop", argv[ii]))
                 show_gop_time = TRUE;
             else if (!strcmp("-fr", argv[ii])) {
-                CHECKARG("esdots", ii);
+                MustARG("esdots"s, ii, argc, argv);
                 err = double_value("esdots", argv[ii], argv[ii + 1], TRUE, &frame_rate);
                 if (err)
                     return 1;
@@ -869,9 +874,9 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    err = open_input_as_ES((use_stdin ? NULL : input_name), use_pes, FALSE, force_stream_type,
-        want_data, &is_data, &es);
-    if (err) {
+    if (err = open_input_as_ES((use_stdin ? nullptr : input_name), use_pes, FALSE,
+            force_stream_type, want_data, &is_data, &es);
+        err) {
         print_err("### esdots: Error opening input file\n");
         return 1;
     }
@@ -894,8 +899,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    err = close_input_as_ES(input_name, &es);
-    if (err) {
+    if (err = close_input_as_ES(input_name, &es); err) {
         print_err("### esdots: Error closing input file\n");
         return 1;
     }

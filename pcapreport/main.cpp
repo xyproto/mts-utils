@@ -1,31 +1,6 @@
 /*
  * Report on a pcap (.pcap) file.
  *
- * <rrw@kynesim.co.uk> 2008-09-05
- *
- * ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the MPEG TS, PS and ES tools.
- *
- * The Initial Developer of the Original Code is Amino Communications Ltd.
- * Portions created by the Initial Developer are Copyright (C) 2008
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Richard Watts, Kynesim <rrw@kynesim.co.uk>
- *
- * ***** END LICENSE BLOCK *****
  */
 
 #include <cerrno>
@@ -34,6 +9,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
+#include <string>
 #include <unistd.h>
 
 #include "ac3.h"
@@ -44,12 +20,17 @@
 #include "bitdata.h"
 #include "compat.h"
 #include "es.h"
+#include "ethernet.h"
 #include "filter.h"
+#include "fmtx.h"
 #include "h222.h"
 #include "h262.h"
+#include "ipv4.h"
 #include "l2audio.h"
 #include "misc.h"
+#include "misc_fns.h"
 #include "nalunit.h"
+#include "pcap.h"
 #include "pes.h"
 #include "pidint.h"
 #include "printing.h"
@@ -59,10 +40,7 @@
 #include "tswrite.h"
 #include "version.h"
 
-#include "ethernet.h"
-#include "fmtx.h"
-#include "ipv4.h"
-#include "pcap.h"
+using namespace std::string_literals;
 
 typedef struct pcapreport_stream_struct pcapreport_stream_t;
 
@@ -203,7 +181,7 @@ typedef struct pcapreport_ctx_struct {
     int dump_data;
     int dump_extra;
     int time_report;
-    int verbose;
+    bool verbose;
     int analyse;
     int extract;
     int stream_count;
@@ -346,7 +324,8 @@ static char* section_name(const pcapreport_ctx_t* const ctx, const pcapreport_st
         return pbuf;
     }
 
-    snprintf(pbuf, pbuf_len, "_S%d", st->section_last == NULL ? 0 : st->section_last->section_no);
+    snprintf(
+        pbuf, pbuf_len, "_S%d", st->section_last == nullptr ? 0 : st->section_last->section_no);
     return pbuf;
 }
 
@@ -358,7 +337,7 @@ static void stream_gen_names2(const pcapreport_ctx_t* const ctx, pcapreport_stre
     char pbuf[32], pbuf2[32];
     char identifier[90];
     const char* const base_name
-        = ctx->output_name_base != NULL ? ctx->output_name_base : ctx->base_name;
+        = ctx->output_name_base != nullptr ? ctx->output_name_base : ctx->base_name;
     const size_t base_len = strlen(base_name);
     int fixed_extract_name = FALSE;
 
@@ -370,7 +349,7 @@ static void stream_gen_names2(const pcapreport_ctx_t* const ctx, pcapreport_stre
         identifier[0] = '\0';
         // If we have been given a unique filter and a name then assume they
         // actually want that name!
-        fixed_extract_name = (ctx->output_name_base != NULL);
+        fixed_extract_name = (ctx->output_name_base != nullptr);
     }
 
     if (ctx->extract) {
@@ -379,7 +358,7 @@ static void stream_gen_names2(const pcapreport_ctx_t* const ctx, pcapreport_stre
 
         if (!fixed_extract_name)
             snprintf(name + base_len, 100, "%s%s%s", identifier, ".",
-                (rtp_header != NULL && rtp_header->is_rtp_raw) ? "rtp" : "ts");
+                (rtp_header != nullptr && rtp_header->is_rtp_raw) ? "rtp" : "ts");
         st->output_name = name;
     }
 
@@ -401,7 +380,7 @@ static void stream_gen_names(const pcapreport_ctx_t* const ctx, pcapreport_strea
 
 static void stream_close_files(const pcapreport_ctx_t* const ctx, pcapreport_stream_t* const st)
 {
-    if (st->output_file != NULL) {
+    if (st->output_file != nullptr) {
         if (st->seen_dodgy != 0) {
             fprint_msg(">%d> WARNING: %d dodgy packet%s written to: %s\n", st->stream_no,
                 st->seen_dodgy, st->seen_dodgy == 1 ? "" : "s", st->output_name);
@@ -411,11 +390,11 @@ static void stream_close_files(const pcapreport_ctx_t* const ctx, pcapreport_str
                 st->seen_bad, st->seen_bad == 1 ? "" : "s", st->output_name);
         }
         fclose(st->output_file);
-        st->output_file = NULL;
+        st->output_file = nullptr;
     }
-    if (st->csv_file != NULL) {
+    if (st->csv_file != nullptr) {
         fclose(st->csv_file);
-        st->csv_file = NULL;
+        st->csv_file = nullptr;
     }
 }
 
@@ -428,12 +407,12 @@ static pcapreport_section_t* section_create(const pcapreport_ctx_t* const ctx,
     if (ctx->file_split_section)
         stream_close_files(ctx, st);
 
-    if (tsect == NULL)
-        return NULL;
+    if (tsect == nullptr)
+        return nullptr;
 
     // Bind into stream
 
-    if (last == NULL) {
+    if (last == nullptr) {
         // Empty chain - add as first el
         st->section_first = tsect;
     } else {
@@ -453,8 +432,8 @@ static pcapreport_section_t* section_create(const pcapreport_ctx_t* const ctx,
     tsect->pkt_final = tsect->pkt_start = ctx->pkt_counter;
     tsect->ts_byte_start = tsect->ts_byte_final = st->ts_bytes;
 
-    if (ctx->file_split_section || last == NULL)
-        stream_gen_names(ctx, st, NULL);
+    if (ctx->file_split_section || last == nullptr)
+        stream_gen_names(ctx, st, nullptr);
 
     return tsect;
 }
@@ -526,7 +505,7 @@ static int digest_times(pcapreport_ctx_t* const ctx, pcapreport_stream_t* const 
         ri->last_seq = rtp_header->sequence_number;
     }
 
-    if (st->ts_r == NULL) {
+    if (st->ts_r == nullptr) {
         rv = build_TS_reader_with_fns(st, digest_times_read, digest_times_seek, &st->ts_r);
         if (rv) {
             print_err("### pcapreport: Cannot create ts reader.\n");
@@ -690,10 +669,10 @@ static int digest_times(pcapreport_ctx_t* const ctx, pcapreport_stream_t* const 
                                     cur_jitter);
                             }
 
-                            if (st->csv_name != NULL) // We should be outputting to file
+                            if (st->csv_name != nullptr) // We should be outputting to file
                             {
-                                if (st->csv_file == NULL) {
-                                    if ((st->csv_file = fopen(st->csv_name, "wt")) == NULL) {
+                                if (st->csv_file == nullptr) {
+                                    if ((st->csv_file = fopen(st->csv_name, "wt")) == nullptr) {
                                         fprint_err(
                                             "### pcapreport: Cannot open %s .\n", st->csv_name);
                                         exit(1);
@@ -725,7 +704,7 @@ static int digest_times(pcapreport_ctx_t* const ctx, pcapreport_stream_t* const 
 
             {
                 pcapreport_section_t* const tsect = st->section_last;
-                if (tsect != NULL) {
+                if (tsect != nullptr) {
                     tsect->time_final = t_pcr;
                     tsect->ts_byte_final = st->ts_bytes;
                     tsect->pkt_final = ctx->pkt_counter;
@@ -742,7 +721,7 @@ static int write_out_packet(pcapreport_ctx_t* const ctx, pcapreport_stream_t* co
     unsigned int pkts = len / 188;
 
     if (st->output_name) {
-        if (st->output_file == NULL) {
+        if (st->output_file == nullptr) {
             fprint_msg("pcapreport: Dumping %s packets for %s:%d to %s\n",
                 ctx->good_ts_only ? "good ts" : ctx->keep_bad ? "all" : "ts",
                 ipv4_addr_to_string(st->output_dest_addr), st->output_dest_port, st->output_name);
@@ -817,7 +796,7 @@ static int write_rtp_raw_packet(pcapreport_ctx_t* const ctx, pcapreport_stream_t
     if (st->output_name) {
         int rv;
 
-        if (st->output_file == NULL) {
+        if (st->output_file == nullptr) {
             fprint_msg("pcapreport: Dumping raw RTP packets for %s:%d to %s\n",
                 ipv4_addr_to_string(st->output_dest_addr), st->output_dest_port, st->output_name);
             st->output_file = fopen(st->output_name, "wb");
@@ -951,7 +930,7 @@ void stream_close(pcapreport_ctx_t* const ctx, pcapreport_stream_t** pst)
     {
         // Free off all our section data
         pcapreport_section_t* p = st->section_first;
-        while (p != NULL) {
+        while (p != nullptr) {
             pcapreport_section_t* np = p->next;
             free(p);
             p = np;
@@ -959,9 +938,9 @@ void stream_close(pcapreport_ctx_t* const ctx, pcapreport_stream_t** pst)
     }
     stream_close_files(ctx, st);
 
-    if (st->csv_name != NULL)
+    if (st->csv_name != nullptr)
         free((void*)st->csv_name);
-    if (st->output_name != NULL)
+    if (st->output_name != nullptr)
         free((void*)st->output_name);
     free(st);
 }
@@ -986,9 +965,9 @@ static pcapreport_stream_t* stream_create(pcapreport_ctx_t* const ctx,
 
     // Even if we don't need sections it won't hurt to have one
     // Also generates output names
-    if (section_create(ctx, st, pcap_pkt_hdr) == NULL) {
+    if (section_create(ctx, st, pcap_pkt_hdr) == nullptr) {
         stream_close(ctx, &st);
-        return NULL;
+        return nullptr;
     }
 
     return st;
@@ -1056,7 +1035,7 @@ static void stream_analysis(const pcapreport_ctx_t* const ctx, const pcapreport_
         fprint_msg("  PCR PID: %d (%#x)%s\n", st->pcr_pid, st->pcr_pid,
             !st->multiple_pcr_pids ? "" : " ### Other PCR PIDs in stream - not tracked");
 
-        for (tsect = st->section_first; tsect != NULL; tsect = tsect->next) {
+        for (tsect = st->section_first; tsect != nullptr; tsect = tsect->next) {
             uint64_t time_offset = ctx->time_start;
             int64_t time_len = tsect->time_last - tsect->time_first; // PCR duration
             int64_t time_len2 = tsect->time_final - tsect->time_start; // Stream duration
@@ -1137,7 +1116,7 @@ pcapreport_stream_t* stream_find(pcapreport_ctx_t* const ctx,
     pcapreport_stream_t** pst = ctx->stream_hash + h;
     pcapreport_stream_t* st;
 
-    while ((st = *pst) != NULL) {
+    while ((st = *pst) != nullptr) {
         if (st->output_dest_addr == dest_addr && st->output_dest_port == dest_port
             && stream_vlan_match(st, epkt)) {
             return st;
@@ -1145,8 +1124,8 @@ pcapreport_stream_t* stream_find(pcapreport_ctx_t* const ctx,
         pst = &st->hash_next;
     }
 
-    if ((st = stream_create(ctx, pcap_pkt_hdr, epkt, dest_addr, dest_port)) == NULL)
-        return NULL;
+    if ((st = stream_create(ctx, pcap_pkt_hdr, epkt, dest_addr, dest_port)) == nullptr)
+        return nullptr;
 
     *pst = st;
     return st;
@@ -1167,7 +1146,7 @@ static int ip_reassemble(pcapreport_reassembly_t* const reas, const ipv4_header_
     int frag_final = (ip->flags & 1) == 0;
 
     // Discard unless we succeed
-    *out_pdata = (byte*)NULL;
+    *out_pdata = (byte*)nullptr;
     *out_plen = 0;
 
     if (frag_final && frag_offset == 0) {
@@ -1408,7 +1387,7 @@ int main(int argc, char** argv)
                 print_usage();
                 return 0;
             } else if (!strcmp("err", arg)) {
-                CHECKARG("pcapreport", ii);
+                MustARG("pcapreport"s, ii, argc, argv);
                 if (!strcmp(argv[ii + 1], "stderr"))
                     redirect_output_stderr();
                 else if (!strcmp(argv[ii + 1], "stdout"))
@@ -1422,7 +1401,7 @@ int main(int argc, char** argv)
                 }
                 ii++;
             } else if (!strcmp("output", arg)) {
-                CHECKARG("pcapreport", ii);
+                MustARG("pcapreport"s, ii, argc, argv);
                 ctx->output_name_base = argv[++ii];
                 ctx->extract_data = TRUE;
             } else if (!strcmp("times", arg)) {
@@ -1430,12 +1409,12 @@ int main(int argc, char** argv)
             } else if (!strcmp("analyse", arg)) {
                 ctx->analyse = TRUE;
             } else if (!strcmp("verbose", arg)) {
-                ++ctx->verbose;
+                ctx->verbose = !(ctx->verbose);
             } else if (!strcmp("destip", arg)) {
                 char* hostname;
                 int port = 0;
 
-                CHECKARG("pcapreport", ii);
+                MustARG("pcapreport"s, ii, argc, argv);
                 err = host_value("pcapreport", argv[ii], argv[ii + 1], &hostname, &port);
                 if (err)
                     return 1;
@@ -1454,14 +1433,14 @@ int main(int argc, char** argv)
                 ++ctx->dump_extra;
             } else if (!strcmp("skew-discontinuity-threshold", arg) || !strcmp("skew", arg)) {
                 int val;
-                CHECKARG("pcapreport", ii);
+                MustARG("pcapreport"s, ii, argc, argv);
                 err = int_value("pcapreport", argv[ii], argv[ii + 1], TRUE, 0, &val);
                 if (err)
                     return 1;
                 ctx->opt_skew_discontinuity_threshold = val;
                 ++ii;
             } else if (strcmp("name", arg) == 0) {
-                CHECKARG("pcapreport", ii);
+                MustARG("pcapreport"s, ii, argc, argv);
                 ctx->base_name = strdup(argv[++ii]); // So we know it is always malloced
             } else if (strcmp("extract", arg) == 0) {
                 ctx->extract = TRUE;
@@ -1475,7 +1454,7 @@ int main(int argc, char** argv)
                 ctx->file_split_section = TRUE;
             } else if (strcmp("tfmt", arg) == 0) {
                 int tfmt;
-                CHECKARG("pcapreport", ii);
+                MustARG("pcapreport"s, ii, argc, argv);
                 if ((tfmt = fmtx_str_to_timestamp_flags(argv[ii + 1])) < 0) {
                     fprint_err("### Bad timeformat: %s\n", argv[ii + 1]);
                     exit(1);
@@ -1513,12 +1492,12 @@ int main(int argc, char** argv)
     if (ctx->good_ts_only)
         ctx->keep_bad = FALSE;
 
-    if (ctx->base_name == NULL) {
+    if (ctx->base_name == nullptr) {
         // If we have no default name then use the input name as a base after
         // stripping off any likely pcap extension
         static const char* const strip_exts[] = { ".cap", ".pcap", ".pcapng" };
 
-        const char* const input_name = ctx->input_name == NULL ? "pcap" : ctx->input_name;
+        const char* const input_name = ctx->input_name == nullptr ? "pcap" : ctx->input_name;
         char* const buf = strdup(ctx->input_name);
         const size_t len = strlen(input_name);
         int i;
@@ -1566,7 +1545,7 @@ int main(int argc, char** argv)
 
         while (!done) {
             pcaprec_hdr_t rec_hdr;
-            byte* data = NULL;
+            byte* data = nullptr;
             uint32_t len = 0;
             int sent_to_output = 0;
 
@@ -1718,7 +1697,7 @@ int main(int argc, char** argv)
                     print_data(TRUE, "data", data, len, len);
                 }
                 free(allocated);
-                allocated = data = NULL;
+                allocated = data = nullptr;
             } break;
             default:
                 // Some other error.
@@ -1735,7 +1714,6 @@ int main(int argc, char** argv)
     // Analyse data if requested
     if (ctx->analyse) {
         // Spit out pcap part of the report
-        //
         const struct tm* const t = gmtime(&ctx->time_sec);
 
         fprint_msg("Pcap start time: %llu (%d-%02d-%02d %d:%02d:%02d.%06d)\n", ctx->time_start,
@@ -1754,7 +1732,7 @@ int main(int argc, char** argv)
             // Add to array for sorting
             for (i = 0; i != 256; ++i) {
                 pcapreport_stream_t* st = ctx->stream_hash[i];
-                while (st != NULL) {
+                while (st != nullptr) {
                     streams[j++] = st;
                     st = st->hash_next;
                 }
@@ -1764,8 +1742,9 @@ int main(int argc, char** argv)
             qsort(streams, ctx->stream_count, sizeof(pcapreport_stream_t*), stream_sort_fn);
 
             // Display
-            for (i = 0; i != ctx->stream_count; ++i)
+            for (i = 0; i != ctx->stream_count; ++i) {
                 stream_analysis(ctx, streams[i]);
+            }
 
             free(streams);
         }
@@ -1773,10 +1752,10 @@ int main(int argc, char** argv)
 
     // Kill it
     {
-        unsigned int i;
-        for (i = 0; i != 256; ++i) {
-            while (ctx->stream_hash[i] != NULL)
+        for (unsigned int i = 0; i != 256; ++i) {
+            while (ctx->stream_hash[i] != nullptr) {
                 stream_close(ctx, ctx->stream_hash + i);
+            }
         }
     }
 
