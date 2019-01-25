@@ -1,16 +1,59 @@
-.PHONY: build clean install install-man test
+.PHONY: build check clean install install-man test
 
 DESTDIR ?=
 PREFIX ?= /usr
 
 build:
-	CXXFLAGS='$(CXXFLAGS) -w' parallel cxx opt -C ::: es2ts esdots esfilter esmerge esreport esreverse m2ts2ts pcapreport ps2ts psdots psreport rtp2264 stream_type ts2es ts2ps ts_packet_insert tsdvbsub tsfilter tsinfo tsplay tsreport tsserve
+	cxx -C es2ts opt
+	cxx -C esdots opt
+	cxx -C esfilter opt
+	cxx -C esmerge opt
+	cxx -C esreport opt
+	cxx -C esreverse opt
+	cxx -C m2ts2ts opt
+	cxx -C pcapreport opt
+	cxx -C ps2ts opt
+	cxx -C psdots opt
+	cxx -C psreport opt
+	cxx -C rtp2264 opt
+	cxx -C stream_type opt
+	cxx -C ts2es opt
+	cxx -C ts2ps opt
+	cxx -C ts_packet_insert opt
+	cxx -C tsdvbsub opt
+	cxx -C tsfilter opt
+	cxx -C tsinfo opt
+	cxx -C tsplay opt
+	cxx -C tsreport opt
+	cxx -C tsserve opt
+
+check: test
 
 test:
 	cxx -C common test
 
 install-man:
-	parallel install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" ::: docs/mdoc/es2ts.1 docs/mdoc/esdots.1 docs/mdoc/esfilter.1 docs/mdoc/esmerge.1 docs/mdoc/esreport.1 docs/mdoc/esreverse.1 docs/mdoc/m2ts2ts.1 docs/mdoc/pcapreport.1 docs/mdoc/ps2ts.1 docs/mdoc/psdots.1 docs/mdoc/psreport.1 docs/mdoc/rtp2264.1 docs/mdoc/stream_type.1 docs/mdoc/ts2es.1 docs/mdoc/ts_packet_insert.1 docs/mdoc/tsdvbsub.1 docs/mdoc/tsfilter.1 docs/mdoc/tsinfo.1 docs/mdoc/tsplay.1 docs/mdoc/tsreport.1 docs/mdoc/tsserve.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/es2ts.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/esdots.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/esfilter.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/esmerge.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/esreport.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/esreverse.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/m2ts2ts.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/pcapreport.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/ps2ts.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/psdots.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/psreport.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/rtp2264.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/stream_type.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/ts2es.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/ts_packet_insert.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/tsdvbsub.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/tsfilter.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/tsinfo.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/tsplay.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/tsreport.1
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" docs/mdoc/tsserve.1
 
 install: build install-man
 	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C es2ts install
@@ -37,4 +80,26 @@ install: build install-man
 	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" cxx -C tsserve install
 
 clean:
-	parallel cxx clean -C ::: es2ts esdots esfilter esmerge esreport esreverse m2ts2ts pcapreport ps2ts psdots psreport rtp2264 stream_type ts2es ts2ps ts_packet_insert tsdvbsub tsfilter tsinfo tsplay tsreport tsserve common
+	cxx -C es2ts clean
+	cxx -C esdots clean
+	cxx -C esfilter clean
+	cxx -C esmerge clean
+	cxx -C esreport clean
+	cxx -C esreverse clean
+	cxx -C m2ts2ts clean
+	cxx -C pcapreport clean
+	cxx -C ps2ts clean
+	cxx -C psdots clean
+	cxx -C psreport clean
+	cxx -C rtp2264 clean
+	cxx -C stream_type clean
+	cxx -C ts2es clean
+	cxx -C ts2ps clean
+	cxx -C ts_packet_insert clean
+	cxx -C tsdvbsub clean
+	cxx -C tsfilter clean
+	cxx -C tsinfo clean
+	cxx -C tsplay clean
+	cxx -C tsreport clean
+	cxx -C tsserve clean
+	cxx -C common clean

@@ -4,7 +4,7 @@ FROM ubuntu:18.10
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y -q apt-utils build-essential git libc-dev make parallel python3 scons && \
+    apt-get install -y -q apt-file apt-utils build-essential git libc-dev make python3 scons && \
     apt-get update && \
     apt-get clean
 
