@@ -34,7 +34,6 @@
 #include <ctime>
 #include <fcntl.h>
 #include <unistd.h>
-#include <string>
 
 #include "accessunit.h"
 #include "bitdata.h"
@@ -53,8 +52,6 @@
 #include "tsplay.h"
 #include "tswrite.h"
 #include "version.h"
-
-using namespace std::string_literals;
 
 static void print_usage(int summary)
 {
@@ -322,7 +319,7 @@ int main(int argc, char** argv)
 
     // Values relevent to "opening" the output file/socket
     enum TS_writer_type how = TS_W_UNDEFINED; // how to output our TS data
-    std::string output_name = ""s; // the output filename/host
+    char* output_name = nullptr; // the output filename/host
     int port = 88; // the port to connect to
     char* multicast_if = nullptr; // IP address of multicast i/f
 
@@ -338,7 +335,7 @@ int main(int argc, char** argv)
     uint32_t audio_pid = 0x67;
     int repeat_program_every = 100;
     int pad_start = 8;
-    bool input_is_dvd = true;
+    int input_is_dvd = true;
 
     int video_stream = -1;
     int audio_stream = -1;
@@ -591,7 +588,7 @@ int main(int argc, char** argv)
                 had_input_name = true;
             } else if (!had_output_name) {
                 // This is presumably the host to write to
-                err = host_value("tsplay", nullptr, argv[ii], &output_name, &port);
+                err = host_value((char*)"tsplay", nullptr, argv[ii], &output_name, &port);
                 if (err)
                     return 1;
                 had_output_name = true;

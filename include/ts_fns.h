@@ -198,7 +198,7 @@ int write_ES_as_TS_PES_packet_with_pcr(TS_writer_p output, byte data[], uint32_t
  * Returns 0 if it worked, 1 if something went wrong.
  */
 int write_PES_as_TS_PES_packet(TS_writer_p output, byte data[], uint32_t data_len, uint32_t pid,
-    byte stream_id, bool got_pcr, uint64_t pcr_base, uint32_t pcr_extn);
+    byte stream_id, int got_pcr, uint64_t pcr_base, uint32_t pcr_extn);
 /*
  * Write out a Transport Stream Null packet.
  *
@@ -409,7 +409,7 @@ int read_buffered_TS_packet(TS_reader_p tsreader, uint32_t* count, byte* data[TS
  * - `got_PCR` is true if the adaptation field contains a PCR
  * - `pcr` is then the PCR value itself
  */
-void get_PCR_from_adaptation_field(byte adapt[], int adapt_len, bool* got_pcr, uint64_t* pcr);
+void get_PCR_from_adaptation_field(byte adapt[], int adapt_len, int* got_pcr, uint64_t* pcr);
 /*
  * Report on the contents of this TS packet's adaptation field
  *
