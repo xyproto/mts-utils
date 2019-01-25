@@ -131,7 +131,7 @@ offset_t tell_file(int filedes);
  * Returns the file descriptor for the file, or -1 if it failed to open
  * the file.
  */
-int open_binary_file(const std::string filename, int for_write);
+int open_binary_file(const std::string filename, bool for_write);
 /*
  * Utility function to close a file (descriptor), and report any errors
  *
@@ -288,7 +288,7 @@ int double_value(const std::string prefix, char* cmd, char* arg, int positive, d
  * explaining will have been written to stderr).
  */
 int host_value(
-    const std::string prefix, const char* cmd, const char* arg, char** hostname, int* port);
+    const std::string prefix, const std::string cmd, const char* arg, std::string** hostname, int* port);
 
 // ============================================================
 // Sockets
@@ -312,7 +312,7 @@ int host_value(
  * succeeds, or -1 if it fails, in which case it will have complained on
  * stderr.
  */
-int connect_socket(const std::string hostname, int port, int use_tcpip, char* multicast_ifaddr);
+int connect_socket(const std::string hostname, int port, bool use_tcpip, const std::string multicast_ifaddr);
 
 /*
  * Disconnect from a socket (close it).

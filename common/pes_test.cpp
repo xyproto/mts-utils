@@ -290,17 +290,17 @@ void print_usage()
 
 int main(int argc, char** argv)
 {
-    char* input_name = nullptr;
-    char* output_name = nullptr;
-    int had_input_name = false;
-    int had_output_name = false;
+    auto input_name = ""s;
+    auto output_name = ""s;
+    bool had_input_name = false;
+    bool had_output_name = false;
     int port = 88; // Useful default port number
     PES_reader_p reader = nullptr;
     TS_writer_p output = nullptr;
     bool quiet = false;
     bool verbose = false;
-    int video_only = false;
-    int want_output = true;
+    bool video_only = false;
+    bool want_output = true;
 
     int err;
     int ii = 1;
@@ -337,7 +337,7 @@ int main(int argc, char** argv)
                 fprintf(stderr, "### test_pes: Unexpected '%s'\n", argv[ii]);
                 return 1;
             } else if (had_input_name && want_output) {
-                err = host_value("test_pes", nullptr, argv[ii], &output_name, &port);
+                err = host_value("test_pes", ""s, argv[ii], &output_name, &port);
                 if (err)
                     return 1;
                 had_output_name = true; // more or less
@@ -371,7 +371,7 @@ int main(int argc, char** argv)
     set_PES_reader_video_only(reader, video_only);
 
     if (want_output) {
-        err = tswrite_open(TS_W_TCP, output_name, nullptr, port, quiet, &output);
+        err = tswrite_open(TS_W_TCP, output_name, ""s, port, quiet, &output);
         if (err) {
             (void)close_PES_reader(&reader);
             fprintf(stderr, "### test_pes: Unable to connect to %s\n", output_name);

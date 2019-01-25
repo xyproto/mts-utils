@@ -409,7 +409,7 @@ int read_buffered_TS_packet(TS_reader_p tsreader, uint32_t* count, byte* data[TS
  * - `got_PCR` is true if the adaptation field contains a PCR
  * - `pcr` is then the PCR value itself
  */
-void get_PCR_from_adaptation_field(byte adapt[], int adapt_len, bool* got_pcr, uint64_t* pcr);
+void get_PCR_from_adaptation_field(byte adapt[], int adapt_len, int* got_pcr, uint64_t* pcr);
 /*
  * Report on the contents of this TS packet's adaptation field
  *

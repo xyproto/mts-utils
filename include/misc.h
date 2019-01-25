@@ -288,7 +288,7 @@ offset_t tell_file(int filedes)
  * Returns the file descriptor for the file, or -1 if it failed to open
  * the file.
  */
-int open_binary_file(const std::string filename, int for_write)
+int open_binary_file(const std::string filename, bool for_write)
 {
     int flags = 0;
     int filedes;
@@ -299,9 +299,10 @@ int open_binary_file(const std::string filename, int for_write)
         flags = flags | O_RDONLY;
         filedes = open(filename.c_str(), flags);
     }
-    if (filedes == -1)
+    if (filedes == -1) {
         fprint_err("### Error opening file %s for %s: %s\n", filename,
             (for_write ? "write" : "read"), strerror(errno));
+    }
     return filedes;
 }
 
@@ -764,13 +765,11 @@ int double_value(const std::string prefix, char* cmd, char* arg, int positive, d
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int host_value(
-    const std::string prefix, const char* cmd, const char* arg, std::string* hostname, int* port)
+int host_value(const std::string prefix, const std::string cmd, const char* arg, std::string* hostname, int* port)
 {
     char* p = strchr((char*)arg, ':');
 
-    std::string h = (char*)arg;
-    *hostname = h;
+    *hostname = std::string(arg);
 
     if (p != nullptr) {
         char* ptr;
@@ -783,10 +782,11 @@ int host_value(
             if (!prefix.empty()) {
                 fprint_err("%s: ", prefix.c_str());
             }
-            if (cmd)
-                fprint_err("Cannot read port number in %s %s (%s)\n", cmd, arg, strerror(errno));
-            else
+            if (!cmd.empty()) {
+                fprint_err("Cannot read port number in %s %s (%s)\n", cmd.c_str(), arg, strerror(errno));
+            } else {
                 fprint_err("Cannot read port number in %s (%s)\n", arg, strerror(errno));
+            }
             return 1;
         }
         if (ptr[0] != '\0') {
@@ -795,10 +795,11 @@ int host_value(
             if (!prefix.empty()) {
                 fprint_err("%s: ", prefix.c_str());
             }
-            if (cmd)
-                fprint_err("Unexpected characters in port number in %s %s\n", cmd, arg);
-            else
+            if (!cmd.empty()) {
+                fprint_err("Unexpected characters in port number in %s %s\n", cmd.c_str(), arg);
+            } else {
                 fprint_err("Unexpected characters in port number in %s\n", arg);
+            }
             return 1;
         }
         if (*port < 0) {
@@ -807,10 +808,11 @@ int host_value(
             if (!prefix.empty()) {
                 fprint_err("%s: ", prefix.c_str());
             }
-            if (cmd)
-                fprint_err("Negative port number in %s %s\n", cmd, arg);
-            else
+            if (!cmd.empty()) {
+                fprint_err("Negative port number in %s %s\n", cmd.c_str(), arg);
+            } else {
                 fprint_err("Negative port number in %s\n", arg);
+            }
             return 1;
         }
     }
@@ -843,11 +845,10 @@ int host_value(
  * succeeds, or -1 if it fails, in which case it will have complained on
  * stderr.
  */
-int connect_socket(const char* hostname, int port, int use_tcpip, char* multicast_ifaddr)
+int connect_socket(const std::string hostname, int port, bool use_tcpip, const std::string multicast_ifaddr)
 {
     int output;
     int result;
-    struct hostent* hp;
     struct sockaddr_in ipaddr;
 
     output = socket(AF_INET, (use_tcpip ? SOCK_STREAM : SOCK_DGRAM), 0);
@@ -856,9 +857,9 @@ int connect_socket(const char* hostname, int port, int use_tcpip, char* multicas
         return -1;
     }
 
-    hp = gethostbyname(hostname);
+    struct hostent* hp = gethostbyname(hostname.c_str());
     if (hp == nullptr) {
-        fprint_err("### Unable to resolve host %s: %s\n", hostname, hstrerror(h_errno));
+        fprint_err("### Unable to resolve host %s: %s\n", hostname.c_str(), hstrerror(h_errno));
         return -1;
     }
     memcpy(&ipaddr.sin_addr.s_addr, hp->h_addr, hp->h_length);
@@ -874,12 +875,12 @@ int connect_socket(const char* hostname, int port, int use_tcpip, char* multicas
             return -1;
         }
 
-        if (multicast_ifaddr) {
+        if (!multicast_ifaddr.empty()) {
             struct in_addr addr;
-            inet_aton(multicast_ifaddr, &addr);
+            inet_aton(multicast_ifaddr.c_str(), &addr);
             result = setsockopt(output, IPPROTO_IP, IP_MULTICAST_IF, (char*)&addr, sizeof(addr));
             if (result < 0) {
-                fprint_err("### Unable to set multicast interface %s: %s\n", multicast_ifaddr,
+                fprint_err("### Unable to set multicast interface %s: %s\n", multicast_ifaddr.c_str(),
                     strerror(errno));
                 return -1;
             }
@@ -888,7 +889,7 @@ int connect_socket(const char* hostname, int port, int use_tcpip, char* multicas
 
     result = connect(output, (struct sockaddr*)&ipaddr, sizeof(ipaddr));
     if (result < 0) {
-        fprint_err("### Unable to connect to host %s: %s\n", hostname, strerror(errno));
+        fprint_err("### Unable to connect to host %s: %s\n", hostname.c_str(), strerror(errno));
         return -1;
     }
     return output;

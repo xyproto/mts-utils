@@ -48,7 +48,7 @@
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-int tswrite_open(TS_WRITER_TYPE how, const std::string name, char* multicast_if, int port,
+int tswrite_open(TS_WRITER_TYPE how, const std::string name, const std::string multicast_if, int port,
     bool quiet, TS_writer_p* tswriter);
 /*
  * Open a network connection for TS output.
@@ -71,7 +71,7 @@ int tswrite_open(TS_WRITER_TYPE how, const std::string name, char* multicast_if,
  * Returns 0 if all goes well, 1 if something went wrong.
  */
 int tswrite_open_connection(
-    int use_tcp, const std::string name, int port, bool quiet, TS_writer_p* tswriter);
+    bool use_tcp, const std::string name, int port, bool quiet, TS_writer_p* tswriter);
 /*
  * Open a file for TS output.
  *

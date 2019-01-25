@@ -2158,7 +2158,7 @@ int tswrite_build(TS_WRITER_TYPE how, bool quiet, TS_writer_p* tswriter)
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-int tswrite_open(TS_WRITER_TYPE how, const std::string name, char* multicast_if, int port,
+int tswrite_open(TS_WRITER_TYPE how, const std::string name, const std::string multicast_if, int port,
     bool quiet, TS_writer_p* tswriter)
 {
     TS_writer_p new2;
@@ -2200,11 +2200,12 @@ int tswrite_open(TS_WRITER_TYPE how, const std::string name, char* multicast_if,
             // the purposes of these messages (amending `connect_socket`, which does
             // know, to output this message iff `!quiet` is a bit overkill)
             fprint_msg("Connecting to %s via UDP on port %d", name.c_str(), port);
-            if (multicast_if)
-                fprint_msg(" (multicast interface %s)", multicast_if);
+            if (!multicast_if.empty()) {
+                fprint_msg(" (multicast interface %s)", multicast_if.c_str());
+            }
             print_msg("\n");
         }
-        new2->where.socket = connect_socket(name.c_str(), port, false, multicast_if);
+        new2->where.socket = connect_socket(name, port, false, multicast_if);
         if (new2->where.socket == -1) {
             fprint_err("### Unable to connect to %s\n", name.c_str());
             return 1;
@@ -2243,7 +2244,7 @@ int tswrite_open(TS_WRITER_TYPE how, const std::string name, char* multicast_if,
 int tswrite_open_connection(
     int use_tcp, const std::string name, int port, bool quiet, TS_writer_p* tswriter)
 {
-    return tswrite_open((use_tcp ? TS_W_TCP : TS_W_UDP), name, nullptr, port, quiet, tswriter);
+    return tswrite_open((use_tcp ? TS_W_TCP : TS_W_UDP), name, ""s, port, quiet, tswriter);
 }
 
 /*
@@ -2263,8 +2264,7 @@ int tswrite_open_connection(
  */
 int tswrite_open_file(const std::string name, bool quiet, TS_writer_p* tswriter)
 {
-    return tswrite_open(
-        (name.empty() ? TS_W_STDOUT : TS_W_FILE), name, nullptr, 0, quiet, tswriter);
+    return tswrite_open((name.empty() ? TS_W_STDOUT : TS_W_FILE), name, ""s, 0, quiet, tswriter);
 }
 
 /*

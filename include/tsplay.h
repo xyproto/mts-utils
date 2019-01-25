@@ -52,7 +52,7 @@
  * false and either EOF was read, or `max` TS packets were read.
  */
 int read_TS_packet(TS_reader_p tsreader, uint32_t* count, byte* data[TS_PACKET_SIZE],
-    uint32_t* pid, bool* got_pcr, uint64_t* pcr, int max, int loop, offset_t start_posn,
+    uint32_t* pid, int* got_pcr, uint64_t* pcr, int max, int loop, offset_t start_posn,
     uint32_t start_count, bool quiet)
 {
     int err;
@@ -475,7 +475,7 @@ int play_TS_packets(TS_reader_p tsreader, TS_writer_p tswriter,
     for (;;) {
         byte* data;
         uint32_t pid;
-        bool got_pcr;
+        int got_pcr;
         uint64_t pcr = 0;
 
         err = read_TS_packet(tsreader, &count, &data, &pid, &got_pcr, &pcr, max, loop, start_posn,

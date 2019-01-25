@@ -1359,7 +1359,7 @@ int fill_TS_packet_buffer(TS_reader_p tsreader)
     for (ii = 0; ii < PCR_READ_AHEAD_SIZE; ii++) {
         byte* data;
         uint32_t pid;
-        bool got_pcr;
+        int got_pcr;
         uint64_t pcr;
         int payload_unit_start_indicator;
         byte* adapt;
@@ -1681,7 +1681,7 @@ int read_buffered_TS_packet(TS_reader_p tsreader, uint32_t* count, byte* data[TS
  * - `got_PCR` is true if the adaptation field contains a PCR
  * - `pcr` is then the PCR value itself
  */
-void get_PCR_from_adaptation_field(byte adapt[], int adapt_len, bool* got_pcr, uint64_t* pcr)
+void get_PCR_from_adaptation_field(byte adapt[], int adapt_len, int* got_pcr, uint64_t* pcr)
 {
     if (adapt_len == 0 || adapt == nullptr)
         *got_pcr = false;
@@ -1712,7 +1712,7 @@ void get_PCR_from_adaptation_field(byte adapt[], int adapt_len, bool* got_pcr, u
  */
 void report_adaptation_field(byte adapt[], int adapt_len)
 {
-    bool got_pcr;
+    int got_pcr;
     uint64_t pcr;
 
     if (adapt_len == 0 || adapt == nullptr)
@@ -1760,7 +1760,7 @@ void report_adaptation_field(byte adapt[], int adapt_len)
  */
 void report_adaptation_timing(timing_p times, byte adapt[], int adapt_len, int packet_count)
 {
-    bool got_pcr;
+    int got_pcr;
     uint64_t pcr;
 
     if (adapt_len == 0 || adapt == nullptr || times == nullptr)
