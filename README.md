@@ -69,7 +69,7 @@ The following utilites are available:
 - [ ] Remove `static` from functions that don't need it.
 - [ ] Restructure header files, make `*_fns.h` just `*_.h` and place the function bodies that are not `inline` in `.cpp` files.
 - [ ] Use `enum class` for all enums.
-- [ ] Fix the `tsplay` segfault by using git bisect.
+- [ ] Fix the `tsplay` segfault.
 
 # Additional info
 
