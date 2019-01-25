@@ -10,7 +10,7 @@ build:
 test:
 	+cxx -C common test
 
-install: install-man
+install: build install-man
 	+parallel install -Dm755 -t "$(DESTDIR)$(PREFIX)/usr/bin" ::: es2ts/es2ts esdots/esdots esfilter/esfilter esmerge/esmerge esreport/esreport esreverse/esreverse m2ts2ts/m2ts2ts pcapreport/pcapreport ps2ts/ps2ts psdots/psdots psreport/psreport rtp2264/rtp2264 stream_type/stream_type ts2es/ts2es ts2ps/ts2ps ts_packet_insert/ts_packet_insert tsdvbsub/tsdvbsub tsfilter/tsfilter tsinfo/tsinfo tsplay/tsplay tsreport/tsreport tsserve/tsserve
 
 install-man:
