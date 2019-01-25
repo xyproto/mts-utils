@@ -8,13 +8,9 @@
 
 #include <cstdarg>
 #include <cstdio>
-#include <iostream>
-#include <string>
 
 #include "compat.h"
 #include "printing_fns.h"
-
-using namespace std::string_literals;
 
 #define DEBUG 0
 
@@ -70,9 +66,9 @@ static struct print_fns fns = { print_message_to_stdout, print_message_to_stdout
     fprint_message_to_stdout, fprint_message_to_stdout, flush_stdout };
 
 #if DEBUG
-static void report_fns(const std::string why)
+static void report_fns(const char* why)
 {
-    printf("Printing bound to (%s) m:%p, e:%p, fm:%p, fe:%p\n", why.c_str(), fns.print_message_fn,
+    printf("Printing bound to (%s) m:%p, e:%p, fm:%p, fe:%p\n", why, fns.print_message_fn,
         fns.print_error_fn, fns.fprint_message_fn, fns.fprint_error_fn);
 }
 #endif
@@ -83,25 +79,25 @@ static void report_fns(const std::string why)
 /*
  * Prints the given string, as a normal message.
  */
-void print_msg(const std::string text)
+void print_msg(const char* text)
 {
 #if DEBUG
     printf("m:%p %s", fns.print_message_fn, text);
-    report_fns("m"s);
+    report_fns("m");
 #endif
-    fns.print_message_fn(text.c_str());
+    fns.print_message_fn(text);
 }
 
 /*
  * Prints the given string, as an error message.
  */
-void print_err(const std::string text)
+void print_err(const char* text)
 {
 #if DEBUG
     printf("e:%p %s", fns.print_error_fn, text);
-    report_fns("e"s);
+    report_fns("e");
 #endif
-    fns.print_error_fn(text.c_str());
+    fns.print_error_fn(text);
 }
 
 /*
@@ -113,7 +109,7 @@ void fprint_msg(const char* format, ...)
     va_start(va_arg, format);
 #if DEBUG
     printf("fm:%p %s", fns.fprint_message_fn, format);
-    report_fns("fm"s);
+    report_fns("fm");
 #endif
     fns.fprint_message_fn(format, va_arg);
     va_end(va_arg);
@@ -128,7 +124,7 @@ void fprint_err(const char* format, ...)
     va_start(va_arg, format);
 #if DEBUG
     printf("fe:%p %s", fns.fprint_error_fn, format);
-    report_fns("fe"s);
+    report_fns("fe");
 #endif
     fns.fprint_error_fn(format, va_arg);
     va_end(va_arg);
@@ -138,20 +134,20 @@ void fprint_err(const char* format, ...)
  * Prints the given formatted text, as a normal or error message.
  * If `is_msg`, then as a normal message, else as an error
  */
-void fprint_msg_or_err(bool is_msg, const char* format, ...)
+void fprint_msg_or_err(int is_msg, const char* format, ...)
 {
     va_list va_arg;
     va_start(va_arg, format);
     if (is_msg) {
 #if DEBUG
         printf("?m:%p %s", fns.fprint_message_fn, format);
-        report_fns("?m"s);
+        report_fns("?m");
 #endif
         fns.fprint_message_fn(format, va_arg);
     } else {
 #if DEBUG
         printf("?e:%p %s", fns.fprint_error_fn, format);
-        report_fns("?e"s);
+        report_fns("?e");
 #endif
         fns.fprint_error_fn(format, va_arg);
     }
@@ -180,7 +176,7 @@ void redirect_output_stderr(void)
     fns.flush_message_fn = &flush_stdout;
 
 #if DEBUG
-    report_fns("traditional"s);
+    report_fns("traditional");
 #endif
 }
 
@@ -199,7 +195,7 @@ void redirect_output_stdout(void)
     fns.flush_message_fn = &flush_stdout;
 
 #if DEBUG
-    report_fns("stdout"s);
+    report_fns("stdout");
 #endif
 }
 
@@ -241,7 +237,7 @@ int redirect_output(void (*new_print_message_fn)(const char* message),
     fns.flush_message_fn = new_flush_msg_fn;
 
 #if DEBUG
-    report_fns("specific"s);
+    report_fns("specific");
 #endif
 
     return 0;
@@ -249,8 +245,8 @@ int redirect_output(void (*new_print_message_fn)(const char* message),
 
 void test_C_printing(void)
 {
-    std::cout << "C Message" << std::endl;
-    std::cerr << "C Error" << std::endl;
+    print_msg("C Message\n");
+    print_err("C Error\n");
     fprint_msg("C Message %s\n", "Fred");
     fprint_err("C Error %s\n", "Fred");
 }

@@ -37,7 +37,7 @@
  * - `count` is a running count of TS packets read from this input
  * - `data` is a pointer to the data for the packet
  * - `pid` is the PID of the TS packet
- * - `got_PCR` is true if the adaptation field of this packet contains a PCR
+ * - `got_PCR` is TRUE if the adaptation field of this packet contains a PCR
  * - `pcr` is then the PCR value itself
  * - if `max` is greater than zero, then at most `max` TS packets should
  *   be read from the input
@@ -53,7 +53,7 @@
  */
 static int read_TS_packet(TS_reader_p tsreader, uint32_t* count, byte* data[TS_PACKET_SIZE],
     uint32_t* pid, int* got_pcr, uint64_t* pcr, int max, int loop, offset_t start_posn,
-    uint32_t start_count, bool quiet)
+    uint32_t start_count, int quiet)
 {
     int err;
     int payload_unit_start_indicator;
@@ -125,7 +125,7 @@ static int read_TS_packet(TS_reader_p tsreader, uint32_t* count, byte* data[TS_P
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int find_PCR_PID(TS_reader_p tsreader, TS_writer_p tswriter, uint32_t* pcr_pid,
-    uint32_t* num_read, int max, bool quiet)
+    uint32_t* num_read, int max, int quiet)
 {
     int err;
     int count = 0;
@@ -136,7 +136,7 @@ static int find_PCR_PID(TS_reader_p tsreader, TS_writer_p tswriter, uint32_t* pc
     int adapt_len;
     byte* payload;
     int payload_len;
-    int got_PAT = false;
+    int got_PAT = FALSE;
 
     pidint_list_p prog_list = nullptr;
     pmt_p pmt = nullptr;
@@ -180,7 +180,7 @@ static int find_PCR_PID(TS_reader_p tsreader, TS_writer_p tswriter, uint32_t* pc
         // Whatever we've found, don't forget to write it out via the
         // circular buffer (and we *know* it doesn't have a PCR that is
         // useful to us, as yet)
-        err = tswrite_write(tswriter, data, pid, false, 0);
+        err = tswrite_write(tswriter, data, pid, FALSE, 0);
         if (err) {
             fprint_err("### Error writing TS packet %d to circular buffer\n", count);
             if (pmt_data)
@@ -207,7 +207,7 @@ static int find_PCR_PID(TS_reader_p tsreader, TS_writer_p tswriter, uint32_t* pc
             }
 
             err = build_psi_data(
-                false, payload, payload_len, pid, &pat_data, &pat_data_len, &pat_data_used);
+                FALSE, payload, payload_len, pid, &pat_data, &pat_data_len, &pat_data_used);
             if (err) {
                 fprint_err("### Error %s PAT\n",
                     (payload_unit_start_indicator ? "starting new" : "continuing"));
@@ -220,13 +220,13 @@ static int find_PCR_PID(TS_reader_p tsreader, TS_writer_p tswriter, uint32_t* pc
             if (pat_data_len > pat_data_used)
                 continue;
 
-            err = extract_prog_list_from_pat(false, pat_data, pat_data_len, &prog_list);
+            err = extract_prog_list_from_pat(FALSE, pat_data, pat_data_len, &prog_list);
             if (err != 0) {
                 free(pat_data);
                 continue;
             }
             if (!quiet)
-                report_pidint_list(prog_list, "Program list", "Program", false);
+                report_pidint_list(prog_list, "Program list", "Program", FALSE);
 
             if (prog_list->length > 1 && !quiet)
                 print_msg("Multiple programs in PAT - using the first\n\n");
@@ -234,7 +234,7 @@ static int find_PCR_PID(TS_reader_p tsreader, TS_writer_p tswriter, uint32_t* pc
             pmt_pid = prog_list->pid[0];
             pmt_program_number = prog_list->number[0];
 
-            got_PAT = true;
+            got_PAT = TRUE;
             free_pidint_list(&prog_list);
             free(pat_data);
             pat_data = nullptr;
@@ -261,7 +261,7 @@ static int find_PCR_PID(TS_reader_p tsreader, TS_writer_p tswriter, uint32_t* pc
             }
 
             err = build_psi_data(
-                false, payload, payload_len, pid, &pmt_data, &pmt_data_len, &pmt_data_used);
+                FALSE, payload, payload_len, pid, &pmt_data, &pmt_data_len, &pmt_data_used);
             if (err) {
                 fprint_err("### Error %s PMT\n",
                     (payload_unit_start_indicator ? "starting new" : "continuing"));
@@ -274,7 +274,7 @@ static int find_PCR_PID(TS_reader_p tsreader, TS_writer_p tswriter, uint32_t* pc
             if (pmt_data_len > pmt_data_used)
                 continue;
 
-            err = extract_pmt(false, pmt_data, pmt_data_len, pmt_pid, &pmt);
+            err = extract_pmt(FALSE, pmt_data, pmt_data_len, pmt_pid, &pmt);
             free(pmt_data);
             pmt_data = nullptr;
             if (err)
@@ -289,7 +289,7 @@ static int find_PCR_PID(TS_reader_p tsreader, TS_writer_p tswriter, uint32_t* pc
             }
 
             if (!quiet)
-                report_pmt(true, (char*)"  ", pmt);
+                report_pmt(TRUE, (char*)"  ", pmt);
             *pcr_pid = pmt->PCR_pid;
             free_pmt(&pmt);
             if (!quiet)
@@ -337,7 +337,7 @@ static int find_PCR_PID(TS_reader_p tsreader, TS_writer_p tswriter, uint32_t* pc
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int play_buffered_TS_packets(TS_reader_p tsreader, TS_writer_p tswriter,
-    uint32_t pid_to_ignore, uint32_t override_pcr_pid, int max, int loop, bool quiet, bool verbose)
+    uint32_t pid_to_ignore, uint32_t override_pcr_pid, int max, int loop, int quiet, bool verbose)
 {
     int err;
     int total = 0;
@@ -405,7 +405,7 @@ static int play_buffered_TS_packets(TS_reader_p tsreader, TS_writer_p tswriter,
             continue;
 
         // And write it out via the circular buffer
-        err = tswrite_write(tswriter, data, pid, true, pcr);
+        err = tswrite_write(tswriter, data, pid, TRUE, pcr);
         if (err) {
             fprint_err("### Error writing TS packet %d to circular buffer\n", count);
             return 1;
@@ -440,7 +440,7 @@ static int play_buffered_TS_packets(TS_reader_p tsreader, TS_writer_p tswriter,
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int play_TS_packets(TS_reader_p tsreader, TS_writer_p tswriter,
-    const tsplay_output_pace_mode pace_mode, uint32_t pid_to_ignore, int max, int loop, bool quiet,
+    const tsplay_output_pace_mode pace_mode, uint32_t pid_to_ignore, int max, int loop, int quiet,
     bool verbose)
 {
     int err;
@@ -511,7 +511,7 @@ static int play_TS_packets(TS_reader_p tsreader, TS_writer_p tswriter,
                     fprint_msg("Other PCR PIDs seen: %#x (%d)...\n", pid, pid);
                 }
                 pcrs_ignored++;
-                got_pcr = false;
+                got_pcr = FALSE;
             }
         }
 
@@ -573,7 +573,7 @@ static int play_TS_packets(TS_reader_p tsreader, TS_writer_p tswriter,
  * Returns 0 if all went well, 1 if something went wrong.
  */
 int play_TS_stream(int input, TS_writer_p tswriter, const tsplay_output_pace_mode pace_mode,
-    uint32_t pid_to_ignore, uint32_t override_pcr_pid, int max, int loop, bool quiet, bool verbose)
+    uint32_t pid_to_ignore, uint32_t override_pcr_pid, int max, int loop, int quiet, bool verbose)
 {
     int err;
     TS_reader_p tsreader;
@@ -645,7 +645,7 @@ int play_PS_stream(int input, TS_writer_p output, int pad_start, int program_rep
     int force_stream_type, int want_h262, int input_is_dvd, int video_stream, int audio_stream,
     int want_ac3_audio, int want_dolby_as_dvb, uint32_t pmt_pid, uint32_t pcr_pid,
     uint32_t video_pid, int keep_audio, uint32_t audio_pid, int max, int loop, bool verbose,
-    bool quiet)
+    int quiet)
 {
     int err;
     int is_h264;
@@ -697,7 +697,7 @@ int play_PS_stream(int input, TS_writer_p output, int pad_start, int program_rep
             }
             err = ps_to_ts(ps, output, pad_start, program_repeat, is_h264, input_is_dvd,
                 video_stream, audio_stream, want_ac3_audio, want_dolby_as_dvb, pmt_pid, pcr_pid,
-                video_pid, keep_audio, audio_pid, max, false, true);
+                video_pid, keep_audio, audio_pid, max, FALSE, TRUE);
             if (err) {
                 if (loop)
                     print_err("!!! Ignoring error and looping\n");

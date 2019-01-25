@@ -305,15 +305,15 @@ int main(int argc, char** argv)
     TS_writer_p tswriter;
     struct TS_context context;
     char* input_name = nullptr;
-    int had_input_name = false;
-    int had_output_name = false;
+    int had_input_name = FALSE;
+    int had_output_name = FALSE;
     int input = -1;
     int max = 0; // The maximum number of TS packets to read (or 0)
-    bool quiet = false;
-    bool verbose = false;
+    int quiet = FALSE;
+    bool verbose = FALSE;
     int err = 0;
     int ii = 1;
-    int loop = false;
+    int loop = FALSE;
     time_t start, end;
     int is_TS; // Does it appear to be TS or PS?
 
@@ -335,20 +335,20 @@ int main(int argc, char** argv)
     uint32_t audio_pid = 0x67;
     int repeat_program_every = 100;
     int pad_start = 8;
-    int input_is_dvd = true;
+    int input_is_dvd = TRUE;
 
     int video_stream = -1;
     int audio_stream = -1;
-    int want_ac3_audio = false;
+    int want_ac3_audio = FALSE;
 
-    int want_h262 = true;
-    int force_stream_type = false;
-    int want_dolby_as_dvb = true;
+    int want_h262 = TRUE;
+    int force_stream_type = FALSE;
+    int want_dolby_as_dvb = TRUE;
     int drop_packets = 0;
     int drop_number = 0;
 
     if (argc < 2) {
-        print_usage(true);
+        print_usage(TRUE);
         return 0;
     }
 
@@ -382,9 +382,9 @@ int main(int argc, char** argv)
                     else if (!strcmp(argv[ii + 1], "debug") || !strcmp(argv[ii + 1], "debugging"))
                         print_help_debugging();
                     else if (!strcmp(argv[ii + 1], "detail") || !strcmp(argv[ii + 1], "details"))
-                        print_usage(false);
+                        print_usage(FALSE);
                     else if (!strcmp(argv[ii + 1], "all")) {
-                        print_usage(false);
+                        print_usage(FALSE);
                         print_msg("\n");
                         print_help_ts();
                         print_msg("\n");
@@ -406,14 +406,14 @@ int main(int argc, char** argv)
                 }
                 return 0;
             } else if (!strcmp("-quiet", argv[ii]) || !strcmp("-q", argv[ii])) {
-                quiet = true;
-                verbose = false;
+                quiet = TRUE;
+                verbose = FALSE;
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
-                quiet = false;
-                verbose = true;
+                quiet = FALSE;
+                verbose = TRUE;
             } else if (!strcmp("-output", argv[ii]) || !strcmp("-o", argv[ii])) {
                 MustARG("tsplay", ii, argc, argv);
-                had_output_name = true;
+                had_output_name = TRUE;
                 how = TS_W_FILE;
                 output_name = argv[ii + 1];
                 ii++;
@@ -422,12 +422,12 @@ int main(int argc, char** argv)
                 multicast_if = argv[ii + 1];
                 ii++;
             } else if (!strcmp("-stdout", argv[ii])) {
-                had_output_name = true; // more or less
+                had_output_name = TRUE; // more or less
                 how = TS_W_STDOUT;
                 output_name = nullptr;
                 redirect_output_stderr();
             } else if (!strcmp("-stdin", argv[ii])) {
-                had_input_name = true; // more or less
+                had_input_name = TRUE; // more or less
                 input_name = nullptr;
             } else if (!strcmp("-err", argv[ii])) {
                 MustARG("tsplay", ii, argc, argv);
@@ -457,7 +457,7 @@ int main(int argc, char** argv)
                 how = TS_W_UDP;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
                 MustARG("tsplay", ii, argc, argv);
-                err = int_value((char*)"tsplay", argv[ii], argv[ii + 1], true, 10, &max);
+                err = int_value((char*)"tsplay", argv[ii], argv[ii + 1], TRUE, 10, &max);
                 if (err)
                     return 1;
                 ii++;
@@ -477,17 +477,17 @@ int main(int argc, char** argv)
                     return 1;
                 ii++;
             } else if (!strcmp("-loop", argv[ii])) {
-                loop = true;
+                loop = TRUE;
             } else if (!strcmp("-avc", argv[ii]) || !strcmp("-h264", argv[ii])) {
-                force_stream_type = true;
-                want_h262 = false;
+                force_stream_type = TRUE;
+                want_h262 = FALSE;
             } else if (!strcmp("-h262", argv[ii])) {
-                force_stream_type = true;
-                want_h262 = true;
+                force_stream_type = TRUE;
+                want_h262 = TRUE;
             } else if (!strcmp("-dvd", argv[ii])) {
-                input_is_dvd = true;
+                input_is_dvd = TRUE;
             } else if (!strcmp("-notdvd", argv[ii]) || !strcmp("-nodvd", argv[ii])) {
-                input_is_dvd = false;
+                input_is_dvd = FALSE;
             } else if (!strcmp("-vstream", argv[ii])) {
                 MustARG("tsplay", ii, argc, argv);
                 err = int_value_in_range(
@@ -501,7 +501,7 @@ int main(int argc, char** argv)
                     (char*)"ps2ts", argv[ii], argv[ii + 1], 0, 0x1F, 0, &audio_stream);
                 if (err)
                     return 1;
-                want_ac3_audio = false;
+                want_ac3_audio = FALSE;
                 ii++;
             } else if (!strcmp("-ac3stream", argv[ii])) {
                 MustARG("tsplay", ii, argc, argv);
@@ -509,15 +509,15 @@ int main(int argc, char** argv)
                     (char*)"ps2ts", argv[ii], argv[ii + 1], 0, 0x7, 0, &audio_stream);
                 if (err)
                     return 1;
-                want_ac3_audio = true;
-                input_is_dvd = true;
+                want_ac3_audio = TRUE;
+                input_is_dvd = TRUE;
                 ii++;
             } else if (!strcmp("-dolby", argv[ii])) {
                 MustARG("tsplay", ii, argc, argv);
                 if (!strcmp("dvb", argv[ii + 1]))
-                    want_dolby_as_dvb = true;
+                    want_dolby_as_dvb = TRUE;
                 else if (!strcmp("atsc", argv[ii + 1]))
-                    want_dolby_as_dvb = false;
+                    want_dolby_as_dvb = FALSE;
                 else {
                     print_err("### tsplay: -dolby must be followed by dvb or atsc\n");
                     return 1;
@@ -526,13 +526,13 @@ int main(int argc, char** argv)
             } else if (!strcmp("-prepeat", argv[ii])) {
                 MustARG("tsplay", ii, argc, argv);
                 err = int_value(
-                    (char*)"tsplay", argv[ii], argv[ii + 1], true, 10, &repeat_program_every);
+                    (char*)"tsplay", argv[ii], argv[ii + 1], TRUE, 10, &repeat_program_every);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-pad", argv[ii])) {
                 MustARG("tsplay", ii, argc, argv);
-                err = int_value((char*)"tsplay", argv[ii], argv[ii + 1], true, 10, &pad_start);
+                err = int_value((char*)"tsplay", argv[ii], argv[ii + 1], TRUE, 10, &pad_start);
                 if (err)
                     return 1;
                 ii++;
@@ -569,10 +569,10 @@ int main(int argc, char** argv)
                     print_err("### tsplay: -drop requires two arguments\n");
                     return 1;
                 }
-                err = int_value((char*)"tsplay", argv[ii], argv[ii + 1], true, 0, &drop_packets);
+                err = int_value((char*)"tsplay", argv[ii], argv[ii + 1], TRUE, 0, &drop_packets);
                 if (err)
                     return 1;
-                err = int_value((char*)"tsplay", argv[ii], argv[ii + 2], true, 0, &drop_number);
+                err = int_value((char*)"tsplay", argv[ii], argv[ii + 2], TRUE, 0, &drop_number);
                 if (err)
                     return 1;
                 ii += 2;
@@ -585,13 +585,13 @@ int main(int argc, char** argv)
         } else {
             if (!had_input_name) {
                 input_name = argv[ii];
-                had_input_name = true;
+                had_input_name = TRUE;
             } else if (!had_output_name) {
                 // This is presumably the host to write to
                 err = host_value((char*)"tsplay", nullptr, argv[ii], &output_name, &port);
                 if (err)
                     return 1;
-                had_output_name = true;
+                had_output_name = TRUE;
                 if (how == TS_W_UNDEFINED)
                     how = TS_W_UDP;
             } else {
@@ -619,8 +619,8 @@ int main(int argc, char** argv)
 
     // Try to stop extraneous data ending up in our output stream
     if (how == TS_W_STDOUT) {
-        verbose = false;
-        quiet = true;
+        verbose = FALSE;
+        quiet = TRUE;
     }
 
     // This is an important check
@@ -642,7 +642,7 @@ int main(int argc, char** argv)
         context.pcr_mode = TSWRITE_PCR_MODE_PCR1;
 
     if (input_name) {
-        input = open_binary_file(input_name, false);
+        input = open_binary_file(input_name, FALSE);
         if (input == -1) {
             fprint_err("### tsplay: Unable to open input file %s\n", input_name);
             return 1;
@@ -657,7 +657,7 @@ int main(int argc, char** argv)
     } else {
         input_name = (char*)"<stdin>";
         input = STDIN_FILENO;
-        is_TS = true; // an assertion
+        is_TS = TRUE; // an assertion
     }
     if (!quiet)
         fprint_msg("Reading from  %s%s\n", input_name, (loop ? " (and looping)" : ""));
@@ -710,7 +710,7 @@ int main(int argc, char** argv)
         if (err) {
             print_err("### tsplay: Error setting up buffering\n");
             (void)close_file(input);
-            (void)tswrite_close(tswriter, true);
+            (void)tswrite_close(tswriter, TRUE);
             return 1;
         }
     }
@@ -721,11 +721,11 @@ int main(int argc, char** argv)
     } else
         err = play_PS_stream(input, tswriter, pad_start, repeat_program_every, force_stream_type,
             want_h262, input_is_dvd, video_stream, audio_stream, want_ac3_audio, want_dolby_as_dvb,
-            pmt_pid, pcr_pid, video_pid, true, audio_pid, max, loop, verbose, quiet);
+            pmt_pid, pcr_pid, video_pid, TRUE, audio_pid, max, loop, verbose, quiet);
     if (err) {
         print_err("### tsplay: Error playing stream\n");
         (void)close_file(input);
-        (void)tswrite_close(tswriter, true);
+        (void)tswrite_close(tswriter, TRUE);
         return 1;
     }
 
@@ -739,7 +739,7 @@ int main(int argc, char** argv)
     err = close_file(input);
     if (err) {
         fprint_err("### tsplay: Error closing input file %s\n", input_name);
-        (void)tswrite_close(tswriter, true);
+        (void)tswrite_close(tswriter, TRUE);
         return 1;
     }
     err = tswrite_close(tswriter, quiet);

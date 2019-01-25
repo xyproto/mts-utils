@@ -41,7 +41,7 @@ static inline int build_access_unit(access_unit_p* acc_unit, uint32_t index)
         return err;
     }
     new2->index = index;
-    new2->started_primary_picture = false;
+    new2->started_primary_picture = FALSE;
     new2->primary_start = nullptr;
     new2->ignored_broken_NAL_units = 0;
 
@@ -54,7 +54,7 @@ static inline int build_access_unit(access_unit_p* acc_unit, uint32_t index)
 /*
  * Tidy up an access unit datastructure after we've finished with it.
  *
- * If `deep` is true, also frees all of the NAL units in the NAL unit
+ * If `deep` is TRUE, also frees all of the NAL units in the NAL unit
  * list (which is normally what we want to do).
  */
 static inline void clear_access_unit(access_unit_p acc_unit, int deep)
@@ -74,7 +74,7 @@ void free_access_unit(access_unit_p* acc_unit)
 {
     if (*acc_unit == nullptr)
         return;
-    clear_access_unit(*acc_unit, true);
+    clear_access_unit(*acc_unit, TRUE);
     free(*acc_unit);
     *acc_unit = nullptr;
 }
@@ -105,7 +105,7 @@ void report_access_unit(access_unit_p access_unit)
             print_msg("     <null>\n");
         else {
             fprint_msg("    %c", ((access_unit->primary_start == nal) ? '*' : ' '));
-            report_nal(true, nal);
+            report_nal(TRUE, nal);
         }
     }
 }
@@ -160,22 +160,22 @@ int all_slices_I(access_unit_p access_unit)
 {
     int ii;
     if (access_unit->primary_start == nullptr)
-        return false;
+        return FALSE;
     if (!nal_is_slice(access_unit->primary_start))
-        return false;
+        return FALSE;
     // All I
     if (access_unit->primary_start->u.slice.slice_type == ALL_SLICES_I)
-        return true;
+        return TRUE;
     // Only one slice, and it's I
     if (num_slices(access_unit) == 1 && access_unit->primary_start->u.slice.slice_type == SLICE_I)
-        return true;
+        return TRUE;
     // Are any of the slices not I?
     for (ii = 0; ii < access_unit->nal_units->length; ii++) {
         nal_unit_p nal_unit = access_unit->nal_units->array[ii];
         if (nal_is_slice(nal_unit) && nal_unit->u.slice.slice_type != SLICE_I)
-            return false;
+            return FALSE;
     }
-    return true;
+    return TRUE;
 }
 
 /*
@@ -185,22 +185,22 @@ int all_slices_P(access_unit_p access_unit)
 {
     int ii;
     if (access_unit->primary_start == nullptr)
-        return false;
+        return FALSE;
     if (!nal_is_slice(access_unit->primary_start))
-        return false;
+        return FALSE;
     // All P
     if (access_unit->primary_start->u.slice.slice_type == ALL_SLICES_P)
-        return true;
+        return TRUE;
     // Only one slice, and it's P
     if (num_slices(access_unit) == 1 && access_unit->primary_start->u.slice.slice_type == SLICE_P)
-        return true;
+        return TRUE;
     // Are any of the slices not P?
     for (ii = 0; ii < access_unit->nal_units->length; ii++) {
         nal_unit_p nal_unit = access_unit->nal_units->array[ii];
         if (nal_is_slice(nal_unit) && nal_unit->u.slice.slice_type != SLICE_P)
-            return false;
+            return FALSE;
     }
-    return true;
+    return TRUE;
 }
 
 /*
@@ -210,27 +210,27 @@ int all_slices_I_or_P(access_unit_p access_unit)
 {
     int ii;
     if (access_unit->primary_start == nullptr)
-        return false;
+        return FALSE;
     if (!nal_is_slice(access_unit->primary_start))
-        return false;
+        return FALSE;
     // All P or all I
     if (access_unit->primary_start->u.slice.slice_type == SLICE_I
         || access_unit->primary_start->u.slice.slice_type == SLICE_P)
-        return true;
+        return TRUE;
     // Only one slice, and it's P or I
     if (num_slices(access_unit) == 1
         && (access_unit->primary_start->u.slice.slice_type == ALL_SLICES_I
                || access_unit->primary_start->u.slice.slice_type == ALL_SLICES_P))
-        return true;
+        return TRUE;
     // Are any of the slices not either P or I?
     for (ii = 0; ii < access_unit->nal_units->length; ii++) {
         nal_unit_p nal_unit = access_unit->nal_units->array[ii];
         if (nal_is_slice(nal_unit)
             && (nal_unit->u.slice.slice_type != SLICE_I
                    && nal_unit->u.slice.slice_type != SLICE_P))
-            return false;
+            return FALSE;
     }
-    return true;
+    return TRUE;
 }
 
 /*
@@ -240,22 +240,22 @@ int all_slices_B(access_unit_p access_unit)
 {
     int ii;
     if (access_unit->primary_start == nullptr)
-        return false;
+        return FALSE;
     if (!nal_is_slice(access_unit->primary_start))
-        return false;
+        return FALSE;
     // All B
     if (access_unit->primary_start->u.slice.slice_type == ALL_SLICES_B)
-        return true;
+        return TRUE;
     // Only one slice, and it's B
     if (num_slices(access_unit) == 1 && access_unit->primary_start->u.slice.slice_type == SLICE_B)
-        return true;
+        return TRUE;
     // Are any of the slices not B?
     for (ii = 0; ii < access_unit->nal_units->length; ii++) {
         nal_unit_p nal_unit = access_unit->nal_units->array[ii];
         if (nal_is_slice(nal_unit) && nal_unit->u.slice.slice_type != SLICE_B)
-            return false;
+            return FALSE;
     }
-    return true;
+    return TRUE;
 }
 
 /*
@@ -279,7 +279,7 @@ static int access_unit_append(
 
     if (starts_primary) {
         access_unit->primary_start = nal;
-        access_unit->started_primary_picture = true;
+        access_unit->started_primary_picture = TRUE;
         access_unit->frame_num = nal->u.slice.frame_num;
         access_unit->field_pic_flag = nal->u.slice.field_pic_flag;
         access_unit->bottom_field_flag = nal->u.slice.bottom_field_flag;
@@ -329,7 +329,7 @@ static int merge_access_unit_nals(access_unit_p access_unit1, access_unit_p* acc
 
     // Take care not to free the individual NAL units in our second access
     // unit, as they are still being used by the first
-    clear_access_unit(*access_unit2, false);
+    clear_access_unit(*access_unit2, FALSE);
     free(*access_unit2);
     *access_unit2 = nullptr;
 
@@ -360,7 +360,7 @@ int write_access_unit_as_ES(access_unit_p access_unit, access_unit_context_p con
         err = write_ES_unit(output, &(access_unit->nal_units->array[ii]->unit));
         if (err) {
             print_err("### Error writing NAL unit ");
-            report_nal(false, access_unit->nal_units->array[ii]);
+            report_nal(FALSE, access_unit->nal_units->array[ii]);
             return err;
         }
     }
@@ -369,7 +369,7 @@ int write_access_unit_as_ES(access_unit_p access_unit, access_unit_context_p con
         err = write_ES_unit(output, &(context->end_of_sequence->unit));
         if (err) {
             print_err("### Error writing end of sequence NAL unit ");
-            report_nal(false, context->end_of_sequence);
+            report_nal(FALSE, context->end_of_sequence);
             return err;
         }
         free_nal_unit(&context->end_of_sequence);
@@ -379,7 +379,7 @@ int write_access_unit_as_ES(access_unit_p access_unit, access_unit_context_p con
         err = write_ES_unit(output, &(context->end_of_stream->unit));
         if (err) {
             print_err("### Error writing end of stream NAL unit ");
-            report_nal(false, context->end_of_sequence);
+            report_nal(FALSE, context->end_of_sequence);
             return err;
         }
         free_nal_unit(&context->end_of_stream);
@@ -412,7 +412,7 @@ static int write_access_unit_trailer_as_TS(
             tswriter, nal->unit.data, nal->unit.data_len, video_pid, DEFAULT_VIDEO_STREAM_ID);
         if (err) {
             print_err("### Error writing end of sequence NAL unit ");
-            report_nal(false, nal);
+            report_nal(FALSE, nal);
             return err;
         }
         free_nal_unit(&context->end_of_sequence);
@@ -424,7 +424,7 @@ static int write_access_unit_trailer_as_TS(
             tswriter, nal->unit.data, nal->unit.data_len, video_pid, DEFAULT_VIDEO_STREAM_ID);
         if (err) {
             print_err("### Error writing end of stream NAL unit ");
-            report_nal(false, nal);
+            report_nal(FALSE, nal);
             return err;
         }
         free_nal_unit(&context->end_of_stream);
@@ -459,7 +459,7 @@ int write_access_unit_as_TS(access_unit_p access_unit, access_unit_context_p con
             tswriter, nal->unit.data, nal->unit.data_len, video_pid, DEFAULT_VIDEO_STREAM_ID);
         if (err) {
             print_err("### Error writing NAL unit ");
-            report_nal(false, nal);
+            report_nal(FALSE, nal);
             return err;
         }
     }
@@ -479,9 +479,9 @@ int write_access_unit_as_TS(access_unit_p access_unit, access_unit_context_p con
  *   legitimately be nullptr if there is no context.
  * - `tswriter` is the TS context to write with
  * - `video_pid` is the PID to use to write the data
- * - `got_pts` is true if we have a PTS value, in which case
+ * - `got_pts` is TRUE if we have a PTS value, in which case
  * - `pts` is said PTS value
- * - `got_dts` is true if we also have DTS, in which case
+ * - `got_dts` is TRUE if we also have DTS, in which case
  * - `dts` is said DTS value.
  *
  * If we are given a DTS (which must, by definition, always go up) we will also
@@ -507,7 +507,7 @@ int write_access_unit_as_TS_with_pts_dts(access_unit_p access_unit, access_unit_
                 tswriter, nal->unit.data, nal->unit.data_len, video_pid, DEFAULT_VIDEO_STREAM_ID);
         if (err) {
             print_err("### Error writing NAL unit ");
-            report_nal(false, nal);
+            report_nal(FALSE, nal);
             return err;
         }
     }
@@ -548,7 +548,7 @@ int write_access_unit_as_TS_with_PCR(access_unit_p access_unit, access_unit_cont
                 tswriter, nal->unit.data, nal->unit.data_len, video_pid, DEFAULT_VIDEO_STREAM_ID);
         if (err) {
             print_err("### Error writing NAL unit ");
-            report_nal(false, nal);
+            report_nal(FALSE, nal);
             return err;
         }
     }
@@ -575,15 +575,15 @@ static inline int end_access_unit(
         report_access_unit(access_unit);
         if (context->pending_nal) {
             print_msg("... pending: ");
-            report_nal(true, context->pending_nal);
+            report_nal(TRUE, context->pending_nal);
         }
         if (context->end_of_sequence) {
             print_msg("--> EndOfSequence ");
-            report_nal(true, context->end_of_sequence);
+            report_nal(TRUE, context->end_of_sequence);
         }
         if (context->end_of_stream) {
             print_msg("--> EndOfStream ");
-            report_nal(true, context->end_of_stream);
+            report_nal(TRUE, context->end_of_stream);
         }
     }
     return 0;
@@ -608,7 +608,7 @@ int build_access_unit_context(ES_p es, access_unit_context_p* context)
     new2->end_of_sequence = nullptr;
     new2->access_unit_index = 0;
     new2->reverse_data = nullptr;
-    new2->no_more_data = false;
+    new2->no_more_data = FALSE;
     new2->earlier_primary_start = nullptr;
 
     err = build_nal_unit_context(es, &new2->nac);
@@ -647,7 +647,7 @@ void free_access_unit_context(access_unit_context_p* context)
 
     // We assume no-one else has an interest in the NAL units in
     // our "pending" list.
-    free_nal_unit_list(&cc->pending_list, true);
+    free_nal_unit_list(&cc->pending_list, TRUE);
 
     // And similarly, we should be the only "person" holding on to these
     free_nal_unit(&cc->earlier_primary_start); // although this is bluff
@@ -674,8 +674,8 @@ void reset_access_unit_context(access_unit_context_p context)
     free_nal_unit(&context->end_of_sequence);
     free_nal_unit(&context->end_of_stream);
     free_nal_unit(&context->pending_nal);
-    reset_nal_unit_list(context->pending_list, false); // @@@ leak???
-    context->no_more_data = false;
+    reset_nal_unit_list(context->pending_list, FALSE); // @@@ leak???
+    context->no_more_data = FALSE;
     // We have to hope that the "previous" sequence parameter and picture
     // parameter dictionaries are still applicable, since we don't still
     // have a record of the ones that would have been in effect at this
@@ -826,7 +826,7 @@ static int maybe_remember_access_unit(
  * Note that `ret_access_unit` will be nullptr if EOF is returned.
  */
 int get_next_access_unit(
-    access_unit_context_p context, bool quiet, int show_details, access_unit_p* ret_access_unit)
+    access_unit_context_p context, int quiet, int show_details, access_unit_p* ret_access_unit)
 {
     int err;
     nal_unit_p nal = nullptr;
@@ -846,17 +846,17 @@ int get_next_access_unit(
 
     // Did we have any left over stuff to put at its start?
     if (context->pending_nal != nullptr) {
-        err = access_unit_append(access_unit, context->pending_nal, true, context->pending_list);
+        err = access_unit_append(access_unit, context->pending_nal, TRUE, context->pending_list);
         if (err)
             goto give_up;
         context->pending_nal = nullptr;
-        reset_nal_unit_list(context->pending_list, false);
+        reset_nal_unit_list(context->pending_list, FALSE);
     }
 
     for (;;) {
-        err = find_next_NAL_unit(context->nac, false, &nal);
+        err = find_next_NAL_unit(context->nac, FALSE, &nal);
         if (err == EOF) {
-            context->no_more_data = true; // prevent future reads on this stream
+            context->no_more_data = TRUE; // prevent future reads on this stream
             break;
         } else if (err == 2) {
             // The NAL unit was broken. Should we:
@@ -883,10 +883,10 @@ int get_next_access_unit(
                 // unit in the bitstream starts with an IDR, which might be
                 // a good idea)
                 nal->start_reason = "First slice of new access unit";
-                err = access_unit_append(access_unit, nal, true, context->pending_list);
+                err = access_unit_append(access_unit, nal, TRUE, context->pending_list);
                 if (err)
                     goto give_up_free_nal;
-                reset_nal_unit_list(context->pending_list, false);
+                reset_nal_unit_list(context->pending_list, FALSE);
                 err = remember_earlier_primary_start(context, nal);
                 if (err)
                     goto give_up_free_nal;
@@ -904,10 +904,10 @@ int get_next_access_unit(
                     break; // Ready to return the access unit
                 } else {
                     // This access unit was waiting for its primary picture
-                    err = access_unit_append(access_unit, nal, true, context->pending_list);
+                    err = access_unit_append(access_unit, nal, TRUE, context->pending_list);
                     if (err)
                         goto give_up_free_nal;
-                    reset_nal_unit_list(context->pending_list, false);
+                    reset_nal_unit_list(context->pending_list, FALSE);
                 }
             } else if (!access_unit->started_primary_picture) {
                 // But this is not a NAL unit that may start a new
@@ -915,7 +915,7 @@ int get_next_access_unit(
                 if (!quiet) {
                     print_err("!!! Ignoring VCL NAL that cannot start a picture:\n");
                     print_err("    ");
-                    report_nal(false, nal);
+                    report_nal(FALSE, nal);
                     print_err("\n");
                 }
                 free_nal_unit(&nal);
@@ -925,10 +925,10 @@ int get_next_access_unit(
                 free_nal_unit(&nal);
             } else {
                 // We're part of the same access unit, but not special
-                err = access_unit_append(access_unit, nal, false, context->pending_list);
+                err = access_unit_append(access_unit, nal, FALSE, context->pending_list);
                 if (err)
                     goto give_up_free_nal;
-                reset_nal_unit_list(context->pending_list, false);
+                reset_nal_unit_list(context->pending_list, FALSE);
             }
         } else if (nal->nal_unit_type == NAL_ACCESS_UNIT_DELIM) {
             // We always start an access unit...
@@ -942,15 +942,15 @@ int get_next_access_unit(
                 if (context->pending_list->length > 0 || access_unit->nal_units->length > 0) {
                     print_err("!!! Ignoring incomplete access unit:\n");
                     if (access_unit->nal_units->length > 0) {
-                        report_nal_unit_list(false, "    ", access_unit->nal_units);
-                        reset_nal_unit_list(access_unit->nal_units, true);
+                        report_nal_unit_list(FALSE, "    ", access_unit->nal_units);
+                        reset_nal_unit_list(access_unit->nal_units, TRUE);
                     }
                     if (context->pending_list->length > 0) {
-                        report_nal_unit_list(false, "    ", context->pending_list);
-                        reset_nal_unit_list(context->pending_list, true);
+                        report_nal_unit_list(FALSE, "    ", context->pending_list);
+                        reset_nal_unit_list(context->pending_list, TRUE);
                     }
                 }
-                err = access_unit_append(access_unit, nal, false, nullptr);
+                err = access_unit_append(access_unit, nal, FALSE, nullptr);
                 if (err)
                     goto give_up_free_nal;
             }
@@ -987,8 +987,8 @@ int get_next_access_unit(
             if (context->pending_list->length > 0) {
                 print_err("!!! Ignoring items after last VCL NAL and"
                           " before End of Sequence:\n");
-                report_nal_unit_list(false, "    ", context->pending_list);
-                reset_nal_unit_list(context->pending_list, true);
+                report_nal_unit_list(FALSE, "    ", context->pending_list);
+                reset_nal_unit_list(context->pending_list, TRUE);
             }
             // And remember this as the End of Sequence marker
             context->end_of_sequence = nal;
@@ -997,15 +997,15 @@ int get_next_access_unit(
             if (context->pending_list->length > 0) {
                 print_err("!!! Ignoring items after last VCL NAL and"
                           " before End of Stream:\n");
-                report_nal_unit_list(false, "    ", context->pending_list);
-                reset_nal_unit_list(context->pending_list, true);
+                report_nal_unit_list(FALSE, "    ", context->pending_list);
+                reset_nal_unit_list(context->pending_list, TRUE);
             }
             // And remember this as the End of Stream marker
             context->end_of_stream = nal;
             // Which means there's no point in reading more from this stream
             // (setting no_more_data like this means that *next* time this
             // function is called, it will return EOF)
-            context->no_more_data = true;
+            context->no_more_data = TRUE;
             break;
         } else {
             // It's not a slice, or an access unit delimiter, or an
@@ -1068,7 +1068,7 @@ give_up:
  * Note that `ret_access_unit` will be nullptr if EOF is returned.
  */
 static int get_next_non_empty_access_unit(
-    access_unit_context_p context, bool quiet, int show_details, access_unit_p* access_unit)
+    access_unit_context_p context, int quiet, int show_details, access_unit_p* access_unit)
 {
     for (;;) {
         int err = get_next_access_unit(context, quiet, show_details, access_unit);
@@ -1099,7 +1099,7 @@ static int get_next_non_empty_access_unit(
  * Returns 0 if it succeeds, EOF if there is no more data to read, or 1 if
  * some error occurs.
  */
-static int get_next_field_of_pair(access_unit_context_p context, bool quiet, int show_details,
+static int get_next_field_of_pair(access_unit_context_p context, int quiet, int show_details,
     int first_time, access_unit_p* access_unit)
 {
     int err;
@@ -1143,7 +1143,7 @@ static int get_next_field_of_pair(access_unit_context_p context, bool quiet, int
         // Try again
         free_access_unit(access_unit);
         *access_unit = second;
-        err = get_next_field_of_pair(context, quiet, show_details, false, access_unit);
+        err = get_next_field_of_pair(context, quiet, show_details, FALSE, access_unit);
         if (err)
             return 1;
     } else {
@@ -1199,7 +1199,7 @@ static int get_next_field_of_pair(access_unit_context_p context, bool quiet, int
  * Note that `ret_access_unit` will be nullptr if EOF is returned.
  */
 int get_next_h264_frame(
-    access_unit_context_p context, bool quiet, int show_details, access_unit_p* frame)
+    access_unit_context_p context, int quiet, int show_details, access_unit_p* frame)
 {
     int err;
     access_unit_p access_unit;
@@ -1213,7 +1213,7 @@ int get_next_h264_frame(
     if (access_unit->field_pic_flag == 1) {
         // We assume (hope) the next access_unit will be our second half
         // - let's try to get it, and merge it into our current access unit
-        err = get_next_field_of_pair(context, quiet, show_details, true, &access_unit);
+        err = get_next_field_of_pair(context, quiet, show_details, TRUE, &access_unit);
         if (err) {
             free_access_unit(&access_unit);
             return 1;
@@ -1235,7 +1235,7 @@ int get_next_h264_frame(
  * If this access unit was read from PES, did any of its PES packets contain
  * a PTS?
  *
- * Returns true if so, false if not.
+ * Returns TRUE if so, FALSE if not.
  */
 int access_unit_has_PTS(access_unit_p access_unit)
 {
@@ -1243,7 +1243,7 @@ int access_unit_has_PTS(access_unit_p access_unit)
     int ii;
     for (ii = 0; ii < access_unit->nal_units->length; ii++) {
         if (access_unit->nal_units->array[ii]->unit.PES_had_PTS)
-            return true;
+            return TRUE;
     }
-    return false;
+    return FALSE;
 }

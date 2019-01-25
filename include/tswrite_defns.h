@@ -73,7 +73,7 @@ struct TS_writer {
     // Support for the child fork/thread, which actually does the writing when
     // buffered output is enabled.
     pid_t child; // the PID of the child process (if any)
-    bool quiet; // Should the child be as quiet as possible?
+    int quiet; // Should the child be as quiet as possible?
 
     // Support for "commands" being sent to us via a socket (or, on Linux/BSD,
     // from any other file descriptor). The "normal" way this is used is for
@@ -85,7 +85,7 @@ struct TS_writer {
 
     // When the user sends a new command (a different character than is
     // currently in `command`), the underpinnings of tswrite_write() set
-    // `command` to that command letter, and `command_changed` to true.
+    // `command` to that command letter, and `command_changed` to TRUE.
     // Various key functions that write to TS check `command_changed`, and
     // return COMMAND_RETURN_CODE if it is true.
     // Note, however, that it is left up to the top level to *unset*

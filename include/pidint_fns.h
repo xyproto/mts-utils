@@ -64,11 +64,11 @@ int pid_index_in_pidint_list(pidint_list_p list, uint32_t pid);
 /*
  * Lookup a PID to see if it is in a pid/int list.
  *
- * Note that if `list` is nullptr, then false will be returned - this is to
+ * Note that if `list` is nullptr, then FALSE will be returned - this is to
  * allow the caller to make a query before they have read a list from the
  * bitstream.
  *
- * Returns true if the PID is in the list, false if it is not.
+ * Returns TRUE if the PID is in the list, FALSE if it is not.
  */
 int pid_in_pidint_list(pidint_list_p list, uint32_t pid);
 /*
@@ -80,7 +80,7 @@ int pid_in_pidint_list(pidint_list_p list, uint32_t pid);
  *  - two nullptr lists compare as the same
  *  - the *order* of PID/int pairs in the lists does not matter
  *
- * Returns true if the two have the same content, false otherwise.
+ * Returns TRUE if the two have the same content, FALSE otherwise.
  */
 int same_pidint_list(pidint_list_p list1, pidint_list_p list2);
 /*
@@ -160,9 +160,9 @@ pmt_stream_p pid_stream_in_pmt(pmt_p pmt, uint32_t pid);
 /*
  * Lookup a PID to see if it is in a PMT datastructure.
  *
- * Note that if `pmt` is nullptr, then false will be returned.
+ * Note that if `pmt` is nullptr, then FALSE will be returned.
  *
- * Returns true if the PID is in the PMT's stream list, false if it is not.
+ * Returns TRUE if the PID is in the PMT's stream list, FALSE if it is not.
  */
 int pid_in_pmt(pmt_p pmt, uint32_t pid);
 /*
@@ -176,7 +176,7 @@ int pid_in_pmt(pmt_p pmt, uint32_t pid);
  *  - descriptors must be identical as well, and byte order therein
  *    does matter (this may need changing later on)
  *
- * Returns true if the two have the same content, false otherwise.
+ * Returns TRUE if the two have the same content, FALSE otherwise.
  */
 int same_pmt(pmt_p pmt1, pmt_p pmt2);
 /*

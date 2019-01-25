@@ -176,6 +176,6 @@ struct timing {
     uint64_t last_pcr;
     int first_pcr_packet;
     int last_pcr_packet;
-    int had_first_pcr; // false until we've started
+    int had_first_pcr; // FALSE until we've started
 };
 typedef struct timing* timing_p;

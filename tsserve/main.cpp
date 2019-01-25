@@ -215,12 +215,12 @@ static int build_filter_context(
     fcontext->is_h262 = stream.is_h262;
     if (stream.is_h262) {
         if (is_strip)
-            err = build_h262_filter_context_strip(&(fcontext->u.h262), stream.u.h262, true);
+            err = build_h262_filter_context_strip(&(fcontext->u.h262), stream.u.h262, TRUE);
         else
             err = build_h262_filter_context(&(fcontext->u.h262), stream.u.h262, frequency);
     } else {
         if (is_strip)
-            err = build_h264_filter_context_strip(&(fcontext->u.h264), stream.u.h264, true);
+            err = build_h264_filter_context_strip(&(fcontext->u.h264), stream.u.h264, TRUE);
         else
             err = build_h264_filter_context(&(fcontext->u.h264), stream.u.h264, frequency);
     }
@@ -253,7 +253,7 @@ static inline void reset_stream(stream_context stream)
  * Retrieve the next picture. Doesn't distinguish H.262 sequence headers
  * and pictures.
  */
-static inline int get_next_picture(stream_context stream, bool verbose, bool quiet, picture* pic)
+static inline int get_next_picture(stream_context stream, bool verbose, int quiet, picture* pic)
 {
     int err;
     if (stream.is_h262) {
@@ -261,7 +261,7 @@ static inline int get_next_picture(stream_context stream, bool verbose, bool qui
         err = get_next_h262_frame(stream.u.h262, verbose, quiet, &picture);
         if (err)
             return err;
-        pic->is_h262 = true;
+        pic->is_h262 = TRUE;
         pic->u.h262 = picture;
         if (picture->is_picture)
             pic->type = picture->picture_coding_type;
@@ -272,7 +272,7 @@ static inline int get_next_picture(stream_context stream, bool verbose, bool qui
         err = get_next_h264_frame(stream.u.h264, quiet, verbose, &unit);
         if (err)
             return err;
-        pic->is_h262 = false;
+        pic->is_h262 = FALSE;
         pic->u.h264 = unit;
     }
     return 0;
@@ -367,7 +367,7 @@ static inline void reset_filter_context(filter_context fcontext, int frequency)
     }
 }
 
-static inline int get_next_stripped(filter_context fcontext, bool verbose, bool quiet,
+static inline int get_next_stripped(filter_context fcontext, bool verbose, int quiet,
     picture* seq_hdr, picture* this_picture, int* delta_pictures_seen)
 {
     int err;
@@ -391,7 +391,7 @@ static inline int get_next_stripped(filter_context fcontext, bool verbose, bool 
     return err;
 }
 
-static inline int get_next_filtered(filter_context fcontext, bool verbose, bool quiet,
+static inline int get_next_filtered(filter_context fcontext, bool verbose, int quiet,
     picture* seq_hdr, picture* this_picture, int* delta_pictures_seen)
 {
     int err;
@@ -430,7 +430,7 @@ static inline int get_next_filtered(filter_context fcontext, bool verbose, bool 
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-static int play_normal(stream_context stream, TS_writer_p output, bool verbose, bool quiet,
+static int play_normal(stream_context stream, TS_writer_p output, bool verbose, int quiet,
     int num_normal, int tsdirect, reverse_data_p reverse_data)
 {
     int err;
@@ -474,7 +474,7 @@ static int play_normal(stream_context stream, TS_writer_p output, bool verbose, 
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-static int flush_after_normal(stream_context stream, TS_writer_p output, bool verbose, bool quiet)
+static int flush_after_normal(stream_context stream, TS_writer_p output, bool verbose, int quiet)
 {
     int err;
     ES_p es = EXTRACT_ES_FROM_STREAM(stream);
@@ -604,7 +604,7 @@ static int flush_after_normal(stream_context stream, TS_writer_p output, bool ve
  * otherwise 1 if an error occurred.
  */
 static int output_next_reference_picture(
-    stream_context stream, TS_writer_p output, bool verbose, bool quiet, int I_only)
+    stream_context stream, TS_writer_p output, bool verbose, int quiet, int I_only)
 {
     int err;
     picture picture;
@@ -676,8 +676,7 @@ static int output_next_reference_picture(
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-static int resync_after_reverse(
-    stream_context stream, TS_writer_p output, bool verbose, bool quiet)
+static int resync_after_reverse(stream_context stream, TS_writer_p output, bool verbose, int quiet)
 {
     int err;
     ES_p es = EXTRACT_ES_FROM_STREAM(stream);
@@ -719,7 +718,7 @@ static int resync_after_reverse(
     // a B picture until we've output the *next* reference picture, since B
     // pictures need to refer "back" (in decoding order - back and forwards
     // in "play" order) to two reference pictures.
-    err = output_next_reference_picture(stream, output, verbose, quiet, false);
+    err = output_next_reference_picture(stream, output, verbose, quiet, FALSE);
     if (err == EOF)
         return EOF;
     else if (err) {
@@ -761,7 +760,7 @@ static int rewind_stream(stream_context stream)
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-static int resync_after_filter(stream_context stream, TS_writer_p output, bool verbose, bool quiet)
+static int resync_after_filter(stream_context stream, TS_writer_p output, bool verbose, int quiet)
 {
     int err;
 
@@ -793,7 +792,7 @@ static int resync_after_filter(stream_context stream, TS_writer_p output, bool v
     // *look* better when we've finished fast forwarding...
 
     // So...
-    err = output_next_reference_picture(stream, output, verbose, quiet, false);
+    err = output_next_reference_picture(stream, output, verbose, quiet, FALSE);
     if (err == EOF)
         return EOF;
     else if (err) {
@@ -894,7 +893,7 @@ static int back_to_normal(stream_context stream, TS_writer_p output, int tsdirec
                 fprint_msg("   last item starts at " OFFSET_T_FORMAT "/%d,\n",
                     stream.u.h262->last_item->unit.start_posn.infile,
                     stream.u.h262->last_item->unit.start_posn.inpacket);
-                print_data(true, "   last item", stream.u.h262->last_item->unit.data,
+                print_data(TRUE, "   last item", stream.u.h262->last_item->unit.data,
                     stream.u.h262->last_item->unit.data_len, 20);
             }
         } else {
@@ -902,7 +901,7 @@ static int back_to_normal(stream_context stream, TS_writer_p output, int tsdirec
                 fprint_msg("   last item starts at " OFFSET_T_FORMAT "/%d,\n",
                     stream.u.h264->pending_nal->unit.start_posn.infile,
                     stream.u.h264->pending_nal->unit.start_posn.inpacket);
-                print_data(true, "   pending NAL unit", stream.u.h264->pending_nal->unit.data,
+                print_data(TRUE, "   pending NAL unit", stream.u.h264->pending_nal->unit.data,
                     stream.u.h264->pending_nal->unit.data_len, 20);
             }
         }
@@ -964,7 +963,7 @@ static int back_to_normal(stream_context stream, TS_writer_p output, int tsdirec
         if (extra_info) {
             fprint_msg(".. so output %d bytes at end of PES packet\n", length_wanted);
             print_data(
-                true, ".. end bytes", &reader->packet->es_data[start_offset], length_wanted, 20);
+                TRUE, ".. end bytes", &reader->packet->es_data[start_offset], length_wanted, 20);
         }
 
         err = write_ES_as_TS_PES_packet(output, &reader->packet->es_data[start_offset],
@@ -977,7 +976,7 @@ static int back_to_normal(stream_context stream, TS_writer_p output, int tsdirec
         // That's all very well, but when the server restarts, and a call is made
         // to read (the next) PES packet in, it will attempt to write *this* PES
         // packet out again. So tell it not to do that...
-        reader->dont_write_current_packet = true;
+        reader->dont_write_current_packet = TRUE;
     }
     return 0;
 }
@@ -992,7 +991,7 @@ static int back_to_normal(stream_context stream, TS_writer_p output, int tsdirec
  * if the current command has changed.
  */
 static int play_stripped(stream_context stream, filter_context fcontext, TS_writer_p output,
-    bool verbose, bool quiet, int tsdirect, int num_fast, int with_seq_hdrs)
+    bool verbose, int quiet, int tsdirect, int num_fast, int with_seq_hdrs)
 {
     int err;
     ES_p es = EXTRACT_ES_FROM_STREAM(stream);
@@ -1065,7 +1064,7 @@ static int play_stripped(stream_context stream, filter_context fcontext, TS_writ
  * if the current command has changed.
  */
 static int play_filtered(stream_context stream, filter_context fcontext, TS_writer_p output,
-    bool verbose, bool quiet, int tsdirect, int num_faster, int frequency, int with_seq_hdrs)
+    bool verbose, int quiet, int tsdirect, int num_faster, int frequency, int with_seq_hdrs)
 {
     int err;
     ES_p es = EXTRACT_ES_FROM_STREAM(stream);
@@ -1189,7 +1188,7 @@ static int play_filtered(stream_context stream, filter_context fcontext, TS_writ
  * if the current command has changed.
  */
 static int skip_forwards(stream_context stream, TS_writer_p output, filter_context fcontext,
-    int with_seq_hdrs, int num_to_skip, bool verbose, bool quiet, int tsdirect)
+    int with_seq_hdrs, int num_to_skip, bool verbose, int quiet, int tsdirect)
 {
     int err;
     ES_p es = EXTRACT_ES_FROM_STREAM(stream);
@@ -1223,12 +1222,12 @@ static int skip_forwards(stream_context stream, TS_writer_p output, filter_conte
     unset_picture(stream.is_h262, &this_picture);
 
     // Say that we don't want our skipping to be interrupted by the next command
-    tswrite_set_command_atomic(output, true);
+    tswrite_set_command_atomic(output, TRUE);
 
     err = get_next_filtered(
         fcontext, verbose, quiet, &seq_hdr, &this_picture, &delta_pictures_seen);
     if (err && err != EOF) {
-        tswrite_set_command_atomic(output, false);
+        tswrite_set_command_atomic(output, FALSE);
         if (err == COMMAND_RETURN_CODE)
             return err;
         else {
@@ -1246,13 +1245,13 @@ static int skip_forwards(stream_context stream, TS_writer_p output, filter_conte
         err = output_from_reverse_data_as_TS(es, output, verbose, quiet, 2, reverse_data);
         if (err) {
             print_err("### Error outputting 'last' picture at EOF\n");
-            tswrite_set_command_atomic(output, false);
+            tswrite_set_command_atomic(output, FALSE);
             return err;
         }
         // Which means we need to adjust back to normal playing *this* way
         err = resync_after_reverse(stream, output, verbose, quiet);
         if (err) {
-            tswrite_set_command_atomic(output, false);
+            tswrite_set_command_atomic(output, FALSE);
             return err;
         }
         // Let the caller know what we did/where we are
@@ -1263,7 +1262,7 @@ static int skip_forwards(stream_context stream, TS_writer_p output, filter_conte
         if (is_null_picture(this_picture)) {
             print_err("### Skipping returned a nullptr picture\n");
             free_picture(&this_picture);
-            tswrite_set_command_atomic(output, false);
+            tswrite_set_command_atomic(output, FALSE);
             return 1;
         }
         if (with_seq_hdrs && !is_null_picture(seq_hdr)) {
@@ -1271,7 +1270,7 @@ static int skip_forwards(stream_context stream, TS_writer_p output, filter_conte
             if (err) {
                 print_err("### Error writing out sequence header\n");
                 free_picture(&this_picture);
-                tswrite_set_command_atomic(output, false);
+                tswrite_set_command_atomic(output, FALSE);
                 return 1;
             }
         }
@@ -1279,7 +1278,7 @@ static int skip_forwards(stream_context stream, TS_writer_p output, filter_conte
         if (err) {
             print_err("### Error writing out picture\n");
             free_picture(&this_picture);
-            tswrite_set_command_atomic(output, false);
+            tswrite_set_command_atomic(output, FALSE);
             return 1;
         }
         free_picture(&this_picture);
@@ -1287,7 +1286,7 @@ static int skip_forwards(stream_context stream, TS_writer_p output, filter_conte
         // And remember to adjust back to normal playing
         err = resync_after_filter(stream, output, verbose, quiet);
         if (err) {
-            tswrite_set_command_atomic(output, false);
+            tswrite_set_command_atomic(output, FALSE);
             return 1;
         }
     }
@@ -1302,7 +1301,7 @@ static int skip_forwards(stream_context stream, TS_writer_p output, filter_conte
 #endif
 
     // Remember to allow future commands to be interrupted
-    tswrite_set_command_atomic(output, false);
+    tswrite_set_command_atomic(output, FALSE);
     return 0;
 }
 
@@ -1316,7 +1315,7 @@ static int skip_forwards(stream_context stream, TS_writer_p output, filter_conte
  * if the current command has changed.
  */
 static int skip_backwards(stream_context stream, TS_writer_p output, int num_to_skip, bool verbose,
-    bool quiet, int tsdirect, reverse_data_p reverse_data)
+    int quiet, int tsdirect, reverse_data_p reverse_data)
 {
     int err;
     ES_p es = EXTRACT_ES_FROM_STREAM(stream);
@@ -1334,24 +1333,24 @@ static int skip_backwards(stream_context stream, TS_writer_p output, int num_to_
         fprint_msg("Skipping backwards (%d frames)\n", num_to_skip);
 
     // Say that we don't want our skipping to be interrupted by the next command
-    tswrite_set_command_atomic(output, true);
+    tswrite_set_command_atomic(output, TRUE);
 
     err = output_in_reverse_as_TS(
         es, output, num_to_skip, verbose, quiet, -1, num_to_skip, reverse_data);
     if (err && err != COMMAND_RETURN_CODE) {
         print_err("### Error skipping backwards\n");
-        tswrite_set_command_atomic(output, false);
+        tswrite_set_command_atomic(output, FALSE);
         return err;
     }
 
     err = resync_after_reverse(stream, output, verbose, quiet);
     if (err) {
-        tswrite_set_command_atomic(output, false);
+        tswrite_set_command_atomic(output, FALSE);
         return err;
     }
 
     // Remember to allow future commands to be interrupted
-    tswrite_set_command_atomic(output, false);
+    tswrite_set_command_atomic(output, FALSE);
     return 0;
 }
 
@@ -1364,7 +1363,7 @@ static int skip_backwards(stream_context stream, TS_writer_p output, int num_to_
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-static int play_reverse(stream_context stream, TS_writer_p output, bool verbose, bool quiet,
+static int play_reverse(stream_context stream, TS_writer_p output, bool verbose, int quiet,
     int tsdirect, int frequency, int num_reverse, reverse_data_p reverse_data)
 {
     int err;
@@ -1422,8 +1421,8 @@ static int obey_command(char this_command, char last_command, int* index,
     int started[MAX_INPUT_FILES], PES_reader_p reader[MAX_INPUT_FILES],
     stream_context stream[MAX_INPUT_FILES], filter_context fcontext[MAX_INPUT_FILES],
     filter_context scontext[MAX_INPUT_FILES], reverse_data_p reverse_data[MAX_INPUT_FILES],
-    TS_writer_p tswriter, int video_only, bool verbose, bool quiet, int tsdirect,
-    int with_seq_hdrs, int ffrequency, int rfrequency)
+    TS_writer_p tswriter, int video_only, bool verbose, int quiet, int tsdirect, int with_seq_hdrs,
+    int ffrequency, int rfrequency)
 {
     int err = 0;
     int new_stream;
@@ -1446,7 +1445,7 @@ static int obey_command(char this_command, char last_command, int* index,
                 if (err)
                     return 1;
             }
-            started[which] = true;
+            started[which] = TRUE;
             set_PES_reader_video_only(reader[which], video_only);
             err = play_normal(
                 stream[which], tswriter, verbose, quiet, 0, tsdirect, reverse_data[which]);
@@ -1470,7 +1469,7 @@ static int obey_command(char this_command, char last_command, int* index,
                            "** [%3d] File %d: Fast forwards\n",
                     tswriter->where.socket, which);
             stop_server_output(reader[which]);
-            set_PES_reader_video_only(reader[which], true);
+            set_PES_reader_video_only(reader[which], TRUE);
             err = play_stripped(stream[which], scontext[which], tswriter, verbose, quiet, tsdirect,
                 0, with_seq_hdrs);
             break;
@@ -1481,7 +1480,7 @@ static int obey_command(char this_command, char last_command, int* index,
                            "** [%3d] File %d: Fast fast forwards\n",
                     tswriter->where.socket, which);
             stop_server_output(reader[which]);
-            set_PES_reader_video_only(reader[which], true);
+            set_PES_reader_video_only(reader[which], TRUE);
             err = play_filtered(stream[which], fcontext[which], tswriter, verbose, quiet, tsdirect,
                 0, ffrequency, with_seq_hdrs);
             break;
@@ -1492,7 +1491,7 @@ static int obey_command(char this_command, char last_command, int* index,
                            "** [%3d] File %d: Reverse\n",
                     tswriter->where.socket, which);
             stop_server_output(reader[which]);
-            set_PES_reader_video_only(reader[which], true);
+            set_PES_reader_video_only(reader[which], TRUE);
             err = play_reverse(stream[which], tswriter, verbose, quiet, tsdirect, rfrequency, 0,
                 reverse_data[which]);
             if (err == 0) {
@@ -1509,7 +1508,7 @@ static int obey_command(char this_command, char last_command, int* index,
                            "** [%3d] File %d: Reverse (faster)\n",
                     tswriter->where.socket, which);
             stop_server_output(reader[which]);
-            set_PES_reader_video_only(reader[which], true);
+            set_PES_reader_video_only(reader[which], TRUE);
             err = play_reverse(stream[which], tswriter, verbose, quiet, tsdirect, 2 * rfrequency,
                 0, reverse_data[which]);
             if (err == 0) {
@@ -1526,7 +1525,7 @@ static int obey_command(char this_command, char last_command, int* index,
                            "** [%3d] File %d: Skip forwards 10 seconds\n",
                     tswriter->where.socket, which);
             stop_server_output(reader[which]);
-            set_PES_reader_video_only(reader[which], true);
+            set_PES_reader_video_only(reader[which], TRUE);
             err = skip_forwards(stream[which], tswriter, fcontext[which], with_seq_hdrs,
                 SMALL_SKIP_DISTANCE, verbose, quiet, tsdirect);
             this_command = COMMAND_NORMAL; // aim to continue with normal play
@@ -1538,7 +1537,7 @@ static int obey_command(char this_command, char last_command, int* index,
                            "** [%3d] File %d: Skip backwards 10 seconds\n",
                     tswriter->where.socket, which);
             stop_server_output(reader[which]);
-            set_PES_reader_video_only(reader[which], true);
+            set_PES_reader_video_only(reader[which], TRUE);
             err = skip_backwards(stream[which], tswriter, SMALL_SKIP_DISTANCE, verbose, quiet,
                 tsdirect, reverse_data[which]);
             this_command = COMMAND_NORMAL; // aim to continue with normal play
@@ -1550,7 +1549,7 @@ static int obey_command(char this_command, char last_command, int* index,
                            "** [%3d] File %d: Skip forwards 3 minutes\n",
                     tswriter->where.socket, which);
             stop_server_output(reader[which]);
-            set_PES_reader_video_only(reader[which], true);
+            set_PES_reader_video_only(reader[which], TRUE);
             err = skip_forwards(stream[which], tswriter, fcontext[which], with_seq_hdrs,
                 BIG_SKIP_DISTANCE, verbose, quiet, tsdirect);
             this_command = COMMAND_NORMAL; // aim to continue with normal play
@@ -1562,7 +1561,7 @@ static int obey_command(char this_command, char last_command, int* index,
                            "** [%3d] File %d: Skip backwards 3 minutes\n",
                     tswriter->where.socket, which);
             stop_server_output(reader[which]);
-            set_PES_reader_video_only(reader[which], true);
+            set_PES_reader_video_only(reader[which], TRUE);
             err = skip_backwards(stream[which], tswriter, BIG_SKIP_DISTANCE, verbose, quiet,
                 tsdirect, reverse_data[which]);
             this_command = COMMAND_NORMAL; // aim to continue with normal play
@@ -1636,7 +1635,7 @@ static int obey_command(char this_command, char last_command, int* index,
                 if (err)
                     return 1;
                 // And note that we *are* starting from the beginning again
-                started[which] = false;
+                started[which] = FALSE;
             }
             // And return to normal playing
             this_command = COMMAND_NORMAL;
@@ -1685,8 +1684,8 @@ static int obey_command(char this_command, char last_command, int* index,
 static int play(int default_index, PES_reader_p reader[MAX_INPUT_FILES],
     stream_context stream[MAX_INPUT_FILES], filter_context fcontext[MAX_INPUT_FILES],
     filter_context scontext[MAX_INPUT_FILES], reverse_data_p reverse_data[MAX_INPUT_FILES],
-    TS_writer_p tswriter, int video_only, bool verbose, bool quiet, int tsdirect,
-    int with_seq_hdrs, int ffrequency, int rfrequency)
+    TS_writer_p tswriter, int video_only, bool verbose, int quiet, int tsdirect, int with_seq_hdrs,
+    int ffrequency, int rfrequency)
 {
     int err;
     int ii;
@@ -1694,17 +1693,17 @@ static int play(int default_index, PES_reader_p reader[MAX_INPUT_FILES],
     int which = default_index; // which stream we're reading
 
     // Any function which writes to the output may read a new command character,
-    // but only if tswriter->command_changed is false. Such a function will then
+    // but only if tswriter->command_changed is FALSE. Such a function will then
     // return COMMAND_RETURN_CODE.
     // When a new command character is read, tswriter->command_changed is set to
-    // true. It is up to us to set it back to false when we have finished
+    // TRUE. It is up to us to set it back to FALSE when we have finished
     // dealing with the new command letter.
 
     byte this_command = tswriter->command;
     byte last_command = COMMAND_NOT_A_COMMAND;
 
     for (ii = 0; ii < MAX_INPUT_FILES; ii++)
-        started[ii] = false;
+        started[ii] = FALSE;
 
     // Select our current PES reader
     if (reader[which] == nullptr) {
@@ -1725,7 +1724,7 @@ static int play(int default_index, PES_reader_p reader[MAX_INPUT_FILES],
         // It is our job to let the underlying interface know that we are
         // ready to read a new command character (i.e., that we have "heard"
         // the last one). We do that by unsetting the command-changed flag.
-        tswriter->command_changed = false;
+        tswriter->command_changed = FALSE;
 
         this_command = tswriter->command;
 
@@ -1753,7 +1752,7 @@ static int play(int default_index, PES_reader_p reader[MAX_INPUT_FILES],
  * Returns 0 if all went well, 1 if an error occurred.
  */
 static int play_pes_packets(PES_reader_p reader[MAX_INPUT_FILES], TS_writer_p tswriter,
-    tsserve_context_p context, bool verbose, bool quiet)
+    tsserve_context_p context, bool verbose, int quiet)
 {
     int err;
     int ii;
@@ -1787,7 +1786,7 @@ static int play_pes_packets(PES_reader_p reader[MAX_INPUT_FILES], TS_writer_p ts
         // it doesn't matter much, as both the H.262 and H.264 "destroy"
         // functions for streams and filter contexts sensibly do nothing
         // with a nullptr value - so we might as well just say the same for all...
-        stream[ii].is_h262 = fcontext[ii].is_h262 = scontext[ii].is_h262 = false;
+        stream[ii].is_h262 = fcontext[ii].is_h262 = scontext[ii].is_h262 = FALSE;
         stream[ii].u.h262 = nullptr;
         fcontext[ii].u.h262 = scontext[ii].u.h262 = nullptr;
     }
@@ -1840,16 +1839,16 @@ static int play_pes_packets(PES_reader_p reader[MAX_INPUT_FILES], TS_writer_p ts
         set_reverse_pid(reverse_data[ii], reader[ii]->output_video_pid, DEFAULT_VIDEO_STREAM_ID);
 
         if (!context->with_seq_hdrs)
-            reverse_data[ii]->output_sequence_headers = false;
+            reverse_data[ii]->output_sequence_headers = FALSE;
 
         // Build our fast forwards filter contexts
-        err = build_filter_context(stream[ii], false, context->ffrequency, &fcontext[ii]);
+        err = build_filter_context(stream[ii], FALSE, context->ffrequency, &fcontext[ii]);
         if (err) {
             fprint_err("### Unable to build filter context for stream %d\n", ii);
             goto tidy_up;
         }
 
-        err = build_filter_context(stream[ii], true, 0, &scontext[ii]);
+        err = build_filter_context(stream[ii], TRUE, 0, &scontext[ii]);
         if (err) {
             fprint_err("### Unable to build strip context for stream %d\n", ii);
             goto tidy_up;
@@ -1881,11 +1880,11 @@ tidy_up:
  */
 static int test_play(PES_reader_p reader, stream_context stream, filter_context fcontext,
     filter_context scontext, reverse_data_p reverse_data, TS_writer_p tswriter, int video_only,
-    bool verbose, bool quiet, int tsdirect, int num_normal, int num_fast, int num_faster,
+    bool verbose, int quiet, int tsdirect, int num_normal, int num_fast, int num_faster,
     int num_reverse, int ffrequency, int rfrequency, int with_seq_hdrs)
 {
     int err = 0;
-    int started = false;
+    int started = FALSE;
     int ii;
 
     if (num_fast == 0 && num_faster == 0 && num_reverse == 0) {
@@ -1911,7 +1910,7 @@ static int test_play(PES_reader_p reader, stream_context stream, filter_context 
             if (err)
                 return 1;
         }
-        started = true;
+        started = TRUE;
 
         set_PES_reader_video_only(reader, video_only);
         err = play_normal(stream, tswriter, verbose, quiet, tsdirect, num_normal, reverse_data);
@@ -1932,7 +1931,7 @@ static int test_play(PES_reader_p reader, stream_context stream, filter_context 
         if (verbose || extra_info)
             print_msg("\n\n");
         fprint_msg("** Fast forward for %d\n", num_fast);
-        set_PES_reader_video_only(reader, true);
+        set_PES_reader_video_only(reader, TRUE);
         err = play_stripped(
             stream, scontext, tswriter, verbose, quiet, tsdirect, num_fast, with_seq_hdrs);
         if (err == EOF)
@@ -1968,7 +1967,7 @@ static int test_play(PES_reader_p reader, stream_context stream, filter_context 
         if (verbose || extra_info)
             print_msg("\n\n");
         fprint_msg("** Faster forward for %d\n", num_faster);
-        set_PES_reader_video_only(reader, true);
+        set_PES_reader_video_only(reader, TRUE);
         err = play_filtered(stream, fcontext, tswriter, verbose, quiet, tsdirect, num_faster,
             ffrequency, with_seq_hdrs);
         if (err == EOF)
@@ -2004,7 +2003,7 @@ static int test_play(PES_reader_p reader, stream_context stream, filter_context 
         if (verbose || extra_info)
             print_msg("\n\n");
         fprint_msg("** Reverse for %d\n", num_reverse);
-        set_PES_reader_video_only(reader, true);
+        set_PES_reader_video_only(reader, TRUE);
         err = play_reverse(
             stream, tswriter, verbose, quiet, rfrequency, tsdirect, num_reverse, reverse_data);
         if (err == EOF)
@@ -2030,11 +2029,11 @@ static int test_play(PES_reader_p reader, stream_context stream, filter_context 
  */
 static int test_skip(PES_reader_p reader, stream_context stream, filter_context fcontext,
     filter_context scontext, reverse_data_p reverse_data, TS_writer_p tswriter, int video_only,
-    bool verbose, bool quiet, int tsdirect, int with_seq_hdrs)
+    bool verbose, int quiet, int tsdirect, int with_seq_hdrs)
 {
     int err = 0;
     int num_normal = 100;
-    int started = false;
+    int started = FALSE;
     int ii;
 
     print_msg(">> Going through sequence once\n");
@@ -2051,7 +2050,7 @@ static int test_skip(PES_reader_p reader, stream_context stream, filter_context 
             if (err)
                 return 1;
         }
-        started = true;
+        started = TRUE;
 
         set_PES_reader_video_only(reader, video_only);
         err = play_normal(stream, tswriter, verbose, quiet, tsdirect, num_normal, reverse_data);
@@ -2071,7 +2070,7 @@ static int test_skip(PES_reader_p reader, stream_context stream, filter_context 
             print_msg("\n\n");
         print_msg("** Skip forwards\n");
         stop_server_output(reader);
-        set_PES_reader_video_only(reader, true);
+        set_PES_reader_video_only(reader, TRUE);
         err = skip_forwards(stream, tswriter, fcontext, with_seq_hdrs, SMALL_SKIP_DISTANCE,
             verbose, quiet, tsdirect);
         if (err == EOF)
@@ -2084,7 +2083,7 @@ static int test_skip(PES_reader_p reader, stream_context stream, filter_context 
             print_msg("\n\n");
         print_msg("** Skip forwards\n");
         stop_server_output(reader);
-        set_PES_reader_video_only(reader, true);
+        set_PES_reader_video_only(reader, TRUE);
         err = skip_forwards(stream, tswriter, fcontext, with_seq_hdrs, SMALL_SKIP_DISTANCE,
             verbose, quiet, tsdirect);
         if (err == EOF)
@@ -2119,7 +2118,7 @@ static int test_skip(PES_reader_p reader, stream_context stream, filter_context 
             print_msg("\n\n");
         print_msg("** Skip backwards\n");
         stop_server_output(reader);
-        set_PES_reader_video_only(reader, true);
+        set_PES_reader_video_only(reader, TRUE);
         err = skip_backwards(stream, tswriter, 1, verbose, quiet, tsdirect, reverse_data);
         if (err == EOF)
             break;
@@ -2131,7 +2130,7 @@ static int test_skip(PES_reader_p reader, stream_context stream, filter_context 
             print_msg("\n\n");
         print_msg("** Skip backwards\n");
         stop_server_output(reader);
-        set_PES_reader_video_only(reader, true);
+        set_PES_reader_video_only(reader, TRUE);
         err = skip_backwards(stream, tswriter, 1, verbose, quiet, tsdirect, reverse_data);
         if (err == EOF)
             break;
@@ -2165,7 +2164,7 @@ static int test_skip(PES_reader_p reader, stream_context stream, filter_context 
             print_msg("\n\n");
         print_msg("** Skip forwards\n");
         stop_server_output(reader);
-        set_PES_reader_video_only(reader, true);
+        set_PES_reader_video_only(reader, TRUE);
         err = skip_forwards(stream, tswriter, fcontext, with_seq_hdrs, SMALL_SKIP_DISTANCE,
             verbose, quiet, tsdirect);
         if (err == EOF)
@@ -2178,7 +2177,7 @@ static int test_skip(PES_reader_p reader, stream_context stream, filter_context 
             print_msg("\n\n");
         print_msg("** Skip backwards\n");
         stop_server_output(reader);
-        set_PES_reader_video_only(reader, true);
+        set_PES_reader_video_only(reader, TRUE);
         err = skip_backwards(stream, tswriter, 1, verbose, quiet, tsdirect, reverse_data);
         if (err == EOF)
             break;
@@ -2228,7 +2227,7 @@ static int test_skip(PES_reader_p reader, stream_context stream, filter_context 
  * Returns 0 if all went well, 1 if an error occurred.
  */
 static int test_play_pes_packets(PES_reader_p reader, TS_writer_p tswriter,
-    tsserve_context_p context, int pad_start, int video_only, bool verbose, bool quiet,
+    tsserve_context_p context, int pad_start, int video_only, bool verbose, int quiet,
     int tsdirect, int num_normal, int num_fast, int num_faster, int num_reverse, int ffrequency,
     int rfrequency, int skiptest, int with_seq_hdrs)
 {
@@ -2301,7 +2300,7 @@ static int test_play_pes_packets(PES_reader_p reader, TS_writer_p tswriter,
             return 1;
         }
 
-        err = build_h264_filter_context_strip(&scontext4, acontext, true);
+        err = build_h264_filter_context_strip(&scontext4, acontext, TRUE);
         if (err) {
             print_err("### Unable to build strip context\n");
             close_elementary_stream(&es);
@@ -2317,11 +2316,11 @@ static int test_play_pes_packets(PES_reader_p reader, TS_writer_p tswriter,
 
         if (skiptest)
             err = test_skip(reader, stream, fcontext, scontext, reverse_data, tswriter, video_only,
-                verbose, quiet, tsdirect, false);
+                verbose, quiet, tsdirect, FALSE);
         else
             err = test_play(reader, stream, fcontext, scontext, reverse_data, tswriter, video_only,
                 verbose, quiet, tsdirect, num_normal, num_fast, num_faster, num_reverse,
-                ffrequency, rfrequency, false);
+                ffrequency, rfrequency, FALSE);
 
         free_access_unit_context(&acontext);
         free_h264_filter_context(&fcontext4);
@@ -2332,7 +2331,7 @@ static int test_play_pes_packets(PES_reader_p reader, TS_writer_p tswriter,
         h262_filter_context_p scontext2 = nullptr; // And another
 
         if (!with_seq_hdrs)
-            reverse_data->output_sequence_headers = false;
+            reverse_data->output_sequence_headers = FALSE;
 
         err = build_h262_context(es, &h262);
         if (err) {
@@ -2352,7 +2351,7 @@ static int test_play_pes_packets(PES_reader_p reader, TS_writer_p tswriter,
             return 1;
         }
 
-        err = build_h262_filter_context_strip(&scontext2, h262, true);
+        err = build_h262_filter_context_strip(&scontext2, h262, TRUE);
         if (err) {
             print_err("### Unable to build strip context\n");
             close_elementary_stream(&es);
@@ -2386,7 +2385,7 @@ static int test_play_pes_packets(PES_reader_p reader, TS_writer_p tswriter,
 }
 
 static int open_input_file(
-    tsserve_context_p context, bool quiet, bool verbose, PES_reader_p* reader)
+    tsserve_context_p context, int quiet, bool verbose, PES_reader_p* reader)
 {
     int err = open_PES_reader(
         context->input_names[context->default_file_index], !quiet, verbose, reader);
@@ -2424,7 +2423,7 @@ static int open_input_file(
 }
 
 static int open_input_files(
-    tsserve_context_p context, bool quiet, bool verbose, PES_reader_p reader[MAX_INPUT_FILES])
+    tsserve_context_p context, int quiet, bool verbose, PES_reader_p reader[MAX_INPUT_FILES])
 {
     int ii;
     for (ii = 0; ii < MAX_INPUT_FILES; ii++) {
@@ -2485,7 +2484,7 @@ struct server_args {
     tsserve_context_p context; // Various arguments we might need
     TS_writer_p tswriter; // Where we're writing to
     bool verbose;
-    bool quiet;
+    int quiet;
 };
 
 static int tsserve_child_process(struct server_args* args)
@@ -2495,7 +2494,7 @@ static int tsserve_child_process(struct server_args* args)
     tsserve_context_p context = args->context;
     TS_writer_p tswriter = args->tswriter;
     bool verbose = args->verbose;
-    bool quiet = args->quiet;
+    int quiet = args->quiet;
     PES_reader_p reader[MAX_INPUT_FILES];
 
     if (!quiet)
@@ -2504,14 +2503,14 @@ static int tsserve_child_process(struct server_args* args)
     err = tswrite_start_input(tswriter, tswriter->where.socket);
     if (err) {
         print_err("### Unable to start command input from client\n");
-        (void)tswrite_close(tswriter, true);
+        (void)tswrite_close(tswriter, TRUE);
         return 1;
     }
 
     err = open_input_files(context, quiet, verbose, reader);
     if (err) {
         print_err("### Unable to open input file\n");
-        (void)tswrite_close(tswriter, true);
+        (void)tswrite_close(tswriter, TRUE);
         return 1;
     }
 
@@ -2522,7 +2521,7 @@ static int tsserve_child_process(struct server_args* args)
     err = play_pes_packets(reader, tswriter, context, verbose, quiet);
     if (err) {
         print_err("!!! Error playing PES packets to client\n");
-        (void)tswrite_close(tswriter, true);
+        (void)tswrite_close(tswriter, TRUE);
         for (ii = 0; ii < MAX_INPUT_FILES; ii++)
             (void)close_PES_reader(&reader[ii]);
         return 0; // Treat as normal completion, so we continue
@@ -2537,12 +2536,12 @@ static int tsserve_child_process(struct server_args* args)
         return 1;
     }
 
-    had_err = false;
+    had_err = FALSE;
     for (ii = 0; ii < MAX_INPUT_FILES; ii++) {
         err = close_PES_reader(&reader[ii]);
         if (err) {
             fprint_err("### Error closing input file %d, %s\n", ii, context->input_names[ii]);
-            had_err = true;
+            had_err = TRUE;
         }
     }
 
@@ -2555,7 +2554,7 @@ static int tsserve_child_process(struct server_args* args)
 /*
  * Start up the child fork, to handle the circular buffering
  */
-static int start_child(tsserve_context_p context, TS_writer_p tswriter, bool verbose, bool quiet)
+static int start_child(tsserve_context_p context, TS_writer_p tswriter, bool verbose, int quiet)
 {
     pid_t pid;
     struct server_args args = { context, tswriter, verbose, quiet };
@@ -2620,7 +2619,7 @@ static void set_child_exit_handler()
 /*
  * Run as a server
  */
-static int run_server(tsserve_context_p context, int listen_port, bool verbose, bool quiet)
+static int run_server(tsserve_context_p context, int listen_port, bool verbose, int quiet)
 {
     int err;
     SOCKET server_socket;
@@ -2680,7 +2679,7 @@ static int run_server(tsserve_context_p context, int listen_port, bool verbose, 
  */
 static int test_reader(tsserve_context_p context, int output_to_file, char* output_name, int port,
     int num_normal, int num_fast, int num_faster, int num_reverse, int skiptest, bool verbose,
-    bool quiet, int tsdirect)
+    int quiet, int tsdirect)
 {
     int err;
     TS_writer_p tswriter = nullptr;
@@ -2701,7 +2700,7 @@ static int test_reader(tsserve_context_p context, int output_to_file, char* outp
     err = open_input_file(context, quiet, verbose, &reader);
     if (err) {
         print_err("### Unable to open input file\n");
-        (void)tswrite_close(tswriter, true);
+        (void)tswrite_close(tswriter, TRUE);
         return 1;
     }
 
@@ -2711,7 +2710,7 @@ static int test_reader(tsserve_context_p context, int output_to_file, char* outp
         context->ffrequency, context->rfrequency, skiptest, context->with_seq_hdrs);
     if (err) {
         print_err("### Error playing PES packets\n");
-        (void)tswrite_close(tswriter, true);
+        (void)tswrite_close(tswriter, TRUE);
         (void)close_PES_reader(&reader);
         return 1;
     }
@@ -2734,8 +2733,8 @@ static int test_reader(tsserve_context_p context, int output_to_file, char* outp
 /*
  * Run as a player, possibly reading commands via a socket
  */
-static int command_reader(tsserve_context_p context, char* output_name, int port, int use_stdin,
-    bool verbose, bool quiet)
+static int command_reader(
+    tsserve_context_p context, char* output_name, int port, int use_stdin, bool verbose, int quiet)
 {
     int err;
     int ii, had_err;
@@ -2772,14 +2771,14 @@ static int command_reader(tsserve_context_p context, char* output_name, int port
         err = tswrite_start_input(tswriter, STDIN_FILENO);
         if (err) {
             print_err("### Unable to start command input from stdin\n");
-            (void)tswrite_close(tswriter, true);
+            (void)tswrite_close(tswriter, TRUE);
             return 1;
         }
     } else {
         err = tswrite_start_input(tswriter, tswriter->where.socket);
         if (err) {
             fprint_err("### Unable to start command input from %s\n", output_name);
-            (void)tswrite_close(tswriter, true);
+            (void)tswrite_close(tswriter, TRUE);
             return 1;
         }
     }
@@ -2787,7 +2786,7 @@ static int command_reader(tsserve_context_p context, char* output_name, int port
     err = open_input_files(context, quiet, verbose, reader);
     if (err) {
         print_err("### Unable to open input file\n");
-        (void)tswrite_close(tswriter, true);
+        (void)tswrite_close(tswriter, TRUE);
         return 1;
     }
 
@@ -2795,7 +2794,7 @@ static int command_reader(tsserve_context_p context, char* output_name, int port
     err = play_pes_packets(reader, tswriter, context, verbose, quiet);
     if (err) {
         print_err("### Error playing PES packets\n");
-        (void)tswrite_close(tswriter, true);
+        (void)tswrite_close(tswriter, TRUE);
         for (ii = 0; ii < MAX_INPUT_FILES; ii++)
             (void)close_PES_reader(&reader[ii]);
         return 1;
@@ -2808,12 +2807,12 @@ static int command_reader(tsserve_context_p context, char* output_name, int port
             (void)close_PES_reader(&reader[ii]);
         return 1;
     }
-    had_err = false;
+    had_err = FALSE;
     for (ii = 0; ii < MAX_INPUT_FILES; ii++) {
         err = close_PES_reader(&reader[ii]);
         if (err) {
             fprint_err("### Error closing input file %d, %s\n", ii, context->input_names[ii]);
-            had_err = true;
+            had_err = TRUE;
         }
     }
     return (had_err ? 1 : 0);
@@ -3060,12 +3059,12 @@ static void print_detailed_usage()
 int main(int argc, char** argv)
 {
     char* output_name = nullptr;
-    int had_input_name = false;
-    int had_output_name = false;
+    int had_input_name = FALSE;
+    int had_output_name = FALSE;
     int output_port = 88; // Useful default port number
-    bool quiet = false;
-    bool verbose = false;
-    int use_stdin = false; // for command input...
+    int quiet = FALSE;
+    bool verbose = FALSE;
+    int use_stdin = FALSE; // for command input...
     int listen_port = 88;
 
     enum ACTION action = ACTION_SERVER;
@@ -3079,19 +3078,19 @@ int main(int argc, char** argv)
     int num_fast = 100;
     int num_faster = 100;
     int num_reverse = 100;
-    int output_to_file = false;
-    int skiptest = false;
+    int output_to_file = FALSE;
+    int skiptest = FALSE;
 
     struct tsserve_context context;
 
     for (ii = 0; ii < MAX_INPUT_FILES; ii++)
         context.input_names[ii] = nullptr;
 
-    context.video_only = false;
+    context.video_only = FALSE;
     context.pad_start = 8;
     context.ffrequency = DEFAULT_FORWARD_FREQUENCY;
     context.rfrequency = DEFAULT_REVERSE_FREQUENCY;
-    context.with_seq_hdrs = true;
+    context.with_seq_hdrs = TRUE;
     context.pes_padding = 0;
     context.drop_packets = 0;
     context.drop_number = 0;
@@ -3104,11 +3103,11 @@ int main(int argc, char** argv)
     context.repeat_program_every = 100;
 
     // Transport Stream specific options
-    context.tsdirect = false; // Write to server as a side effect of PES reading
+    context.tsdirect = FALSE; // Write to server as a side effect of PES reading
 
-    context.force_stream_type = false;
-    context.want_h262 = true; // shouldn't matter
-    context.dolby_is_dvb = true;
+    context.force_stream_type = FALSE;
+    context.want_h262 = TRUE; // shouldn't matter
+    context.dolby_is_dvb = TRUE;
 
     if (argc < 2) {
         print_usage();
@@ -3139,57 +3138,57 @@ int main(int argc, char** argv)
                 print_detailed_usage();
                 return 0;
             } else if (!strcmp("-noseqhdr", argv[argno]) || !strcmp("-noseqhdrs", argv[argno])) {
-                context.with_seq_hdrs = false;
+                context.with_seq_hdrs = FALSE;
             } else if (!strcmp("-skiptest", argv[argno])) {
                 action = ACTION_TEST;
-                skiptest = true;
+                skiptest = TRUE;
             } else if (!strcmp("-test", argv[argno])) {
                 action = ACTION_TEST;
-                skiptest = false;
+                skiptest = FALSE;
             } else if (!strcmp("-tsdirect", argv[argno])) {
-                context.tsdirect = true; // Write to server as a side effect of TS reading
+                context.tsdirect = TRUE; // Write to server as a side effect of TS reading
             } else if (!strcmp("-n", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
-                err = int_value("tsserve", argv[argno], argv[argno + 1], true, 10, &num_normal);
+                err = int_value("tsserve", argv[argno], argv[argno + 1], TRUE, 10, &num_normal);
                 if (err)
                     return 1;
                 argno++;
             } else if (!strcmp("-f", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
-                err = int_value("tsserve", argv[argno], argv[argno + 1], true, 10, &num_fast);
+                err = int_value("tsserve", argv[argno], argv[argno + 1], TRUE, 10, &num_fast);
                 if (err)
                     return 1;
                 argno++;
             } else if (!strcmp("-ff", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
-                err = int_value("tsserve", argv[argno], argv[argno + 1], true, 10, &num_faster);
+                err = int_value("tsserve", argv[argno], argv[argno + 1], TRUE, 10, &num_faster);
                 if (err)
                     return 1;
                 argno++;
             } else if (!strcmp("-r", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
-                err = int_value("tsserve", argv[argno], argv[argno + 1], true, 10, &num_reverse);
+                err = int_value("tsserve", argv[argno], argv[argno + 1], TRUE, 10, &num_reverse);
                 if (err)
                     return 1;
                 argno++;
             } else if (!strcmp("-ffreq", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
                 err = int_value(
-                    "tsserve", argv[argno], argv[argno + 1], true, 0, &context.ffrequency);
+                    "tsserve", argv[argno], argv[argno + 1], TRUE, 0, &context.ffrequency);
                 if (err)
                     return 1;
                 argno++;
             } else if (!strcmp("-rfreq", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
                 err = int_value(
-                    "tsserve", argv[argno], argv[argno + 1], true, 0, &context.rfrequency);
+                    "tsserve", argv[argno], argv[argno + 1], TRUE, 0, &context.rfrequency);
                 if (err)
                     return 1;
                 argno++;
             } else if (!strcmp("-pes_padding", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
                 err = int_value(
-                    "tsserve", argv[argno], argv[argno + 1], true, 10, &context.pes_padding);
+                    "tsserve", argv[argno], argv[argno + 1], TRUE, 10, &context.pes_padding);
                 if (err)
                     return 1;
                 argno++;
@@ -3199,36 +3198,36 @@ int main(int argc, char** argv)
                     return 1;
                 }
                 err = int_value(
-                    "tsserve", argv[argno], argv[argno + 1], true, 0, &context.drop_packets);
+                    "tsserve", argv[argno], argv[argno + 1], TRUE, 0, &context.drop_packets);
                 if (err)
                     return 1;
                 err = int_value(
-                    "tsserve", argv[argno], argv[argno + 2], true, 0, &context.drop_number);
+                    "tsserve", argv[argno], argv[argno + 2], TRUE, 0, &context.drop_number);
                 if (err)
                     return 1;
                 argno += 2;
             } else if (!strcmp("-quiet", argv[argno]) || !strcmp("-q", argv[argno])) {
-                quiet = true;
-                verbose = false;
+                quiet = TRUE;
+                verbose = FALSE;
             } else if (!strcmp("-verbose", argv[argno]) || !strcmp("-v", argv[argno])) {
-                quiet = false;
-                verbose = true;
+                quiet = FALSE;
+                verbose = TRUE;
             } else if (!strcmp("-x", argv[argno])) {
-                extra_info = true;
+                extra_info = TRUE;
             } else if (!strcmp("-noaudio", argv[argno])) {
-                context.video_only = true;
+                context.video_only = TRUE;
             } else if (!strcmp("-avc", argv[argno]) || !strcmp("-h264", argv[argno])) {
-                context.force_stream_type = true;
-                context.want_h262 = false;
+                context.force_stream_type = TRUE;
+                context.want_h262 = FALSE;
             } else if (!strcmp("-h262", argv[argno])) {
-                context.force_stream_type = true;
-                context.want_h262 = true;
+                context.force_stream_type = TRUE;
+                context.want_h262 = TRUE;
             } else if (!strcmp("-dolby", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
                 if (!strcmp("dvb", argv[argno + 1]))
-                    context.dolby_is_dvb = true;
+                    context.dolby_is_dvb = TRUE;
                 else if (!strcmp("atsc", argv[argno + 1]))
-                    context.dolby_is_dvb = false;
+                    context.dolby_is_dvb = FALSE;
                 else {
                     print_err("### tsserve: -dolby must be followed by dvb or atsc\n");
                     return 1;
@@ -3236,7 +3235,7 @@ int main(int argc, char** argv)
                 ii++;
             } else if (!strcmp("-prepeat", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
-                err = int_value("tsserve", argv[argno], argv[argno + 1], true, 10,
+                err = int_value("tsserve", argv[argno], argv[argno + 1], TRUE, 10,
                     &context.repeat_program_every);
                 if (err)
                     return 1;
@@ -3244,20 +3243,20 @@ int main(int argc, char** argv)
             } else if (!strcmp("-pad", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
                 err = int_value(
-                    "tsserve", argv[argno], argv[argno + 1], true, 10, &context.pad_start);
+                    "tsserve", argv[argno], argv[argno + 1], TRUE, 10, &context.pad_start);
                 if (err)
                     return 1;
                 argno++;
             } else if (!strcmp("-port", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
-                err = int_value("tsserve", argv[argno], argv[argno + 1], true, 0, &listen_port);
+                err = int_value("tsserve", argv[argno], argv[argno + 1], TRUE, 0, &listen_port);
                 if (err)
                     return 1;
                 argno++;
             } else if (!strcmp("-cmd", argv[argno])) {
                 action = ACTION_CMD;
             } else if (!strcmp("-cmdstdin", argv[argno])) {
-                use_stdin = true;
+                use_stdin = TRUE;
                 action = ACTION_CMD;
             } else if (!strcmp("-host", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
@@ -3265,62 +3264,62 @@ int main(int argc, char** argv)
                     "tsserve", argv[argno], argv[argno + 1], &output_name, &output_port);
                 if (err)
                     return 1;
-                had_output_name = true; // more or less
+                had_output_name = TRUE; // more or less
                 argno++;
             } else if (!strcmp("-0", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
-                had_input_name = true;
+                had_input_name = TRUE;
                 context.input_names[0] = argv[argno + 1];
                 argno++;
             } else if (!strcmp("-1", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
-                had_input_name = true;
+                had_input_name = TRUE;
                 context.input_names[1] = argv[argno + 1];
                 argno++;
             } else if (!strcmp("-2", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
-                had_input_name = true;
+                had_input_name = TRUE;
                 context.input_names[2] = argv[argno + 1];
                 argno++;
             } else if (!strcmp("-3", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
-                had_input_name = true;
+                had_input_name = TRUE;
                 context.input_names[3] = argv[argno + 1];
                 argno++;
             } else if (!strcmp("-4", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
-                had_input_name = true;
+                had_input_name = TRUE;
                 context.input_names[4] = argv[argno + 1];
                 argno++;
             } else if (!strcmp("-5", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
-                had_input_name = true;
+                had_input_name = TRUE;
                 context.input_names[5] = argv[argno + 1];
                 argno++;
             } else if (!strcmp("-6", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
-                had_input_name = true;
+                had_input_name = TRUE;
                 context.input_names[6] = argv[argno + 1];
                 argno++;
             } else if (!strcmp("-7", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
-                had_input_name = true;
+                had_input_name = TRUE;
                 context.input_names[7] = argv[argno + 1];
                 argno++;
             } else if (!strcmp("-8", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
-                had_input_name = true;
+                had_input_name = TRUE;
                 context.input_names[8] = argv[argno + 1];
                 argno++;
             } else if (!strcmp("-9", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
-                had_input_name = true;
+                had_input_name = TRUE;
                 context.input_names[9] = argv[argno + 1];
                 argno++;
             } else if (!strcmp("-output", argv[argno]) || !strcmp("-o", argv[argno])) {
                 MustARG("tsserve", argno, argc, argv);
-                output_to_file = true;
-                had_output_name = true;
+                output_to_file = TRUE;
+                had_output_name = TRUE;
                 output_name = argv[argno + 1];
                 argno++;
             } else {
@@ -3335,7 +3334,7 @@ int main(int argc, char** argv)
                 return 1;
             } else {
                 context.input_names[0] = argv[argno];
-                had_input_name = true;
+                had_input_name = TRUE;
             }
         }
         argno++;

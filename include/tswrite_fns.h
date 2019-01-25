@@ -49,7 +49,7 @@
  * Returns 0 if all goes well, 1 if something went wrong.
  */
 int tswrite_open(TS_WRITER_TYPE how, const std::string name, char* multicast_if, int port,
-    bool quiet, TS_writer_p* tswriter);
+    int quiet, TS_writer_p* tswriter);
 /*
  * Open a network connection for TS output.
  *
@@ -57,7 +57,7 @@ int tswrite_open(TS_WRITER_TYPE how, const std::string name, char* multicast_if,
  *
  * - `name` is the name of the host to connect to
  * - `port` is the port to connect to
- * - `use_tcp` is true if TCP/IP should be use, false if UDP should be used
+ * - `use_tcp` is TRUE if TCP/IP should be use, FALSE if UDP should be used
  * - `quiet` is true if only error messages should be printed
  * - `tswriter` is the new context to use for writing TS output,
  *   which should be closed using `tswrite_close`.
@@ -71,7 +71,7 @@ int tswrite_open(TS_WRITER_TYPE how, const std::string name, char* multicast_if,
  * Returns 0 if all goes well, 1 if something went wrong.
  */
 int tswrite_open_connection(
-    int use_tcp, const std::string name, int port, bool quiet, TS_writer_p* tswriter);
+    int use_tcp, const std::string name, int port, int quiet, TS_writer_p* tswriter);
 /*
  * Open a file for TS output.
  *
@@ -87,7 +87,7 @@ int tswrite_open_connection(
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-int tswrite_open_file(const std::string name, bool quiet, TS_writer_p* tswriter);
+int tswrite_open_file(const std::string name, int quiet, TS_writer_p* tswriter);
 /*
  * Wait for a client to connect and then both write TS data to it and
  * listen for command from it. Uses TCP/IP.
@@ -99,7 +99,7 @@ int tswrite_open_file(const std::string name, bool quiet, TS_writer_p* tswriter)
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-int tswrite_wait_for_client(int server_socket, bool quiet, TS_writer_p* tswriter);
+int tswrite_wait_for_client(int server_socket, int quiet, TS_writer_p* tswriter);
 /*
  * Set up internal buffering for TS output. This is necessary for UDP
  * output, and optional otherwise.
@@ -123,7 +123,7 @@ int tswrite_wait_for_client(int server_socket, bool quiet, TS_writer_p* tswriter
  *   host with no wait between packets
  * - `waitfor` is the number of microseconds to wait for thereafter
  * - `byterate` is the (initial) rate at which we'd like to output our data
- * - `use_pcrs` is true if PCRs in the data stream are to be used for
+ * - `use_pcrs` is TRUE if PCRs in the data stream are to be used for
  *   timing output (the normal case), otherwise the specified byte rate
  *   will be used directly.
  * - `prime_size` is how much to prime the circular buffer output timer
@@ -198,7 +198,7 @@ void tswrite_set_command_atomic(TS_writer_p tswriter, int atomic);
  *
  * If the TS writer is enabled for command input, then if the command
  * currently being executed has declared itself "atomic" (i.e., not able to be
- * interrupted), it returns false, otherwise it returns true if the command
+ * interrupted), it returns FALSE, otherwise it returns TRUE if the command
  * character has changed.
  */
 int tswrite_command_changed(TS_writer_p tswriter);
@@ -213,7 +213,7 @@ int tswrite_command_changed(TS_writer_p tswriter);
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-int tswrite_close(TS_writer_p tswriter, bool quiet);
+int tswrite_close(TS_writer_p tswriter, int quiet);
 
 /*
  * Wait for a new command after 'p'ausing.
@@ -230,7 +230,7 @@ int wait_for_command(TS_writer_p tswriter);
  * - `tswriter` is the TS output context returned by `tswrite_open`
  * - `packet` is the TS packet
  * - if the packets payload_unit_start_indicator is set, then
- *   `pid` is the PID for this packet, `got_pcr` is true if it
+ *   `pid` is the PID for this packet, `got_pcr` is TRUE if it
  *   contains a PCR in its adaptation field, and `pcr` contains
  *   said PCR. These values are only used when outputting via
  *   buffered output.

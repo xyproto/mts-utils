@@ -12,7 +12,7 @@
  * Build the internal arrays to remember video sequence bounds in,
  * for reversing.
  *
- * Builds a new `reverse_data` datastructure. If `is_h264` is false (i.e., the
+ * Builds a new `reverse_data` datastructure. If `is_h264` is FALSE (i.e., the
  * data to be reversed is not MPEG-1 or MPEG-2), then this datastructure may
  * be smaller.
  *
@@ -142,7 +142,7 @@ int get_reverse_data(reverse_data_p reverse_data, int which, uint32_t* index,
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int collect_reverse_h262(h262_context_p h262, int max, bool verbose, bool quiet);
+int collect_reverse_h262(h262_context_p h262, int max, bool verbose, int quiet);
 /*
  * Find IDR and I slices, and remember their access units for later output
  * in reverse order.
@@ -158,8 +158,7 @@ int collect_reverse_h262(h262_context_p h262, int max, bool verbose, bool quiet)
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int collect_reverse_access_units(
-    access_unit_context_p acontext, int max, bool verbose, bool quiet);
+int collect_reverse_access_units(access_unit_context_p acontext, int max, bool verbose, int quiet);
 /*
  * Output the last picture (or an earlier one) from the reverse arrays.
  * This version writes the data out as Transport Stream.
@@ -182,7 +181,7 @@ int collect_reverse_access_units(
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int output_from_reverse_data_as_TS(ES_p es, TS_writer_p tswriter, bool verbose, bool quiet,
+int output_from_reverse_data_as_TS(ES_p es, TS_writer_p tswriter, bool verbose, int quiet,
     uint32_t offset, reverse_data_p reverse_data);
 /*
  * Output the last picture (or an earlier one) from the reverse arrays.
@@ -207,7 +206,7 @@ int output_from_reverse_data_as_TS(ES_p es, TS_writer_p tswriter, bool verbose, 
  * if the current command has changed.
  */
 int output_from_reverse_data_as_ES(
-    ES_p es, FILE* output, bool verbose, bool quiet, uint32_t offset, reverse_data_p reverse_data);
+    ES_p es, FILE* output, bool verbose, int quiet, uint32_t offset, reverse_data_p reverse_data);
 /*
  * Output the H.262 pictures or H.264 access units we remembered earlier - but
  * in reverse order. This version writes the data out as Transport Stream.
@@ -234,7 +233,7 @@ int output_from_reverse_data_as_ES(
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int output_in_reverse_as_TS(ES_p es, TS_writer_p tswriter, int frequency, bool verbose, bool quiet,
+int output_in_reverse_as_TS(ES_p es, TS_writer_p tswriter, int frequency, bool verbose, int quiet,
     int32_t start_with, int max, reverse_data_p reverse_data);
 /*
  * Output the H.262 pictures or H.264 access units we remembered earlier - but
@@ -262,5 +261,5 @@ int output_in_reverse_as_TS(ES_p es, TS_writer_p tswriter, int frequency, bool v
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int output_in_reverse_as_ES(ES_p es, FILE* output, int frequency, bool verbose, bool quiet,
+int output_in_reverse_as_ES(ES_p es, FILE* output, int frequency, bool verbose, int quiet,
     int32_t start_with, int max, reverse_data_p reverse_data);

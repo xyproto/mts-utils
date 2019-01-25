@@ -45,7 +45,7 @@ void print_bits(int num_bits, byte value);
  * where no more than `max` bytes are to be printed (and "..." is printed
  * if not all bytes were shown).
  */
-void print_data(bool is_msg, const std::string name, const byte data[], size_t length, size_t max);
+void print_data(int is_msg, const std::string name, const byte data[], int length, int max);
 /*
  * Print out (the last `max`) bytes of a byte array.
  *
@@ -61,7 +61,7 @@ void print_data(bool is_msg, const std::string name, const byte data[], size_t l
  * where no more than `max` bytes are to be printed (and "..." is printed
  * if not all bytes were shown).
  */
-void print_end_of_data(const std::string name, byte data[], size_t length, size_t max);
+void print_end_of_data(const std::string name, byte data[], int length, int max);
 /*
  * Calculate log2 of `x` - for some reason this is missing from <math.h>
  */
@@ -122,9 +122,9 @@ offset_t tell_file(int filedes);
  * a general purpose "open" replacement.
  *
  * - `filename` is the name of the file to open
- * - `for_write` should be true if the file is to be written to,
+ * - `for_write` should be TRUE if the file is to be written to,
  *   in which case it will be opened with flags O_WRONLY|O_CREAT|O_TRUNC,
- *   or false if the file is to be read, in which case it will be
+ *   or FALSE if the file is to be read, in which case it will be
  *   opened with flag O_RDONLY. In both cases, on Windows the flag
  *   O_BINARY will also be set.
  *
@@ -147,7 +147,7 @@ int close_file(int filedes);
  *
  * - `name` is the name of the file, or nullptr if standard input
  *   is to be read from (which is not allowed if `use_pes` is
- *   true).
+ *   TRUE).
  *
  * - If `use_pes` is true then the input file is PS or TS and should
  *   be read via a PES reader.
@@ -169,7 +169,7 @@ int close_file(int filedes);
  *   to whatever is determined (presumably one of VIDEO_H262, VIDEO_H264
  *   or VIDEO_AVS).
  *
- * - If input is from standard input, and `force_stream_type` is false,
+ * - If input is from standard input, and `force_stream_type` is FALSE,
  *   `is_data` will always be set to VIDEO_H262, which may be incorrect.
  *
  * - `es` is the new ES reader context.
@@ -177,7 +177,7 @@ int close_file(int filedes);
  * Returns 0 if all goes well, 1 if something goes wrong. In the latter case,
  * suitable messages will have been written out to standard error.
  */
-int open_input_as_ES(const std::string name, int use_pes, bool quiet, int force_stream_type,
+int open_input_as_ES(const std::string name, int use_pes, int quiet, int force_stream_type,
     int want_data, int* is_data, ES_p* es);
 /*
  * Close an input ES stream opened with `open_input_as_ES`.

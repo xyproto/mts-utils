@@ -193,9 +193,9 @@ static int report_h262_file_as_dots(ES_p es, int max, bool verbose, int show_gop
         }
 
         if (item->unit.start_code == 0xB3) {
-            time_gop_max = std::max(time_gop_max, time_gop);
+            time_gop_max = max(time_gop_max, time_gop);
             if (gops)
-                time_gop_min = std::min(time_gop_min, time_gop);
+                time_gop_min = min(time_gop_min, time_gop);
             gops++;
             time_gop_tot += time_gop;
         }
@@ -257,7 +257,7 @@ static int report_avs_file_as_dots(ES_p es, int max, bool verbose)
     for (;;) {
         avs_frame_p avs_frame;
 
-        err = get_next_avs_frame(context, true, false, &avs_frame);
+        err = get_next_avs_frame(context, TRUE, FALSE, &avs_frame);
         if (err == EOF)
             break;
         else if (err) {
@@ -329,11 +329,11 @@ static char choose_nal_type(access_unit_p access_unit, int* gop_start_found)
 {
     char character_nal_type = '?';
     int ii;
-    int gop_start = false;
+    int gop_start = FALSE;
     nal_unit_p temp_nal_unit;
-    int rec_point_required = false;
-    // false: a random access point is identified as an I frame,
-    // true:  a random access point is identified as an I frame + recovery_point SEI.
+    int rec_point_required = FALSE;
+    // FALSE: a random access point is identified as an I frame,
+    // TRUE:  a random access point is identified as an I frame + recovery_point SEI.
     //        The value recovery_frame_cnt is never considered (as if it was 0).
 
     if (access_unit->primary_start == nullptr)
@@ -348,7 +348,7 @@ static char choose_nal_type(access_unit_p access_unit, int* gop_start_found)
         else
             character_nal_type = 'x';
     } else if (access_unit->primary_start->nal_unit_type == NAL_IDR) {
-        gop_start = true;
+        gop_start = TRUE;
         if (all_slices_I(access_unit))
             character_nal_type = 'D';
         else
@@ -357,13 +357,13 @@ static char choose_nal_type(access_unit_p access_unit, int* gop_start_found)
         if (all_slices_I(access_unit)) {
             character_nal_type = 'I';
             if (!rec_point_required)
-                gop_start = true;
+                gop_start = TRUE;
             else
                 for (ii = 0; ii < access_unit->nal_units->length; ii++) {
                     temp_nal_unit = access_unit->nal_units->array[ii];
                     if (temp_nal_unit->nal_unit_type == NAL_SEI) {
                         if (temp_nal_unit->u.sei_recovery.payloadType == 6) {
-                            gop_start = true;
+                            gop_start = TRUE;
                             // Print a warning if more than one frame are needed for a
                             // recovery point. This is technically legal but not supported
                             // in our research of random access point.
@@ -397,14 +397,14 @@ static int dots_by_access_unit(ES_p es, int max, bool verbose, int hash_eos, int
     int access_unit_count = 0;
     access_unit_context_p context;
 
-    int gop_start_found = false;
+    int gop_start_found = FALSE;
     int k_frame = 0;
     int size_gop;
     int size_gop_max = 0;
     int size_gop_min = 100000;
     int gops = 0;
     int size_gop_tot = 0;
-    int is_first_k_frame = true;
+    int is_first_k_frame = TRUE;
     char char_nal_type = 'a';
     unsigned long num_idr = 0;
     unsigned long num_i = 0;
@@ -436,7 +436,7 @@ static int dots_by_access_unit(ES_p es, int max, bool verbose, int hash_eos, int
     for (;;) {
         access_unit_p access_unit;
 
-        err = get_next_h264_frame(context, true, false, &access_unit);
+        err = get_next_h264_frame(context, TRUE, FALSE, &access_unit);
 
         if (err == EOF)
             break;
@@ -453,8 +453,8 @@ static int dots_by_access_unit(ES_p es, int max, bool verbose, int hash_eos, int
         if (gop_start_found) {
             if (!is_first_k_frame) {
                 size_gop = access_unit_count - k_frame;
-                size_gop_max = std::max(size_gop_max, size_gop);
-                size_gop_min = std::min(size_gop_min, size_gop);
+                size_gop_max = max(size_gop_max, size_gop);
+                size_gop_min = min(size_gop_min, size_gop);
                 size_gop_tot += size_gop;
                 gops++;
                 if (show_gop_time)
@@ -462,7 +462,7 @@ static int dots_by_access_unit(ES_p es, int max, bool verbose, int hash_eos, int
                         (double)size_gop / frame_rate); // that's the time duration of a "GOP"
                 // (if the frame rate is 25fps)
             }
-            is_first_k_frame = false;
+            is_first_k_frame = FALSE;
             k_frame = access_unit_count;
         }
 
@@ -498,8 +498,8 @@ static int dots_by_access_unit(ES_p es, int max, bool verbose, int hash_eos, int
             if (hash_eos) {
                 print_msg("#");
                 // This should be enough to allow us to keep on after the EOS
-                context->end_of_stream = 0; // false;
-                context->no_more_data = false;
+                context->end_of_stream = 0; // FALSE;
+                context->no_more_data = FALSE;
             } else {
                 print_msg("\nStopping because found end-of-stream NAL unit\n");
                 break;
@@ -774,23 +774,23 @@ static void print_usage()
 int main(int argc, char** argv)
 {
     auto input_name = ""s;
-    int had_input_name = false;
-    int use_stdin = false;
+    int had_input_name = FALSE;
+    int use_stdin = FALSE;
     int err = 0;
     ES_p es = nullptr;
     int max = 0;
-    bool verbose = false;
+    bool verbose = FALSE;
     int ii = 1;
 
-    int use_pes = false;
-    int hash_eos = false;
+    int use_pes = FALSE;
+    int hash_eos = FALSE;
 
     int want_data = VIDEO_H262;
     int is_data = want_data;
-    int force_stream_type = false;
+    int force_stream_type = FALSE;
 
-    int want_ES = false;
-    int show_gop_time = false;
+    int want_ES = FALSE;
+    int show_gop_time = FALSE;
 
     if (argc < 2) {
         print_usage();
@@ -818,36 +818,36 @@ int main(int argc, char** argv)
                 }
                 ii++;
             } else if (!strcmp("-stdin", argv[ii])) {
-                had_input_name = true; // more or less
-                use_stdin = true;
+                had_input_name = TRUE; // more or less
+                use_stdin = TRUE;
             } else if (!strcmp("-avc", argv[ii]) || !strcmp("-h264", argv[ii])) {
-                force_stream_type = true;
+                force_stream_type = TRUE;
                 want_data = VIDEO_H264;
             } else if (!strcmp("-h262", argv[ii])) {
-                force_stream_type = true;
+                force_stream_type = TRUE;
                 want_data = VIDEO_H262;
             } else if (!strcmp("-avs", argv[ii])) {
-                force_stream_type = true;
+                force_stream_type = TRUE;
                 want_data = VIDEO_AVS;
             } else if (!strcmp("-es", argv[ii]))
-                want_ES = true;
+                want_ES = TRUE;
             else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii]))
-                verbose = true;
+                verbose = TRUE;
             else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
                 MustARG("esdots"s, ii, argc, argv);
-                err = int_value("esdots", argv[ii], argv[ii + 1], true, 10, &max);
+                err = int_value("esdots", argv[ii], argv[ii + 1], TRUE, 10, &max);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-hasheos", argv[ii]))
-                hash_eos = true;
+                hash_eos = TRUE;
             else if (!strcmp("-pes", argv[ii]) || !strcmp("-ts", argv[ii]))
-                use_pes = true;
+                use_pes = TRUE;
             else if (!strcmp("-gop", argv[ii]))
-                show_gop_time = true;
+                show_gop_time = TRUE;
             else if (!strcmp("-fr", argv[ii])) {
                 MustARG("esdots"s, ii, argc, argv);
-                err = double_value("esdots", argv[ii], argv[ii + 1], true, &frame_rate);
+                err = double_value("esdots", argv[ii], argv[ii + 1], TRUE, &frame_rate);
                 if (err)
                     return 1;
                 ii++;
@@ -863,7 +863,7 @@ int main(int argc, char** argv)
                 return 1;
             } else {
                 input_name = argv[ii];
-                had_input_name = true;
+                had_input_name = TRUE;
             }
         }
         ii++;
@@ -874,7 +874,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    if (err = open_input_as_ES((use_stdin ? nullptr : input_name), use_pes, false,
+    if (err = open_input_as_ES((use_stdin ? nullptr : input_name), use_pes, FALSE,
             force_stream_type, want_data, &is_data, &es);
         err) {
         print_err("### esdots: Error opening input file\n");

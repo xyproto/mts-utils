@@ -133,7 +133,7 @@ static int is_I_or_IDR_frame(access_unit_p frame)
  */
 static int merge_with_avs(avs_context_p video_context, int audio_file, TS_writer_p output,
     int audio_type, int audio_samples_per_frame, int audio_sample_rate, double video_frame_rate,
-    int pat_pmt_freq, bool quiet, bool verbose, int debugging)
+    int pat_pmt_freq, int quiet, bool verbose, int debugging)
 {
     int ii;
     int err;
@@ -153,8 +153,8 @@ static int merge_with_avs(avs_context_p video_context, int audio_file, TS_writer
     double audio_time = 0.0;
     double video_time = 0.0;
 
-    int got_video = true;
-    int got_audio = true;
+    int got_video = TRUE;
+    int got_audio = TRUE;
 
     if (verbose)
         fprint_msg("Video PTS increment %u\n"
@@ -213,7 +213,7 @@ static int merge_with_avs(avs_context_p video_context, int audio_file, TS_writer
             if (err == EOF) {
                 if (verbose)
                     print_msg("EOF: no more video data\n");
-                got_video = false;
+                got_video = FALSE;
             } else if (err)
                 return 1;
 
@@ -270,7 +270,7 @@ static int merge_with_avs(avs_context_p video_context, int audio_file, TS_writer
             // easier just to add a delay to allow for progress through the decoder)
             if (is_avs_I_frame(avs_frame))
                 err = write_avs_frame_as_TS_with_pts_dts(avs_frame, output, DEFAULT_VIDEO_PID,
-                    true, video_pts + 30000, true, video_pts);
+                    TRUE, video_pts + 30000, TRUE, video_pts);
             else
                 err = write_avs_frame_as_TS_with_PCR(
                     avs_frame, output, DEFAULT_VIDEO_PID, video_pts, 0);
@@ -291,7 +291,7 @@ static int merge_with_avs(avs_context_p video_context, int audio_file, TS_writer
             if (err == EOF) {
                 if (verbose)
                     print_msg("EOF: no more audio data\n");
-                got_audio = false;
+                got_audio = FALSE;
                 break;
             } else if (err)
                 return 1;
@@ -304,7 +304,7 @@ static int merge_with_avs(avs_context_p video_context, int audio_file, TS_writer
                     audio_time, audio_pts);
 
             err = write_ES_as_TS_PES_packet_with_pts_dts(output, aframe->data, aframe->data_len,
-                DEFAULT_AUDIO_PID, DEFAULT_AUDIO_STREAM_ID, true, audio_pts, true, audio_pts);
+                DEFAULT_AUDIO_PID, DEFAULT_AUDIO_STREAM_ID, TRUE, audio_pts, TRUE, audio_pts);
             if (err) {
                 free_audio_frame(&aframe);
                 print_err("### Error writing audio frame\n");
@@ -336,7 +336,7 @@ static int merge_with_avs(avs_context_p video_context, int audio_file, TS_writer
  */
 static int merge_with_h264(access_unit_context_p video_context, int audio_file, TS_writer_p output,
     int audio_type, int audio_samples_per_frame, int audio_sample_rate, int video_frame_rate,
-    int pat_pmt_freq, bool quiet, bool verbose, int debugging)
+    int pat_pmt_freq, int quiet, bool verbose, int debugging)
 {
     int ii;
     int err;
@@ -356,8 +356,8 @@ static int merge_with_h264(access_unit_context_p video_context, int audio_file, 
     double audio_time = 0.0;
     double video_time = 0.0;
 
-    int got_video = true;
-    int got_audio = true;
+    int got_video = TRUE;
+    int got_audio = TRUE;
 
     if (verbose)
         fprint_msg("Video PTS increment %u\n"
@@ -416,7 +416,7 @@ static int merge_with_h264(access_unit_context_p video_context, int audio_file, 
             if (err == EOF) {
                 if (verbose)
                     print_msg("EOF: no more video data\n");
-                got_video = false;
+                got_video = FALSE;
             } else if (err)
                 return 1;
         }
@@ -454,7 +454,7 @@ static int merge_with_h264(access_unit_context_p video_context, int audio_file, 
             // but might as well only do it on index frames.
             if (is_I_or_IDR_frame(access_unit))
                 err = write_access_unit_as_TS_with_pts_dts(access_unit, video_context, output,
-                    DEFAULT_VIDEO_PID, true, video_pts + 45000, true, video_pts);
+                    DEFAULT_VIDEO_PID, TRUE, video_pts + 45000, TRUE, video_pts);
             else
                 err = write_access_unit_as_TS_with_PCR(
                     access_unit, video_context, output, DEFAULT_VIDEO_PID, video_pts, 0);
@@ -469,7 +469,7 @@ static int merge_with_h264(access_unit_context_p video_context, int audio_file, 
             if (video_context->end_of_stream) {
                 if (verbose)
                     print_msg("Found End-of-stream NAL unit\n");
-                got_video = false;
+                got_video = FALSE;
             }
         }
 
@@ -482,7 +482,7 @@ static int merge_with_h264(access_unit_context_p video_context, int audio_file, 
             if (err == EOF) {
                 if (verbose)
                     print_msg("EOF: no more audio data\n");
-                got_audio = false;
+                got_audio = FALSE;
                 break;
             } else if (err)
                 return 1;
@@ -495,7 +495,7 @@ static int merge_with_h264(access_unit_context_p video_context, int audio_file, 
                     audio_time, audio_pts);
 
             err = write_ES_as_TS_PES_packet_with_pts_dts(output, aframe->data, aframe->data_len,
-                DEFAULT_AUDIO_PID, DEFAULT_AUDIO_STREAM_ID, true, audio_pts, true, audio_pts);
+                DEFAULT_AUDIO_PID, DEFAULT_AUDIO_STREAM_ID, TRUE, audio_pts, TRUE, audio_pts);
             if (err) {
                 free_audio_frame(&aframe);
                 print_err("### Error writing audio frame\n");
@@ -572,9 +572,9 @@ static void print_usage()
 
 int main(int argc, char** argv)
 {
-    int had_video_name = false;
-    int had_audio_name = false;
-    int had_output_name = false;
+    int had_video_name = FALSE;
+    int had_audio_name = FALSE;
+    int had_output_name = FALSE;
     char* video_name = nullptr;
     char* audio_name = nullptr;
     char* output_name = nullptr;
@@ -584,9 +584,9 @@ int main(int argc, char** argv)
     avs_context_p avs_video_context = nullptr;
     int audio_file = -1;
     TS_writer_p output = nullptr;
-    bool quiet = false;
-    bool verbose = false;
-    int debugging = false;
+    int quiet = FALSE;
+    bool verbose = FALSE;
+    int debugging = FALSE;
     int audio_samples_per_frame = ADTS_SAMPLES_PER_FRAME;
     int audio_sample_rate = CD_RATE;
     int video_frame_rate = DEFAULT_VIDEO_FRAME_RATE;
@@ -626,15 +626,15 @@ int main(int argc, char** argv)
                 }
                 ii++;
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
-                verbose = true;
+                verbose = TRUE;
             } else if (!strcmp("-quiet", argv[ii]) || !strcmp("-q", argv[ii])) {
-                quiet = true;
+                quiet = TRUE;
             } else if (!strcmp("-x", argv[ii])) {
-                debugging = true;
-                quiet = false;
+                debugging = TRUE;
+                quiet = FALSE;
             } else if (!strcmp("-rate", argv[ii])) {
                 MustARG("esmerge", ii, argc, argv);
-                err = int_value("esmerge", argv[ii], argv[ii + 1], true, 10, &audio_sample_rate);
+                err = int_value("esmerge", argv[ii], argv[ii + 1], TRUE, 10, &audio_sample_rate);
                 if (err)
                     return 1;
                 ii++;
@@ -644,7 +644,7 @@ int main(int argc, char** argv)
                 audio_sample_rate = DAT_RATE;
             } else if (!strcmp("-vidrate", argv[ii])) {
                 MustARG("esmerge", ii, argc, argv);
-                err = int_value("esmerge", argv[ii], argv[ii + 1], true, 10, &video_frame_rate);
+                err = int_value("esmerge", argv[ii], argv[ii + 1], TRUE, 10, &video_frame_rate);
                 if (err)
                     return 1;
                 ii++;
@@ -664,7 +664,7 @@ int main(int argc, char** argv)
                 video_type = VIDEO_AVS;
             } else if (!strcmp("-patpmtfreq", argv[ii])) {
                 MustARG("esmerge", ii, argc, argv);
-                err = int_value("esmerge", argv[ii], argv[ii + 1], true, 10, &pat_pmt_freq);
+                err = int_value("esmerge", argv[ii], argv[ii + 1], TRUE, 10, &pat_pmt_freq);
                 if (err) {
                     return 1;
                 }
@@ -678,13 +678,13 @@ int main(int argc, char** argv)
         } else {
             if (!had_video_name) {
                 video_name = argv[ii];
-                had_video_name = true;
+                had_video_name = TRUE;
             } else if (!had_audio_name) {
                 audio_name = argv[ii];
-                had_audio_name = true;
+                had_audio_name = TRUE;
             } else if (!had_output_name) {
                 output_name = argv[ii];
-                had_output_name = true;
+                had_output_name = TRUE;
             } else {
                 fprint_err("### esmerge: Unexpected '%s'\n", argv[ii]);
                 return 1;
@@ -734,7 +734,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    audio_file = open_binary_file(audio_name, false);
+    audio_file = open_binary_file(audio_name, FALSE);
     if (audio_file == -1) {
         print_err("### esmerge: "
                   "Problem opening audio file - abandoning reading\n");

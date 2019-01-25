@@ -61,12 +61,14 @@ static int tfmt = FMTX_TS_DISPLAY_90kHz_RAW;
 
 const std::string PROGNAME = "tsdvbsub"s;
 
+//#define PROGNAME "tsdvbsub"
+
 static inline unsigned int mem16be(const uint8_t* p)
 {
     return static_cast<unsigned int>((p[0] << 8) | p[1]);
 }
 
-static const uint8_t* page_composition_segment(const uint8_t* p, size_t segment_length)
+static const uint8_t* page_composition_segment(const uint8_t* p, int segment_length)
 {
     const uint8_t* const eos = p + segment_length;
     const char* state_text[] = { "normal", "acquisition point", "mode change", "reserved" };
@@ -89,7 +91,7 @@ static const uint8_t* page_composition_segment(const uint8_t* p, size_t segment_
     return p;
 }
 
-static const uint8_t* region_composition_segment(const uint8_t* p, size_t segment_length)
+static const uint8_t* region_composition_segment(const uint8_t* p, int segment_length)
 {
     const uint8_t* const eos = p + segment_length;
     int region_fill_flag;
@@ -135,7 +137,7 @@ static const uint8_t* region_composition_segment(const uint8_t* p, size_t segmen
     return p;
 }
 
-static const uint8_t* CLUT_definition_segment(const uint8_t* p, size_t segment_length)
+static const uint8_t* CLUT_definition_segment(const uint8_t* p, int segment_length)
 {
     const uint8_t* const eos = p + segment_length;
 
@@ -173,7 +175,7 @@ static const uint8_t* CLUT_definition_segment(const uint8_t* p, size_t segment_l
 }
 
 static const uint8_t* object_data_segment(
-    dvbdata_t* const dvbd, const uint8_t* p, size_t segment_length)
+    dvbdata_t* const dvbd, const uint8_t* p, int segment_length)
 {
     const uint8_t* const sos = p;
     const uint8_t* const eos = p + segment_length;
@@ -197,9 +199,9 @@ static const uint8_t* object_data_segment(
         fprint_msg(
             "bottom_field_data_block_length: %d\n", bottom_field_data_block_length = mem16be(p));
         p += 2;
-        print_data(true, "top pixel-data:", p, top_field_data_block_length, 0x10000);
+        print_data(TRUE, "top pixel-data:", p, top_field_data_block_length, 0x10000);
         p += top_field_data_block_length;
-        print_data(true, "bottom pixel-data:", p, bottom_field_data_block_length, 0x10000);
+        print_data(TRUE, "bottom pixel-data:", p, bottom_field_data_block_length, 0x10000);
         p += bottom_field_data_block_length;
         if (((p - sos) & 1) != 0) {
             fprint_msg("8_stuff_bits: %d\n", *p++);
@@ -220,7 +222,7 @@ static const uint8_t* object_data_segment(
     }
 
     default:
-        print_data(true, "reserved:", p, eos - p, 0x10000);
+        print_data(TRUE, "reserved:", p, eos - p, 0x10000);
         break;
     }
 
@@ -230,7 +232,7 @@ static const uint8_t* object_data_segment(
 static const uint8_t* subtitling_segment(dvbdata_t* const dvbd, const uint8_t* p)
 {
     unsigned int segment_type;
-    size_t segment_length;
+    unsigned int segment_length;
     const uint8_t* p2;
 
     fprint_msg("\nsubtitling_segment\n");
@@ -259,7 +261,7 @@ static const uint8_t* subtitling_segment(dvbdata_t* const dvbd, const uint8_t* p
         break;
 
     default:
-        print_data(true, "data"s, p, segment_length, segment_length);
+        print_data(TRUE, "data", p, segment_length, segment_length);
         p2 = p + segment_length;
         break;
     }
@@ -302,21 +304,21 @@ static void flush_dvbd(dvbdata_t* const dvbd)
     fprint_msg("end_of_PES_data_field_marker: %#x\n", *p++);
 
     if (dvbd->data_len > (unsigned int)(p - dvbd->data)) {
-        print_data(true, "excess bytes", p, dvbd->data_len - (p - dvbd->data), 0x10000);
+        print_data(TRUE, "excess bytes", p, dvbd->data_len - (p - dvbd->data), 0x10000);
     } else if (dvbd->data_len < (unsigned int)(p - dvbd->data)) {
         fprint_msg("### overrun\n");
     }
 
     dvbd->data_len = 0;
-    dvbd->pts_valid = false;
-    dvbd->dts_valid = false;
-    dvbd->found = false;
+    dvbd->pts_valid = FALSE;
+    dvbd->dts_valid = FALSE;
+    dvbd->found = FALSE;
     memset(dvbd->data, 0, sizeof(dvbd->data));
 }
 
-static void add_data_dvbd(dvbdata_t* const dvbd, const uint8_t* const data, size_t len)
+static void add_data_dvbd(dvbdata_t* const dvbd, const uint8_t* const data, unsigned int len)
 {
-    size_t gap = sizeof(dvbd->data) - dvbd->data_len;
+    unsigned int gap = sizeof(dvbd->data) - dvbd->data_len;
 
     if (len == 0) {
         return;
@@ -336,16 +338,16 @@ static void add_data_dvbd(dvbdata_t* const dvbd, const uint8_t* const data, size
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int extract_pid_packets(
-    TS_reader_p tsreader, uint32_t pid_wanted, int max, bool verbose, bool quiet)
+    TS_reader_p tsreader, uint32_t pid_wanted, int max, bool verbose, int quiet)
 {
     int err;
     int count = 0;
     int extracted = 0;
     int pes_packet_len = 0;
-    bool got_pes_packet_len = false;
+    int got_pes_packet_len = FALSE;
     // It doesn't make sense to start outputting data for our PID until we
     // get the start of a packet
-    bool need_packet_start = true;
+    int need_packet_start = TRUE;
 
     for (;;) {
         uint32_t pid;
@@ -396,7 +398,7 @@ static int extract_pid_packets(
                 int offset;
 
                 if (need_packet_start)
-                    need_packet_start = false;
+                    need_packet_start = FALSE;
 
                 pes_packet_len = (payload[4] << 8) | payload[5];
                 if (verbose)
@@ -407,7 +409,7 @@ static int extract_pid_packets(
 
                 err = find_PTS_DTS_in_PES(
                     payload, payload_len, &dvbd.pts_valid, &dvbd.pts, &dvbd.dts_valid, &dvbd.dts);
-                dvbd.found = true;
+                dvbd.found = TRUE;
 
                 if (IS_H222_PES(payload)) {
                     // It's H.222.0 - payload[8] is the PES_header_data_length,
@@ -420,7 +422,7 @@ static int extract_pid_packets(
                 data = &payload[offset];
                 data_len = payload_len - offset;
                 if (verbose)
-                    print_data(true, "data", data, data_len, 1000);
+                    print_data(TRUE, "data", data, data_len, 1000);
             } else {
                 // If we haven't *started* a packet, we can't use this,
                 // since it will just look like random bytes when written out.
@@ -431,7 +433,7 @@ static int extract_pid_packets(
                 data = payload;
                 data_len = payload_len;
                 if (verbose)
-                    print_data(true, "Data", payload, payload_len, 1000);
+                    print_data(TRUE, "Data", payload, payload_len, 1000);
             }
 
             if (got_pes_packet_len) {
@@ -450,7 +452,7 @@ static int extract_pid_packets(
             }
 
             if (pes_overflow) {
-                print_data(true, "Data after PES", data + data_len, pes_overflow, 1000);
+                print_data(TRUE, "Data after PES", data + data_len, pes_overflow, 1000);
             }
 
             extracted++;
@@ -475,7 +477,7 @@ static int extract_pid_packets(
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int extract_av(int input, const int prog_no, int max, bool verbose, bool quiet)
+static int extract_av(int input, const int prog_no, int max, bool verbose, int quiet)
 {
     int err, ii;
     int max_to_read = max;
@@ -555,7 +557,7 @@ static int extract_av(int input, const int prog_no, int max, bool verbose, bool 
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int extract_pid(int input, uint32_t pid_wanted, int max, bool verbose, bool quiet)
+static int extract_pid(int input, uint32_t pid_wanted, int max, bool verbose, int quiet)
 {
     int err;
     TS_reader_p tsreader = nullptr;
@@ -601,16 +603,16 @@ General switches:
 
 int main(int argc, char** argv)
 {
-    int use_stdin = false;
+    int use_stdin = FALSE;
     char* input_name = nullptr;
-    int had_input_name = false;
+    int had_input_name = FALSE;
     Extract extract = Extract::TS;
 
     int input = -1; // Our input file descriptor
     int maxts = 0; // The maximum number of TS packets to read (or 0)
     uint32_t pid = 0; // The PID of the (single) stream to extract
-    bool quiet = false; // True => be as quiet as possible
-    bool verbose = false; // True => output diagnostic/progress messages
+    int quiet = FALSE; // True => be as quiet as possible
+    bool verbose = FALSE; // True => output diagnostic/progress messages
     int prog_no = 1;
 
     int err = 0;
@@ -628,14 +630,14 @@ int main(int argc, char** argv)
                 print_usage();
                 return 0;
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
-                verbose = true;
-                quiet = false;
+                verbose = TRUE;
+                quiet = FALSE;
             } else if (!strcmp("-quiet", argv[ii]) || !strcmp("-q", argv[ii])) {
-                verbose = false;
-                quiet = true;
+                verbose = FALSE;
+                quiet = TRUE;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
                 MustARG(PROGNAME, ii, argc, argv);
-                if (err = int_value(PROGNAME.c_str(), argv[ii], argv[ii + 1], true, 10, &maxts);
+                if (err = int_value(PROGNAME.c_str(), argv[ii], argv[ii + 1], TRUE, 10, &maxts);
                     err) {
                     return 1;
                 }
@@ -649,14 +651,14 @@ int main(int argc, char** argv)
                 extract = Extract::PID;
             } else if (!strcmp("-prog", argv[ii])) {
                 MustARG(PROGNAME, ii, argc, argv);
-                err = int_value(PROGNAME.c_str(), argv[ii], argv[ii + 1], true, 10, &prog_no);
+                err = int_value(PROGNAME.c_str(), argv[ii], argv[ii + 1], TRUE, 10, &prog_no);
                 if (err) {
                     return 1;
                 }
                 ii++;
             } else if (!strcmp("-stdin", argv[ii])) {
-                use_stdin = true;
-                had_input_name = true; // so to speak
+                use_stdin = TRUE;
+                had_input_name = TRUE; // so to speak
             } else if (!strcmp("-err", argv[ii])) {
                 MustARG(PROGNAME, ii, argc, argv);
                 if (!strcmp(argv[ii + 1], "stderr")) {
@@ -690,7 +692,7 @@ int main(int argc, char** argv)
                 return 1;
             } else {
                 input_name = argv[ii];
-                had_input_name = true;
+                had_input_name = TRUE;
             }
         }
         ii++;
@@ -707,7 +709,7 @@ int main(int argc, char** argv)
     if (use_stdin) {
         input = STDIN_FILENO;
     } else {
-        if (input = open_binary_file(input_name, false); input == -1) {
+        if (input = open_binary_file(input_name, FALSE); input == -1) {
             std::string errOpen = "### "s + PROGNAME + ": Unable to open input file %s\n"s;
             fprint_err(errOpen.c_str(), input_name);
             return 1;

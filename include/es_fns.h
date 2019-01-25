@@ -97,7 +97,7 @@ void close_elementary_stream(ES_p* es);
  *
  * Calls `tswrite_command_changed()` on the TS writer associated with this ES.
  *
- * Returns true if there is a changed command.
+ * Returns TRUE if there is a changed command.
  */
 int es_command_changed(ES_p es);
 
@@ -131,7 +131,7 @@ int build_ES_unit(ES_unit_p* unit);
  * Build a new ES unit datastructure, from a given data array.
  *
  * Takes a copy of 'data'. Sets 'start_code' appropriately,
- * sets 'start_posn' to (0,0), and 'PES_had_PTS' to false.
+ * sets 'start_posn' to (0,0), and 'PES_had_PTS' to FALSE.
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
@@ -317,7 +317,7 @@ int get_ES_unit_list_bounds(ES_unit_list_p list, ES_offset* start, uint32_t* len
  *
  * - `list1` and `list2` are the two ES unit lists to compare.
  *
- * Returns true if the lists contain identical content, false otherwise.
+ * Returns TRUE if the lists contain identical content, FALSE otherwise.
  */
 int same_ES_unit_list(ES_unit_list_p list1, ES_unit_list_p list2);
 

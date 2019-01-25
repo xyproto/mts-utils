@@ -49,7 +49,7 @@ static int write_ES_unit_as_TS(TS_writer_p output, ES_unit_p unit, uint32_t vide
 }
 
 static int transfer_data(ES_p es, TS_writer_p output, uint32_t pmt_pid, uint32_t video_pid,
-    byte stream_type, int max2, bool verbose, bool quiet)
+    byte stream_type, int max2, bool verbose, int quiet)
 {
     int err = 0;
     int count = 0;
@@ -78,7 +78,7 @@ static int transfer_data(ES_p es, TS_writer_p output, uint32_t pmt_pid, uint32_t
         count++;
 
         if (verbose)
-            report_ES_unit(false, unit);
+            report_ES_unit(FALSE, unit);
 
         err = write_ES_unit_as_TS(output, unit, video_pid);
         if (err) {
@@ -161,18 +161,18 @@ static void print_usage()
 
 int main(int argc, char** argv)
 {
-    int use_stdin = false;
-    int use_stdout = false;
-    int use_tcpip = false;
+    int use_stdin = FALSE;
+    int use_stdout = FALSE;
+    int use_tcpip = FALSE;
     int port = 88; // Useful default port number
     char* input_name = nullptr;
     char* output_name = nullptr;
-    int had_input_name = false;
-    int had_output_name = false;
+    int had_input_name = FALSE;
+    int had_output_name = FALSE;
     TS_writer_p output = nullptr;
     ES_p es;
-    bool verbose = false;
-    bool quiet = false;
+    bool verbose = FALSE;
+    int quiet = FALSE;
     int max2 = 0;
     uint32_t video_pid = 0x68;
     uint32_t pmt_pid = 0x66;
@@ -181,7 +181,7 @@ int main(int argc, char** argv)
     int ii = 1;
 
     int video_type = VIDEO_H262; // hopefully a sensible default
-    int force_stream_type = false;
+    int force_stream_type = FALSE;
     byte stream_type = 0; // silly value to keep compiler quiet
 
     if (argc < 2) {
@@ -196,20 +196,20 @@ int main(int argc, char** argv)
                 print_usage();
                 return 0;
             } else if (!strcmp("-avc", argv[ii]) || !strcmp("-h264", argv[ii])) {
-                force_stream_type = true;
+                force_stream_type = TRUE;
                 video_type = VIDEO_H264;
             } else if (!strcmp("-h262", argv[ii])) {
-                force_stream_type = true;
+                force_stream_type = TRUE;
                 video_type = VIDEO_H262;
             } else if (!strcmp("-avs", argv[ii])) {
-                force_stream_type = true;
+                force_stream_type = TRUE;
                 video_type = VIDEO_AVS;
             } else if (!strcmp("-stdin", argv[ii])) {
-                had_input_name = true; // more or less
-                use_stdin = true;
+                had_input_name = TRUE; // more or less
+                use_stdin = TRUE;
             } else if (!strcmp("-stdout", argv[ii])) {
-                had_output_name = true; // more or less
-                use_stdout = true;
+                had_output_name = TRUE; // more or less
+                use_stdout = TRUE;
                 redirect_output_stderr();
             } else if (!strcmp("-err", argv[ii])) {
                 MustARG("es2ts"s, ii, argc, argv);
@@ -230,18 +230,18 @@ int main(int argc, char** argv)
                 err = host_value("es2ts"s, argv[ii], argv[ii + 1], &output_name, &port);
                 if (err)
                     return 1;
-                had_output_name = true; // more or less
-                use_tcpip = true;
+                had_output_name = TRUE; // more or less
+                use_tcpip = TRUE;
                 ii++;
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
-                verbose = true;
-                quiet = false;
+                verbose = TRUE;
+                quiet = FALSE;
             } else if (!strcmp("-quiet", argv[ii]) || !strcmp("-q", argv[ii])) {
-                verbose = false;
-                quiet = true;
+                verbose = FALSE;
+                quiet = TRUE;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
                 MustARG("es2ts"s, ii, argc, argv);
-                err = int_value("es2ts"s, argv[ii], argv[ii + 1], true, 10, &max2);
+                err = int_value("es2ts"s, argv[ii], argv[ii + 1], TRUE, 10, &max2);
                 if (err)
                     return 1;
                 ii++;
@@ -269,10 +269,10 @@ int main(int argc, char** argv)
                 return 1;
             } else if (had_input_name) {
                 output_name = argv[ii];
-                had_output_name = true;
+                had_output_name = TRUE;
             } else {
                 input_name = argv[ii];
-                had_input_name = true;
+                had_input_name = TRUE;
             }
         }
         ii++;
@@ -289,8 +289,8 @@ int main(int argc, char** argv)
 
     // Try to stop extraneous data ending up in our output stream
     if (use_stdout) {
-        verbose = false;
-        quiet = true;
+        verbose = FALSE;
+        quiet = TRUE;
     }
 
     if (use_stdin) {
@@ -315,7 +315,7 @@ int main(int argc, char** argv)
         }
     } else {
         // int video_type;
-        if (err = decide_ES_file_video_type(es->input, false, verbose, &video_type); err) {
+        if (err = decide_ES_file_video_type(es->input, FALSE, verbose, &video_type); err) {
             print_err("### es2ts: Error deciding on stream type\n");
             close_elementary_stream(&es);
             return 1;

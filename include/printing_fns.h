@@ -18,11 +18,11 @@ using namespace std::string_literals;
 /*
  * Prints the given string, as a normal message.
  */
-void print_msg(const std::string text);
+void print_msg(const char* text);
 /*
  * Prints the given string, as an error message.
  */
-void print_err(const std::string text);
+void print_err(const char* text);
 /*
  * Prints the given format text, as a normal message.
  */
@@ -35,7 +35,7 @@ void fprint_err(const char* format, ...);
  * Prints the given formatted text, as a normal or error message.
  * If `is_msg`, then as a normal message, else as an error
  */
-void fprint_msg_or_err(bool is_msg, const char* format, ...);
+void fprint_msg_or_err(int is_msg, const char* format, ...);
 /*
  * Flush the message output
  */

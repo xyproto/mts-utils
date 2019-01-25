@@ -72,9 +72,9 @@ static int build_PES_packet_data(PES_packet_data_p* data)
     new2->es_data_len = 0;
     new2->length = 0;
     new2->posn = 0;
-    new2->is_video = true; // a guess
-    new2->data_alignment_indicator = false; // another
-    new2->has_PTS = false; // assumed until told otherwise
+    new2->is_video = TRUE; // a guess
+    new2->data_alignment_indicator = FALSE; // another
+    new2->has_PTS = FALSE; // assumed until told otherwise
 
     *data = new2;
     return 0;
@@ -130,7 +130,7 @@ static inline int build_dummy_PES_packet_data(PES_packet_data_p* data, size_t da
             print_err("### Error building dummy PES packet\n");
             return 1;
         }
-        local_data->is_video = false;
+        local_data->is_video = FALSE;
     }
     if (local_data->data == nullptr) {
         local_data->data = (byte*)malloc(data_len);
@@ -291,9 +291,9 @@ static inline int pid_index_in_peslist(peslist_p list, uint32_t pid)
 /*
  * Lookup a PID to see if it is in a PID/PES data array.
  *
- * Note that if `list` is nullptr, then false will be returned.
+ * Note that if `list` is nullptr, then FALSE will be returned.
  *
- * Returns true if the PID is in the list, false if it is not.
+ * Returns TRUE if the PID is in the list, FALSE if it is not.
  */
 static inline int pid_in_peslist(peslist_p list, uint32_t pid)
 {
@@ -433,12 +433,12 @@ static int read_next_PES_packet_from_PS(PES_reader_p reader, PES_packet_data_p* 
     for (;;) {
         int err;
         byte stream_id; // The packet's stream id
-        int keep = false; // Keep this packet?
-        int is_video = false;
+        int keep = FALSE; // Keep this packet?
+        int is_video = FALSE;
         struct PS_packet packet = { 0 };
         struct PS_pack_header header = { 0 };
 
-        err = read_PS_packet_start(reader->psreader, false, &reader->posn, &stream_id);
+        err = read_PS_packet_start(reader->psreader, FALSE, &reader->posn, &stream_id);
         if (err == EOF) {
             *packet_data = nullptr;
             return EOF;
@@ -491,31 +491,31 @@ static int read_next_PES_packet_from_PS(PES_reader_p reader, PES_packet_data_p* 
         } else if (stream_id == PRIVATE1_AUDIO_STREAM_ID) {
             // It's private stream 1, traditionally used for Dolby (AC-3) audio
             if (reader->video_only)
-                keep = false;
+                keep = FALSE;
             else if (reader->audio_stream_id == stream_id) {
-                keep = true;
-                is_video = false;
+                keep = TRUE;
+                is_video = FALSE;
             }
         } else if ((stream_id >= 0xc0) && (stream_id <= 0xdf)) {
             // It's a non-Dolby audio stream
             if (reader->video_only)
-                keep = false;
+                keep = FALSE;
             else if (reader->audio_stream_id == stream_id) {
-                keep = true;
-                is_video = false;
+                keep = TRUE;
+                is_video = FALSE;
             } else if (reader->audio_stream_id == 0) {
                 // Aha - we're looking for an audio stream to use, and this is it
                 reader->audio_stream_id = stream_id;
-                keep = true;
-                is_video = false;
+                keep = TRUE;
+                is_video = FALSE;
                 if (reader->give_info)
                     fprint_msg("Selecting audio stream number %d\n", stream_id & 0x1F);
             }
         } else if (stream_id >= 0xe0 && stream_id <= 0xef) {
             // It's a video stream. We're assuming we only get one video
             // stream, so this is a "keeper" regardless
-            keep = true;
-            is_video = true;
+            keep = TRUE;
+            is_video = TRUE;
         }
 
         if (keep) {
@@ -554,8 +554,8 @@ static void decide_pids(PES_reader_p reader)
 {
     pmt_p pmt = reader->program_map;
     int ii;
-    int had_video = false;
-    int had_audio = false;
+    int had_video = FALSE;
+    int had_audio = FALSE;
 
     if (pmt == nullptr)
         return;
@@ -575,20 +575,20 @@ static void decide_pids(PES_reader_p reader)
                 reader->video_pid = pmt->streams[ii].elementary_PID;
                 switch (pmt->streams[ii].stream_type) {
                 case AVC_VIDEO_STREAM_TYPE:
-                    reader->is_h264 = true;
+                    reader->is_h264 = TRUE;
                     reader->video_type = VIDEO_H264;
                     break;
                 case MPEG2_VIDEO_STREAM_TYPE:
                 case MPEG1_VIDEO_STREAM_TYPE: // well, more-or-less
-                    reader->is_h264 = false;
+                    reader->is_h264 = FALSE;
                     reader->video_type = VIDEO_H262;
                     break;
                 case AVS_VIDEO_STREAM_TYPE:
-                    reader->is_h264 = false;
+                    reader->is_h264 = FALSE;
                     reader->video_type = VIDEO_AVS;
                     break;
                 default:
-                    reader->is_h264 = false;
+                    reader->is_h264 = FALSE;
                     reader->video_type = VIDEO_UNKNOWN;
                     break;
                 }
@@ -601,7 +601,7 @@ static void decide_pids(PES_reader_p reader)
                         reader->program_number, reader->posn, reader->video_pid);
                 break;
             }
-            had_video = true;
+            had_video = TRUE;
         }
     }
 
@@ -641,7 +641,7 @@ static void decide_pids(PES_reader_p reader)
                         reader->program_number, reader->posn, reader->audio_pid);
                 break;
             }
-            had_audio = true;
+            had_audio = TRUE;
         }
     }
 
@@ -671,15 +671,15 @@ static int refine_TS_program_info(PES_reader_p reader, pmt_p pmt)
 #if DEBUG_PROGRAM_INFO
         if (reader->give_info) {
             fprint_msg("PMT packet at " OFFSET_T_FORMAT ": first PMT, used as-is\n", reader->posn);
-            report_pmt(true, (char*)"    ", reader->program_map);
+            report_pmt(TRUE, (char*)"    ", reader->program_map);
         }
 #else
         if (reader->give_info)
-            report_pmt(true, (char*)"    ", reader->program_map);
+            report_pmt(TRUE, (char*)"    ", reader->program_map);
 #endif
         // And use its information to determine our video/audio PIDs
         decide_pids(reader);
-        reader->got_program_data = true;
+        reader->got_program_data = TRUE;
         return 0;
     }
 
@@ -703,14 +703,14 @@ static int refine_TS_program_info(PES_reader_p reader, pmt_p pmt)
                    " replaces previous program information\n",
             reader->posn);
         print_err("    Program information was:\n");
-        report_pmt(false, "      ", reader->program_map);
+        report_pmt(FALSE, "      ", reader->program_map);
         print_err("    New program information is:\n");
-        report_pmt(false, "      ", pmt);
+        report_pmt(FALSE, "      ", pmt);
     } else if (reader->give_info) {
 #if DEBUG_PROGRAM_INFO
         fprint_msg("PMT packet at " OFFSET_T_FORMAT ": updating program info\n", reader->posn);
 #endif
-        report_pmt(true, "      ", pmt);
+        report_pmt(TRUE, "      ", pmt);
     }
 
     free_pmt(&reader->program_map);
@@ -740,7 +740,7 @@ static int extract_and_refine_TS_program_info(
     int err;
     pmt_p pmt = nullptr;
 
-    err = extract_pmt(false, pmt_data, pmt_data_len, pmt_pid, &pmt);
+    err = extract_pmt(FALSE, pmt_data, pmt_data_len, pmt_pid, &pmt);
     if (err) {
         print_err("### Error extracting stream list from PMT\n");
         return 1;
@@ -787,7 +787,7 @@ static int find_first_PAT(PES_reader_p reader)
     int num_read;
     pidint_list_p prog_list = nullptr;
 
-    err = find_pat(reader->tsreader, 0, false, !reader->give_info, &num_read, &prog_list);
+    err = find_pat(reader->tsreader, 0, FALSE, !reader->give_info, &num_read, &prog_list);
     if (err) {
         print_err("### Error finding first PAT\n");
         return 1;
@@ -806,10 +806,10 @@ static int find_first_PAT(PES_reader_p reader)
         reader->pmt_pid = prog_list->pid[0];
     } else {
         int ii;
-        int got_program = false;
+        int got_program = FALSE;
         for (ii = 0; ii < prog_list->length; ii++) {
             if (prog_list->number[ii] == reader->program_number) {
-                got_program = true;
+                got_program = TRUE;
                 reader->pmt_pid = prog_list->pid[ii];
                 break;
             }
@@ -841,7 +841,7 @@ static int find_first_PMT(PES_reader_p reader)
 
     for (;;) {
         err = find_next_pmt(
-            reader->tsreader, reader->pmt_pid, -1, 0, false, !reader->give_info, &nread, &pmt);
+            reader->tsreader, reader->pmt_pid, -1, 0, FALSE, !reader->give_info, &nread, &pmt);
         if (err) {
             fprint_err("### Error looking for program %d PMT with PID %04x"
                        " after first PAT\n",
@@ -948,7 +948,7 @@ static int start_new_PES_packet(PES_reader_p reader, uint32_t pid, byte payload[
 #if DEBUG_PES_ASSEMBLY
     fprint_msg(": start new %s PES packet, payload_len = %d\n",
         (pid == reader->video_pid ? "video" : "audio"), payload_len);
-    print_data(true, "Data", payload, payload_len, payload_len);
+    print_data(TRUE, "Data", payload, payload_len, payload_len);
 #endif
 
     if (payload_len < 6) {
@@ -1029,7 +1029,7 @@ static int start_new_PES_packet(PES_reader_p reader, uint32_t pid, byte payload[
         if (extra > 0) {
 #if 0
       int from = payload_len - extra;
-      print_data(false,"   End of data",payload+from,extra,extra);
+      print_data(FALSE,"   End of data",payload+from,extra,extra);
 #endif
             fprint_err("    In %s PES packet, PID %x, starting at " OFFSET_T_FORMAT "\n",
                 (pid == reader->video_pid ? "video" : "audio"), pid, reader->posn);
@@ -1115,7 +1115,7 @@ static int continue_PES_packet(PES_reader_p reader, uint32_t pid, byte payload[]
         if (extra > 0) {
 #if 0
       int from = payload_len - extra;
-      print_data(false,"   End of data",payload+from,extra,extra);
+      print_data(FALSE,"   End of data",payload+from,extra,extra);
 #endif
             fprint_err("    In %s PES packet, PID %x, starting at " OFFSET_T_FORMAT "\n",
                 (pid == reader->video_pid ? "video" : "audio"), pid, reader->posn);
@@ -1253,7 +1253,7 @@ static int read_next_PES_packet_from_TS(PES_reader_p reader, PES_packet_data_p* 
         // If we're writing out TS packets directly to a client, then this
         // is probably a sensible place to do it.
         if (reader->write_TS_packets && reader->tswriter != nullptr && !reader->suppress_writing) {
-            err = tswrite_write(reader->tswriter, ts_packet, pid, false, 0);
+            err = tswrite_write(reader->tswriter, ts_packet, pid, FALSE, 0);
             if (err) {
                 fprint_err("### Error writing TS packet (PID %04x) at " OFFSET_T_FORMAT "\n", pid,
                     reader->posn);
@@ -1291,7 +1291,7 @@ static int read_next_PES_packet_from_TS(PES_reader_p reader, PES_packet_data_p* 
                 continue;
             }
 
-            err = build_psi_data(false, payload, payload_len, pid, &reader->pmt_data,
+            err = build_psi_data(FALSE, payload, payload_len, pid, &reader->pmt_data,
                 &reader->pmt_data_len, &reader->pmt_data_used);
             if (err) {
                 fprint_err("### Error %s PMT at " OFFSET_T_FORMAT "\n",
@@ -1341,13 +1341,13 @@ static int read_next_PES_packet_from_TS(PES_reader_p reader, PES_packet_data_p* 
                 fprint_err("### Error %s PES packet (PID %04x)"
                            " with TS packet at " OFFSET_T_FORMAT "\n",
                     (payload_unit_start_indicator ? "starting" : "continuing"), pid, reader->posn);
-                print_data(false, "    Data", payload, payload_len, 20);
+                print_data(FALSE, "    Data", payload, payload_len, 20);
                 return 1;
             }
             if (finished) {
 #if DEBUG_PES_ASSEMBLY
                 fprint_msg("@@@ PES packet with pid %x finished\n", pid);
-                report_PES_data_array("    ", finished->data, finished->data_len, true);
+                report_PES_data_array("    ", finished->data, finished->data_len, TRUE);
 #endif
 
                 if (pid == reader->audio_pid && reader->video_only) {
@@ -1385,7 +1385,7 @@ static int read_next_PES_packet_from_TS(PES_reader_p reader, PES_packet_data_p* 
  * it appears to start with several TS packets).
  *
  * - `input` is the file to check
- * - `is_TS` is true if it looks like TS, as described above.
+ * - `is_TS` is TRUE if it looks like TS, as described above.
  *
  * Returns 0 if all goes well, 1 if there was an error.
  */
@@ -1395,7 +1395,7 @@ int determine_if_TS_file(int input, int* is_TS)
     int ii;
     byte buf[TS_PACKET_SIZE];
 
-    *is_TS = true;
+    *is_TS = TRUE;
 
     for (ii = 0; ii < 100; ii++) {
         err = read_bytes(input, TS_PACKET_SIZE, buf);
@@ -1406,7 +1406,7 @@ int determine_if_TS_file(int input, int* is_TS)
             return 1;
         }
         if (buf[0] != 0x47) {
-            *is_TS = false;
+            *is_TS = FALSE;
             break;
         }
     }
@@ -1443,9 +1443,9 @@ static int determine_PES_video_type(PES_reader_p reader)
         return 1;
     }
 
-    reader->video_only = true;
+    reader->video_only = TRUE;
 
-    err = decide_ES_video_type(es, false, false, &reader->video_type);
+    err = decide_ES_video_type(es, FALSE, FALSE, &reader->video_type);
     if (err) {
         print_err("### Error deciding on PS video type\n");
         free_elementary_stream(&es);
@@ -1467,10 +1467,10 @@ static int determine_PES_video_type(PES_reader_p reader)
 /*
  * Build a PES reader datastructure
  *
- * - `give_info` is true if information about program data, etc., should be
+ * - `give_info` is TRUE if information about program data, etc., should be
  *   output (to stdout).
- * - `give_warnings` is true if warnings (starting with "!!!") should be
- *   output (to stderr), false if they should be suppressed.
+ * - `give_warnings` is TRUE if warnings (starting with "!!!") should be
+ *   output (to stderr), FALSE if they should be suppressed.
  * - `reader` is the resulting PES reader
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
@@ -1486,17 +1486,17 @@ static int build_PES_reader_datastructure(int give_info, int give_warnings, PES_
 
     new2->tsreader = nullptr; // for the moment, at least
     new2->psreader = nullptr; // for the moment, at least
-    new2->is_TS = false; // for want of better
+    new2->is_TS = FALSE; // for want of better
     new2->give_info = give_info;
     new2->give_warning = give_warnings;
     new2->posn = 0;
-    new2->is_h264 = false;
+    new2->is_h264 = FALSE;
     new2->video_type = VIDEO_UNKNOWN;
     new2->packet = nullptr;
 
     new2->program_number = 0;
     new2->program_map = nullptr;
-    new2->video_only = false;
+    new2->video_only = FALSE;
     new2->audio_stream_id = 0;
 
     new2->pmt_data = nullptr;
@@ -1505,24 +1505,24 @@ static int build_PES_reader_datastructure(int give_info, int give_warnings, PES_
 
     new2->video_pid = new2->audio_pid = 0;
     new2->pcr_pid = new2->pmt_pid = 0;
-    new2->got_program_data = false;
+    new2->got_program_data = FALSE;
 
     new2->output_program_number = 0;
     new2->output_video_pid = new2->output_audio_pid = 0;
     new2->output_pcr_pid = new2->output_pmt_pid = 0;
-    new2->override_program_data = false;
+    new2->override_program_data = FALSE;
 
     new2->output_dolby_stream_type = new2->dolby_stream_type = DVB_DOLBY_AUDIO_STREAM_TYPE;
-    new2->override_dolby_stream_type = false;
+    new2->override_dolby_stream_type = FALSE;
 
     new2->tswriter = nullptr;
-    new2->write_PES_packets = false;
-    new2->write_TS_packets = false;
-    new2->suppress_writing = true;
-    new2->dont_write_current_packet = false;
+    new2->write_PES_packets = FALSE;
+    new2->write_TS_packets = FALSE;
+    new2->suppress_writing = TRUE;
+    new2->dont_write_current_packet = FALSE;
     new2->pes_padding = 0;
 
-    new2->debug_read_packets = false;
+    new2->debug_read_packets = FALSE;
 
     err = build_peslist(&new2->packets);
     if (err) {
@@ -1532,7 +1532,7 @@ static int build_PES_reader_datastructure(int give_info, int give_warnings, PES_
     }
 
     new2->deferred = nullptr;
-    new2->had_eof = false;
+    new2->had_eof = FALSE;
     *reader = new2;
     return 0;
 }
@@ -1541,10 +1541,10 @@ static int build_PES_reader_datastructure(int give_info, int give_warnings, PES_
  * Build a PES reader datastructure for PS data
  *
  * - `ps` is the Program Stream to read the PES data from
- * - `give_info` is true if information about program data, etc., should be
+ * - `give_info` is TRUE if information about program data, etc., should be
  *   output (to stdout).
- * - `give_warnings` is true if warnings (starting with "!!!") should be
- *   output (to stderr), false if they should be suppressed.
+ * - `give_warnings` is TRUE if warnings (starting with "!!!") should be
+ *   output (to stderr), FALSE if they should be suppressed.
  * - `reader` is the resulting PES reader
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
@@ -1557,7 +1557,7 @@ int build_PS_PES_reader(PS_reader_p ps, int give_info, int give_warnings, PES_re
     if (err)
         return 1;
 
-    (*reader)->is_TS = false;
+    (*reader)->is_TS = FALSE;
     (*reader)->psreader = ps;
 
     // Try to determine what sort of video this is (particularly, is it H.264)
@@ -1574,10 +1574,10 @@ int build_PS_PES_reader(PS_reader_p ps, int give_info, int give_warnings, PES_re
  * Build a PES reader datastructure for TS data
  *
  * - `tsreader` is the Transport Stream to read the PES data from
- * - `give_info` is true if information about program data, etc., should be
+ * - `give_info` is TRUE if information about program data, etc., should be
  *   output (to stdout).
- * - `give_warnings` is true if warnings (starting with "!!!") should be
- *   output (to stderr), false if they should be suppressed.
+ * - `give_warnings` is TRUE if warnings (starting with "!!!") should be
+ *   output (to stderr), FALSE if they should be suppressed.
  * - `program_number` is only used for TS data, and identifies which program
  *   to read. If this is 0 then the first program encountered in the first PAT
  *   will be read.
@@ -1594,7 +1594,7 @@ int build_TS_PES_reader(TS_reader_p tsreader, int give_info, int give_warnings,
     if (err)
         return 1;
 
-    (*reader)->is_TS = true;
+    (*reader)->is_TS = TRUE;
     (*reader)->tsreader = tsreader;
 
     (*reader)->program_number = program_number;
@@ -1615,11 +1615,11 @@ int build_TS_PES_reader(TS_reader_p tsreader, int give_info, int give_warnings,
  * Build a PES reader datastructure
  *
  * - `input` is the file to read the PES data from
- * - `is_TS` should be true if the data is TS, false if it is PS
- * - `give_info` is true if information about program data, etc., should be
+ * - `is_TS` should be TRUE if the data is TS, FALSE if it is PS
+ * - `give_info` is TRUE if information about program data, etc., should be
  *   output (to stdout).
- * - `give_warnings` is true if warnings (starting with "!!!") should be
- *   output (to stderr), false if they should be suppressed.
+ * - `give_warnings` is TRUE if warnings (starting with "!!!") should be
+ *   output (to stderr), FALSE if they should be suppressed.
  * - `program_number` is only used for TS data, and identifies which program
  *   to read. If this is 0 then the first program encountered in the first PAT
  *   will be read.
@@ -1668,12 +1668,12 @@ int build_PES_reader(int input, int is_TS, int give_info, int give_warnings,
  * - `filename` is the name of the file to open.
  * - `program_number` identifies which program to read. If this is 0
  *   then the first program encountered in the first PAT will be read.
- * - `give_info` is true if information about program data, etc., should be
+ * - `give_info` is TRUE if information about program data, etc., should be
  *   output (to stdout). If information messages are requested, and the
  *   program number is given as 0, the actual program number chosen will
  *   be reported as well.
- * - `give_warnings` is true if warnings (starting with "!!!") should be
- *   output (to stderr), false if they should be suppressed.
+ * - `give_warnings` is TRUE if warnings (starting with "!!!") should be
+ *   output (to stderr), FALSE if they should be suppressed.
  * - `reader` is the PES reader context corresponding to the newly
  *   opened file.
  *
@@ -1688,12 +1688,12 @@ int open_PES_reader_for_TS(const std::string filename, uint16_t program_number, 
     int err;
     int input;
 
-    input = open_binary_file(filename, false);
+    input = open_binary_file(filename, FALSE);
     if (input == -1) {
         fprint_err("### Unable to open input TS file %s\n", filename);
         return 1;
     }
-    err = build_PES_reader(input, true, give_info, give_warnings, program_number, reader);
+    err = build_PES_reader(input, TRUE, give_info, give_warnings, program_number, reader);
     if (err)
         return 1;
     return 0;
@@ -1703,10 +1703,10 @@ int open_PES_reader_for_TS(const std::string filename, uint16_t program_number, 
  * Open a Program Stream file for PES packet reading
  *
  * - `filename` is the name of the file to open.
- * - `give_info` is true if information about program data, etc., should be
+ * - `give_info` is TRUE if information about program data, etc., should be
  *   output (to stdout).
- * - `give_warnings` is true if warnings (starting with "!!!") should be
- *   output (to stderr), false if they should be suppressed.
+ * - `give_warnings` is TRUE if warnings (starting with "!!!") should be
+ *   output (to stderr), FALSE if they should be suppressed.
  * - `reader` is the PES reader context corresponding to the newly
  *   opened file.
  *
@@ -1715,22 +1715,22 @@ int open_PES_reader_for_TS(const std::string filename, uint16_t program_number, 
 int open_PES_reader_for_PS(
     const std::string filename, int give_info, int give_warnings, PES_reader_p* reader)
 {
-    int input = open_binary_file(filename, false);
+    int input = open_binary_file(filename, FALSE);
     if (input == -1) {
         fprint_err("### Unable to open input PS file %s\n", filename);
         return 1;
     }
-    return build_PES_reader(input, false, give_info, give_warnings, 0, reader);
+    return build_PES_reader(input, FALSE, give_info, give_warnings, 0, reader);
 }
 
 /*
  * Open a Program Stream or Transport Stream file for PES packet reading
  *
  * - `filename` is the name of the file to open.
- * - `give_info` is true if information about program data, etc., should be
+ * - `give_info` is TRUE if information about program data, etc., should be
  *   output (to stdout).
- * - `give_warnings` is true if warnings (starting with "!!!") should be
- *   output (to stderr), false if they should be suppressed.
+ * - `give_warnings` is TRUE if warnings (starting with "!!!") should be
+ *   output (to stderr), FALSE if they should be suppressed.
  * - `reader` is the PES reader context corresponding to the newly
  *   opened file.
  *
@@ -1769,7 +1769,7 @@ int open_PES_reader(
     int input;
     int is_TS;
 
-    input = open_binary_file(filename, false);
+    input = open_binary_file(filename, FALSE);
     if (input == -1) {
         fprint_err("### Unable to open input file %s\n", filename);
         return 1;
@@ -1780,15 +1780,15 @@ int open_PES_reader(
         return 1;
     }
     if (is_TS)
-        return build_PES_reader(input, true, give_info, give_warnings, 0, reader);
+        return build_PES_reader(input, TRUE, give_info, give_warnings, 0, reader);
     else
-        return build_PES_reader(input, false, give_info, give_warnings, 0, reader);
+        return build_PES_reader(input, FALSE, give_info, give_warnings, 0, reader);
 }
 
 /*
  * Tell the PES reader whether we only want video data
  *
- * - `video_only` should be true if audio is to be ignored, false
+ * - `video_only` should be TRUE if audio is to be ignored, FALSE
  *   if audio should be retained.
  *
  * By default, the PES reader returns video data and a single audio
@@ -1874,7 +1874,7 @@ void set_PES_reader_program_data(PES_reader_p reader, uint16_t program_number, u
         program_number = 1;
 
     if (reader->is_TS) {
-        reader->override_program_data = true;
+        reader->override_program_data = TRUE;
         reader->output_program_number = program_number;
         reader->output_pmt_pid = pmt_pid;
         reader->output_pcr_pid = pcr_pid;
@@ -1886,7 +1886,7 @@ void set_PES_reader_program_data(PES_reader_p reader, uint16_t program_number, u
         reader->output_pcr_pid = reader->pcr_pid = pcr_pid;
         reader->output_video_pid = reader->video_pid = video_pid;
         reader->output_audio_pid = reader->audio_pid = audio_pid;
-        reader->got_program_data = true;
+        reader->got_program_data = TRUE;
         // Ideally we might also set the reader->program_map datastructure up
     }
 }
@@ -1897,7 +1897,7 @@ void set_PES_reader_program_data(PES_reader_p reader, uint16_t program_number, u
  */
 void set_PES_reader_h264(PES_reader_p reader)
 {
-    reader->is_h264 = true;
+    reader->is_h264 = TRUE;
     reader->video_type = VIDEO_H264;
 }
 
@@ -1926,7 +1926,7 @@ void set_PES_reader_video_type(PES_reader_p reader, int video_type)
  */
 void set_PES_reader_dolby_stream_type(PES_reader_p reader, int is_dvb)
 {
-    reader->override_dolby_stream_type = true;
+    reader->override_dolby_stream_type = TRUE;
     reader->output_dolby_stream_type
         = (is_dvb ? DVB_DOLBY_AUDIO_STREAM_TYPE : ATSC_DOLBY_AUDIO_STREAM_TYPE);
 }
@@ -1973,7 +1973,7 @@ int set_PES_reader_position(PES_reader_p reader, offset_t posn)
             free_PES_packet_data(&reader->packets->data[ii]);
         if (reader->deferred)
             free_PES_packet_data(&reader->deferred);
-        reader->had_eof = false;
+        reader->had_eof = FALSE;
     }
     return 0;
 }
@@ -2105,7 +2105,7 @@ int read_next_PES_packet(PES_reader_p reader)
                 stream_id = DEFAULT_AUDIO_STREAM_ID;
             }
             err = write_PES_as_TS_PES_packet(reader->tswriter, reader->packet->data,
-                reader->packet->data_len, pid, stream_id, false, 0, 0);
+                reader->packet->data_len, pid, stream_id, FALSE, 0, 0);
             if (err) {
                 print_err("### Error writing out PES packet as TS\n");
                 return 1;
@@ -2119,7 +2119,7 @@ int read_next_PES_packet(PES_reader_p reader)
                     return 1;
                 for (ii = 0; ii < reader->pes_padding; ii++) {
                     err = write_PES_as_TS_PES_packet(reader->tswriter, dummy->data,
-                        dummy->data_len, pid, STREAM_ID_PADDING_STREAM, false, 0, 0);
+                        dummy->data_len, pid, STREAM_ID_PADDING_STREAM, FALSE, 0, 0);
                     if (err) {
                         print_err("### Error writing out dummy PES packet as TS\n");
                         return 1;
@@ -2132,7 +2132,7 @@ int read_next_PES_packet(PES_reader_p reader)
     }
     // We always undo the "don't write the current packet flag" after we (might)
     // have written it out
-    reader->dont_write_current_packet = false;
+    reader->dont_write_current_packet = FALSE;
 
     if (reader->is_TS)
         err = read_next_PES_packet_from_TS(reader, &reader->packet);
@@ -2263,12 +2263,12 @@ static inline void setup_PES_as_ES(PES_packet_data_p packet)
     packet->es_data = packet->data + offset;
     packet->es_data_len = packet->data_len - offset;
 #if 0 // XXX
-  print_data(true,"      ",packet->es_data,packet->es_data_len,20);
+  print_data(TRUE,"      ",packet->es_data,packet->es_data_len,20);
 #endif
 
 #ifdef DEBUG
     if (reader->give_info)
-        print_data(true, ".. ES data", packet->es_data, packet->es_data_len, 20);
+        print_data(TRUE, ".. ES data", packet->es_data, packet->es_data_len, 20);
 #endif
 
     return;
@@ -2294,14 +2294,14 @@ int read_next_PES_ES_packet(PES_reader_p reader)
         if (reader->give_info) {
             fprint_msg(".. PES packet at " OFFSET_T_FORMAT " is %x (", reader->packet->posn,
                 reader->packet->data[3]);
-            print_stream_id(true, reader->packet->data[3]);
+            print_stream_id(TRUE, reader->packet->data[3]);
             fprint_msg(")%s\n", (reader->packet->is_video ? " VIDEO" : ""));
         }
 #endif
 
         if (reader->packet->is_video) {
             if (reader->debug_read_packets)
-                report_PES_data_array("", reader->packet->data, reader->packet->data_len, true);
+                report_PES_data_array("", reader->packet->data, reader->packet->data_len, TRUE);
             // Locate its ES data, and check we have some...
             setup_PES_as_ES(reader->packet);
             if (reader->packet->es_data_len > 0)
@@ -2440,7 +2440,7 @@ void encode_pts_dts(byte data[], int guard_bits, uint64_t value)
  *
  * - `packet` is the PES packet datastructure
  *
- * Returns true if it does, false if it does not (or is in error)
+ * Returns TRUE if it does, FALSE if it does not (or is in error)
  */
 int PES_packet_has_PTS(PES_packet_data_p packet)
 {
@@ -2456,7 +2456,7 @@ int PES_packet_has_PTS(PES_packet_data_p packet)
         fprint_err("### PES_packet_has_PTS: "
                    "PES packet start code prefix is %02x %02x %02x, not 00 00 01",
             data[0], data[1], data[2]);
-        return false;
+        return FALSE;
     }
 
     stream_id = data[3];
@@ -2477,9 +2477,9 @@ int PES_packet_has_PTS(PES_packet_data_p packet)
     case STREAM_ID_PROGRAM_STREAM_DIRECTORY:
     case STREAM_ID_DSMCC_STREAM:
     case STREAM_ID_H222_E_STREAM:
-        return false; // Just data bytes
+        return FALSE; // Just data bytes
     case STREAM_ID_PADDING_STREAM:
-        return false; // Just padding bytes
+        return FALSE; // Just padding bytes
     default:
         break; // Some sort of data we might be interested in dissecting
     }
@@ -2496,11 +2496,11 @@ int PES_packet_has_PTS(PES_packet_data_p packet)
         while (posn < packet_length && bytes[posn] == 0xFF)
             posn++;
         if (posn == packet_length)
-            return false; // no space for anything else
+            return FALSE; // no space for anything else
         if ((bytes[posn] & 0xC0) == 0x40) // ignore buffer scale/size
             posn += 2;
         if (posn == packet_length)
-            return false; // no space for PTS/DTS
+            return FALSE; // no space for PTS/DTS
         if ((bytes[posn] & 0xF0) == 0x20) // ignore PTS
             PTS_DTS_flags = 2;
         else if ((bytes[posn] & 0xF0) == 0x30) // ignore PTS and DTS
@@ -2517,7 +2517,7 @@ int PES_packet_has_PTS(PES_packet_data_p packet)
  *
  * - `prefix` is a string to put before each line of output
  * - `data` is the packet data, and `data_len` its length
- * - `show_data` should be true if the start of the data for each packet should
+ * - `show_data` should be TRUE if the start of the data for each packet should
  *   be shown
  *
  * Returns 0 if all went well, 1 if an error occurs.
@@ -2533,8 +2533,8 @@ int report_PES_data_array(const std::string prefix, byte* data, size_t data_len,
     int err;
     uint64_t pts, dts;
 
-    int got_pts = false; // pessimistic
-    int got_dts = false; // pessimistic
+    int got_pts = FALSE; // pessimistic
+    int got_dts = FALSE; // pessimistic
 
     if (data[0] != 0 || data[1] != 0 || data[2] != 1) {
         fprint_err("### PES packet start code prefix is %02x %02x %02x, not 00 00 01", data[0],
@@ -2550,7 +2550,7 @@ int report_PES_data_array(const std::string prefix, byte* data, size_t data_len,
     //   return 0;
 
     fprint_msg("%sPES packet: stream id %02x (", prefix, stream_id);
-    print_stream_id(true, stream_id);
+    print_stream_id(TRUE, stream_id);
     fprint_msg("), packet length %d", packet_length);
     if (packet_length == 0) {
         packet_length = data_len - 6;
@@ -2568,7 +2568,7 @@ int report_PES_data_array(const std::string prefix, byte* data, size_t data_len,
     case STREAM_ID_DSMCC_STREAM:
     case STREAM_ID_H222_E_STREAM:
         print_msg("\n    Just data bytes\n");
-        print_data(true, (char*)"    ", bytes, packet_length, 20);
+        print_data(TRUE, (char*)"    ", bytes, packet_length, 20);
         return 0; // Just data bytes
     case STREAM_ID_PADDING_STREAM:
         print_msg("\n");
@@ -2632,17 +2632,17 @@ int report_PES_data_array(const std::string prefix, byte* data, size_t data_len,
             err = decode_pts_dts(&bytes[3], 2, &pts);
             if (err)
                 return 1;
-            got_pts = true;
+            got_pts = TRUE;
         }
         if (PTS_DTS_flags == 3) {
             err = decode_pts_dts(&bytes[3], 3, &pts);
             if (err)
                 return 1;
-            got_pts = true;
+            got_pts = TRUE;
             err = decode_pts_dts(&bytes[8], 1, &dts);
             if (err)
                 return 1;
-            got_dts = true;
+            got_dts = TRUE;
         }
         if (got_pts || got_dts) {
             fprint_msg("%s    PTS " LLU_FORMAT, prefix, pts);
@@ -2656,7 +2656,7 @@ int report_PES_data_array(const std::string prefix, byte* data, size_t data_len,
             if (!prefix.empty()) {
                 fprint_msg("%s", prefix);
             }
-            print_data(true, (char*)"    ", bytes, packet_length - 3 - PES_header_data_length, 20);
+            print_data(TRUE, (char*)"    ", bytes, packet_length - 3 - PES_header_data_length, 20);
         }
     } else {
         // We assume it's MPEG-1
@@ -2676,19 +2676,19 @@ int report_PES_data_array(const std::string prefix, byte* data, size_t data_len,
                 err = decode_pts_dts(&bytes[posn], 2, &pts);
                 if (err)
                     return 1;
-                got_pts = true;
+                got_pts = TRUE;
                 posn += 5;
             } else if ((bytes[posn] & 0xF0) == 0x30) // PTS and DTS
             {
                 err = decode_pts_dts(&bytes[posn], 3, &pts);
                 if (err)
                     return 1;
-                got_pts = true;
+                got_pts = TRUE;
                 posn += 5;
                 err = decode_pts_dts(&bytes[posn], 1, &dts);
                 if (err)
                     return 1;
-                got_dts = true;
+                got_dts = TRUE;
                 posn += 5;
             } else if (bytes[posn] == 0x0F) // check for paranoia
                 posn++;
@@ -2710,7 +2710,7 @@ int report_PES_data_array(const std::string prefix, byte* data, size_t data_len,
                 if (!prefix.empty()) {
                     fprint_msg("%s", prefix);
                 }
-                print_data(true, (char*)"    ", bytes, packet_length - posn, 20);
+                print_data(TRUE, (char*)"    ", bytes, packet_length - posn, 20);
             }
         }
     }
@@ -2737,8 +2737,8 @@ int report_PES_data_array(const std::string prefix, byte* data, size_t data_len,
 void report_PES_data_array2(int stream_type, byte* payload, int payload_len, int show_data_len)
 {
     int err;
-    int with_pts = false;
-    int with_dts = false;
+    int with_pts = FALSE;
+    int with_dts = FALSE;
     uint64_t pts, dts;
     int PES_packet_length;
     byte* data = nullptr;
@@ -2773,7 +2773,7 @@ void report_PES_data_array2(int stream_type, byte* payload, int payload_len, int
         case STREAM_ID_DSMCC_STREAM:
         case STREAM_ID_H222_E_STREAM:
             print_msg("    Just data bytes\n");
-            print_data(true, (char*)"    Data", payload + 6, payload_len - 6, 1000);
+            print_data(TRUE, (char*)"    Data", payload + 6, payload_len - 6, 1000);
             return; // Just data bytes
         case STREAM_ID_PADDING_STREAM:
             print_msg("    Padding stream\n");
@@ -2799,11 +2799,11 @@ void report_PES_data_array2(int stream_type, byte* payload, int payload_len, int
         if (payload[7] != 0) {
             print_msg(" :");
             if (ON(payload[7], 0x80)) {
-                with_pts = true;
+                with_pts = TRUE;
                 print_msg(" PTS");
             }
             if (ON(payload[7], 0x40)) {
-                with_dts = true;
+                with_dts = TRUE;
                 print_msg(" DTS");
             }
             if (ON(payload[7], 0x20))
@@ -2874,19 +2874,19 @@ void report_PES_data_array2(int stream_type, byte* payload, int payload_len, int
                     err = decode_pts_dts(&payload[6 + posn], 2, &pts);
                     if (err)
                         return;
-                    with_pts = true;
+                    with_pts = TRUE;
                     posn += 5;
                 } else if ((payload[6 + posn] & 0xF0) == 0x30) // PTS and DTS
                 {
                     err = decode_pts_dts(&payload[6 + posn], 3, &pts);
                     if (err)
                         return;
-                    with_pts = true;
+                    with_pts = TRUE;
                     posn += 5;
                     err = decode_pts_dts(&payload[6 + posn], 1, &dts);
                     if (err)
                         return;
-                    with_dts = true;
+                    with_dts = TRUE;
                     posn += 5;
                 } else if (payload[6 + posn] == 0x0F) // check for paranoia
                     posn++;
@@ -2912,7 +2912,7 @@ void report_PES_data_array2(int stream_type, byte* payload, int payload_len, int
         }
     }
     if (show_data_len)
-        print_data(true, (char*)"    Data", data, data_len, show_data_len);
+        print_data(TRUE, (char*)"    Data", data, data_len, show_data_len);
 }
 
 /*
@@ -2920,7 +2920,7 @@ void report_PES_data_array2(int stream_type, byte* payload, int payload_len, int
  *
  * - `data` is the data for this PES packet
  * - `data_len` is its length
- * - `got_pts` is true if a PTS field was found, in which case
+ * - `got_pts` is TRUE if a PTS field was found, in which case
  * - `pts` is that PTS value
  *
  * Returns 0 if all went well, 1 if an error occurs.
@@ -2933,7 +2933,7 @@ int find_PTS_in_PES(byte data[], int32_t data_len, int* got_pts, uint64_t* pts)
 
     int PTS_DTS_flags;
 
-    *got_pts = false; // pessimistic
+    *got_pts = FALSE; // pessimistic
 
     if (data[0] != 0 || data[1] != 0 || data[2] != 1) {
         fprint_err("### find_PTS_in_PES:"
@@ -2972,7 +2972,7 @@ int find_PTS_in_PES(byte data[], int32_t data_len, int* got_pts, uint64_t* pts)
             int err = decode_pts_dts(&bytes[3], PTS_DTS_flags, pts);
             if (err)
                 return 1;
-            *got_pts = true;
+            *got_pts = TRUE;
         }
     } else {
         int posn = 0;
@@ -2993,7 +2993,7 @@ int find_PTS_in_PES(byte data[], int32_t data_len, int* got_pts, uint64_t* pts)
                 int err = decode_pts_dts(&bytes[posn], marker, pts);
                 if (err)
                     return 1;
-                *got_pts = true;
+                *got_pts = TRUE;
             }
         }
     }
@@ -3005,7 +3005,7 @@ int find_PTS_in_PES(byte data[], int32_t data_len, int* got_pts, uint64_t* pts)
  *
  * - `data` is the data for this PES packet
  * - `data_len` is its length
- * - `got_dts` is true if a DTS field was found, in which case
+ * - `got_dts` is TRUE if a DTS field was found, in which case
  * - `dts` is that DTS value
  *
  * Returns 0 if all went well, 1 if an error occurs.
@@ -3018,7 +3018,7 @@ int find_DTS_in_PES(byte data[], int32_t data_len, int* got_dts, uint64_t* dts)
 
     int PTS_DTS_flags;
 
-    *got_dts = false; // pessimistic
+    *got_dts = FALSE; // pessimistic
 
     if (data[0] != 0 || data[1] != 0 || data[2] != 1) {
         fprint_err("### find_DTS_in_PES:"
@@ -3058,7 +3058,7 @@ int find_DTS_in_PES(byte data[], int32_t data_len, int* got_dts, uint64_t* dts)
             int err = decode_pts_dts(&bytes[8], 1, dts);
             if (err)
                 return 1;
-            *got_dts = true;
+            *got_dts = TRUE;
         }
     } else {
         int posn = 0;
@@ -3077,7 +3077,7 @@ int find_DTS_in_PES(byte data[], int32_t data_len, int* got_dts, uint64_t* dts)
                 int err = decode_pts_dts(&bytes[posn + 5], 1, dts);
                 if (err)
                     return 1;
-                *got_dts = true;
+                *got_dts = TRUE;
             }
         }
     }
@@ -3089,9 +3089,9 @@ int find_DTS_in_PES(byte data[], int32_t data_len, int* got_dts, uint64_t* dts)
  *
  * - `data` is the data for this PES packet
  * - `data_len` is its length
- * - `got_pts` is true if a PTS field was found, in which case
+ * - `got_pts` is TRUE if a PTS field was found, in which case
  * - `pts` is that PTS value
- * - `got_dts` is true if a DTS field was found, in which case
+ * - `got_dts` is TRUE if a DTS field was found, in which case
  * - `dts` is that DTS value
  *
  * Returns 0 if all went well, 1 if an error occurs.
@@ -3105,8 +3105,8 @@ int find_PTS_DTS_in_PES(
 
     int PTS_DTS_flags;
 
-    *got_pts = false; // pessimistic
-    *got_dts = false;
+    *got_pts = FALSE; // pessimistic
+    *got_dts = FALSE;
 
     if (data[0] != 0 || data[1] != 0 || data[2] != 1) {
         fprint_err("### find_PTS_DTS_in_PES"
@@ -3145,14 +3145,14 @@ int find_PTS_DTS_in_PES(
             int err = decode_pts_dts(&bytes[3], PTS_DTS_flags, pts);
             if (err)
                 return 1;
-            *got_pts = true;
+            *got_pts = TRUE;
         }
         if (PTS_DTS_flags == 3) {
             // err = decode_pts_dts(&bytes[3],3,&pts);
             int err = decode_pts_dts(&bytes[8], 1, dts);
             if (err)
                 return 1;
-            *got_dts = true;
+            *got_dts = TRUE;
         }
     } else {
         int posn = 0;
@@ -3173,14 +3173,14 @@ int find_PTS_DTS_in_PES(
                 int err = decode_pts_dts(&bytes[posn], marker, pts);
                 if (err)
                     return 1;
-                *got_pts = true;
+                *got_pts = TRUE;
             }
             if (marker == 3) // PTS and DTS
             {
                 int err = decode_pts_dts(&bytes[posn + 5], 1, dts);
                 if (err)
                     return 1;
-                *got_dts = true;
+                *got_dts = TRUE;
             }
         }
     }
@@ -3188,7 +3188,7 @@ int find_PTS_DTS_in_PES(
     // If we have no DTS then it is the same as PTS
     if (*got_pts && !*got_dts) {
         *dts = *pts;
-        *got_dts = true;
+        *got_dts = TRUE;
     }
     return 0;
 }
@@ -3198,7 +3198,7 @@ int find_PTS_DTS_in_PES(
  *
  * - `data` is the data for this PES packet
  * - `data_len` is its length
- * - `got_escr` is true if an ESCR field was found, in which case
+ * - `got_escr` is TRUE if an ESCR field was found, in which case
  * - `escr` is that ESCR value
  *
  * Returns 0 if all went well, 1 if an error occurs.
@@ -3209,7 +3209,7 @@ int find_ESCR_in_PES(byte data[], int32_t data_len, int* got_escr, uint64_t* esc
     //  int   packet_length;
     byte* bytes;
 
-    *got_escr = false; // pessimistic
+    *got_escr = FALSE; // pessimistic
     *escr = 0;
 
     if (data[0] != 0 || data[1] != 0 || data[2] != 1) {
@@ -3296,7 +3296,7 @@ void set_server_output(PES_reader_p reader, TS_writer_p tswriter, int write_PES,
     reader->program_index = 0;
     reader->write_PES_packets = write_PES;
     reader->write_TS_packets = !write_PES;
-    reader->suppress_writing = false;
+    reader->suppress_writing = FALSE;
     return;
 }
 
@@ -3313,7 +3313,7 @@ void set_server_output(PES_reader_p reader, TS_writer_p tswriter, int write_PES,
 void start_server_output(PES_reader_p reader)
 {
     if (reader != nullptr)
-        reader->suppress_writing = false;
+        reader->suppress_writing = FALSE;
     return;
 }
 
@@ -3327,7 +3327,7 @@ void start_server_output(PES_reader_p reader)
 void stop_server_output(PES_reader_p reader)
 {
     if (reader != nullptr)
-        reader->suppress_writing = true;
+        reader->suppress_writing = TRUE;
     return;
 }
 
