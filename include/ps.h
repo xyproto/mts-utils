@@ -3,15 +3,37 @@
 /*
  * Utilities for reading program stream data.
  *
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the MPEG TS, PS and ES tools.
+ *
+ * The Initial Developer of the Original Code is Amino Communications Ltd.
+ * Portions created by the Initial Developer are Copyright (C) 2008
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Amino Communications Ltd, Swavesey, Cambridge UK
+ *
+ * ***** END LICENSE BLOCK *****
  */
 
 #include <cerrno>
-#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
-#include <string>
+
 #include <unistd.h>
 
 #include "compat.h"
@@ -21,8 +43,6 @@
 #include "printing_fns.h"
 #include "ps_fns.h"
 #include "ts_fns.h"
-
-using namespace std::string_literals;
 
 #define DEBUG 0
 #define DEBUG_AC3 0
@@ -180,17 +200,16 @@ void free_PS_reader(PS_reader_p* ps)
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-int open_PS_file(const std::string name, int quiet, PS_reader_p* ps)
+int open_PS_file(char* name, int quiet, PS_reader_p* ps)
 {
     int f;
 
-    if (name.empty()) {
+    if (name == nullptr)
         f = STDIN_FILENO;
-    } else {
+    else {
         f = open_binary_file(name, FALSE);
-        if (f == -1) {
+        if (f == -1)
             return 1;
-        }
     }
     return build_PS_reader(f, quiet, ps);
 }
@@ -382,96 +401,96 @@ static int read_PS_bytes(PS_reader_p ps, int num_bytes, byte* buffer, offset_t* 
 void print_stream_id(int is_msg, byte stream_id)
 {
     byte number;
-    auto str = ""s;
+    char* str = nullptr;
     switch (stream_id) {
         // H.222 Program stream specific codes
     case 0xB9:
-        str = "PS MPEG_program_end_code"s;
+        str = "PS MPEG_program_end_code";
         break;
     case 0xBA:
-        str = "PS Pack header start code"s;
+        str = "PS Pack header start code";
         break;
     case 0xBB:
-        str = "PS System header start code"s;
+        str = "PS System header start code";
         break;
     case 0xBC:
-        str = "PS Program stream map"s;
+        str = "PS Program stream map";
         break;
     case 0xFF:
-        str = "PS Program stream directory"s;
+        str = "PS Program stream directory";
         break;
 
         // Other "simple" values from H.222 Table 2-18, page 32
     case 0xBD:
-        str = "Private stream 1"s;
+        str = "Private stream 1";
         break;
     case 0xBE:
-        str = "Padding stream"s;
+        str = "Padding stream";
         break;
     case 0xBF:
-        str = "Private stream 2"s;
+        str = "Private stream 2";
         break;
     case 0xF0:
-        str = "ECM stream"s;
+        str = "ECM stream";
         break;
     case 0xF1:
-        str = "EMM stream"s;
+        str = "EMM stream";
         break;
     case 0xF2:
-        str = "DSMCC stream"s;
+        str = "DSMCC stream";
         break;
     case 0xF3:
-        str = "13522 stream"s;
+        str = "13522 stream";
         break;
     case 0xF4:
-        str = "H.222.1 A stream"s;
+        str = "H.222.1 A stream";
         break;
     case 0xF5:
-        str = "H.222.1 B stream"s;
+        str = "H.222.1 B stream";
         break;
     case 0xF6:
-        str = "H.222.1 C stream"s;
+        str = "H.222.1 C stream";
         break;
     case 0xF7:
-        str = "H.222.1 D stream"s;
+        str = "H.222.1 D stream";
         break;
     case 0xF8:
-        str = "H.222.1 E stream"s;
+        str = "H.222.1 E stream";
         break;
     case 0xF9:
-        str = "Ancillary stream"s;
+        str = "Ancillary stream";
         break;
 
     case 0x00:
-        str = "H.262 Picture"s;
+        str = "H.262 Picture";
         break;
     case 0xB2:
-        str = "H.262 User data"s;
+        str = "H.262 User data";
         break;
     case 0xB3:
-        str = "H.262 Sequence header"s;
+        str = "H.262 Sequence header";
         break;
     case 0xB4:
-        str = "H.262 Sequence error"s;
+        str = "H.262 Sequence error";
         break;
     case 0xB5:
-        str = "H.262 Extension"s;
+        str = "H.262 Extension";
         break;
     case 0xB7:
-        str = "H.262 Sequence end"s;
+        str = "H.262 Sequence end";
         break;
     case 0xB8:
-        str = "H.262 Group start"s;
+        str = "H.262 Group start";
         break;
 
     default:
-        str = ""s;
+        str = nullptr;
         break;
     }
 
-    if (!str.empty()) {
-        fprint_msg_or_err(is_msg, str.c_str());
-    } else if (stream_id >= 0xC0 && stream_id <= 0xDF) {
+    if (str != nullptr)
+        fprint_msg_or_err(is_msg, str);
+    else if (stream_id >= 0xC0 && stream_id <= 0xDF) {
         number = stream_id & 0x1F;
         fprint_msg_or_err(is_msg, "Audio stream 0x%02X", number);
     } else if (stream_id >= 0xE0 && stream_id <= 0xEF) {
@@ -506,7 +525,7 @@ void print_stream_id(int is_msg, byte stream_id)
  *   * 1 if some error (including the first 3 bytes not being 00 00 01) occurs.
  */
 int find_PS_packet_start(
-    PS_reader_p ps, bool verbose, uint32_t max, offset_t* posn, byte* stream_id)
+    PS_reader_p ps, int verbose, uint32_t max, offset_t* posn, byte* stream_id)
 {
     int err;
     byte prev1 = 0xff;
@@ -573,7 +592,7 @@ int find_PS_packet_start(
  *   * EOF if EOF is read, or an MPEG_program_end_code is read, or
  *   * 1 if some error (including the first 3 bytes not being 00 00 01) occurs.
  */
-int find_PS_pack_header_start(PS_reader_p ps, bool verbose, uint32_t max, offset_t* posn)
+int find_PS_pack_header_start(PS_reader_p ps, int verbose, uint32_t max, offset_t* posn)
 {
     int err;
     byte stream_id = 0;
@@ -831,7 +850,7 @@ void free_PS_packet(PS_packet_p* packet)
  *   * 2 if the bytes read are not 00 00 01 `stream_id`, or
  *   * 1 if some other error occurs.
  */
-int read_PS_packet_start(PS_reader_p ps, bool verbose, offset_t* posn, byte* stream_id)
+int read_PS_packet_start(PS_reader_p ps, int verbose, offset_t* posn, byte* stream_id)
 {
     int err;
     byte buf[4];
@@ -911,7 +930,7 @@ int read_PS_packet_start(PS_reader_p ps, bool verbose, offset_t* posn, byte* str
  *
  * Naughtily assume that `data` is long enough...
  */
-static inline void determine_ac3_details(byte* data, bool verbose, byte* bsmod, byte* acmod)
+static inline void determine_ac3_details(byte* data, int verbose, byte* bsmod, byte* acmod)
 {
     // The end of the syncinfo
     int fscod = (data[4] & 0xC0) >> 6;
@@ -947,8 +966,8 @@ static inline void determine_ac3_details(byte* data, bool verbose, byte* bsmod, 
  *
  * Returns one of the SUBSTREAM_* values.
  */
-int identify_private1_data(struct PS_packet* packet, int is_dvd, bool verbose,
-    int* substream_index, byte* bsmod, byte* acmod)
+int identify_private1_data(struct PS_packet* packet, int is_dvd, int verbose, int* substream_index,
+    byte* bsmod, byte* acmod)
 {
     // If this packet contains the start of a data packet, then
     // try to determine if it is AC-3
@@ -1094,7 +1113,7 @@ int identify_private1_data(struct PS_packet* packet, int is_dvd, bool verbose,
  */
 static int write_video(TS_writer_p output, struct PS_pack_header* header, byte stream_id,
     struct PS_packet* packet, struct program_data* prog_data, int* num_video_ignored,
-    int* num_video_written, bool verbose, int quiet)
+    int* num_video_written, int verbose, int quiet)
 {
     int err;
 
@@ -1178,7 +1197,7 @@ static int write_DVD_AC3_data(
     //    offset N-1
     int PES_header_data_length = packet->data[6 + 2];
     byte* data = packet->data + 6 + 3 + PES_header_data_length;
-    size_t data_len = packet->data_len - 6 - 3 - PES_header_data_length;
+    int data_len = packet->data_len - 6 - 3 - PES_header_data_length;
     // int substream_id = data[0];
     int frame_count = data[1]; // frames starting in this packet
     int offset = (data[2] << 8) | data[3];
@@ -1279,7 +1298,7 @@ static int write_DVD_AC3_data(
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int write_audio(TS_writer_p output, byte stream_id, struct PS_packet* packet,
-    struct program_data* prog_data, int* num_audio_ignored, int* num_audio_written, bool verbose,
+    struct program_data* prog_data, int* num_audio_ignored, int* num_audio_written, int verbose,
     int quiet)
 {
     int err;
@@ -1480,7 +1499,7 @@ static int write_audio(TS_writer_p output, byte stream_id, struct PS_packet* pac
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int _ps_to_ts(PS_reader_p ps, TS_writer_p output, struct program_data* prog_data,
-    int pad_start, int program_repeat, int keep_audio, int max, bool verbose, int quiet)
+    int pad_start, int program_repeat, int keep_audio, int max, int verbose, int quiet)
 {
     int ii, err;
     offset_t posn = 0; // The location in the input file of the current packet
@@ -1695,7 +1714,7 @@ static int _ps_to_ts(PS_reader_p ps, TS_writer_p output, struct program_data* pr
 int ps_to_ts(PS_reader_p ps, TS_writer_p output, int pad_start, int program_repeat, int video_type,
     int is_dvd, int video_stream, int audio_stream, int want_ac3_audio, int output_dolby_as_dvb,
     uint32_t pmt_pid, uint32_t pcr_pid, uint32_t video_pid, int keep_audio, uint32_t audio_pid,
-    int max, bool verbose, int quiet)
+    int max, int verbose, int quiet)
 {
     int err;
     struct program_data prog_data = { 0 };

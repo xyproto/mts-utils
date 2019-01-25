@@ -1,9 +1,33 @@
-#pragma once
-
 /*
  * Prototypes for reading H.262 (MPEG-2) elementary streams.
  *
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the MPEG TS, PS and ES tools.
+ *
+ * The Initial Developer of the Original Code is Amino Communications Ltd.
+ * Portions created by the Initial Developer are Copyright (C) 2008
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Amino Communications Ltd, Swavesey, Cambridge UK
+ *
+ * ***** END LICENSE BLOCK *****
  */
+
+#ifndef _h262_fns
+#define _h262_fns
 
 #include "h262_defns.h"
 
@@ -124,7 +148,7 @@ int same_h262_picture(h262_picture_p picture1, h262_picture_p picture2);
  * Returns 0 if it succeeds, EOF if we reach the end of file, or 1 if some
  * error occurs.
  */
-int get_next_h262_single_picture(h262_context_p context, bool verbose, h262_picture_p* picture);
+int get_next_h262_single_picture(h262_context_p context, int verbose, h262_picture_p* picture);
 /*
  * Retrieve the the next H.262 "picture".
  *
@@ -164,7 +188,7 @@ int get_next_h262_single_picture(h262_context_p context, bool verbose, h262_pict
  * Returns 0 if it succeeds, EOF if we reach the end of file, or 1 if some
  * error occurs.
  */
-int get_next_h262_frame(h262_context_p context, bool verbose, int quiet, h262_picture_p* picture);
+int get_next_h262_frame(h262_context_p context, int verbose, int quiet, h262_picture_p* picture);
 /*
  * Write out an H.262 picture as TS
  *
@@ -191,3 +215,12 @@ int write_h262_picture_as_ES(FILE* output, h262_picture_p picture);
  * - if `report_data`, then the component ES units will be printed out as well
  */
 void report_h262_picture(h262_picture_p picture, int report_data);
+
+#endif // _h262_fns
+
+// Local Variables:
+// tab-width: 8
+// indent-tabs-mode: nil
+// c-basic-offset: 2
+// End:
+// vim: set tabstop=8 shiftwidth=2 expandtab:

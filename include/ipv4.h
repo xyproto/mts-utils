@@ -1,9 +1,34 @@
-#pragma once
-
+/* ipv4.h */
 /*
  * Routines for dissecting IPv4 and UDP packets.
  *
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the MPEG TS, PS and ES tools.
+ *
+ * The Initial Developer of the Original Code is Amino Communications Ltd.
+ * Portions created by the Initial Developer are Copyright (C) 2008
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Richard Watts, Kynesim <rrw@kynesim.co.uk>
+ *
+ * ***** END LICENSE BLOCK *****
  */
+
+#ifndef _ipv4_h
+#define _ipv4_h
 
 #include "compat.h"
 
@@ -86,3 +111,7 @@ typedef struct ipv4_udp_header_s {
  */
 int ipv4_udp_from_payload(const uint8_t* data, const uint32_t len, ipv4_udp_header_t* out_hdr,
     uint32_t* out_st, uint32_t* out_len);
+
+#endif
+
+/* End file */

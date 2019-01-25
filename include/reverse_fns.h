@@ -1,9 +1,33 @@
-#pragma once
-
 /*
  * Support for reversing
  *
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the MPEG TS, PS and ES tools.
+ *
+ * The Initial Developer of the Original Code is Amino Communications Ltd.
+ * Portions created by the Initial Developer are Copyright (C) 2008
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Amino Communications Ltd, Swavesey, Cambridge UK
+ *
+ * ***** END LICENSE BLOCK *****
  */
+#ifndef _reverse_fns
+#define _reverse_fns
+
 #include "accessunit_defns.h"
 #include "h262_defns.h"
 #include "reverse_defns.h"
@@ -142,7 +166,7 @@ int get_reverse_data(reverse_data_p reverse_data, int which, uint32_t* index,
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int collect_reverse_h262(h262_context_p h262, int max, bool verbose, int quiet);
+int collect_reverse_h262(h262_context_p h262, int max, int verbose, int quiet);
 /*
  * Find IDR and I slices, and remember their access units for later output
  * in reverse order.
@@ -158,7 +182,7 @@ int collect_reverse_h262(h262_context_p h262, int max, bool verbose, int quiet);
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int collect_reverse_access_units(access_unit_context_p acontext, int max, bool verbose, int quiet);
+int collect_reverse_access_units(access_unit_context_p acontext, int max, int verbose, int quiet);
 /*
  * Output the last picture (or an earlier one) from the reverse arrays.
  * This version writes the data out as Transport Stream.
@@ -181,7 +205,7 @@ int collect_reverse_access_units(access_unit_context_p acontext, int max, bool v
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int output_from_reverse_data_as_TS(ES_p es, TS_writer_p tswriter, bool verbose, int quiet,
+int output_from_reverse_data_as_TS(ES_p es, TS_writer_p tswriter, int verbose, int quiet,
     uint32_t offset, reverse_data_p reverse_data);
 /*
  * Output the last picture (or an earlier one) from the reverse arrays.
@@ -206,7 +230,7 @@ int output_from_reverse_data_as_TS(ES_p es, TS_writer_p tswriter, bool verbose, 
  * if the current command has changed.
  */
 int output_from_reverse_data_as_ES(
-    ES_p es, FILE* output, bool verbose, int quiet, uint32_t offset, reverse_data_p reverse_data);
+    ES_p es, FILE* output, int verbose, int quiet, uint32_t offset, reverse_data_p reverse_data);
 /*
  * Output the H.262 pictures or H.264 access units we remembered earlier - but
  * in reverse order. This version writes the data out as Transport Stream.
@@ -233,7 +257,7 @@ int output_from_reverse_data_as_ES(
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int output_in_reverse_as_TS(ES_p es, TS_writer_p tswriter, int frequency, bool verbose, int quiet,
+int output_in_reverse_as_TS(ES_p es, TS_writer_p tswriter, int frequency, int verbose, int quiet,
     int32_t start_with, int max, reverse_data_p reverse_data);
 /*
  * Output the H.262 pictures or H.264 access units we remembered earlier - but
@@ -261,5 +285,14 @@ int output_in_reverse_as_TS(ES_p es, TS_writer_p tswriter, int frequency, bool v
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int output_in_reverse_as_ES(ES_p es, FILE* output, int frequency, bool verbose, int quiet,
+int output_in_reverse_as_ES(ES_p es, FILE* output, int frequency, int verbose, int quiet,
     int32_t start_with, int max, reverse_data_p reverse_data);
+
+#endif // _reverse_fns
+
+// Local Variables:
+// tab-width: 8
+// indent-tabs-mode: nil
+// c-basic-offset: 2
+// End:
+// vim: set tabstop=8 shiftwidth=2 expandtab:

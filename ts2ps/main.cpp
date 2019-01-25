@@ -2,6 +2,29 @@
  * Given an H.222 transport stream (TS) file, extract PES data therefrom (i.e.,
  * extract the PES packets within the TS) and construct PS.
  *
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the MPEG TS, PS and ES tools.
+ *
+ * The Initial Developer of the Original Code is Amino Communications Ltd.
+ * Portions created by the Initial Developer are Copyright (C) 2008
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Amino Communications Ltd, Swavesey, Cambridge UK
+ *
+ * ***** END LICENSE BLOCK *****
  */
 
 #include <cerrno>
@@ -104,7 +127,7 @@ static int write_PES_packet(FILE* output, byte* data, uint16_t data_len, byte st
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int extract_data(
-    int input, FILE* output, uint16_t program_number, int max, bool verbose, int quiet)
+    int input, FILE* output, uint16_t program_number, int max, int verbose, int quiet)
 {
     int err;
     PES_reader_p reader;
@@ -249,16 +272,16 @@ int main(int argc, char** argv)
 {
     int use_stdout = FALSE;
     int use_stdin = FALSE;
-    char* input_name = nullptr;
-    char* output_name = nullptr;
+    char* input_name = NULL;
+    char* output_name = NULL;
     int had_input_name = FALSE;
     int had_output_name = FALSE;
 
     int input = -1; // Our input file descriptor
-    FILE* output = nullptr; // The stream we're writing to (if any)
+    FILE* output = NULL; // The stream we're writing to (if any)
     int max = 0; // The maximum number of TS packets to read (or 0)
     int quiet = FALSE; // True => be as quiet as possible
-    bool verbose = FALSE; // True => output diagnostic/progress messages
+    int verbose = FALSE; // True => output diagnostic/progress messages
     uint16_t program_number = 0;
 
     int err = 0;
@@ -282,14 +305,14 @@ int main(int argc, char** argv)
                 verbose = FALSE;
                 quiet = TRUE;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
-                MustARG("ts2ps", ii, argc, argv);
+                CHECKARG("ts2ps", ii);
                 err = int_value("ts2ps", argv[ii], argv[ii + 1], TRUE, 10, &max);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-prog", argv[ii])) {
                 int temp;
-                MustARG("ts2ps", ii, argc, argv);
+                CHECKARG("ts2ps", ii);
                 err = int_value("ts2ps", argv[ii], argv[ii + 1], TRUE, 10, &temp);
                 if (err)
                     return 1;
@@ -303,7 +326,7 @@ int main(int argc, char** argv)
                 had_output_name = TRUE; // so to speak
                 redirect_output_stderr();
             } else if (!strcmp("-err", argv[ii])) {
-                MustARG("ts2ps", ii, argc, argv);
+                CHECKARG("ts2ps", ii);
                 if (!strcmp(argv[ii + 1], "stderr"))
                     redirect_output_stderr();
                 else if (!strcmp(argv[ii + 1], "stdout"))
@@ -371,7 +394,7 @@ int main(int argc, char** argv)
             output = stdout;
         else {
             output = fopen(output_name, "wb");
-            if (output == nullptr) {
+            if (output == NULL) {
                 if (!use_stdin)
                     (void)close_file(input);
                 fprint_err("### ts2ps: "

@@ -304,13 +304,13 @@ int main(int argc, char** argv)
 {
     TS_writer_p tswriter;
     struct TS_context context;
-    char* input_name = nullptr;
+    char* input_name = NULL;
     int had_input_name = FALSE;
     int had_output_name = FALSE;
     int input = -1;
     int max = 0; // The maximum number of TS packets to read (or 0)
     int quiet = FALSE;
-    bool verbose = FALSE;
+    int verbose = FALSE;
     int err = 0;
     int ii = 1;
     int loop = FALSE;
@@ -319,9 +319,9 @@ int main(int argc, char** argv)
 
     // Values relevent to "opening" the output file/socket
     enum TS_writer_type how = TS_W_UNDEFINED; // how to output our TS data
-    char* output_name = nullptr; // the output filename/host
+    char* output_name = NULL; // the output filename/host
     int port = 88; // the port to connect to
-    char* multicast_if = nullptr; // IP address of multicast i/f
+    char* multicast_if = NULL; // IP address of multicast i/f
 
     tsplay_output_pace_mode pace_mode = TSPLAY_OUTPUT_PACE_PCR2_TS;
 
@@ -353,7 +353,7 @@ int main(int argc, char** argv)
     }
 
     // Process the standard tswrite switches/arguments
-    err = tswrite_process_args("tsplay", argc, argv, &context);
+    err = tswrite_process_args((char*)"tsplay", argc, argv, &context);
     if (err)
         return 1;
 
@@ -412,25 +412,25 @@ int main(int argc, char** argv)
                 quiet = FALSE;
                 verbose = TRUE;
             } else if (!strcmp("-output", argv[ii]) || !strcmp("-o", argv[ii])) {
-                MustARG("tsplay", ii, argc, argv);
+                CHECKARG("tsplay", ii);
                 had_output_name = TRUE;
                 how = TS_W_FILE;
                 output_name = argv[ii + 1];
                 ii++;
             } else if (!strcmp("-mcastif", argv[ii]) || !strcmp("-i", argv[ii])) {
-                MustARG("tsplay", ii, argc, argv);
+                CHECKARG("tsplay", ii);
                 multicast_if = argv[ii + 1];
                 ii++;
             } else if (!strcmp("-stdout", argv[ii])) {
                 had_output_name = TRUE; // more or less
                 how = TS_W_STDOUT;
-                output_name = nullptr;
+                output_name = NULL;
                 redirect_output_stderr();
             } else if (!strcmp("-stdin", argv[ii])) {
                 had_input_name = TRUE; // more or less
-                input_name = nullptr;
+                input_name = NULL;
             } else if (!strcmp("-err", argv[ii])) {
-                MustARG("tsplay", ii, argc, argv);
+                CHECKARG("tsplay", ii);
                 if (!strcmp(argv[ii + 1], "stderr"))
                     redirect_output_stderr();
                 else if (!strcmp(argv[ii + 1], "stdout"))
@@ -456,7 +456,7 @@ int main(int argc, char** argv)
                 }
                 how = TS_W_UDP;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
-                MustARG("tsplay", ii, argc, argv);
+                CHECKARG("tsplay", ii);
                 err = int_value((char*)"tsplay", argv[ii], argv[ii + 1], TRUE, 10, &max);
                 if (err)
                     return 1;
@@ -470,7 +470,7 @@ int main(int argc, char** argv)
             } else if (!strcmp("-pace-pcr2-pmt", argv[ii])) {
                 pace_mode = TSPLAY_OUTPUT_PACE_PCR2_PMT;
             } else if (!strcmp("-forcepcr", argv[ii])) {
-                MustARG("tsplay", ii, argc, argv);
+                CHECKARG("tsplay", ii);
                 err = unsigned_value(
                     (char*)"tsplay", argv[ii], argv[ii + 1], 0, &override_pcr_pid);
                 if (err)
@@ -489,14 +489,14 @@ int main(int argc, char** argv)
             } else if (!strcmp("-notdvd", argv[ii]) || !strcmp("-nodvd", argv[ii])) {
                 input_is_dvd = FALSE;
             } else if (!strcmp("-vstream", argv[ii])) {
-                MustARG("tsplay", ii, argc, argv);
+                CHECKARG("tsplay", ii);
                 err = int_value_in_range(
                     (char*)"ps2ts", argv[ii], argv[ii + 1], 0, 0xF, 0, &video_stream);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-astream", argv[ii])) {
-                MustARG("tsplay", ii, argc, argv);
+                CHECKARG("tsplay", ii);
                 err = int_value_in_range(
                     (char*)"ps2ts", argv[ii], argv[ii + 1], 0, 0x1F, 0, &audio_stream);
                 if (err)
@@ -504,7 +504,7 @@ int main(int argc, char** argv)
                 want_ac3_audio = FALSE;
                 ii++;
             } else if (!strcmp("-ac3stream", argv[ii])) {
-                MustARG("tsplay", ii, argc, argv);
+                CHECKARG("tsplay", ii);
                 err = int_value_in_range(
                     (char*)"ps2ts", argv[ii], argv[ii + 1], 0, 0x7, 0, &audio_stream);
                 if (err)
@@ -513,7 +513,7 @@ int main(int argc, char** argv)
                 input_is_dvd = TRUE;
                 ii++;
             } else if (!strcmp("-dolby", argv[ii])) {
-                MustARG("tsplay", ii, argc, argv);
+                CHECKARG("tsplay", ii);
                 if (!strcmp("dvb", argv[ii + 1]))
                     want_dolby_as_dvb = TRUE;
                 else if (!strcmp("atsc", argv[ii + 1]))
@@ -524,20 +524,20 @@ int main(int argc, char** argv)
                 }
                 ii++;
             } else if (!strcmp("-prepeat", argv[ii])) {
-                MustARG("tsplay", ii, argc, argv);
+                CHECKARG("tsplay", ii);
                 err = int_value(
                     (char*)"tsplay", argv[ii], argv[ii + 1], TRUE, 10, &repeat_program_every);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-pad", argv[ii])) {
-                MustARG("tsplay", ii, argc, argv);
+                CHECKARG("tsplay", ii);
                 err = int_value((char*)"tsplay", argv[ii], argv[ii + 1], TRUE, 10, &pad_start);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-ignore", argv[ii])) {
-                MustARG("tsplay", ii, argc, argv);
+                CHECKARG("tsplay", ii);
                 err = unsigned_value((char*)"tsplay", argv[ii], argv[ii + 1], 0, &pid_to_ignore);
                 if (err)
                     return 1;
@@ -547,19 +547,19 @@ int main(int argc, char** argv)
                 }
                 ii++;
             } else if (!strcmp("-vpid", argv[ii])) {
-                MustARG("tsplay", ii, argc, argv);
+                CHECKARG("tsplay", ii);
                 err = unsigned_value((char*)"tsplay", argv[ii], argv[ii + 1], 0, &video_pid);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-apid", argv[ii])) {
-                MustARG("tsplay", ii, argc, argv);
+                CHECKARG("tsplay", ii);
                 err = unsigned_value((char*)"tsplay", argv[ii], argv[ii + 1], 0, &audio_pid);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-pmt", argv[ii])) {
-                MustARG("tsplay", ii, argc, argv);
+                CHECKARG("tsplay", ii);
                 err = unsigned_value((char*)"tsplay", argv[ii], argv[ii + 1], 0, &pmt_pid);
                 if (err)
                     return 1;
@@ -588,7 +588,7 @@ int main(int argc, char** argv)
                 had_input_name = TRUE;
             } else if (!had_output_name) {
                 // This is presumably the host to write to
-                err = host_value((char*)"tsplay", nullptr, argv[ii], &output_name, &port);
+                err = host_value((char*)"tsplay", NULL, argv[ii], &output_name, &port);
                 if (err)
                     return 1;
                 had_output_name = TRUE;
@@ -701,7 +701,7 @@ int main(int argc, char** argv)
     }
 
     if (!quiet)
-        start = time(nullptr);
+        start = time(NULL);
 
     // We can only use buffered output for TCP/IP and UDP
     // (it doesn't make much sense for output to a file)
@@ -730,7 +730,7 @@ int main(int argc, char** argv)
     }
 
     if (!quiet) {
-        end = time(nullptr);
+        end = time(NULL);
         fprint_msg("Started  output at %s", ctime(&start));
         fprint_msg("Finished output at %s", ctime(&end));
         fprint_msg("Elapsed time %.1fs\n", difftime(end, start));

@@ -52,7 +52,7 @@
 #include "version.h"
 
 /** List of PIDs to filter in */
-int* pidList = nullptr;
+int* pidList = NULL;
 unsigned int pidListAlloc = 0, pidListUsed = 0;
 
 static void print_usage(void);
@@ -69,10 +69,10 @@ void ensurePidList(int nr)
 int main(int argn, char* args[])
 {
     int ii = 1;
-    //    bool verbose = FALSE;  // Currently unused - squash warning
+    //    int verbose = FALSE;  // Currently unused - squash warning
     int invert = 0;
     unsigned int max_pkts = (unsigned int)-1;
-    const char *input_file = nullptr, *output_file = nullptr;
+    const char *input_file = NULL, *output_file = NULL;
 
     if (argn < 2) {
         print_usage();
@@ -119,7 +119,7 @@ int main(int argn, char* args[])
                 return 1;
             }
         } else {
-            char* p = nullptr;
+            char* p = NULL;
             // It's a pid.
             if (pidListUsed >= pidListAlloc) {
                 ensurePidList(pidListAlloc + 1024);
@@ -145,7 +145,7 @@ int main(int argn, char* args[])
         int err;
         TS_reader_p tsreader;
         TS_writer_p tswriter;
-        byte* pkt = nullptr;
+        byte* pkt = NULL;
 
         unsigned int pid, pkt_num;
         int pusi, adapt_len, payload_len;
@@ -158,9 +158,9 @@ int main(int argn, char* args[])
             return 1;
         }
         if (output_file) {
-            err = tswrite_open(TS_W_FILE, (char*)output_file, nullptr, 0, 1, &tswriter);
+            err = tswrite_open(TS_W_FILE, (char*)output_file, NULL, 0, 1, &tswriter);
         } else {
-            err = tswrite_open(TS_W_STDOUT, nullptr, nullptr, 0, 1, &tswriter);
+            err = tswrite_open(TS_W_STDOUT, NULL, NULL, 0, 1, &tswriter);
         }
         if (err) {
             fprint_err("## tsfilter: Unable to open stdout for writing TS. \n");

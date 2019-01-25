@@ -5,6 +5,29 @@
  * Note that the input stream must be seekable, which means that an option
  * to read from standard input is not provided.
  *
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the MPEG TS, PS and ES tools.
+ *
+ * The Initial Developer of the Original Code is Amino Communications Ltd.
+ * Portions created by the Initial Developer are Copyright (C) 2008
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Amino Communications Ltd, Swavesey, Cambridge UK
+ *
+ * ***** END LICENSE BLOCK *****
  */
 
 #include <cerrno>
@@ -60,11 +83,11 @@ static int show_reverse_data = FALSE;
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int reverse_h262(
-    ES_p es, WRITER output, int max, int frequency, int as_TS, bool verbose, int quiet)
+    ES_p es, WRITER output, int max, int frequency, int as_TS, int verbose, int quiet)
 {
     int err = 0;
-    reverse_data_p reverse_data = nullptr;
-    h262_context_p hcontext = nullptr;
+    reverse_data_p reverse_data = NULL;
+    h262_context_p hcontext = NULL;
 
     err = build_h262_context(es, &hcontext);
     if (err)
@@ -167,11 +190,11 @@ static int output_parameter_sets(
     for (ii = 0; ii < seq_param_dict->length; ii++) {
         ES_offset posn = seq_param_dict->posns[ii];
         uint32_t length = seq_param_dict->data_lens[ii];
-        byte* data = nullptr;
+        byte* data = NULL;
         if (!quiet)
             fprint_msg("Writing out sequence parameter set %d\n", seq_param_dict->ids[ii]);
 
-        err = read_ES_data(nac->es, posn, length, nullptr, &data);
+        err = read_ES_data(nac->es, posn, length, NULL, &data);
         if (err) {
             fprint_err("### Error reading (sequence parameter set %d) data"
                        " from " OFFSET_T_FORMAT "/%d for %d\n",
@@ -192,11 +215,11 @@ static int output_parameter_sets(
     for (ii = 0; ii < pic_param_dict->length; ii++) {
         ES_offset posn = pic_param_dict->posns[ii];
         uint32_t length = pic_param_dict->data_lens[ii];
-        byte* data = nullptr;
+        byte* data = NULL;
         if (!quiet)
             fprint_msg("Writing out picture parameter set %d\n", pic_param_dict->ids[ii]);
 
-        err = read_ES_data(nac->es, posn, length, nullptr, &data);
+        err = read_ES_data(nac->es, posn, length, NULL, &data);
         if (err) {
             fprint_err("### Error reading (picture parameter set %d) data"
                        " from " OFFSET_T_FORMAT "/%d for %d\n",
@@ -222,11 +245,11 @@ static int output_parameter_sets(
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int reverse_access_units(
-    ES_p es, WRITER output, int max, int frequency, int as_TS, bool verbose, int quiet)
+    ES_p es, WRITER output, int max, int frequency, int as_TS, int verbose, int quiet)
 {
     int err = 0;
-    reverse_data_p reverse_data = nullptr;
-    access_unit_context_p acontext = nullptr;
+    reverse_data_p reverse_data = NULL;
+    access_unit_context_p acontext = NULL;
 
     err = build_access_unit_context(es, &acontext);
     if (err)
@@ -370,21 +393,21 @@ static void print_usage()
 
 int main(int argc, char** argv)
 {
-    char* input_name = nullptr;
-    char* output_name = nullptr;
+    char* input_name = NULL;
+    char* output_name = NULL;
     int had_input_name = FALSE;
     int had_output_name = FALSE;
     int use_stdout = FALSE;
     int use_tcpip = FALSE;
     int port = 88; // Useful default port number
     int err = 0;
-    ES_p es = nullptr;
+    ES_p es = NULL;
     WRITER output;
     int max = 0;
     int as_TS = FALSE;
     int frequency = 8; // The default as stated in the usage
     int quiet = FALSE;
-    bool verbose = FALSE;
+    int verbose = FALSE;
     int ii = 1;
 
     int use_pes = FALSE;
@@ -400,7 +423,7 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    output.es_output = nullptr;
+    output.es_output = NULL;
 
     while (ii < argc) {
         if (argv[ii][0] == '-') {
@@ -432,7 +455,7 @@ int main(int argc, char** argv)
                 use_stdout = TRUE;
                 redirect_output_stderr();
             } else if (!strcmp("-err", argv[ii])) {
-                MustARG("esreverse", ii, argc, argv);
+                CHECKARG("esreverse", ii);
                 if (!strcmp(argv[ii + 1], "stderr"))
                     redirect_output_stderr();
                 else if (!strcmp(argv[ii + 1], "stdout"))
@@ -446,7 +469,7 @@ int main(int argc, char** argv)
                 }
                 ii++;
             } else if (!strcmp("-host", argv[ii])) {
-                MustARG("esreverse", ii, argc, argv);
+                CHECKARG("esreverse", ii);
                 err = host_value("esreverse", argv[ii], argv[ii + 1], &output_name, &port);
                 if (err)
                     return 1;
@@ -461,13 +484,13 @@ int main(int argc, char** argv)
                 verbose = FALSE;
                 quiet = TRUE;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
-                MustARG("esreverse", ii, argc, argv);
+                CHECKARG("esreverse", ii);
                 err = int_value("esreverse", argv[ii], argv[ii + 1], TRUE, 10, &max);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-freq", argv[ii])) {
-                MustARG("esreverse", ii, argc, argv);
+                CHECKARG("esreverse", ii);
                 err = int_value("esreverse", argv[ii], argv[ii + 1], TRUE, 10, &frequency);
                 if (err)
                     return 1;
@@ -526,11 +549,11 @@ int main(int argc, char** argv)
 
     if (as_TS) {
         if (use_stdout)
-            err = tswrite_open(TS_W_STDOUT, nullptr, nullptr, 0, quiet, &(output.ts_output));
+            err = tswrite_open(TS_W_STDOUT, NULL, NULL, 0, quiet, &(output.ts_output));
         else if (use_tcpip)
-            err = tswrite_open(TS_W_TCP, output_name, nullptr, port, quiet, &(output.ts_output));
+            err = tswrite_open(TS_W_TCP, output_name, NULL, port, quiet, &(output.ts_output));
         else
-            err = tswrite_open(TS_W_FILE, output_name, nullptr, 0, quiet, &(output.ts_output));
+            err = tswrite_open(TS_W_FILE, output_name, NULL, 0, quiet, &(output.ts_output));
         if (err) {
             fprint_err("### esreverse: Unable to open %s\n", output_name);
             (void)close_input_as_ES(input_name, &es);
@@ -538,7 +561,7 @@ int main(int argc, char** argv)
         }
     } else {
         output.es_output = fopen(output_name, "wb");
-        if (output.es_output == nullptr) {
+        if (output.es_output == NULL) {
             fprint_err("### esreverse: Unable to open output file %s: %s\n", output_name,
                 strerror(errno));
             (void)close_input_as_ES(input_name, &es);

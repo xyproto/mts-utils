@@ -3,6 +3,29 @@
  * data therefrom (i.e., extract the ES from the PES packets within the
  * TS).
  *
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the MPEG TS, PS and ES tools.
+ *
+ * The Initial Developer of the Original Code is Amino Communications Ltd.
+ * Portions created by the Initial Developer are Copyright (C) 2008
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Amino Communications Ltd, Swavesey, Cambridge UK
+ *
+ * ***** END LICENSE BLOCK *****
  */
 
 #include <cerrno>
@@ -47,8 +70,8 @@ typedef enum pid_extract EXTRACT;
 static int extract_av_via_pes(char* input_name, char* output_name, int want_video, int quiet)
 {
     int err;
-    PES_reader_p reader = nullptr;
-    ES_p es = nullptr;
+    PES_reader_p reader = NULL;
+    ES_p es = NULL;
     FILE* output;
 
     if (!want_video) {
@@ -57,7 +80,7 @@ static int extract_av_via_pes(char* input_name, char* output_name, int want_vide
     }
 
     output = fopen(output_name, "wb");
-    if (output == nullptr) {
+    if (output == NULL) {
         fprint_err("### Unable to open output file %s: %s\n", output_name, strerror(errno));
         return 1;
     }
@@ -116,7 +139,7 @@ static int extract_av_via_pes(char* input_name, char* output_name, int want_vide
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int extract_pid_packets(
-    TS_reader_p tsreader, FILE* output, uint32_t pid_wanted, int max, bool verbose, int quiet)
+    TS_reader_p tsreader, FILE* output, uint32_t pid_wanted, int max, int verbose, int quiet)
 {
     int err;
     int count = 0;
@@ -156,7 +179,7 @@ static int extract_pid_packets(
 
         if (pid == pid_wanted) {
             byte* data;
-            size_t data_len;
+            int data_len;
             size_t written;
 
             if (verbose) {
@@ -243,14 +266,14 @@ static int extract_pid_packets(
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int extract_av(int input, FILE* output, int want_video, int max, bool verbose, int quiet)
+static int extract_av(int input, FILE* output, int want_video, int max, int verbose, int quiet)
 {
     int err, ii;
     int max_to_read = max;
     int total_num_read = 0;
     uint32_t pid = 0;
-    TS_reader_p tsreader = nullptr;
-    pmt_p pmt = nullptr;
+    TS_reader_p tsreader = NULL;
+    pmt_p pmt = NULL;
 
     // Turn our file into a TS reader
     err = build_TS_reader(input, &tsreader);
@@ -324,10 +347,10 @@ static int extract_av(int input, FILE* output, int want_video, int max, bool ver
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int extract_pid(
-    int input, FILE* output, uint32_t pid_wanted, int max, bool verbose, int quiet)
+    int input, FILE* output, uint32_t pid_wanted, int max, int verbose, int quiet)
 {
     int err;
-    TS_reader_p tsreader = nullptr;
+    TS_reader_p tsreader = NULL;
 
     // Turn our file into a TS reader
     err = build_TS_reader(input, &tsreader);
@@ -381,19 +404,19 @@ int main(int argc, char** argv)
 {
     int use_stdout = FALSE;
     int use_stdin = FALSE;
-    char* input_name = nullptr;
-    char* output_name = nullptr;
+    char* input_name = NULL;
+    char* output_name = NULL;
     int had_input_name = FALSE;
     int had_output_name = FALSE;
     char* action_switch = "None";
 
     EXTRACT extract = EXTRACT_VIDEO; // What we're meant to extract
     int input = -1; // Our input file descriptor
-    FILE* output = nullptr; // The stream we're writing to (if any)
+    FILE* output = NULL; // The stream we're writing to (if any)
     int max = 0; // The maximum number of TS packets to read (or 0)
     uint32_t pid = 0; // The PID of the (single) stream to extract
     int quiet = FALSE; // True => be as quiet as possible
-    bool verbose = FALSE; // True => output diagnostic/progress messages
+    int verbose = FALSE; // True => output diagnostic/progress messages
     int use_pes = FALSE;
 
     int err = 0;
@@ -417,7 +440,7 @@ int main(int argc, char** argv)
                 verbose = FALSE;
                 quiet = TRUE;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
-                MustARG("ts2es", ii, argc, argv);
+                CHECKARG("ts2es", ii);
                 err = int_value("ts2es", argv[ii], argv[ii + 1], TRUE, 10, &max);
                 if (err)
                     return 1;
@@ -425,7 +448,7 @@ int main(int argc, char** argv)
             } else if (!strcmp("-pes", argv[ii]) || !strcmp("-ps", argv[ii])) {
                 use_pes = TRUE;
             } else if (!strcmp("-pid", argv[ii])) {
-                MustARG("ts2es", ii, argc, argv);
+                CHECKARG("ts2es", ii);
                 err = unsigned_value("ts2es", argv[ii], argv[ii + 1], 0, &pid);
                 if (err)
                     return 1;
@@ -443,7 +466,7 @@ int main(int argc, char** argv)
                 had_output_name = TRUE; // so to speak
                 redirect_output_stderr();
             } else if (!strcmp("-err", argv[ii])) {
-                MustARG("ts2es", ii, argc, argv);
+                CHECKARG("ts2es", ii);
                 if (!strcmp(argv[ii + 1], "stderr"))
                     redirect_output_stderr();
                 else if (!strcmp(argv[ii + 1], "stdout"))
@@ -537,7 +560,7 @@ int main(int argc, char** argv)
             output = stdout;
         else {
             output = fopen(output_name, "wb");
-            if (output == nullptr) {
+            if (output == NULL) {
                 if (!use_stdin)
                     (void)close_file(input);
                 fprint_err("### ts2es: "

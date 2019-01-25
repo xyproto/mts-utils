@@ -1,16 +1,36 @@
 #pragma once
-
 /*
  * Utilities for working with NAL units in H.264 elementary streams.
  *
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the MPEG TS, PS and ES tools.
+ *
+ * The Initial Developer of the Original Code is Amino Communications Ltd.
+ * Portions created by the Initial Developer are Copyright (C) 2008
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Amino Communications Ltd, Swavesey, Cambridge UK
+ *
+ * ***** END LICENSE BLOCK *****
  */
 
 #include <cerrno>
-#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <string>
 #include <unistd.h>
 
 #include "bitdata_fns.h"
@@ -20,6 +40,8 @@
 #include "nalunit_fns.h"
 #include "printing_fns.h"
 #include "ts_fns.h"
+
+#include "math.h"
 
 #define DEBUG 0
 
@@ -200,7 +222,7 @@ void free_nal_unit(nal_unit_p* nal)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-static int remove_emulation_prevention(byte data[], size_t data_len, byte* rbsp[], int* rbsp_len)
+static int remove_emulation_prevention(byte data[], int data_len, byte* rbsp[], int* rbsp_len)
 {
     int ii;
     int posn = 0;
@@ -1109,6 +1131,7 @@ void report_nal(int is_msg, nal_unit_p nal)
 static void check_profile(nal_unit_p nal, int show_nal_details)
 {
     struct nal_seq_param_data data;
+    char* name;
 
     if (nal == nullptr) {
         print_err("### Attempt to check profile on a nullptr NAL unit\n");
@@ -1131,7 +1154,7 @@ static void check_profile(nal_unit_p nal, int show_nal_details)
     }
 
     data = nal->u.seq;
-    const std::string name = (char*)(data.profile_idc == 66
+    name = (char*)(data.profile_idc == 66
             ? "baseline"
             : data.profile_idc == 77 ? "main" : data.profile_idc == 88 ? "extended" : "<unknown>");
 
@@ -1178,7 +1201,7 @@ static void check_profile(nal_unit_p nal, int show_nal_details)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int setup_NAL_data(bool verbose, nal_unit_p nal)
+int setup_NAL_data(int verbose, nal_unit_p nal)
 {
     int forbidden_zero_bit;
 
@@ -1245,7 +1268,7 @@ int setup_NAL_data(bool verbose, nal_unit_p nal)
  *   (specifically, if the NAL unit's RBSP data cannot be understood),
  * * 1 if some other error occurs.
  */
-int find_next_NAL_unit(nal_unit_context_p context, bool verbose, nal_unit_p* nal)
+int find_next_NAL_unit(nal_unit_context_p context, int verbose, nal_unit_p* nal)
 {
     static int need_first_seq_param_set = TRUE;
     int err;
@@ -1733,8 +1756,10 @@ void free_nal_unit_list(nal_unit_list_p* list, int deep)
 /*
  * Report on a NAL unit list's contents, to the given stream.
  */
-void report_nal_unit_list(int is_msg, const std::string prefix, nal_unit_list_p list)
+void report_nal_unit_list(int is_msg, char* prefix, nal_unit_list_p list)
 {
+    if (prefix == nullptr)
+        prefix = "";
     if (list->array == nullptr)
         fprint_msg_or_err(is_msg, "%s<empty>\n", prefix);
     else {

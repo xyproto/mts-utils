@@ -1,9 +1,33 @@
-#pragma once
-
 /*
  * Functions for reading PES packets from TS or PS files
  *
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the MPEG TS, PS and ES tools.
+ *
+ * The Initial Developer of the Original Code is Amino Communications Ltd.
+ * Portions created by the Initial Developer are Copyright (C) 2008
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Amino Communications Ltd, Swavesey, Cambridge UK
+ *
+ * ***** END LICENSE BLOCK *****
  */
+
+#ifndef _pes_fns
+#define _pes_fns
 
 #include "es_defns.h"
 #include "pes_defns.h"
@@ -94,7 +118,7 @@ int build_PES_reader(int input, int is_TS, int give_info, int give_warnings,
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int open_PES_reader_for_TS(const std::string filename, uint16_t program_number, int give_info,
+int open_PES_reader_for_TS(char* filename, uint16_t program_number, int give_info,
     int give_warnings, PES_reader_p* reader);
 /*
  * Open a Program Stream file for PES packet reading
@@ -109,8 +133,7 @@ int open_PES_reader_for_TS(const std::string filename, uint16_t program_number, 
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int open_PES_reader_for_PS(
-    const std::string filename, int give_info, int give_warnings, PES_reader_p* reader);
+int open_PES_reader_for_PS(char* filename, int give_info, int give_warnings, PES_reader_p* reader);
 /*
  * Open a Program Stream or Transport Stream file for PES packet reading
  *
@@ -131,8 +154,7 @@ int open_PES_reader_for_PS(
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int open_PES_reader(
-    const std::string filename, int give_info, int give_warnings, PES_reader_p* reader);
+int open_PES_reader(char* filename, int give_info, int give_warnings, PES_reader_p* reader);
 /*
  * Tell the PES reader whether we only want video data
  *
@@ -277,7 +299,7 @@ int read_next_PES_packet(PES_reader_p reader);
  * Returns the required offset (i.e., packet[offset] is the first byte
  * of the ES data within the PES packet).
  */
-int calc_mpeg1_pes_offset(byte* data, size_t data_len);
+int calc_mpeg1_pes_offset(byte* data, int data_len);
 
 /*
  * Read in the next PES packet that contains ES data we are interested in
@@ -374,7 +396,7 @@ int PES_packet_has_PTS(PES_packet_data_p packet);
  *
  * Returns 0 if all went well, 1 if an error occurs.
  */
-int report_PES_data_array(const std::string prefix, byte* data, size_t data_len, int show_data);
+int report_PES_data_array(char* prefix, byte* data, int data_len, int show_data);
 /*
  * Report on the content of a PES packet.
  *
@@ -462,3 +484,12 @@ void set_server_padding(PES_reader_p reader, int extra);
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
 int write_program_data(PES_reader_p reader, TS_writer_p output);
+
+#endif // _pes_fns
+
+// Local Variables:
+// tab-width: 8
+// indent-tabs-mode: nil
+// c-basic-offset: 2
+// End:
+// vim: set tabstop=8 shiftwidth=2 expandtab:

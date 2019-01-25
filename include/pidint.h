@@ -3,6 +3,29 @@
 /*
  * Support for lists (actually arrays) of PID versus integer
  *
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the MPEG TS, PS and ES tools.
+ *
+ * The Initial Developer of the Original Code is Amino Communications Ltd.
+ * Portions created by the Initial Developer are Copyright (C) 2008
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Amino Communications Ltd, Swavesey, Cambridge UK
+ *
+ * ***** END LICENSE BLOCK *****
  */
 
 #include <cstdio>
@@ -262,11 +285,10 @@ int same_pidint_list(pidint_list_p list1, pidint_list_p list2)
  * - `list` is the stream list to report on
  * - `prefix` is nullptr or a string to put before each line printed
  */
-void report_stream_list(pidint_list_p list, const std::string prefix)
+void report_stream_list(pidint_list_p list, char* prefix)
 {
-    if (!prefix.empty()) {
-        print_msg(prefix.c_str());
-    }
+    if (prefix != nullptr)
+        print_msg(prefix);
     if (list == nullptr)
         print_msg("Program stream list is nullptr\n");
     else if (list->length == 0)
@@ -275,9 +297,8 @@ void report_stream_list(pidint_list_p list, const std::string prefix)
         int ii;
         print_msg("Program streams:\n");
         for (ii = 0; ii < list->length; ii++) {
-            if (!prefix.empty()) {
-                print_msg(prefix.c_str());
-            }
+            if (prefix != nullptr)
+                print_msg(prefix);
             fprint_msg("    PID %04x (%d) -> Stream type %3d (%s)\n", list->pid[ii], list->pid[ii],
                 list->number[ii], h222_stream_type_str(list->number[ii]));
         }
@@ -627,11 +648,10 @@ int same_pmt(pmt_p pmt1, pmt_p pmt2)
  * - `prefix` is nullptr or a string to put before each line printed
  * - `pmt` is the PMT to report on
  */
-void report_pmt(int is_msg, const std::string prefix, pmt_p pmt)
+void report_pmt(int is_msg, char* prefix, pmt_p pmt)
 {
-    if (!prefix.empty()) {
-        fprint_msg_or_err(is_msg, prefix.c_str());
-    }
+    if (prefix != nullptr)
+        fprint_msg_or_err(is_msg, prefix);
     if (pmt == nullptr) {
         fprint_msg_or_err(is_msg, "PMT is nullptr\n");
         return;
@@ -640,35 +660,30 @@ void report_pmt(int is_msg, const std::string prefix, pmt_p pmt)
             pmt->program_number, pmt->version_number, pmt->PCR_pid, pmt->PCR_pid);
 
     if (pmt->program_info_length > 0) {
-        if (!prefix.empty()) {
-            fprint_msg_or_err(is_msg, prefix.c_str());
-        }
+        if (prefix != nullptr)
+            fprint_msg_or_err(is_msg, prefix);
         print_data(is_msg, "   Program info", pmt->program_info, pmt->program_info_length,
             pmt->program_info_length);
-        print_descriptors(is_msg, (char*)prefix.c_str(), (char*)"   ", pmt->program_info,
-            pmt->program_info_length);
+        print_descriptors(is_msg, prefix, "   ", pmt->program_info, pmt->program_info_length);
     }
     if (pmt->num_streams > 0) {
         int ii;
-        if (!prefix.empty()) {
-            fprint_msg_or_err(is_msg, prefix.c_str());
-        }
+        if (prefix != nullptr)
+            fprint_msg_or_err(is_msg, prefix);
         fprint_msg_or_err(is_msg, "Program streams:\n");
         for (ii = 0; ii < pmt->num_streams; ii++) {
-            if (!prefix.empty()) {
-                fprint_msg_or_err(is_msg, prefix.c_str());
-            }
+            if (prefix != nullptr)
+                fprint_msg_or_err(is_msg, prefix);
             fprint_msg_or_err(is_msg, "  PID %04x (%4d) -> Stream type %02x (%3d) %s\n",
                 pmt->streams[ii].elementary_PID, pmt->streams[ii].elementary_PID,
                 pmt->streams[ii].stream_type, pmt->streams[ii].stream_type,
                 h222_stream_type_str(pmt->streams[ii].stream_type));
             if (pmt->streams[ii].ES_info_length > 0) {
-                if (!prefix.empty()) {
-                    fprint_msg_or_err(is_msg, prefix.c_str());
-                }
+                if (prefix != nullptr)
+                    fprint_msg_or_err(is_msg, prefix);
                 print_data(is_msg, "      ES info", pmt->streams[ii].ES_info,
                     pmt->streams[ii].ES_info_length, pmt->streams[ii].ES_info_length);
-                print_descriptors(is_msg, prefix.c_str(), "      ", pmt->streams[ii].ES_info,
+                print_descriptors(is_msg, prefix, "      ", pmt->streams[ii].ES_info,
                     pmt->streams[ii].ES_info_length);
             }
         }

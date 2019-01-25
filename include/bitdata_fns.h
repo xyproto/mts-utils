@@ -1,12 +1,36 @@
-#pragma once
-
 /*
  * Infrastructure to handle byte data as bit data, and particularly to read
  * Exp-Golomb encoded data.
  *
  * See H.264 clause 10.
  *
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the MPEG TS, PS and ES tools.
+ *
+ * The Initial Developer of the Original Code is Amino Communications Ltd.
+ * Portions created by the Initial Developer are Copyright (C) 2008
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Amino Communications Ltd, Swavesey, Cambridge UK
+ *
+ * ***** END LICENSE BLOCK *****
  */
+
+#ifndef _bitdata_fns
+#define _bitdata_fns
 
 #include "bitdata_defns.h"
 
@@ -18,7 +42,7 @@
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_bitdata(bitdata_p* bitdata, byte data[], size_t data_len);
+int build_bitdata(bitdata_p* bitdata, byte data[], int data_len);
 
 /*
  * Tidy up and free a bitdata datastructure after we've finished with it.
@@ -78,3 +102,12 @@ int read_exp_golomb(bitdata_p bitdata, uint32_t* result);
  * Returns 0 if all went well, 1 if there were not enough bits in the data.
  */
 int read_signed_exp_golomb(bitdata_p bitdata, int32_t* result);
+
+#endif // _bitdata_fns
+
+// Local Variables:
+// tab-width: 8
+// indent-tabs-mode: nil
+// c-basic-offset: 2
+// End:
+// vim: set tabstop=8 shiftwidth=2 expandtab:

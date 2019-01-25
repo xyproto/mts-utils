@@ -7,21 +7,44 @@
  * behaviour via a circular buffer, optionally taking timing from the
  * TS PCR entries.
  *
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the MPEG TS, PS and ES tools.
+ *
+ * The Initial Developer of the Original Code is Amino Communications Ltd.
+ * Portions created by the Initial Developer are Copyright (C) 2008
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Amino Communications Ltd, Swavesey, Cambridge UK
+ *
+ * ***** END LICENSE BLOCK *****
  */
 
-#include <cctype>
+#include <cctype> // for isprint
 #include <cerrno>
-#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <ctime>
 #include <fcntl.h>
-#include <string>
-#include <sys/mman.h>
-#include <sys/socket.h>
-#include <sys/time.h>
+
+#include <ctime> // Sleeping and timing
 #include <sys/types.h>
+
+#include <sys/mman.h> // memory mapping
+#include <sys/socket.h> // send
+#include <sys/time.h> // gettimeofday
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -183,7 +206,7 @@ struct circular_buffer {
     byte* item_data;
 
     // The "header" data for each circular buffer item
-    struct circular_buffer_item* item;
+    struct circular_buffer_item item[];
 };
 typedef struct circular_buffer* circular_buffer_p;
 
@@ -514,12 +537,11 @@ inline int wait_if_buffer_full(circular_buffer_p circular)
 /*
  * Print out the buffer contents, prefixed by a prefix string
  */
-void print_circular_buffer(const std::string prefix, circular_buffer_p circular)
+void print_circular_buffer(char* prefix, circular_buffer_p circular)
 {
     int ii;
-    if (!prefix.empty()) {
+    if (prefix != nullptr)
         fprint_msg("%s ", prefix);
-    }
     for (ii = 0; ii < circular->size; ii++) {
         byte* offset = circular->item_data + (ii * circular->item_size);
         fprint_msg("%s", (circular->start == ii ? "[" : " "));
@@ -1297,7 +1319,7 @@ int write_file_data(TS_writer_p tswriter, byte data[], size_t data_len)
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int write_socket_data(SOCKET output, byte data[], size_t data_len)
+int write_socket_data(SOCKET output, byte data[], int data_len)
 {
     ssize_t written = 0;
     ssize_t left = data_len;
@@ -1556,7 +1578,7 @@ int read_command(SOCKET command_socket, byte* command, int* command_changed)
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int write_tcp_data(TS_writer_p tswriter, byte data[], size_t data_len)
+int write_tcp_data(TS_writer_p tswriter, byte data[], int data_len)
 {
     int err;
 
@@ -2154,8 +2176,8 @@ int tswrite_build(TS_WRITER_TYPE how, int quiet, TS_writer_p* tswriter)
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-int tswrite_open(TS_WRITER_TYPE how, const std::string name, char* multicast_if, int port,
-    int quiet, TS_writer_p* tswriter)
+int tswrite_open(
+    TS_WRITER_TYPE how, char* name, char* multicast_if, int port, int quiet, TS_writer_p* tswriter)
 {
     TS_writer_p new2;
     int err = tswrite_build(how, quiet, tswriter);
@@ -2172,7 +2194,7 @@ int tswrite_open(TS_WRITER_TYPE how, const std::string name, char* multicast_if,
     case TS_W_FILE:
         if (!quiet)
             fprint_msg("Writing to file %s\n", name);
-        new2->where.file = fopen(name.c_str(), "wb");
+        new2->where.file = fopen(name, "wb");
         if (new2->where.file == nullptr) {
             fprint_err("### Unable to open output file %s: %s\n", name, strerror(errno));
             return 1;
@@ -2236,8 +2258,7 @@ int tswrite_open(TS_WRITER_TYPE how, const std::string name, char* multicast_if,
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-int tswrite_open_connection(
-    int use_tcp, const std::string name, int port, int quiet, TS_writer_p* tswriter)
+int tswrite_open_connection(int use_tcp, char* name, int port, int quiet, TS_writer_p* tswriter)
 {
     return tswrite_open((use_tcp ? TS_W_TCP : TS_W_UDP), name, nullptr, port, quiet, tswriter);
 }
@@ -2257,10 +2278,10 @@ int tswrite_open_connection(
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-int tswrite_open_file(const std::string name, int quiet, TS_writer_p* tswriter)
+int tswrite_open_file(char* name, int quiet, TS_writer_p* tswriter)
 {
     return tswrite_open(
-        (name.empty() ? TS_W_STDOUT : TS_W_FILE), name, nullptr, 0, quiet, tswriter);
+        (name == nullptr ? TS_W_STDOUT : TS_W_FILE), name, nullptr, 0, quiet, tswriter);
 }
 
 /*
@@ -2915,7 +2936,7 @@ void tswrite_report_args(TS_context_p context)
  * Returns 0 if all goes well, 1 if there was an error. Note that not
  * specifying an output file or host counts as an error.
  */
-int tswrite_process_args(const std::string prefix, int argc, char* argv[], TS_context_p context)
+int tswrite_process_args(char* prefix, int argc, char* argv[], TS_context_p context)
 {
     int err = 0;
     int ii = 1;
@@ -2937,20 +2958,15 @@ int tswrite_process_args(const std::string prefix, int argc, char* argv[], TS_co
             context->pcr_mode = TSWRITE_PCR_MODE_NONE;
             argv[ii] = TSWRITE_PROCESSED;
         } else if (!strcmp("-bitrate", argv[ii])) {
-            if (!ARG(prefix, ii, argc, argv)) {
+            CHECKARG(prefix, ii);
+            err = int_value(prefix, argv[ii], argv[ii + 1], TRUE, 10, &context->bitrate);
+            if (err)
                 return 1;
-            }
-            if (err = int_value(prefix, argv[ii], argv[ii + 1], TRUE, 10, &context->bitrate);
-                err) {
-                return 1;
-            }
             context->byterate = context->bitrate / 8;
             argv[ii] = argv[ii + 1] = TSWRITE_PROCESSED;
             ii++;
         } else if (!strcmp("-byterate", argv[ii])) {
-            if (!ARG(prefix, ii, argc, argv)) {
-                return 1;
-            }
+            CHECKARG(prefix, ii);
             err = int_value(prefix, argv[ii], argv[ii + 1], TRUE, 10, &context->byterate);
             if (err)
                 return 1;
@@ -2958,9 +2974,7 @@ int tswrite_process_args(const std::string prefix, int argc, char* argv[], TS_co
             argv[ii] = argv[ii + 1] = TSWRITE_PROCESSED;
             ii++;
         } else if (!strcmp("-prime", argv[ii])) {
-            if (!ARG(prefix, ii, argc, argv)) {
-                return 1;
-            }
+            CHECKARG(prefix, ii);
             err = int_value(prefix, argv[ii], argv[ii + 1], TRUE, 10, &context->prime_size);
             if (err)
                 return 1;
@@ -2971,13 +2985,10 @@ int tswrite_process_args(const std::string prefix, int argc, char* argv[], TS_co
             argv[ii] = argv[ii + 1] = TSWRITE_PROCESSED;
             ii++;
         } else if (!strcmp("-speedup", argv[ii])) {
-            if (!ARG(prefix, ii, argc, argv)) {
+            CHECKARG(prefix, ii);
+            err = int_value(prefix, argv[ii], argv[ii + 1], TRUE, 10, &context->prime_speedup);
+            if (err)
                 return 1;
-            }
-            if (err = int_value(prefix, argv[ii], argv[ii + 1], TRUE, 10, &context->prime_speedup);
-                err) {
-                return 1;
-            }
             if (context->prime_speedup < 1) {
                 fprint_err("### %s: -speedup 0 does not make sense\n", prefix);
                 return 1;
@@ -2986,9 +2997,7 @@ int tswrite_process_args(const std::string prefix, int argc, char* argv[], TS_co
             ii++;
         } else if (!strcmp("-pcr_scale", argv[ii])) {
             double percentage;
-            if (!ARG(prefix, ii, argc, argv)) {
-                return 1;
-            }
+            CHECKARG(prefix, ii);
             err = double_value(prefix, argv[ii], argv[ii + 1], TRUE, &percentage);
             if (err)
                 return 1;
@@ -2997,9 +3006,7 @@ int tswrite_process_args(const std::string prefix, int argc, char* argv[], TS_co
             context->pcr_scale = percentage / 100.0;
             fprint_msg("PCR accelerator = %g%% = PCR * %g\n", percentage, context->pcr_scale);
         } else if (!strcmp("-maxnowait", argv[ii])) {
-            if (!ARG(prefix, ii, argc, argv)) {
-                return 1;
-            }
+            CHECKARG(prefix, ii);
             if (!strcmp(argv[ii + 1], "off"))
                 context->maxnowait = -1;
             else {
@@ -3010,18 +3017,14 @@ int tswrite_process_args(const std::string prefix, int argc, char* argv[], TS_co
             argv[ii] = argv[ii + 1] = TSWRITE_PROCESSED;
             ii++;
         } else if (!strcmp("-waitfor", argv[ii])) {
-            if (!ARG(prefix, ii, argc, argv)) {
-                return 1;
-            }
+            CHECKARG(prefix, ii);
             err = int_value(prefix, argv[ii], argv[ii + 1], TRUE, 10, &context->waitfor);
             if (err)
                 return 1;
             argv[ii] = argv[ii + 1] = TSWRITE_PROCESSED;
             ii++;
         } else if (!strcmp("-buffer", argv[ii])) {
-            if (!ARG(prefix, ii, argc, argv)) {
-                return 1;
-            }
+            CHECKARG(prefix, ii);
             err = int_value(prefix, argv[ii], argv[ii + 1], TRUE, 10, &context->circ_buf_size);
             if (err)
                 return 1;
@@ -3032,9 +3035,7 @@ int tswrite_process_args(const std::string prefix, int argc, char* argv[], TS_co
             argv[ii] = argv[ii + 1] = TSWRITE_PROCESSED;
             ii++;
         } else if (!strcmp("-tsinpkt", argv[ii])) {
-            if (!ARG(prefix, ii, argc, argv)) {
-                return 1;
-            }
+            CHECKARG(prefix, ii);
             err = int_value(prefix, argv[ii], argv[ii + 1], TRUE, 10, &context->TS_in_item);
             if (err)
                 return 1;
@@ -3070,9 +3071,7 @@ int tswrite_process_args(const std::string prefix, int argc, char* argv[], TS_co
             argv[ii] = TSWRITE_PROCESSED;
         } else if (!strcmp("-pwait", argv[ii])) {
             int temp;
-            if (!ARG(prefix, ii, argc, argv)) {
-                return 1;
-            }
+            CHECKARG(prefix, ii);
             err = int_value(prefix, argv[ii], argv[ii + 1], TRUE, 10, &temp);
             if (err)
                 return 1;
@@ -3089,9 +3088,7 @@ int tswrite_process_args(const std::string prefix, int argc, char* argv[], TS_co
             ii++;
         } else if (!strcmp("-cwait", argv[ii])) {
             int temp;
-            if (!ARG(prefix, ii, argc, argv)) {
-                return 1;
-            }
+            CHECKARG(prefix, ii);
             err = int_value(prefix, argv[ii], argv[ii + 1], TRUE, 10, &temp);
             if (err)
                 return 1;

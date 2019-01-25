@@ -27,8 +27,8 @@ int main(int argc, char** argv)
 {
     int err, ii;
     int max = ES_UNIT_LIST_START_SIZE + ES_UNIT_LIST_INCREMENT + 3;
-    ES_unit_list_p list = nullptr;
-    ES_unit_p unit = nullptr;
+    ES_unit_list_p list = NULL;
+    ES_unit_p unit = NULL;
 
     printf("Testing ES unit list\n");
     printf("Test 1 - differing ES units\n");

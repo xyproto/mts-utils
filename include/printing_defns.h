@@ -1,5 +1,6 @@
 /*
- * Prototypes for functions relating to H.222 data, whether TS or PS
+ * Support for printing out to stdout/stderr/elsewhere -- functions to use
+ * instead of printf, etc.
  *
  * ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
@@ -26,16 +27,13 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#ifndef _h222_fns
-#define _h222_fns
+#ifndef _printing_defns
+#define _printing_defns
 
-// We don't include our corresponding header file, since there's
-// nothing we depend on from it. However, not that *it* includes
-// us, mainly for historical reasons.
+#include <stdarg.h>
+#include <stdio.h>
 
-const char* h222_stream_type_str(unsigned s);
-
-#endif // _h222_fns
+#endif // _printing_defns
 
 // Local Variables:
 // tab-width: 8

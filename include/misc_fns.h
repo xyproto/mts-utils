@@ -4,12 +4,10 @@
  * Miscellaneous useful functions.
  *
  */
-#include <cmath>
-#include <cstdint>
-#include <string>
-
 #include "es_defns.h"
 #include "misc_defns.h"
+
+#include <cstdint>
 
 #define CRC32_POLY 0x04c11db7L
 
@@ -45,7 +43,7 @@ void print_bits(int num_bits, byte value);
  * where no more than `max` bytes are to be printed (and "..." is printed
  * if not all bytes were shown).
  */
-void print_data(int is_msg, const std::string name, const byte data[], int length, int max);
+void print_data(int is_msg, const char* name, const byte data[], int length, int max);
 /*
  * Print out (the last `max`) bytes of a byte array.
  *
@@ -61,7 +59,7 @@ void print_data(int is_msg, const std::string name, const byte data[], int lengt
  * where no more than `max` bytes are to be printed (and "..." is printed
  * if not all bytes were shown).
  */
-void print_end_of_data(const std::string name, byte data[], int length, int max);
+void print_end_of_data(char* name, byte data[], int length, int max);
 /*
  * Calculate log2 of `x` - for some reason this is missing from <math.h>
  */
@@ -131,7 +129,7 @@ offset_t tell_file(int filedes);
  * Returns the file descriptor for the file, or -1 if it failed to open
  * the file.
  */
-int open_binary_file(const std::string filename, int for_write);
+int open_binary_file(char* filename, int for_write);
 /*
  * Utility function to close a file (descriptor), and report any errors
  *
@@ -177,8 +175,8 @@ int close_file(int filedes);
  * Returns 0 if all goes well, 1 if something goes wrong. In the latter case,
  * suitable messages will have been written out to standard error.
  */
-int open_input_as_ES(const std::string name, int use_pes, int quiet, int force_stream_type,
-    int want_data, int* is_data, ES_p* es);
+int open_input_as_ES(char* name, int use_pes, int quiet, int force_stream_type, int want_data,
+    int* is_data, ES_p* es);
 /*
  * Close an input ES stream opened with `open_input_as_ES`.
  *
@@ -191,7 +189,7 @@ int open_input_as_ES(const std::string name, int use_pes, int quiet, int force_s
  * Returns 0 if all goes well, 1 if something goes wrong. In the latter case,
  * suitable messages will have been written out to standard error.
  */
-int close_input_as_ES(const std::string name, ES_p* es);
+int close_input_as_ES(char* name, ES_p* es);
 
 // ============================================================
 // Command line "helpers"
@@ -211,8 +209,7 @@ int close_input_as_ES(const std::string name, ES_p* es);
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int unsigned_value(
-    const std::string prefix, const char* cmd, const char* arg, int base, uint32_t* value);
+int unsigned_value(const char* prefix, const char* cmd, const char* arg, int base, uint32_t* value);
 
 /*
  * Read in an integer value, checking for extraneous characters.
@@ -230,8 +227,8 @@ int unsigned_value(
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int int_value(const std::string prefix, const char* cmd, const char* str, int positive, int base,
-    int* value);
+int int_value(
+    const char* prefix, const char* cmd, const char* str, int positive, int base, int* value);
 /*
  * Read in an integer value, checking for extraneous characters and a range.
  *
@@ -249,8 +246,8 @@ int int_value(const std::string prefix, const char* cmd, const char* str, int po
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int int_value_in_range(const std::string prefix, char* cmd, char* arg, int minimum, int maximum,
-    int base, int* value);
+int int_value_in_range(
+    char* prefix, char* cmd, char* arg, int minimum, int maximum, int base, int* value);
 /*
  * Read in a double value, checking for extraneous characters.
  *
@@ -265,7 +262,7 @@ int int_value_in_range(const std::string prefix, char* cmd, char* arg, int minim
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int double_value(const std::string prefix, char* cmd, char* arg, int positive, double* value);
+int double_value(char* prefix, char* cmd, char* arg, int positive, double* value);
 /*
  * Read in a hostname and (optional) port
  *
@@ -287,8 +284,7 @@ int double_value(const std::string prefix, char* cmd, char* arg, int positive, d
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int host_value(
-    const std::string prefix, const char* cmd, const char* arg, char** hostname, int* port);
+int host_value(const char* prefix, const char* cmd, const char* arg, char** hostname, int* port);
 
 // ============================================================
 // Sockets
@@ -312,7 +308,7 @@ int host_value(
  * succeeds, or -1 if it fails, in which case it will have complained on
  * stderr.
  */
-int connect_socket(const std::string hostname, int port, int use_tcpip, char* multicast_ifaddr);
+int connect_socket(char* hostname, int port, int use_tcpip, char* multicast_ifaddr);
 
 /*
  * Disconnect from a socket (close it).
@@ -387,20 +383,4 @@ inline int64_t pts_signed_diff(uint64_t x, uint64_t y)
 {
     int64_t r = x - y;
     return (r << 31) >> 31;
-}
-
-inline bool ARG(const std::string program, int argno, int argc, char** argv)
-{
-    if ((argno) + 1 == argc) {
-        fprintf(stderr, "### %s: missing argument to %s\n", program.c_str(), argv[argno]);
-        return false;
-    }
-    return true;
-}
-
-inline void MustARG(const std::string program, int argno, int argc, char** argv)
-{
-    if (!ARG(program, argno, argc, argv)) {
-        std::exit(1);
-    }
 }

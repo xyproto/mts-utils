@@ -13,11 +13,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
-#include <iostream>
-#include <string>
 #include <unistd.h>
-
-using namespace std::string_literals;
 
 #include "accessunit.h"
 #include "bitdata.h"
@@ -38,37 +34,34 @@ using namespace std::string_literals;
 #include "version.h"
 
 // A three-way choice for what to output by PID
-enum class Extract {
-    Undefined,
-    TS, // Output the first "named" video stream
-    PID, // Output an explicit PID
+enum pid_extract {
+    EXTRACT_UNDEFINED,
+    EXTRACT_TS, // Output the first "named" video stream
+    EXTRACT_PID, // Output an explicit PID
 };
+typedef enum pid_extract EXTRACT;
 
 typedef struct dvbdata_s {
     int found;
     int pts_valid;
     int dts_valid;
-    size_t data_len;
+    unsigned int data_len;
     uint64_t pts;
     uint64_t last_pts;
     uint64_t dts;
     uint8_t data[0x10000];
 } dvbdata_t;
 
-static dvbdata_t dvbd = { .found = 0 };
+static dvbdata_t dvbd = { 0 };
 
 static int tfmt = FMTX_TS_DISPLAY_90kHz_RAW;
 
-const std::string PROGNAME = "tsdvbsub"s;
+#define PROGNAME "tsdvbsub"
 
-//#define PROGNAME "tsdvbsub"
+static inline unsigned int mem16be(const uint8_t* p) { return (p[0] << 8) | p[1]; }
 
-static inline unsigned int mem16be(const uint8_t* p)
-{
-    return static_cast<unsigned int>((p[0] << 8) | p[1]);
-}
-
-static const uint8_t* page_composition_segment(const uint8_t* p, int segment_length)
+static const uint8_t* page_composition_segment(
+    dvbdata_t* const dvbd, const uint8_t* p, int segment_length)
 {
     const uint8_t* const eos = p + segment_length;
     const char* state_text[] = { "normal", "acquisition point", "mode change", "reserved" };
@@ -91,7 +84,8 @@ static const uint8_t* page_composition_segment(const uint8_t* p, int segment_len
     return p;
 }
 
-static const uint8_t* region_composition_segment(const uint8_t* p, int segment_length)
+static const uint8_t* region_composition_segment(
+    dvbdata_t* const dvbd, const uint8_t* p, int segment_length)
 {
     const uint8_t* const eos = p + segment_length;
     int region_fill_flag;
@@ -137,7 +131,8 @@ static const uint8_t* region_composition_segment(const uint8_t* p, int segment_l
     return p;
 }
 
-static const uint8_t* CLUT_definition_segment(const uint8_t* p, int segment_length)
+static const uint8_t* CLUT_definition_segment(
+    dvbdata_t* const dvbd, const uint8_t* p, int segment_length)
 {
     const uint8_t* const eos = p + segment_length;
 
@@ -242,18 +237,17 @@ static const uint8_t* subtitling_segment(dvbdata_t* const dvbd, const uint8_t* p
     p += 2;
     fprint_msg("segment_length: %d\n", segment_length = ((p[0] << 8) | p[1]));
     p += 2;
-
     switch (segment_type) {
     case 0x10:
-        p2 = page_composition_segment(p, segment_length);
+        p2 = page_composition_segment(dvbd, p, segment_length);
         break;
 
     case 0x11:
-        p2 = region_composition_segment(p, segment_length);
+        p2 = region_composition_segment(dvbd, p, segment_length);
         break;
 
     case 0x12:
-        p2 = CLUT_definition_segment(p, segment_length);
+        p2 = CLUT_definition_segment(dvbd, p, segment_length);
         break;
 
     case 0x13:
@@ -280,17 +274,15 @@ static void flush_dvbd(dvbdata_t* const dvbd)
 {
     const uint8_t* p = dvbd->data;
 
-    if (!dvbd->found) {
+    if (!dvbd->found)
         return;
-    }
 
     fprint_msg("\nPTS: %s, DTS: %s, PTS - last_PTS: %s\n",
         !dvbd->pts_valid ? "none" : fmtx_timestamp(dvbd->pts, tfmt),
         !dvbd->dts_valid ? "none" : fmtx_timestamp(dvbd->dts, tfmt),
         !dvbd->pts_valid ? "????" : fmtx_timestamp(dvbd->pts - dvbd->last_pts, tfmt));
-    if (dvbd->pts_valid) {
+    if (dvbd->pts_valid)
         dvbd->last_pts = dvbd->pts;
-    }
 
     fprint_msg("data length: %d\n\n", dvbd->data_len);
 
@@ -320,9 +312,8 @@ static void add_data_dvbd(dvbdata_t* const dvbd, const uint8_t* const data, unsi
 {
     unsigned int gap = sizeof(dvbd->data) - dvbd->data_len;
 
-    if (len == 0) {
+    if (len == 0)
         return;
-    }
 
     if (gap < len) {
         fprint_err("### Data buffer overflow\n");
@@ -338,7 +329,7 @@ static void add_data_dvbd(dvbdata_t* const dvbd, const uint8_t* const data, unsi
  * Returns 0 if all went well, 1 if something went wrong.
  */
 static int extract_pid_packets(
-    TS_reader_p tsreader, uint32_t pid_wanted, int max, bool verbose, int quiet)
+    TS_reader_p tsreader, uint32_t pid_wanted, int max, int verbose, int quiet)
 {
     int err;
     int count = 0;
@@ -356,17 +347,16 @@ static int extract_pid_packets(
         int adapt_len, payload_len;
 
         if (max > 0 && count >= max) {
-            if (!quiet) {
+            if (!quiet)
                 fprint_msg("Stopping after %d packets\n", max);
-            }
             break;
         }
 
         err = get_next_TS_packet(tsreader, &pid, &payload_unit_start_indicator, &adapt, &adapt_len,
             &payload, &payload_len);
-        if (err == EOF) {
+        if (err == EOF)
             break;
-        } else if (err) {
+        else if (err) {
             print_err("### Error reading TS packet\n");
             return 1;
         }
@@ -374,22 +364,20 @@ static int extract_pid_packets(
         count++;
 
         // If the packet is empty, all we can do is ignore it
-        if (payload_len == 0) {
+        if (payload_len == 0)
             continue;
-        }
 
         if (pid == pid_wanted) {
             byte* data;
-            size_t data_len;
+            int data_len;
             int pes_overflow = 0;
 
             if (verbose) {
                 fprint_msg("%4d: TS Packet PID %04x", count, pid);
-                if (payload_unit_start_indicator) {
+                if (payload_unit_start_indicator)
                     print_msg(" (start)");
-                } else if (need_packet_start) {
+                else if (need_packet_start)
                     print_msg(" <ignored>");
-                }
                 print_msg("\n");
             }
 
@@ -459,16 +447,14 @@ static int extract_pid_packets(
         }
     }
 
-    if (!quiet) {
+    if (!quiet)
         fprint_msg("Extracted %d of %d TS packet%s\n", extracted, count, (count == 1 ? "" : "s"));
-    }
 
     // If the user has forgotten to say -pid XX, or -video/-audio,
     // and are piping the output to another program, it can be surprising
     // if there is no data!
-    if (quiet && extracted == 0) {
+    if (quiet && extracted == 0)
         fprint_err("### No data extracted for PID %#04x (%d)\n", pid_wanted, pid_wanted);
-    }
     return 0;
 }
 
@@ -477,7 +463,7 @@ static int extract_pid_packets(
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int extract_av(int input, const int prog_no, int max, bool verbose, int quiet)
+static int extract_av(int input, const int prog_no, int max, int verbose, int quiet)
 {
     int err, ii;
     int max_to_read = max;
@@ -557,7 +543,7 @@ static int extract_av(int input, const int prog_no, int max, bool verbose, int q
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-static int extract_pid(int input, uint32_t pid_wanted, int max, bool verbose, int quiet)
+static int extract_pid(int input, uint32_t pid_wanted, int max, int verbose, int quiet)
 {
     int err;
     TS_reader_p tsreader = nullptr;
@@ -575,30 +561,30 @@ static int extract_pid(int input, uint32_t pid_wanted, int max, bool verbose, in
 
 static void print_usage()
 {
-    std::string usage = "Usage: "s + PROGNAME + " [switches] <infile>\n\n";
-    print_msg(usage.c_str());
+    print_msg("Usage: " PROGNAME " [switches] <infile>\n"
+              "\n");
     REPORT_VERSION(PROGNAME);
-    print_msg(R"(
-Parse & dump the contents of a single DVB subtitling stream from a Transport
-Stream (or Program Stream).
-
-Files:
-  <infile> is an H.222 Transport Stream file (but see -stdin and -pes)
-
-Which stream to extract:
-  -pid <pid>         Output data for the stream with the given
-                     <pid>. Use -pid 0x<pid> to specify a hex value
-  [default]          The stream will be located from the PMT info
-  -prog <n>          Program number [default=1]
-
-General switches:
-  -err stdout        Write error messages to standard output (the default)
-  -err stderr        Write error messages to standard error (Unix traditional)
-  -stdin             Input from standard input, instead of a file
-  -verbose, -v       Output informational/diagnostic messages
-  -quiet, -q         Only output error messages
-  -max <n>, -m <n>   Maximum number of TS packets to read
-)"s.c_str());
+    print_msg("\n"
+              "  Parse & dump the contents of a single DVB subtitling stream from a\n"
+              "  Transport Stream\n"
+              "  (or Program Stream).\n"
+              "\n"
+              "Files:\n"
+              "  <infile>  is an H.222 Transport Stream file (but see -stdin and -pes)\n"
+              "\n"
+              "Which stream to extract:\n"
+              "  -pid <pid>         Output data for the stream with the given\n"
+              "                     <pid>. Use -pid 0x<pid> to specify a hex value\n"
+              "  [default]          The stream will be located from the PMT info\n"
+              "  -prog <n>          Program number [default=1]\n"
+              "\n"
+              "General switches:\n"
+              "  -err stdout        Write error messages to standard output (the default)\n"
+              "  -err stderr        Write error messages to standard error (Unix traditional)\n"
+              "  -stdin             Input from standard input, instead of a file\n"
+              "  -verbose, -v       Output informational/diagnostic messages\n"
+              "  -quiet, -q         Only output error messages\n"
+              "  -max <n>, -m <n>   Maximum number of TS packets to read\n");
 }
 
 int main(int argc, char** argv)
@@ -606,13 +592,13 @@ int main(int argc, char** argv)
     int use_stdin = FALSE;
     char* input_name = nullptr;
     int had_input_name = FALSE;
-    Extract extract = Extract::TS;
+    EXTRACT extract = EXTRACT_TS;
 
     int input = -1; // Our input file descriptor
     int maxts = 0; // The maximum number of TS packets to read (or 0)
     uint32_t pid = 0; // The PID of the (single) stream to extract
     int quiet = FALSE; // True => be as quiet as possible
-    bool verbose = FALSE; // True => output diagnostic/progress messages
+    int verbose = FALSE; // True => output diagnostic/progress messages
     int prog_no = 1;
 
     int err = 0;
@@ -636,59 +622,57 @@ int main(int argc, char** argv)
                 verbose = FALSE;
                 quiet = TRUE;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
-                MustARG(PROGNAME, ii, argc, argv);
-                if (err = int_value(PROGNAME.c_str(), argv[ii], argv[ii + 1], TRUE, 10, &maxts);
-                    err) {
+                CHECKARG(PROGNAME, ii);
+                err = int_value(PROGNAME, argv[ii], argv[ii + 1], TRUE, 10, &maxts);
+                if (err)
                     return 1;
-                }
                 ii++;
             } else if (!strcmp("-pid", argv[ii])) {
-                MustARG(PROGNAME, ii, argc, argv);
-                if (err = unsigned_value(PROGNAME.c_str(), argv[ii], argv[ii + 1], 0, &pid); err) {
+                CHECKARG(PROGNAME, ii);
+                err = unsigned_value(PROGNAME, argv[ii], argv[ii + 1], 0, &pid);
+                if (err)
                     return 1;
-                }
                 ii++;
-                extract = Extract::PID;
+                extract = EXTRACT_PID;
             } else if (!strcmp("-prog", argv[ii])) {
-                MustARG(PROGNAME, ii, argc, argv);
-                err = int_value(PROGNAME.c_str(), argv[ii], argv[ii + 1], TRUE, 10, &prog_no);
-                if (err) {
+                CHECKARG(PROGNAME, ii);
+                err = int_value(PROGNAME, argv[ii], argv[ii + 1], TRUE, 10, &prog_no);
+                if (err)
                     return 1;
-                }
                 ii++;
             } else if (!strcmp("-stdin", argv[ii])) {
                 use_stdin = TRUE;
                 had_input_name = TRUE; // so to speak
             } else if (!strcmp("-err", argv[ii])) {
-                MustARG(PROGNAME, ii, argc, argv);
-                if (!strcmp(argv[ii + 1], "stderr")) {
+                CHECKARG(PROGNAME, ii);
+                if (!strcmp(argv[ii + 1], "stderr"))
                     redirect_output_stderr();
-                } else if (!strcmp(argv[ii + 1], "stdout")) {
+                else if (!strcmp(argv[ii + 1], "stdout"))
                     redirect_output_stdout();
-                } else {
-                    std::string unrecognized = "### "s + PROGNAME
-                        + ": Unrecognised option '%s' to -err (not 'stdout' or 'stderr')\n"s;
-                    fprint_err(unrecognized.c_str(), argv[ii + 1]);
+                else {
+                    fprint_err("### " PROGNAME ": "
+                               "Unrecognised option '%s' to -err (not 'stdout' or"
+                               " 'stderr')\n",
+                        argv[ii + 1]);
                     return 1;
                 }
                 ii++;
             } else if (!strcmp("-tfmt", argv[ii])) {
-                MustARG(PROGNAME, ii, argc, argv);
+                CHECKARG(PROGNAME, ii);
                 if ((tfmt = fmtx_str_to_timestamp_flags(argv[ii + 1])) < 0) {
                     fprint_msg("### tsreport: Bad timestamp format '%s'\n", argv[ii + 1]);
                     return 1;
                 }
                 ii++;
             } else {
-                std::string unrecognized
-                    = "### "s + PROGNAME + ": Unrecognised command line switch '%s'\n"s;
-                fprint_err(unrecognized.c_str(), argv[ii]);
+                fprint_err("### " PROGNAME ": "
+                           "Unrecognised command line switch '%s'\n",
+                    argv[ii]);
                 return 1;
             }
         } else {
             if (had_input_name) {
-                std::string unexpected = "### "s + PROGNAME + ": Unexpected '%s'\n"s;
-                fprint_err(unexpected.c_str(), argv[ii]);
+                fprint_err("### " PROGNAME ": Unexpected '%s'\n", argv[ii]);
                 return 1;
             } else {
                 input_name = argv[ii];
@@ -699,52 +683,47 @@ int main(int argc, char** argv)
     }
 
     if (!had_input_name) {
-        std::string no_input = "### "s + PROGNAME + ": No input file specified\n"s;
-        print_err(no_input.c_str());
+        print_err("### " PROGNAME ": No input file specified\n");
         return 1;
     }
 
     // ============================================================
 
-    if (use_stdin) {
+    if (use_stdin)
         input = STDIN_FILENO;
-    } else {
-        if (input = open_binary_file(input_name, FALSE); input == -1) {
-            std::string errOpen = "### "s + PROGNAME + ": Unable to open input file %s\n"s;
-            fprint_err(errOpen.c_str(), input_name);
+    else {
+        input = open_binary_file(input_name, FALSE);
+        if (input == -1) {
+            fprint_err("### " PROGNAME ": Unable to open input file %s\n", input_name);
             return 1;
         }
     }
-    if (!quiet) {
+    if (!quiet)
         fprint_msg("Reading from %s\n", (use_stdin ? "<stdin>" : input_name));
-        if (extract == Extract::PID) {
+
+    if (!quiet) {
+        if (extract == EXTRACT_PID)
             fprint_msg("Extracting packets for PID %04x (%d)\n", pid, pid);
-        }
     }
 
-    if (maxts != 0 && !quiet) {
+    if (maxts != 0 && !quiet)
         fprint_msg("Stopping after %d TS packets\n", maxts);
-    }
 
-    if (extract == Extract::PID) {
+    if (extract == EXTRACT_PID)
         err = extract_pid(input, pid, maxts, verbose, quiet);
-    } else {
+    else
         err = extract_av(input, prog_no, maxts, verbose, quiet);
-    }
     if (err) {
-        std::string errExtract = "### "s + PROGNAME + ": Error extracting data\n"s;
-        print_err(errExtract.c_str());
-        if (!use_stdin) {
+        print_err("### " PROGNAME ": Error extracting data\n");
+        if (!use_stdin)
             (void)close_file(input);
-        }
         return 1;
     }
 
     if (!use_stdin) {
-        if (err = close_file(input); err) {
-            std::string errClose = "### "s + PROGNAME + ": Error closing input file %s\n"s;
-            fprint_err(errClose.c_str(), input_name);
-        }
+        err = close_file(input);
+        if (err)
+            fprint_err("### " PROGNAME ": Error closing input file %s\n", input_name);
     }
     return 0;
 }

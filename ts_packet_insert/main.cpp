@@ -1,3 +1,29 @@
+/*
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the MPEG TS, PS and ES tools.
+ *
+ * The Initial Developer of the Original Code is Amino Communications Ltd.
+ * Portions created by the Initial Developer are Copyright (C) 2008
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Gareth Bailey (gb@kynesim.co.uk), Kynesim, Cambridge, UK
+ *
+ * ***** END LICENSE BLOCK *****
+ */
+
 #include <cerrno>
 #include <cmath>
 #include <cstdio>
@@ -41,9 +67,9 @@ static uint8_t* create_out_packet(char* in_data, int in_len, uint16_t pid)
     uint16_t flags_pid;
 
     if (!ptr)
-        return nullptr;
+        return NULL;
     if (in_len > (TS_PACKET_SIZE - 4))
-        return nullptr;
+        return NULL;
 
     *ptr = 0x47;
     ptr++;
@@ -204,11 +230,11 @@ static void sort_positions(double* in_array, int size)
 int main(int argc, char** argv)
 {
     char* output_file_path = "out.ts";
-    char* in_file_path = nullptr;
+    char* in_file_path = NULL;
     long in_file_size = 0;
     /*an array of floats for the positions of packets to insert,values of 0-1*/
-    double* positions = nullptr;
-    int* packet_numbers = nullptr;
+    double* positions = NULL;
+    int* packet_numbers = NULL;
     int n_pos = 0;
 
     int argno = 1;
@@ -260,7 +286,7 @@ int main(int argc, char** argv)
 
                     fprint_msg("  %d%%", (int)(positions[pos_index] * 100));
 
-                    position_string = strtok(nullptr, ":");
+                    position_string = strtok(NULL, ":");
                     pos_index++;
                 }
                 print_msg("\n");
@@ -268,7 +294,7 @@ int main(int argc, char** argv)
                 assert(pos_index == n_pos);
 
             } else if (!strcmp("-err", argv[argno])) {
-                MustARG("ts_packet_insert", argno, argc, argv);
+                CHECKARG("ts_packet_insert", argno);
                 if (!strcmp(argv[argno + 1], "stderr"))
                     redirect_output_stderr();
                 else if (!strcmp(argv[argno + 1], "stdout"))
@@ -283,16 +309,16 @@ int main(int argc, char** argv)
                 argno++;
             } else if (!strcmp("-pid", argv[argno])) {
                 int err;
-                MustARG("ts_packet_insert", argno, argc, argv);
+                CHECKARG("ts_packet_insert", argno);
                 err = unsigned_value("ts_packet_insert", argv[argno], argv[argno + 1], 0, &pid);
                 if (err)
                     return 1;
                 argno++;
             } else if (!strcmp("-o", argv[argno])) {
-                MustARG("ts_packet_insert", argno, argc, argv);
+                CHECKARG("ts_packet_insert", argno);
                 output_file_path = argv[++argno];
             } else if (!strcmp("-s", argv[argno])) {
-                MustARG("ts_packet_insert", argno, argc, argv);
+                CHECKARG("ts_packet_insert", argno);
                 out_string = argv[++argno];
             } else if (!strcmp("-h", argv[argno]) || !strcmp("--help", argv[argno])) {
                 print_usage();

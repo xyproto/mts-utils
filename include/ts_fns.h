@@ -1,9 +1,34 @@
-#pragma once
 /*
  * Functions for working with H.222 Transport Stream packets - in particular,
  * for writing PES packets.
  *
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the MPEG TS, PS and ES tools.
+ *
+ * The Initial Developer of the Original Code is Amino Communications Ltd.
+ * Portions created by the Initial Developer are Copyright (C) 2008
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Amino Communications Ltd, Swavesey, Cambridge UK
+ *
+ * ***** END LICENSE BLOCK *****
  */
+
+#ifndef _ts_fns
+#define _ts_fns
 
 #include "compat.h"
 #include "h222_defns.h"
@@ -238,7 +263,7 @@ int build_TS_reader_with_fns(void* handle, int (*read_fn)(void*, byte*, size_t),
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int open_file_for_TS_read(const std::string filename, TS_reader_p* tsreader);
+int open_file_for_TS_read(char* filename, TS_reader_p* tsreader);
 /*
  * Free a TS packet read-ahead buffer
  *
@@ -458,8 +483,8 @@ void report_payload(int show_data, int stream_type, byte payload[MAX_TS_PAYLOAD_
  *
  * Returns 0 if all went well, 1 if something went wrong
  */
-int print_descriptors(int is_msg, const std::string leader1, const std::string leader2,
-    byte* desc_data, int desc_data_len);
+int print_descriptors(
+    int is_msg, char* leader1, char* leader2, byte* desc_data, int desc_data_len);
 /*
  * Extract the program list from a PAT packet (PID 0x0000).
  *
@@ -474,7 +499,7 @@ int print_descriptors(int is_msg, const std::string leader1, const std::string l
  * Returns 0 if all went well, 1 if something went wrong.
  */
 int extract_prog_list_from_pat(
-    bool verbose, byte payload[MAX_TS_PAYLOAD_SIZE], size_t payload_len, pidint_list_p* prog_list);
+    int verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_len, pidint_list_p* prog_list);
 /*
  * Extract the stream list (and PCR PID) from a PMT packet.
  *
@@ -491,7 +516,7 @@ int extract_prog_list_from_pat(
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int extract_stream_list_from_pmt(bool verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_len,
+int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_len,
     uint32_t pid, int* program_number, uint32_t* pcr_pid, pidint_list_p* stream_list);
 /*
  * Given a TS packet, extract the (next bit of) a PAT/PMT's data.
@@ -521,7 +546,7 @@ int extract_stream_list_from_pmt(bool verbose, byte payload[MAX_TS_PAYLOAD_SIZE]
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int build_psi_data(bool verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_len, uint32_t pid,
+int build_psi_data(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_len, uint32_t pid,
     byte** data, int* data_len, int* data_used);
 /*
  * Extract the program map table from a PMT packet.
@@ -535,7 +560,7 @@ int build_psi_data(bool verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int extract_pmt(bool verbose, byte data[], size_t data_len, uint32_t pid, pmt_p* pmt);
+int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt);
 /*
  * Split a TS packet into its main parts
  *
@@ -601,7 +626,7 @@ int get_next_TS_packet(TS_reader_p tsreader, uint32_t* pid, int* payload_unit_st
  * Returns 0 if all went well, EOF if no PAT was found,
  * 1 if something else went wrong.
  */
-int find_pat(TS_reader_p tsreader, int max, bool verbose, int quiet, int* num_read,
+int find_pat(TS_reader_p tsreader, int max, int verbose, int quiet, int* num_read,
     pidint_list_p* prog_list);
 /*
  * Find the next PMT, and report on it.
@@ -621,8 +646,8 @@ int find_pat(TS_reader_p tsreader, int max, bool verbose, int quiet, int* num_re
  * Returns 0 if all went well, EOF if no PMT was found,
  * 1 if something else went wrong.
  */
-int find_next_pmt(TS_reader_p tsreader, uint32_t pmt_pid, int program_number, int max,
-    bool verbose, int quiet, int* num_read, pmt_p* pmt);
+int find_next_pmt(TS_reader_p tsreader, uint32_t pmt_pid, int program_number, int max, int verbose,
+    int quiet, int* num_read, pmt_p* pmt);
 /*
  * Find the next PAT, and from that the next PMT.
  *
@@ -642,5 +667,14 @@ int find_next_pmt(TS_reader_p tsreader, uint32_t pmt_pid, int program_number, in
  * no program stream), -2 if a PAT was found but it did not contain any
  * programs, 1 if something else went wrong.
  */
-int find_pmt(TS_reader_p tsreader, const int req_prog_no, int max, bool verbose, int quiet,
+int find_pmt(TS_reader_p tsreader, const int req_prog_no, int max, int verbose, int quiet,
     int* num_read, pmt_p* pmt);
+
+#endif // _ts_fns
+
+// Local Variables:
+// tab-width: 8
+// indent-tabs-mode: nil
+// c-basic-offset: 2
+// End:
+// vim: set tabstop=8 shiftwidth=2 expandtab:

@@ -2,6 +2,29 @@
  * Attempt to determine if an input stream is Transport Stream or Elementary
  * Stream, and if the latter, if it is H.262 or H.264 (MPEG-2 or MPEG-4/AVC).
  *
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the MPEG TS, PS and ES tools.
+ *
+ * The Initial Developer of the Original Code is Amino Communications Ltd.
+ * Portions created by the Initial Developer are Copyright (C) 2008
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Amino Communications Ltd, Swavesey, Cambridge UK
+ *
+ * ***** END LICENSE BLOCK *****
  */
 
 #include <cerrno>
@@ -43,7 +66,7 @@
  *
  * Returns 0 if nothing went wrong, 1 if something did.
  */
-static int check_if_TS(int input, byte cur_byte, bool verbose, int* decided, int* result)
+static int check_if_TS(int input, byte cur_byte, int verbose, int* decided, int* result)
 {
     int ii;
 
@@ -91,7 +114,7 @@ static int check_if_TS(int input, byte cur_byte, bool verbose, int* decided, int
  *
  * Returns 0 if nothing went wrong, 1 if something did.
  */
-static int check_if_PS(int input, bool verbose, int* decided, int* result)
+static int check_if_PS(int input, int verbose, int* decided, int* result)
 {
     int err;
     byte buf[10];
@@ -196,7 +219,7 @@ static int check_if_PS(int input, bool verbose, int* decided, int* result)
  *
  * Returns 0 if nothing went wrong, 1 if an error occurred
  */
-static int determine_packet_type(int input, bool verbose, int* decided, int* result)
+static int determine_packet_type(int input, int verbose, int* decided, int* result)
 {
     int err;
     ssize_t length;
@@ -325,10 +348,10 @@ static void print_usage()
 
 int main(int argc, char** argv)
 {
-    char* input_name = nullptr;
+    char* input_name = NULL;
     int had_input_name = FALSE;
     int input = -1;
-    bool verbose = FALSE;
+    int verbose = FALSE;
     int quiet = FALSE;
     int err = 0;
     int ii = 1;
@@ -350,7 +373,7 @@ int main(int argc, char** argv)
                 verbose = TRUE;
                 quiet = FALSE;
             } else if (!strcmp("-err", argv[ii])) {
-                MustARG("stream_type", ii, argc, argv);
+                CHECKARG("stream_type", ii);
                 if (!strcmp(argv[ii + 1], "stderr"))
                     redirect_output_stderr();
                 else if (!strcmp(argv[ii + 1], "stdout"))

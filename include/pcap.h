@@ -6,14 +6,34 @@
  *
  * Documentation from <http://wiki.wireshark.org/Development/LibpcapFileFormat>
  *
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the MPEG TS, PS and ES tools.
+ *
+ * The Initial Developer of the Original Code is Amino Communications Ltd.
+ * Portions created by the Initial Developer are Copyright (C) 2008
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Richard Watts, Kynesim <rrw@kynesim.co.uk>
+ *
+ * ***** END LICENSE BLOCK *****
  */
 
-#include <cmath>
+#include "compat.h"
 #include <cstdio>
 #include <cstdlib>
-#include <string>
-
-#include "compat.h"
 
 //! Out of memory.
 #define PCAP_ERR_OUT_OF_MEMORY (-8)
@@ -112,7 +132,7 @@ typedef struct _pcap_io_ctx* PCAP_reader_p;
  * \param filename IN Filename or nullptr for stdin.
  * \return 0 on success, non-zero on failure.
  */
-int pcap_open(PCAP_reader_p* ctx_p, pcap_hdr_t* out_hdr, const std::string filename);
+int pcap_open(PCAP_reader_p* ctx_p, pcap_hdr_t* out_hdr, const char* filename);
 
 /*! Read the next packet from a pcap file. The returned data is
  *  malloc()d and must be free()d. If we fail, returned data will

@@ -2,16 +2,15 @@
 /*
  * Routines for dissecting ipv4
  *
- */
+  */
 
-#include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
-#include <string>
 
 #include "ipv4.h"
 #include "misc_fns.h"
+
+#include <cstring>
 
 int ipv4_from_payload(const uint8_t* data, const uint32_t len, ipv4_header_t* out_hdr,
     uint32_t* out_st, uint32_t* out_len)

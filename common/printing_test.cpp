@@ -88,7 +88,7 @@ int main(int argc, char** argv)
     // printf("Trying to choose only *some* custom functions\n");
     // printf("---------------------------------------------\n");
     // err = redirect_output(
-    //    print_message_to_stdout, print_message_to_stderr, nullptr, fprint_message_to_stderr);
+    //    print_message_to_stdout, print_message_to_stderr, NULL, fprint_message_to_stderr);
     // if (err == 0) {
     //    printf("Oh dear, that appeared to work: %d\n", err);
     //    printf("So what happens if we try our tests again?\n");

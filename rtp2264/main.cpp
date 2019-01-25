@@ -103,7 +103,7 @@ static size_t b64str2binn(
             ++src;
     }
 
-    if (plast != nullptr)
+    if (plast != NULL)
         *plast = src - 1;
 
     return dest - dest0;
@@ -131,8 +131,8 @@ static void usage(void)
 
 int main(int argc, char** argv)
 {
-    FILE* f_in = nullptr;
-    FILE* f_out = nullptr;
+    FILE* f_in = NULL;
+    FILE* f_out = NULL;
     const char* fname_in;
     const char* fname_out;
     int zcount = 0;
@@ -144,12 +144,12 @@ int main(int argc, char** argv)
     fname_in = argv[1];
     fname_out = argv[2];
 
-    if ((f_in = fopen(fname_in, "rb")) == nullptr) {
+    if ((f_in = fopen(fname_in, "rb")) == NULL) {
         perror(argv[1]);
         return 1;
     }
 
-    if ((f_out = fopen(fname_out, "wb")) == nullptr) {
+    if ((f_out = fopen(fname_out, "wb")) == NULL) {
         perror(argv[2]);
         return 1;
     }
