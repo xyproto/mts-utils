@@ -65,7 +65,12 @@ The following utilites are available:
 
 # TODO
 
-- [ ] Fix all warnings
+- [ ] Fix all warnings.
+- [ ] Restructure header files, make `*_fns.h` just `*_.h` and place the function bodies that are not `inline` in `.cpp` files.
+- [ ] Remove `static` from functions that don't need it.
+- [ ] Use `enum class` for all enums.
+- [ ] Use `const std::string` whenever possible.
+- [ ] Use `bool` whenever possible.
 
 # Additional info
 
@@ -95,5 +100,4 @@ The tools are focused on:
 
 # Version
 
-* 2.0.2
-
+* 2.1.8
