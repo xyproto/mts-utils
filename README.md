@@ -65,9 +65,7 @@ The following utilites are available:
 
 # TODO
 
-- [ ] Fix all warnings.
-- [ ] Remove `static` from functions that don't need it.
-- [ ] Restructure header files, make `*_fns.h` just `*_.h` and place the function bodies that are not `inline` in `.cpp` files.
+- [ ] Fix all warnings
 
 # Additional info
 
@@ -97,4 +95,4 @@ The tools are focused on:
 
 # Version
 
-* 2.1.8
+* 2.1.7
