@@ -404,7 +404,7 @@ static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, i
         if (index != -1) {
             // Do continuity counter checking
             const int cc = packet[3] & 15;
-            const bool is_discontinuity = (adapt != nullptr && (adapt[0] & 0x80) != 0);
+            const int is_discontinuity = (adapt != nullptr && (adapt[0] & 0x80) != 0);
             struct stream_data* const ss = stats + index;
 
             // Log if required
@@ -412,12 +412,9 @@ static int report_buffering_stats(TS_reader_p tsreader, const int req_prog_no, i
                 fprintf(file_cnt, "%d%c", cc, cc == 15 ? '\n' : ' ');
 
             // Count flagged discontinuities & note what the first CC in the file is
-            if (is_discontinuity) {
-                ss->discontinuity_flag_count++;
-            }
-            if (ss->first_cc < 0) {
+            ss->discontinuity_flag_count += is_discontinuity;
+            if (ss->first_cc < 0)
                 ss->first_cc = cc;
-            }
 
             // CC is meant to increment if we have a payload and not if we don't
             // CC may legitimately 'be wrong' if the discontinuity flag is set

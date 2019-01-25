@@ -178,7 +178,7 @@ int close_file(int filedes);
  * suitable messages will have been written out to standard error.
  */
 int open_input_as_ES(const std::string name, int use_pes, bool quiet, int force_stream_type,
-    int want_data, int* is_data, ES_p* es);
+    int want_data, bool* is_data, ES_p* es);
 /*
  * Close an input ES stream opened with `open_input_as_ES`.
  *

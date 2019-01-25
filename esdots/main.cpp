@@ -786,7 +786,7 @@ int main(int argc, char** argv)
     int hash_eos = false;
 
     int want_data = VIDEO_H262;
-    int data_type = want_data;
+    bool is_data = want_data;
     int force_stream_type = false;
 
     int want_ES = false;
@@ -875,19 +875,19 @@ int main(int argc, char** argv)
     }
 
     if (err = open_input_as_ES((use_stdin ? nullptr : input_name), use_pes, false,
-            force_stream_type, want_data, &data_type, &es);
+            force_stream_type, want_data, &is_data, &es);
         err) {
         print_err("### esdots: Error opening input file\n");
         return 1;
     }
 
     if (want_ES)
-        err = report_file_as_ES_dots(es, data_type, max, verbose);
-    else if (data_type == VIDEO_H262)
+        err = report_file_as_ES_dots(es, is_data, max, verbose);
+    else if (is_data == VIDEO_H262)
         err = report_h262_file_as_dots(es, max, verbose, show_gop_time);
-    else if (data_type == VIDEO_H264)
+    else if (is_data == VIDEO_H264)
         err = dots_by_access_unit(es, max, verbose, hash_eos, show_gop_time);
-    else if (data_type == VIDEO_AVS)
+    else if (is_data == VIDEO_AVS)
         err = report_avs_file_as_dots(es, max, verbose);
     else {
         print_err("### esdots: Unexpected type of video data\n");

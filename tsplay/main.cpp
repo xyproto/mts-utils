@@ -305,17 +305,17 @@ int main(int argc, char** argv)
     TS_writer_p tswriter;
     struct TS_context context;
     char* input_name = nullptr;
-    bool had_input_name = false;
-    bool had_output_name = false;
+    int had_input_name = false;
+    int had_output_name = false;
     int input = -1;
     int max = 0; // The maximum number of TS packets to read (or 0)
     bool quiet = false;
     bool verbose = false;
     int err = 0;
     int ii = 1;
-    bool loop = false;
+    int loop = false;
     time_t start, end;
-    bool is_TS; // Does it appear to be TS or PS?
+    int is_TS; // Does it appear to be TS or PS?
 
     // Values relevent to "opening" the output file/socket
     enum TS_writer_type how = TS_W_UNDEFINED; // how to output our TS data
@@ -339,11 +339,11 @@ int main(int argc, char** argv)
 
     int video_stream = -1;
     int audio_stream = -1;
-    bool want_ac3_audio = false;
+    int want_ac3_audio = false;
 
-    bool want_h262 = true;
-    bool force_stream_type = false;
-    bool want_dolby_as_dvb = true;
+    int want_h262 = true;
+    int force_stream_type = false;
+    int want_dolby_as_dvb = true;
     int drop_packets = 0;
     int drop_number = 0;
 
@@ -736,12 +736,14 @@ int main(int argc, char** argv)
         fprint_msg("Elapsed time %.1fs\n", difftime(end, start));
     }
 
-    if (err = close_file(input); err) {
+    err = close_file(input);
+    if (err) {
         fprint_err("### tsplay: Error closing input file %s\n", input_name);
         (void)tswrite_close(tswriter, true);
         return 1;
     }
-    if (err = tswrite_close(tswriter, quiet); err) {
+    err = tswrite_close(tswriter, quiet);
+    if (err) {
         fprint_err("### tsplay: Error closing output to %s\n", output_name);
         return 1;
     }

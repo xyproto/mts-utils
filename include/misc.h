@@ -331,7 +331,7 @@ int close_file(int filedes)
 // More complex file I/O utilities
 // ============================================================
 static int open_input_as_ES_using_PES(const std::string name, bool quiet, int force_stream_type,
-    int want_data, int* is_data, ES_p* es)
+    int want_data, bool* is_data, ES_p* es)
 {
     int err;
     PES_reader_p reader = nullptr;
@@ -375,7 +375,7 @@ static int open_input_as_ES_using_PES(const std::string name, bool quiet, int fo
 }
 
 static int open_input_as_ES_direct(const std::string name, bool quiet, int force_stream_type,
-    int want_data, int* is_data, ES_p* es)
+    int want_data, bool* is_data, ES_p* es)
 {
     int err;
     bool use_stdin = name.empty();
@@ -489,7 +489,7 @@ static int open_input_as_ES_direct(const std::string name, bool quiet, int force
  * suitable messages will have been written out to standard error.
  */
 int open_input_as_ES(const std::string name, int use_pes, bool quiet, int force_stream_type,
-    int want_data, int* is_data, ES_p* es)
+    int want_data, bool* is_data, ES_p* es)
 {
     if (use_pes)
         return open_input_as_ES_using_PES(name, quiet, force_stream_type, want_data, is_data, es);

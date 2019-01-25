@@ -130,7 +130,8 @@ int write_h262_picture(WRITER output, int as_TS, h262_picture_p picture)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int strip_h262(ES_p es, WRITER output, int as_TS, int max, int keep_p, bool verbose, bool quiet)
+int strip_h262(
+    ES_p es, WRITER output, int as_TS, int max, int keep_p, bool verbose, bool quiet)
 {
     int err;
     int count;
@@ -731,7 +732,7 @@ int main(int argc, char** argv)
     int use_pes = false;
 
     int want_data = VIDEO_H262;
-    int data_type = 0;
+    bool is_data = false;
     int force_stream_type = false;
     byte stream_type;
 
@@ -859,7 +860,7 @@ int main(int argc, char** argv)
     }
 
     err = open_input_as_ES((use_stdin ? nullptr : input_name), use_pes, quiet, force_stream_type,
-        want_data, &data_type, &es);
+        want_data, &is_data, &es);
     if (err) {
         print_err("### esfilter: Error opening input file\n");
         return 1;
@@ -871,9 +872,9 @@ int main(int argc, char** argv)
     if (use_pes)
         set_PES_reader_video_only(es->reader, true);
 
-    if (data_type == VIDEO_H262)
+    if (is_data == VIDEO_H262)
         stream_type = MPEG2_VIDEO_STREAM_TYPE;
-    else if (data_type == VIDEO_H264)
+    else if (is_data == VIDEO_H264)
         stream_type = AVC_VIDEO_STREAM_TYPE;
     else {
         print_err("### esfilter: Unexpected type of video data\n");

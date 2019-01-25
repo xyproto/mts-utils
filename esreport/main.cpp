@@ -919,29 +919,29 @@ static void print_usage()
 int main(int argc, char** argv)
 {
     char* input_name = nullptr;
-    bool had_input_name = false;
-    bool use_stdin = false;
+    int had_input_name = false;
+    int use_stdin = false;
     int err = 0;
     ES_p es = nullptr;
     int max = 0;
-    bool by_frame = false;
-    bool find_fields = false;
+    int by_frame = false;
+    int find_fields = false;
     bool quiet = false;
     bool verbose = false;
-    bool show_nal_details = false;
-    bool give_pes_info = false;
-    bool report_afds = false;
-    bool report_framesize = false;
-    bool report_frametype = false;
-    bool report_pes_headers = false;
-    bool report_ES = false;
+    int show_nal_details = false;
+    int give_pes_info = false;
+    int report_afds = false;
+    int report_framesize = false;
+    int report_frametype = false;
+    int report_pes_headers = false;
+    int report_ES = false;
     int ii = 1;
 
-    bool use_pes = false;
+    int use_pes = false;
 
     int want_data = VIDEO_H262;
-    int data_type = 0;
-    bool force_stream_type = false;
+    int is_data;
+    int force_stream_type = false;
 
     if (argc < 2) {
         print_usage();
@@ -1038,7 +1038,7 @@ int main(int argc, char** argv)
     }
 
     err = open_input_as_ES((use_stdin ? nullptr : input_name), use_pes, quiet, force_stream_type,
-        want_data, &data_type, &es);
+        want_data, &is_data, &es);
     if (err) {
         print_err("### esreport: Error opening input file\n");
         return 1;
@@ -1054,7 +1054,7 @@ int main(int argc, char** argv)
 
     if (report_ES) {
         report_ES_units(es, max, verbose, quiet);
-    } else if (data_type == VIDEO_H262) {
+    } else if (is_data == VIDEO_H262) {
         if (find_fields)
             find_h262_fields(es, max, verbose);
         else if (by_frame)
@@ -1063,9 +1063,9 @@ int main(int argc, char** argv)
             report_h262_afds(es, max, verbose, quiet);
         else
             report_h262_items(es, max, verbose, quiet);
-    } else if (data_type == VIDEO_AVS) {
+    } else if (is_data == VIDEO_AVS) {
         report_avs_frames(es, max, verbose, quiet, report_framesize);
-    } else if (data_type == VIDEO_H264) {
+    } else if (is_data == VIDEO_H264) {
         if (find_fields)
             find_h264_fields(es, max, quiet, verbose, show_nal_details);
         else if (by_frame)

@@ -131,9 +131,9 @@ inline bool is_I_or_IDR_frame(access_unit_p frame)
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int merge_with_avs(avs_context_p video_context, int audio_file, TS_writer_p output, int audio_type,
-    int audio_samples_per_frame, int audio_sample_rate, double video_frame_rate, int pat_pmt_freq,
-    bool quiet, bool verbose, int debugging)
+int merge_with_avs(avs_context_p video_context, int audio_file, TS_writer_p output,
+    int audio_type, int audio_samples_per_frame, int audio_sample_rate, double video_frame_rate,
+    int pat_pmt_freq, bool quiet, bool verbose, int debugging)
 {
     int ii;
     int err;

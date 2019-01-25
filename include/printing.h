@@ -125,24 +125,22 @@ void fprint_err(const std::string fmt, ...)
     va_end(va_arg);
 }
 
-void print_msg_or_err(bool is_msg, const std::string message)
-{
+void print_msg_or_err(bool is_msg, const std::string message) {
     if (is_msg) {
         std::cout << message;
-        // fns.fprint_message_fn("%s", message.c_str());
+        //fns.fprint_message_fn("%s", message.c_str());
     } else {
-        // fns.fprint_error_fn("%s", message.c_str());
+        //fns.fprint_error_fn("%s", message.c_str());
         std::cerr << message;
     }
 }
 
-void print_msg_or_err(bool is_msg, const char* message)
-{
+void print_msg_or_err(bool is_msg, const char* message) {
     if (is_msg) {
         std::cout << message;
-        // fns.fprint_message_fn("%s", message);
+        //fns.fprint_message_fn("%s", message);
     } else {
-        // fns.fprint_error_fn("%s", message);
+        //fns.fprint_error_fn("%s", message);
         std::cerr << message;
     }
 }
