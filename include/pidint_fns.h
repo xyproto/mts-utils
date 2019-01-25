@@ -186,4 +186,4 @@ int same_pmt(pmt_p pmt1, pmt_p pmt2);
  * - `prefix` is nullptr or a string to put before each line printed
  * - `pmt` is the PMT to report on
  */
-void report_pmt(bool is_msg, const std::string prefix, pmt_p pmt);
+void report_pmt(int is_msg, const std::string prefix, pmt_p pmt);

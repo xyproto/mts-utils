@@ -17,7 +17,7 @@
 #include "audio_fns.h"
 #include "compat.h"
 #include "l2audio_fns.h"
-#include "printing.h"
+#include "printing_fns.h"
 
 /*
  * Build a new generic audio frame datastructure

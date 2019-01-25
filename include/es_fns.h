@@ -149,7 +149,7 @@ void free_ES_unit(ES_unit_p* unit);
 /*
  * Print out some information this ES unit, on normal or error output
  */
-void report_ES_unit(bool is_msg, ES_unit_p unit);
+void report_ES_unit(int is_msg, ES_unit_p unit);
 
 /*
  * Retrieve ES data from the end of a PES packet. It is assumed (i.e, things

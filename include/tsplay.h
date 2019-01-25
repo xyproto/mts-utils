@@ -21,7 +21,7 @@
 #include "misc_fns.h"
 #include "pes_fns.h"
 #include "pidint_fns.h"
-#include "printing.h"
+#include "printing_fns.h"
 #include "ps_fns.h"
 #include "ts_fns.h"
 #include "tsplay_fns.h"
@@ -648,7 +648,7 @@ int play_PS_stream(int input, TS_writer_p output, int pad_start, int program_rep
     bool quiet)
 {
     int err;
-    bool is_h264;
+    int is_h264;
     PS_reader_p ps;
 
     err = build_PS_reader(input, quiet, &ps);

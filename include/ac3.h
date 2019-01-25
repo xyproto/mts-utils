@@ -16,7 +16,7 @@
 #include "ac3_fns.h"
 #include "compat.h"
 #include "misc_fns.h"
-#include "printing.h"
+#include "printing_fns.h"
 
 static const unsigned int // Table 5.18, frame sizes
     l_frmsizecod[19][3]

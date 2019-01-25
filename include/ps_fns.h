@@ -70,7 +70,7 @@ int close_PS_file(PS_reader_p* ps);
  * Returns 0 if all goes well, 1 if there was an error (including the
  * stream not appearing to be either).
  */
-int determine_if_PS_is_h264(PS_reader_p ps, bool* is_h264);
+int determine_if_PS_is_h264(PS_reader_p ps, int* is_h264);
 /*
  * Given a program stream, attempt to determine what type of video data it
  * contains.
@@ -109,7 +109,7 @@ int rewind_program_stream(PS_reader_p ps);
  * Print out a stream id in a manner consistent with the PS usages
  * of the stream id values.
  */
-void print_stream_id(bool is_msg, byte stream_id);
+void print_stream_id(int is_msg, byte stream_id);
 /*
  * Look for the start (the first 4 bytes) of the next program stream packet.
  *
@@ -238,7 +238,7 @@ int read_PS_packet_start(PS_reader_p ps, bool verbose, offset_t* posn, byte* str
  *
  * Returns one of the SUBSTREAM_* values.
  */
-int identify_private1_data(struct PS_packet* packet, bool is_dvd, bool verbose,
+int identify_private1_data(struct PS_packet* packet, int is_dvd, bool verbose,
     int* substream_index, byte* bsmod, byte* acmod);
 
 // ============================================================
@@ -284,6 +284,6 @@ int identify_private1_data(struct PS_packet* packet, bool is_dvd, bool verbose,
  * Returns 0 if all went well, 1 if something went wrong.
  */
 int ps_to_ts(PS_reader_p ps, TS_writer_p output, int pad_start, int program_repeat, int video_type,
-    bool is_dvd, int video_stream, int audio_stream, int want_ac3_audio, int dolby_is_dvb,
+    int is_dvd, int video_stream, int audio_stream, int want_ac3_audio, int dolby_is_dvb,
     uint32_t pmt_pid, uint32_t pcr_pid, uint32_t video_pid, int keep_audio, uint32_t audio_pid,
     int max, bool verbose, bool quiet);

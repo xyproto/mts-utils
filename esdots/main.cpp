@@ -404,7 +404,7 @@ static int dots_by_access_unit(ES_p es, int max, bool verbose, int hash_eos, int
     int size_gop_min = 100000;
     int gops = 0;
     int size_gop_tot = 0;
-    bool is_first_k_frame = true;
+    int is_first_k_frame = true;
     char char_nal_type = 'a';
     unsigned long num_idr = 0;
     unsigned long num_i = 0;
@@ -786,7 +786,7 @@ int main(int argc, char** argv)
     int hash_eos = false;
 
     int want_data = VIDEO_H262;
-    bool is_data = want_data;
+    int is_data = want_data;
     int force_stream_type = false;
 
     int want_ES = false;

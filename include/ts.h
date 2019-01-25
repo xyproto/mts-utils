@@ -18,7 +18,7 @@
 #include "misc_fns.h"
 #include "pes_fns.h"
 #include "pidint_fns.h"
-#include "printing.h"
+#include "printing_fns.h"
 #include "ts_fns.h"
 #include "tswrite_fns.h"
 
@@ -2068,7 +2068,7 @@ static const char* const descriptor_names[] = {
 // From ATSC A/52B section A3.4
 // N.B. Horizontal lines in the table represent valid stop points
 
-static void print_ac3_audio_descriptor(const bool is_msg, const byte* const buf, const int len)
+static void print_ac3_audio_descriptor(const int is_msg, const byte* const buf, const int len)
 {
     const byte* p = buf;
     const byte* const eop = p + len;
@@ -2204,7 +2204,7 @@ too_short:
     fprint_msg_or_err(is_msg, "; ### block short ###\n");
 }
 
-static void print_HEVC_descriptor(const bool is_msg, const byte* const buf, const int len)
+static void print_HEVC_descriptor(const int is_msg, const byte* const buf, const int len)
 {
     const uint8_t* p = buf;
     const byte* const eop = p + len;
@@ -2287,7 +2287,7 @@ too_short:
  *
  * If you want to interpret more descriptors then ITU-T J.94 is the standard
  */
-int print_descriptors(bool is_msg, const std::string leader1, const std::string leader2,
+int print_descriptors(int is_msg, const std::string leader1, const std::string leader2,
     byte* desc_data, int desc_data_len)
 {
     byte data_len = desc_data_len;
@@ -2307,10 +2307,10 @@ int print_descriptors(bool is_msg, const std::string leader1, const std::string 
         }
 
         if (!leader1.empty()) {
-            print_msg_or_err(is_msg, leader1);
+            fprint_msg_or_err(is_msg, "%s", leader1);
         }
         if (!leader2.empty()) {
-            print_msg_or_err(is_msg, leader2);
+            fprint_msg_or_err(is_msg, "%s", leader2);
         }
 
         {
@@ -2508,10 +2508,10 @@ int print_descriptors(bool is_msg, const std::string leader1, const std::string 
                         fprint_msg_or_err(is_msg, "Teletext: ");
                     else {
                         if (!leader1.empty()) {
-                            print_msg_or_err(is_msg, leader1);
+                            fprint_msg_or_err(is_msg, "%s", leader1);
                         }
                         if (!leader2.empty()) {
-                            print_msg_or_err(is_msg, leader2);
+                            fprint_msg_or_err(is_msg, "%s", leader2);
                         }
                         fprint_msg_or_err(is_msg, (char*)"          ");
                     }
@@ -2565,26 +2565,26 @@ int print_descriptors(bool is_msg, const std::string leader1, const std::string 
                     lang[2] = data[ii + 2];
                     lang[3] = 0;
                     if (!leader1.empty()) {
-                        print_msg_or_err(is_msg, leader1);
+                        fprint_msg_or_err(is_msg, "%s", leader1);
                     }
                     if (!leader2.empty()) {
-                        print_msg_or_err(is_msg, leader2);
+                        fprint_msg_or_err(is_msg, "%s", leader2);
                     }
                     fprint_msg_or_err(
                         is_msg, "  language='%s', subtitling_type=%u\n", lang, subtitling_type);
                     if (!leader1.empty()) {
-                        print_msg_or_err(is_msg, leader1);
+                        fprint_msg_or_err(is_msg, "%s", leader1);
                     }
                     if (!leader2.empty()) {
-                        print_msg_or_err(is_msg, leader2);
+                        fprint_msg_or_err(is_msg, "%s", leader2);
                     }
                     fprint_msg_or_err(
                         is_msg, "    (%s)\n", dvb_component_type3_str(subtitling_type));
                     if (!leader1.empty()) {
-                        print_msg_or_err(is_msg, leader1);
+                        fprint_msg_or_err(is_msg, "%s", leader1);
                     }
                     if (!leader2.empty()) {
-                        print_msg_or_err(is_msg, leader2);
+                        fprint_msg_or_err(is_msg, "%s", leader2);
                     }
                     fprint_msg_or_err(is_msg, "  composition_page_id=%u, ancillary_page_id=%u\n",
                         composition_page_id, ancillary_page_id);

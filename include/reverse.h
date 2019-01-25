@@ -39,7 +39,7 @@
 #include "h262_fns.h"
 #include "misc_defns.h"
 #include "nalunit_fns.h"
-#include "printing.h"
+#include "printing_fns.h"
 #include "reverse_fns.h"
 #include "ts_fns.h"
 #include "tswrite_fns.h"
@@ -73,7 +73,7 @@ using namespace std::string_literals;
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_reverse_data(reverse_data_p* reverse_data, bool is_h264)
+int build_reverse_data(reverse_data_p* reverse_data, int is_h264)
 {
     int newsize = REVERSE_ARRAY_START_SIZE;
     reverse_data_p new2 = (reverse_data_p)malloc(SIZEOF_REVERSE_DATA);
@@ -852,7 +852,7 @@ static int output_from_reverse_data(ES_p es, WRITER output, int as_TS, bool verb
 {
     int with_sequence_headers = (!reverse_data->is_h264 && reverse_data->output_sequence_headers);
     uint32_t which = reverse_data->length - 1; // the maximum picture index
-    bool is_h262 = !reverse_data->is_h264;
+    int is_h262 = !reverse_data->is_h264;
     int err;
     uint32_t index;
     ES_offset start_posn;
@@ -1053,7 +1053,7 @@ static int output_in_reverse(ES_p es, WRITER output, int as_TS, int frequency, b
     uint32_t last_seq_index = reverse_data->length; // impossible value
     int max_pic_index = reverse_data->length - 1;
     int first_actual_picture_index = 0; // the first *actual* picture
-    bool is_h262 = !reverse_data->is_h264;
+    int is_h262 = !reverse_data->is_h264;
 
     uint32_t start_index;
     uint32_t final_index;

@@ -55,7 +55,7 @@ typedef enum actions ACTION;
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int copy_h262(ES_p es, WRITER output, int as_TS, int max, bool quiet)
+static int copy_h262(ES_p es, WRITER output, int as_TS, int max, bool quiet)
 {
     int err;
     int count = 0;
@@ -101,7 +101,7 @@ int copy_h262(ES_p es, WRITER output, int as_TS, int max, bool quiet)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int write_h262_picture(WRITER output, int as_TS, h262_picture_p picture)
+static int write_h262_picture(WRITER output, int as_TS, h262_picture_p picture)
 {
     int err;
     if (as_TS)
@@ -130,7 +130,7 @@ int write_h262_picture(WRITER output, int as_TS, h262_picture_p picture)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int strip_h262(
+static int strip_h262(
     ES_p es, WRITER output, int as_TS, int max, int keep_p, bool verbose, bool quiet)
 {
     int err;
@@ -233,7 +233,7 @@ int strip_h262(
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int filter_h262(
+static int filter_h262(
     ES_p es, WRITER output, int as_TS, int frequency, int max, bool verbose, bool quiet)
 {
     int err;
@@ -351,7 +351,7 @@ int filter_h262(
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int copy_nal_units(ES_p es, WRITER output, int as_TS, int max, bool verbose, bool quiet)
+static int copy_nal_units(ES_p es, WRITER output, int as_TS, int max, bool verbose, bool quiet)
 {
     int err = 0;
     nal_unit_context_p context = nullptr;
@@ -407,7 +407,7 @@ int copy_nal_units(ES_p es, WRITER output, int as_TS, int max, bool verbose, boo
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int strip_access_units(
+static int strip_access_units(
     ES_p es, WRITER output, int as_TS, int max, int keep_all_ref, bool verbose, bool quiet)
 {
     int err = 0;
@@ -488,7 +488,7 @@ int strip_access_units(
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int filter_access_units(
+static int filter_access_units(
     ES_p es, WRITER output, int as_TS, int max, int frequency, bool verbose, bool quiet)
 {
     int err = 0;
@@ -593,7 +593,7 @@ int filter_access_units(
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int do_action(ACTION action, ES_p es, WRITER output, int max, int frequency, bool is_h262,
+static int do_action(ACTION action, ES_p es, WRITER output, int max, int frequency, int is_h262,
     int as_TS, int keep_all_ref, byte stream_type, bool verbose, bool quiet)
 {
     int err = 0;
@@ -732,7 +732,7 @@ int main(int argc, char** argv)
     int use_pes = false;
 
     int want_data = VIDEO_H262;
-    bool is_data = false;
+    int is_data;
     int force_stream_type = false;
     byte stream_type;
 

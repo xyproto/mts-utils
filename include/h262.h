@@ -16,7 +16,7 @@
 #include "es_fns.h"
 #include "h262_fns.h"
 #include "misc_fns.h"
-#include "printing.h"
+#include "printing_fns.h"
 #include "reverse_fns.h"
 #include "ts_fns.h"
 
@@ -642,7 +642,7 @@ static void _show_item(h262_item_p item)
     else if (is_h262_slice_item(item))
         fprint_msg("slice %2x", item->unit.start_code);
     else
-        print_msg(H262_START_CODE_STR(item->unit.start_code));
+        fprint_msg("%s", H262_START_CODE_STR(item->unit.start_code));
     fprint_msg(" at " OFFSET_T_FORMAT "/%d for %d\n", item->unit.start_posn.infile,
         item->unit.start_posn.inpacket, item->unit.data_len);
 }

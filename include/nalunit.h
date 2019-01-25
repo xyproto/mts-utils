@@ -18,7 +18,7 @@
 #include "es_fns.h"
 #include "misc_fns.h"
 #include "nalunit_fns.h"
-#include "printing.h"
+#include "printing_fns.h"
 #include "ts_fns.h"
 
 #define DEBUG 0
@@ -1052,7 +1052,7 @@ int nal_is_first_VCL_NAL(nal_unit_p nal, nal_unit_p last)
  *
  * This is intended as a single line of information.
  */
-void report_nal(bool is_msg, nal_unit_p nal)
+void report_nal(int is_msg, nal_unit_p nal)
 {
     if (nal == nullptr)
         fprint_msg_or_err(is_msg, ".............: NAL unit <null>\n");
@@ -1733,15 +1733,14 @@ void free_nal_unit_list(nal_unit_list_p* list, int deep)
 /*
  * Report on a NAL unit list's contents, to the given stream.
  */
-void report_nal_unit_list(bool is_msg, const std::string prefix, nal_unit_list_p list)
+void report_nal_unit_list(int is_msg, const std::string prefix, nal_unit_list_p list)
 {
-    if (list->array == nullptr) {
-        print_msg_or_err(is_msg, prefix);
-        print_msg_or_err(is_msg, "<empty>\n");
-    } else {
+    if (list->array == nullptr)
+        fprint_msg_or_err(is_msg, "%s<empty>\n", prefix);
+    else {
         int ii;
         for (ii = 0; ii < list->length; ii++) {
-            print_msg_or_err(is_msg, prefix);
+            fprint_msg_or_err(is_msg, "%s", prefix);
             report_nal(is_msg, list->array[ii]);
         }
     }

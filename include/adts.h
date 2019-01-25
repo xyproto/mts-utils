@@ -15,7 +15,7 @@
 #include "adts_fns.h"
 #include "compat.h"
 #include "misc_fns.h"
-#include "printing.h"
+#include "printing_fns.h"
 
 #define DEBUG 0
 

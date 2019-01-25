@@ -19,7 +19,7 @@ typedef struct reverse_data* reverse_data_p;
 // the location, size and details for frames that it might want to output in
 // reverse
 struct reverse_data {
-    bool is_h264; // Dealing with H.264 or H.262 data?
+    int is_h264; // Dealing with H.264 or H.262 data?
 
     // To do anything useful, we must then be linked to one or the other
     // type of input context (a union would save 4 bytes, but it doesn't

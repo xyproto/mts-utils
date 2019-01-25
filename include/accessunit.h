@@ -13,7 +13,7 @@
 #include "compat.h"
 #include "es_fns.h"
 #include "nalunit_fns.h"
-#include "printing.h"
+#include "printing_fns.h"
 #include "reverse_fns.h"
 #include "ts_fns.h"
 

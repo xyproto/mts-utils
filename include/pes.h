@@ -16,7 +16,7 @@
 #include "misc_fns.h"
 #include "pes_fns.h"
 #include "pidint_fns.h"
-#include "printing.h"
+#include "printing_fns.h"
 #include "ps_fns.h"
 #include "ts_fns.h"
 #include "tswrite_fns.h"
@@ -309,7 +309,7 @@ static inline int pid_in_peslist(peslist_p list, uint32_t pid)
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
 static int start_packet_in_peslist(
-    PES_reader_p reader, uint32_t pid, bool is_video, PES_packet_data_p* data)
+    PES_reader_p reader, uint32_t pid, int is_video, PES_packet_data_p* data)
 {
     int err;
     int ii;
@@ -434,7 +434,7 @@ static int read_next_PES_packet_from_PS(PES_reader_p reader, PES_packet_data_p* 
         int err;
         byte stream_id; // The packet's stream id
         int keep = false; // Keep this packet?
-        bool is_video = false;
+        int is_video = false;
         struct PS_packet packet = { 0 };
         struct PS_pack_header header = { 0 };
 
@@ -1389,7 +1389,7 @@ static int read_next_PES_packet_from_TS(PES_reader_p reader, PES_packet_data_p* 
  *
  * Returns 0 if all goes well, 1 if there was an error.
  */
-int determine_if_TS_file(int input, bool* is_TS)
+int determine_if_TS_file(int input, int* is_TS)
 {
     int err;
     int ii;
@@ -1627,7 +1627,7 @@ int build_TS_PES_reader(TS_reader_p tsreader, int give_info, int give_warnings,
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int build_PES_reader(int input, bool is_TS, int give_info, int give_warnings,
+int build_PES_reader(int input, int is_TS, int give_info, int give_warnings,
     uint16_t program_number, PES_reader_p* reader)
 {
     int err;
@@ -1767,7 +1767,7 @@ int open_PES_reader(
 {
     int err;
     int input;
-    bool is_TS;
+    int is_TS;
 
     input = open_binary_file(filename, false);
     if (input == -1) {
@@ -1924,7 +1924,7 @@ void set_PES_reader_video_type(PES_reader_p reader, int video_type)
  *
  * This call only has effect if Dolby audio data is actually selected.
  */
-void set_PES_reader_dolby_stream_type(PES_reader_p reader, bool is_dvb)
+void set_PES_reader_dolby_stream_type(PES_reader_p reader, int is_dvb)
 {
     reader->override_dolby_stream_type = true;
     reader->output_dolby_stream_type
@@ -2654,7 +2654,7 @@ int report_PES_data_array(const std::string prefix, byte* data, size_t data_len,
         if (show_data) {
             bytes += 3 + PES_header_data_length;
             if (!prefix.empty()) {
-                print_msg(prefix);
+                fprint_msg("%s", prefix);
             }
             print_data(true, (char*)"    ", bytes, packet_length - 3 - PES_header_data_length, 20);
         }
@@ -2708,7 +2708,7 @@ int report_PES_data_array(const std::string prefix, byte* data, size_t data_len,
             if (show_data) {
                 bytes += posn;
                 if (!prefix.empty()) {
-                    print_msg(prefix);
+                    fprint_msg("%s", prefix);
                 }
                 print_data(true, (char*)"    ", bytes, packet_length - posn, 20);
             }
