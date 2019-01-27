@@ -66,11 +66,12 @@ The following utilites are available:
 # TODO
 
 - [ ] Fix all warnings.
+- [ ] Use `enum class` for all enums.
+- [ ] Add more comprehensive tests, to ensure that everything works while porting to C++17.
 - [ ] Restructure header files, make `*_fns.h` just `*_.h` and place the function bodies that are not `inline` in `.cpp` files.
 - [ ] Remove `static` from functions that don't need it.
-- [ ] Use `enum class` for all enums.
 - [ ] Use `const std::string` whenever possible.
-- [ ] Use `bool` whenever possible.
+- [ ] Use `bool` whenever possible, instead of `int`.
 
 # Additional info
 
