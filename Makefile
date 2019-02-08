@@ -5,7 +5,7 @@ DESTDIR ?=
 PREFIX ?= /usr
 
 build:
-	+CXXFLAGS='$(CXXFLAGS) -w' parallel cxx opt -C ::: es2ts esdots esfilter esmerge esreport esreverse m2ts2ts pcapreport ps2ts psdots psreport rtp2264 stream_type ts2es ts2ps ts_packet_insert tsdvbsub tsfilter tsinfo tsplay tsreport tsserve
+	+CXXFLAGS='$(CXXFLAGS) -w' parallel --compress cxx opt -C ::: es2ts esdots esfilter esmerge esreport esreverse m2ts2ts pcapreport ps2ts psdots psreport rtp2264 stream_type ts2es ts2ps ts_packet_insert tsdvbsub tsfilter tsinfo tsplay tsreport tsserve
 
 test:
 	+cxx -C common test
@@ -17,4 +17,4 @@ install-man:
 	+parallel install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/man/man1" ::: docs/mdoc/es2ts.1 docs/mdoc/esdots.1 docs/mdoc/esfilter.1 docs/mdoc/esmerge.1 docs/mdoc/esreport.1 docs/mdoc/esreverse.1 docs/mdoc/m2ts2ts.1 docs/mdoc/pcapreport.1 docs/mdoc/ps2ts.1 docs/mdoc/psdots.1 docs/mdoc/psreport.1 docs/mdoc/rtp2264.1 docs/mdoc/stream_type.1 docs/mdoc/ts2es.1 docs/mdoc/ts_packet_insert.1 docs/mdoc/tsdvbsub.1 docs/mdoc/tsfilter.1 docs/mdoc/tsinfo.1 docs/mdoc/tsplay.1 docs/mdoc/tsreport.1 docs/mdoc/tsserve.1
 
 clean:
-	+parallel cxx clean -C ::: es2ts esdots esfilter esmerge esreport esreverse m2ts2ts pcapreport ps2ts psdots psreport rtp2264 stream_type ts2es ts2ps ts_packet_insert tsdvbsub tsfilter tsinfo tsplay tsreport tsserve common
+	+parallel --compress cxx clean -C ::: es2ts esdots esfilter esmerge esreport esreverse m2ts2ts pcapreport ps2ts psdots psreport rtp2264 stream_type ts2es ts2ps ts_packet_insert tsdvbsub tsfilter tsinfo tsplay tsreport tsserve common
