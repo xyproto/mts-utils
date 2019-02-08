@@ -69,7 +69,7 @@ void ensurePidList(int nr)
 int main(int argn, char* args[])
 {
     int ii = 1;
-    //    int verbose = FALSE;  // Currently unused - squash warning
+    //    int verbose = false;  // Currently unused - squash warning
     int invert = 0;
     unsigned int max_pkts = (unsigned int)-1;
     const char *input_file = nullptr, *output_file = nullptr;
@@ -88,7 +88,7 @@ int main(int argn, char* args[])
                 print_usage();
                 return 0;
             } else if (!strcmp("-verbose", args[ii]) || !strcmp("-v", args[ii])) {
-                //                verbose = TRUE;
+                //                verbose = true;
             } else if (!strcmp("-m", args[ii]) || !strcmp("-max", args[ii])) {
                 if (argn <= ii) {
                     fprint_err("### tsfilter: -max requires an argument\n");

@@ -142,7 +142,7 @@ int build_PS_reader(int input, int quiet, PS_reader_p* ps)
     }
 
     // And look for the first pack header
-    err = find_PS_pack_header_start(new2, FALSE, PACK_HEADER_SEARCH_DISTANCE, &(new2->start));
+    err = find_PS_pack_header_start(new2, false, PACK_HEADER_SEARCH_DISTANCE, &(new2->start));
     if (err) {
         fprint_err("### File does not appear to be PS\n"
                    "    Cannot find PS pack header in first %d bytes of file\n",
@@ -207,7 +207,7 @@ int open_PS_file(char* name, int quiet, PS_reader_p* ps)
     if (name == nullptr)
         f = STDIN_FILENO;
     else {
-        f = open_binary_file(name, FALSE);
+        f = open_binary_file(name, false);
         if (f == -1)
             return 1;
     }
@@ -259,7 +259,7 @@ int determine_if_PS_is_h264(PS_reader_p ps, int* is_h264)
     // around our file
 
     // It's then safe to build the temporary PES reader
-    err = build_PS_PES_reader(ps, FALSE, FALSE, &reader);
+    err = build_PS_PES_reader(ps, false, false, &reader);
     if (err) {
         print_err("### Error trying to determine PS stream type\n");
         return 1;
@@ -302,7 +302,7 @@ int determine_PS_video_type(PS_reader_p ps, int* video_type)
     // around our file
 
     // It's then safe to build the temporary PES reader
-    err = build_PS_PES_reader(ps, FALSE, FALSE, &reader);
+    err = build_PS_PES_reader(ps, false, false, &reader);
     if (err) {
         print_err("### Error trying to determine PS stream type\n");
         return 1;
@@ -605,7 +605,7 @@ int find_PS_pack_header_start(PS_reader_p ps, int verbose, uint32_t max, offset_
         }
         if (verbose) {
             fprint_err("    Found: stream id %02X at " OFFSET_T_FORMAT " (", stream_id, *posn);
-            print_stream_id(FALSE, stream_id);
+            print_stream_id(false, stream_id);
             print_err(")\n");
         }
     }
@@ -738,7 +738,7 @@ int read_PS_pack_header_body(PS_reader_p ps, PS_pack_header_p hdr)
     if ((hdr->data[0] & 0xF0) == 0x20) {
 #if DEBUG
         print_msg("ISO/IEC 11171-1/MPEG-1 pack header\n");
-        print_data(TRUE, "Pack header", hdr->data, 8, 8);
+        print_data(true, "Pack header", hdr->data, 8, 8);
 #endif
         hdr->pack_stuffing_length = 0; // since it doesn't exist
         hdr->scr = (((uint64_t)(hdr->data[0] & 0x09)) << 29) | (((uint64_t)hdr->data[1]) << 22)
@@ -768,7 +768,7 @@ int read_PS_pack_header_body(PS_reader_p ps, PS_pack_header_p hdr)
             return err;
         }
 #if DEBUG
-        print_data(TRUE, "Pack header", hdr->data, 10, 10);
+        print_data(true, "Pack header", hdr->data, 10, 10);
 #endif
         hdr->scr_base = (((uint64_t)(hdr->data[0] & 0x38)) << 27)
             | (((uint64_t)(hdr->data[0] & 0x03)) << 28) | (((uint64_t)hdr->data[1]) << 20)
@@ -894,7 +894,7 @@ int read_PS_packet_start(PS_reader_p ps, int verbose, offset_t* posn, byte* stre
             *posn, buf[0], buf[1], buf[2]);
 #if RECOVER_BROKEN_PS
         print_err("!!! Attempting to find next PS pack header\n");
-        err = find_PS_pack_header_start(ps, TRUE, 0, posn);
+        err = find_PS_pack_header_start(ps, true, 0, posn);
         if (err == EOF)
             return EOF;
         else if (err) {
@@ -913,7 +913,7 @@ int read_PS_packet_start(PS_reader_p ps, int verbose, offset_t* posn, byte* stre
 
 #if DEBUG
     fprint_msg("Packet at " OFFSET_T_FORMAT ", stream id %02X (", *posn, *stream_id);
-    print_stream_id(TRUE, *stream_id);
+    print_stream_id(true, *stream_id);
     print_msg(")\n");
 #endif
 
@@ -1128,7 +1128,7 @@ static int write_video(TS_writer_p output, struct PS_pack_header* header, byte s
         static int ignored_stream[NUMBER_VIDEO_STREAMS] = { 0 };
         int this_stream = stream_id & 0x0F;
         if (!ignored_stream[this_stream]) {
-            ignored_stream[this_stream] = TRUE;
+            ignored_stream[this_stream] = true;
             if (!quiet)
                 fprint_msg("Ignoring video stream 0x%x (%d)\n", this_stream, this_stream);
         }
@@ -1162,7 +1162,7 @@ static int write_video(TS_writer_p output, struct PS_pack_header* header, byte s
 
     // This is our video stream - output it as such
     err = write_PES_as_TS_PES_packet(output, packet->data, packet->data_len, prog_data->video_pid,
-        DEFAULT_VIDEO_STREAM_ID, TRUE, header->scr_base, header->scr_extn);
+        DEFAULT_VIDEO_STREAM_ID, true, header->scr_base, header->scr_extn);
     if (err)
         return 1;
 
@@ -1245,7 +1245,7 @@ static int write_DVD_AC3_data(
 
         // And we then have something suitable for outputting as-is
         err = write_PES_as_TS_PES_packet(output, packet->data, packet->data_len - 4,
-            prog_data->audio_pid, PRIVATE1_AUDIO_STREAM_ID, FALSE, 0, 0);
+            prog_data->audio_pid, PRIVATE1_AUDIO_STREAM_ID, false, 0, 0);
         if (err)
             return 1;
     } else {
@@ -1276,7 +1276,7 @@ static int write_DVD_AC3_data(
 
         // And we then have something suitable for outputting as-is
         err = write_PES_as_TS_PES_packet(output, packet->data, packet->data_len - 3 - offset,
-            prog_data->audio_pid, PRIVATE1_AUDIO_STREAM_ID, FALSE, 0, 0);
+            prog_data->audio_pid, PRIVATE1_AUDIO_STREAM_ID, false, 0, 0);
         if (err)
             return 1;
     }
@@ -1337,7 +1337,7 @@ static int write_audio(TS_writer_p output, byte stream_id, struct PS_packet* pac
             static int ignored_stream[NUMBER_AUDIO_STREAMS] = { 0 };
             int this_stream = stream_id & 0x1F;
             if (!ignored_stream[this_stream]) {
-                ignored_stream[this_stream] = TRUE;
+                ignored_stream[this_stream] = true;
                 fprint_msg("Ignoring audio stream 0x%x (%d)\n", this_stream, this_stream);
             }
         }
@@ -1375,7 +1375,7 @@ static int write_audio(TS_writer_p output, byte stream_id, struct PS_packet* pac
             if (!quiet) {
                 static int ignored_ac3_substream[NUMBER_AC3_SUBSTREAMS] = { 0 };
                 if (!ignored_ac3_substream[substream_index]) {
-                    ignored_ac3_substream[substream_index] = TRUE;
+                    ignored_ac3_substream[substream_index] = true;
                     fprint_msg("Ignoring private_stream_1 substream 0x%x (%d) "
                                "containing AC3\n",
                         substream_index, substream_index);
@@ -1447,7 +1447,7 @@ static int write_audio(TS_writer_p output, byte stream_id, struct PS_packet* pac
     } else {
         err = write_PES_as_TS_PES_packet(output, packet->data, packet->data_len,
             prog_data->audio_pid,
-            (prog_data->want_ac3 ? PRIVATE1_AUDIO_STREAM_ID : DEFAULT_AUDIO_STREAM_ID), FALSE, 0,
+            (prog_data->want_ac3 ? PRIVATE1_AUDIO_STREAM_ID : DEFAULT_AUDIO_STREAM_ID), false, 0,
             0);
         if (err)
             return 1;
@@ -1505,7 +1505,7 @@ static int _ps_to_ts(PS_reader_p ps, TS_writer_p output, struct program_data* pr
     offset_t posn = 0; // The location in the input file of the current packet
     int count = 0; // Number of PS packets
     byte stream_id; // The packet's stream id
-    int end_of_file = FALSE;
+    int end_of_file = false;
 
     // Summary data
     int num_packs = 0;
@@ -1546,7 +1546,7 @@ static int _ps_to_ts(PS_reader_p ps, TS_writer_p output, struct program_data* pr
     if (stream_id != 0xba) {
         print_err("### Program stream does not start with pack header\n");
         fprint_err("    First packet has stream id %02X (", stream_id);
-        print_stream_id(FALSE, stream_id);
+        print_stream_id(false, stream_id);
         print_err(")\n");
         return 1;
     }
@@ -1556,9 +1556,9 @@ static int _ps_to_ts(PS_reader_p ps, TS_writer_p output, struct program_data* pr
     // I *think* using this macro makes the code marginally more readable,
     // and it helps emphasise that the code *is* identical each time
 #define READ_NEXT_PS_PACKET_START                                                                 \
-    err = read_PS_packet_start(ps, FALSE, &posn, &stream_id);                                     \
+    err = read_PS_packet_start(ps, false, &posn, &stream_id);                                     \
     if (err == EOF) {                                                                             \
-        end_of_file = TRUE;                                                                       \
+        end_of_file = true;                                                                       \
         break;                                                                                    \
     } else if (err)                                                                               \
         return 1;                                                                                 \

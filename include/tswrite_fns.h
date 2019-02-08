@@ -79,7 +79,7 @@ int tswrite_open(TS_WRITER_TYPE how, char* name, char* multicast_if, int port, i
  *
  * - `name` is the name of the host to connect to
  * - `port` is the port to connect to
- * - `use_tcp` is TRUE if TCP/IP should be use, FALSE if UDP should be used
+ * - `use_tcp` is true if TCP/IP should be use, false if UDP should be used
  * - `quiet` is true if only error messages should be printed
  * - `tswriter` is the new context to use for writing TS output,
  *   which should be closed using `tswrite_close`.
@@ -144,7 +144,7 @@ int tswrite_wait_for_client(int server_socket, int quiet, TS_writer_p* tswriter)
  *   host with no wait between packets
  * - `waitfor` is the number of microseconds to wait for thereafter
  * - `byterate` is the (initial) rate at which we'd like to output our data
- * - `use_pcrs` is TRUE if PCRs in the data stream are to be used for
+ * - `use_pcrs` is true if PCRs in the data stream are to be used for
  *   timing output (the normal case), otherwise the specified byte rate
  *   will be used directly.
  * - `prime_size` is how much to prime the circular buffer output timer
@@ -219,7 +219,7 @@ void tswrite_set_command_atomic(TS_writer_p tswriter, int atomic);
  *
  * If the TS writer is enabled for command input, then if the command
  * currently being executed has declared itself "atomic" (i.e., not able to be
- * interrupted), it returns FALSE, otherwise it returns TRUE if the command
+ * interrupted), it returns false, otherwise it returns true if the command
  * character has changed.
  */
 int tswrite_command_changed(TS_writer_p tswriter);
@@ -251,7 +251,7 @@ int wait_for_command(TS_writer_p tswriter);
  * - `tswriter` is the TS output context returned by `tswrite_open`
  * - `packet` is the TS packet
  * - if the packets payload_unit_start_indicator is set, then
- *   `pid` is the PID for this packet, `got_pcr` is TRUE if it
+ *   `pid` is the PID for this packet, `got_pcr` is true if it
  *   contains a PCR in its adaptation field, and `pcr` contains
  *   said PCR. These values are only used when outputting via
  *   buffered output.

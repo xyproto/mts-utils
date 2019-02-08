@@ -248,13 +248,13 @@ static unsigned int jitter_add(
     jitter_el_t* const in_el = je->buf + je->in_n;
     jitter_el_t* out_el = je->buf + je->out_n;
     jitter_el_t* const next_el = (je->in_n == JITTER_BUF_SIZE - 1) ? je->buf : in_el + 1;
-    int needs_scan = FALSE;
+    int needs_scan = false;
 
     // 1st expire anything we no longer want - in any case expire one if
     // we are about to overflow.
     while (in_el != out_el && (time - out_el->t > range || out_el == next_el)) {
         if (out_el->delta == je->min_val || out_el->delta == je->max_val)
-            needs_scan = TRUE;
+            needs_scan = true;
 
         // Inc with wrap
         if (++out_el >= eob)
@@ -360,7 +360,7 @@ static void stream_gen_names2(const pcapreport_ctx_t* const ctx, pcapreport_stre
     const char* const base_name
         = ctx->output_name_base != nullptr ? ctx->output_name_base : ctx->base_name;
     const size_t base_len = strlen(base_name);
-    int fixed_extract_name = FALSE;
+    int fixed_extract_name = false;
 
     if (ctx->filter_dest_addr == 0 || ctx->filter_dest_port == 0) {
         snprintf(identifier, 90, "%s_%u.%u.%u.%u_%u%s", vlan_name("_V", st, sizeof(pbuf), pbuf),
@@ -510,7 +510,7 @@ static int digest_times(pcapreport_ctx_t* const ctx, pcapreport_stream_t* const 
         if (ri->ssrc != rtp_header->ssrc && ri->n != 0 && !ri->multiple_ssrc) {
             fprint_msg("!%d! Multiple SSRCs detected: SSRCs: %u,%u,...\n", st->stream_no, ri->ssrc,
                 rtp_header->ssrc);
-            ri->multiple_ssrc = TRUE;
+            ri->multiple_ssrc = true;
         }
 
         rtp_seq_delta
@@ -601,7 +601,7 @@ static int digest_times(pcapreport_ctx_t* const ctx, pcapreport_stream_t* const 
                                 fprint_msg("!%d! Multiple PCR pids detected: pids: %d,%d,...\n",
                                     st->stream_no, st->pcr_pid, pid);
                             }
-                            st->multiple_pcr_pids = TRUE;
+                            st->multiple_pcr_pids = true;
                         } else {
                             pcapreport_section_t* tsect = st->section_last;
                             unsigned int cur_jitter;
@@ -798,13 +798,13 @@ static int stream_ts_check(const pcapreport_ctx_t* const ctx, pcapreport_stream_
 
     if (st->ts_good <= 0 || (bad != 0 && ctx->good_ts_only)) {
         ++st->seen_bad;
-        return FALSE;
+        return false;
     }
 
     if (bad != 0)
         ++st->seen_dodgy;
     ++st->seen_good;
-    return TRUE;
+    return true;
 }
 
 // RTP - RFC 3550
@@ -868,25 +868,25 @@ static int stream_rtp_check(const pcapreport_ctx_t* const ctx, pcapreport_stream
     uint32_t offset;
     uint32_t padlen = 0;
     unsigned int payload_type;
-    int is_raw = FALSE;
+    int is_raw = false;
 
     // Flatten output
     memset(rh, 0, sizeof(*rh));
 
     // Must contain at least the header!
     if (len < 12)
-        return FALSE;
+        return false;
 
     // Check version - must be 2
     // Incidentally this will reject 0x47 which is good :-)
     if ((data[0] & 0xc0) != 0x80)
-        return FALSE;
+        return false;
     // We only deal with TS in RTP so check for that alone
     payload_type = data[1] & 0x7f;
     if (ctx->rtp_raw_wanted[payload_type] != 0)
-        is_raw = TRUE;
+        is_raw = true;
     else if ((data[1] & 0x7f) != 33) // PT bits
-        return FALSE;
+        return false;
 
     // ??Check sequence??
 
@@ -899,21 +899,21 @@ static int stream_rtp_check(const pcapreport_ctx_t* const ctx, pcapreport_stream
         padlen = data[len - 1];
         // Padlen of zero makes no sense as padding len includes this byte
         if (padlen == 0)
-            return FALSE;
+            return false;
     }
 
     // Check for extension
     if ((data[0] & 0x10) != 0) // X bit
     {
         if (offset + 4 + padlen > len)
-            return FALSE;
+            return false;
         // Skip extension header
         offset += 4 + uint_16_be(data + offset + 2);
     }
 
     // trivial check for TS in payload if not raw extraction
     if (!is_raw && (offset + 188 + padlen > len || data[offset] != 0x47))
-        return FALSE;
+        return false;
 
     rh->is_rtp_raw = is_raw;
     rh->is_rtp_ts = !is_raw;
@@ -925,7 +925,7 @@ static int stream_rtp_check(const pcapreport_ctx_t* const ctx, pcapreport_stream
     rh->header_len = offset;
     rh->pad_len = padlen;
 
-    return TRUE;
+    return true;
 }
 
 static void stream_merge_vlan_info(
@@ -999,14 +999,14 @@ static char* map_to_string(unsigned int n, const size_t blen, char* const buf)
     int i = 0;
     char* p = buf;
     char* const eob = buf + blen;
-    int first = TRUE;
+    int first = true;
 
     while (n != 0 && eob - p > 2) {
         if ((n & 1) != 0) {
             if (!first)
                 *p++ = ',';
             p += snprintf(p, eob - p, "%d", i);
-            first = FALSE;
+            first = false;
         }
         n >>= 1;
         ++i;
@@ -1120,13 +1120,13 @@ static int stream_vlan_match(
     int i;
 
     if (epkt->vlan_count != st->vlan_count)
-        return FALSE;
+        return false;
 
     for (i = 0; i < epkt->vlan_count; ++i) {
         if (epkt->vlans[i].vid != st->vlans[i].vid)
-            return FALSE;
+            return false;
     }
-    return TRUE;
+    return true;
 }
 
 pcapreport_stream_t* stream_find(pcapreport_ctx_t* const ctx,
@@ -1424,11 +1424,11 @@ int main(int argc, char** argv)
             } else if (!strcmp("output", arg)) {
                 CHECKARG("pcapreport", ii);
                 ctx->output_name_base = argv[++ii];
-                ctx->extract_data = TRUE;
+                ctx->extract_data = true;
             } else if (!strcmp("times", arg)) {
                 ++ctx->time_report;
             } else if (!strcmp("analyse", arg)) {
-                ctx->analyse = TRUE;
+                ctx->analyse = true;
             } else if (!strcmp("verbose", arg)) {
                 ++ctx->verbose;
             } else if (!strcmp("destip", arg)) {
@@ -1455,7 +1455,7 @@ int main(int argc, char** argv)
             } else if (!strcmp("skew-discontinuity-threshold", arg) || !strcmp("skew", arg)) {
                 int val;
                 CHECKARG("pcapreport", ii);
-                err = int_value("pcapreport", argv[ii], argv[ii + 1], TRUE, 0, &val);
+                err = int_value("pcapreport", argv[ii], argv[ii + 1], true, 0, &val);
                 if (err)
                     return 1;
                 ctx->opt_skew_discontinuity_threshold = val;
@@ -1464,15 +1464,15 @@ int main(int argc, char** argv)
                 CHECKARG("pcapreport", ii);
                 ctx->base_name = strdup(argv[++ii]); // So we know it is always malloced
             } else if (strcmp("extract", arg) == 0) {
-                ctx->extract = TRUE;
+                ctx->extract = true;
             } else if (strcmp("csvgen", arg) == 0) {
-                ctx->csv_gen = TRUE;
+                ctx->csv_gen = true;
             } else if (strcmp("good-ts-only", arg) == 0) {
-                ctx->good_ts_only = TRUE;
+                ctx->good_ts_only = true;
             } else if (strcmp("keep-bad", arg) == 0) {
-                ctx->keep_bad = TRUE;
+                ctx->keep_bad = true;
             } else if (strcmp("split-section", arg) == 0) {
-                ctx->file_split_section = TRUE;
+                ctx->file_split_section = true;
             } else if (strcmp("tfmt", arg) == 0) {
                 int tfmt;
                 CHECKARG("pcapreport", ii);
@@ -1494,7 +1494,7 @@ int main(int argc, char** argv)
                 return 1;
             } else {
                 ctx->input_name = argv[ii];
-                ctx->had_input_name = TRUE;
+                ctx->had_input_name = true;
             }
         }
         ++ii;
@@ -1507,11 +1507,11 @@ int main(int argc, char** argv)
 
     // If the dest:port is fully specified then avoid guesswork
     if (ctx->filter_dest_addr != 0 && ctx->filter_dest_port != 0)
-        ctx->keep_bad = TRUE;
+        ctx->keep_bad = true;
 
     // Good only overrides keep bad
     if (ctx->good_ts_only)
-        ctx->keep_bad = FALSE;
+        ctx->keep_bad = false;
 
     if (ctx->base_name == nullptr) {
         // If we have no default name then use the input name as a base after
@@ -1715,7 +1715,7 @@ int main(int argc, char** argv)
                 // Adjust
             dump_out:
                 if (ctx->dump_data || (ctx->dump_extra && !sent_to_output)) {
-                    print_data(TRUE, "data", data, len, len);
+                    print_data(true, "data", data, len, len);
                 }
                 free(allocated);
                 allocated = data = nullptr;

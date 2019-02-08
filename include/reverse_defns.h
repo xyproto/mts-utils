@@ -51,8 +51,8 @@ struct reverse_data {
     h262_context_p h262;
     access_unit_context_p h264;
 
-    // Information for managing our arrays. `use_seq_offset` will be TRUE
-    // for H.262 data, and FALSE for H.264 (MPEG-4/AVC)
+    // Information for managing our arrays. `use_seq_offset` will be true
+    // for H.262 data, and false for H.264 (MPEG-4/AVC)
     int length; // Number of items in our arrays
     int size; // How big our arrays are
     uint32_t num_pictures; // How many pictures we have

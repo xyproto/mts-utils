@@ -128,9 +128,9 @@ int write_avs_frame_as_TS(TS_writer_p tswriter, avs_frame_p frame, uint32_t pid)
  * - `frame` is the frame to write out
  * - `tswriter` is the TS context to write with
  * - `video_pid` is the PID to use to write the data
- * - `got_pts` is TRUE if we have a PTS value, in which case
+ * - `got_pts` is true if we have a PTS value, in which case
  * - `pts` is said PTS value
- * - `got_dts` is TRUE if we also have DTS, in which case
+ * - `got_dts` is true if we also have DTS, in which case
  * - `dts` is said DTS value.
  *
  * If we are given a DTS (which must, by definition, always go up) we will also

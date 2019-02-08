@@ -69,7 +69,7 @@ static int report_ps_dots(PS_reader_p ps, int max, int verbose)
     int num_packs = 0;
     offset_t posn; // The location in the input file of the current packet
     byte stream_id; // The packet's stream id
-    int end_of_file = FALSE;
+    int end_of_file = false;
 
     struct PS_packet packet = { 0 };
     struct PS_pack_header header = { 0 };
@@ -91,7 +91,7 @@ static int report_ps_dots(PS_reader_p ps, int max, int verbose)
 
     // Read the start of the first packet (we confidently expect this
     // to be a pack header)
-    err = read_PS_packet_start(ps, FALSE, &posn, &stream_id);
+    err = read_PS_packet_start(ps, false, &posn, &stream_id);
     if (err == EOF) {
         print_err("### Error reading first pack header\n");
         print_err("    Unexpected end of PS at start of stream\n");
@@ -104,7 +104,7 @@ static int report_ps_dots(PS_reader_p ps, int max, int verbose)
     if (stream_id != 0xba) {
         print_err("### Program stream does not start with pack header\n");
         fprint_err("    First packet has stream id %02X (", stream_id);
-        print_stream_id(FALSE, stream_id);
+        print_stream_id(false, stream_id);
         print_err(")\n");
         return 1;
     }
@@ -131,9 +131,9 @@ static int report_ps_dots(PS_reader_p ps, int max, int verbose)
 
         // Read (and, for the moment, at least, ignore) any system headers
         for (;;) {
-            err = read_PS_packet_start(ps, FALSE, &posn, &stream_id);
+            err = read_PS_packet_start(ps, false, &posn, &stream_id);
             if (err == EOF) {
-                end_of_file = TRUE;
+                end_of_file = true;
                 if (stream_id == 0xB9) {
                     print_msg("]");
                     fflush(stdout);
@@ -197,13 +197,13 @@ static int report_ps_dots(PS_reader_p ps, int max, int verbose)
                 return 1;
             }
 
-            err = read_PS_packet_start(ps, FALSE, &posn, &stream_id);
+            err = read_PS_packet_start(ps, false, &posn, &stream_id);
             if (err == EOF) {
                 if (stream_id == 0xB9) {
                     print_msg("]");
                     fflush(stdout);
                 }
-                end_of_file = TRUE;
+                end_of_file = true;
                 break;
             } else if (err)
                 return 1;
@@ -240,13 +240,13 @@ static void print_usage()
 
 int main(int argc, char** argv)
 {
-    int use_stdin = FALSE;
+    int use_stdin = false;
     char* input_name = nullptr;
-    int had_input_name = FALSE;
+    int had_input_name = false;
 
     PS_reader_p ps; // The PS file we're reading
     int max = 0; // The maximum number of PS packets to read (or 0)
-    int verbose = FALSE; // True => output diagnostic/progress messages
+    int verbose = false; // True => output diagnostic/progress messages
 
     int err = 0;
     int ii = 1;
@@ -277,16 +277,16 @@ int main(int argc, char** argv)
                 }
                 ii++;
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
-                verbose = TRUE;
+                verbose = true;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
                 CHECKARG("psdots", ii);
-                err = int_value("psdots", argv[ii], argv[ii + 1], TRUE, 10, &max);
+                err = int_value("psdots", argv[ii], argv[ii + 1], true, 10, &max);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-stdin", argv[ii])) {
-                use_stdin = TRUE;
-                had_input_name = TRUE; // so to speak
+                use_stdin = true;
+                had_input_name = true; // so to speak
             } else {
                 fprint_err("### psdots: "
                            "Unrecognised command line switch '%s'\n",
@@ -299,7 +299,7 @@ int main(int argc, char** argv)
                 return 1;
             } else {
                 input_name = argv[ii];
-                had_input_name = TRUE;
+                had_input_name = true;
             }
         }
         ii++;
@@ -310,7 +310,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    err = open_PS_file(input_name, FALSE, &ps);
+    err = open_PS_file(input_name, false, &ps);
     if (err) {
         fprint_err(
             "### psdots: Unable to open input file %s\n", (use_stdin ? "<stdin>" : input_name));

@@ -132,7 +132,7 @@ static int extract_data(
     int err;
     PES_reader_p reader;
 
-    err = build_PES_reader(input, TRUE, !quiet, !quiet, program_number, &reader);
+    err = build_PES_reader(input, true, !quiet, !quiet, program_number, &reader);
     if (err) {
         print_err("### Error building PES reader over input file\n");
         return 1;
@@ -270,18 +270,18 @@ static void print_usage()
 
 int main(int argc, char** argv)
 {
-    int use_stdout = FALSE;
-    int use_stdin = FALSE;
+    int use_stdout = false;
+    int use_stdin = false;
     char* input_name = nullptr;
     char* output_name = nullptr;
-    int had_input_name = FALSE;
-    int had_output_name = FALSE;
+    int had_input_name = false;
+    int had_output_name = false;
 
     int input = -1; // Our input file descriptor
     FILE* output = nullptr; // The stream we're writing to (if any)
     int max = 0; // The maximum number of TS packets to read (or 0)
-    int quiet = FALSE; // True => be as quiet as possible
-    int verbose = FALSE; // True => output diagnostic/progress messages
+    int quiet = false; // True => be as quiet as possible
+    int verbose = false; // True => output diagnostic/progress messages
     uint16_t program_number = 0;
 
     int err = 0;
@@ -299,31 +299,31 @@ int main(int argc, char** argv)
                 print_usage();
                 return 0;
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
-                verbose = TRUE;
-                quiet = FALSE;
+                verbose = true;
+                quiet = false;
             } else if (!strcmp("-quiet", argv[ii]) || !strcmp("-q", argv[ii])) {
-                verbose = FALSE;
-                quiet = TRUE;
+                verbose = false;
+                quiet = true;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
                 CHECKARG("ts2ps", ii);
-                err = int_value("ts2ps", argv[ii], argv[ii + 1], TRUE, 10, &max);
+                err = int_value("ts2ps", argv[ii], argv[ii + 1], true, 10, &max);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-prog", argv[ii])) {
                 int temp;
                 CHECKARG("ts2ps", ii);
-                err = int_value("ts2ps", argv[ii], argv[ii + 1], TRUE, 10, &temp);
+                err = int_value("ts2ps", argv[ii], argv[ii + 1], true, 10, &temp);
                 if (err)
                     return 1;
                 program_number = temp;
                 ii++;
             } else if (!strcmp("-stdin", argv[ii])) {
-                use_stdin = TRUE;
-                had_input_name = TRUE; // so to speak
+                use_stdin = true;
+                had_input_name = true; // so to speak
             } else if (!strcmp("-stdout", argv[ii])) {
-                use_stdout = TRUE;
-                had_output_name = TRUE; // so to speak
+                use_stdout = true;
+                had_output_name = true; // so to speak
                 redirect_output_stderr();
             } else if (!strcmp("-err", argv[ii])) {
                 CHECKARG("ts2ps", ii);
@@ -352,10 +352,10 @@ int main(int argc, char** argv)
             } else if (had_input_name) // shouldn't do this if had -stdout
             {
                 output_name = argv[ii];
-                had_output_name = TRUE;
+                had_output_name = true;
             } else {
                 input_name = argv[ii];
-                had_input_name = TRUE;
+                had_input_name = true;
             }
         }
         ii++;
@@ -373,14 +373,14 @@ int main(int argc, char** argv)
 
     // Try to stop extraneous data ending up in our output stream
     if (use_stdout) {
-        verbose = FALSE;
-        quiet = TRUE;
+        verbose = false;
+        quiet = true;
     }
 
     if (use_stdin)
         input = STDIN_FILENO;
     else {
-        input = open_binary_file(input_name, FALSE);
+        input = open_binary_file(input_name, false);
         if (input == -1) {
             fprint_err("### ts2ps: Unable to open input file %s\n", input_name);
             return 1;

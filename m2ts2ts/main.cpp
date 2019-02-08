@@ -266,18 +266,18 @@ static void print_usage(void)
 
 int main(int argc, char* argv[])
 {
-    int use_stdout = FALSE;
-    int use_stdin = FALSE;
+    int use_stdout = false;
+    int use_stdin = false;
     char* input_name = nullptr;
     char* output_name = nullptr;
-    int had_input_name = FALSE;
-    int had_output_name = FALSE;
+    int had_input_name = false;
+    int had_output_name = false;
 
     int input = -1; // Our input file descriptor
     FILE* output = nullptr; // Our output stream (if any)
     unsigned int reorder_buff_size = 4; // Number of TS packets to delay output
-    int quiet = FALSE; // True => be as quiet as possible
-    int verbose = FALSE; // True => output diagnostic messages
+    int quiet = false; // True => be as quiet as possible
+    int verbose = false; // True => output diagnostic messages
 
     int err = 0;
     int ii = 1;
@@ -295,11 +295,11 @@ int main(int argc, char* argv[])
                 print_usage();
                 return 0;
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
-                verbose = TRUE;
-                quiet = FALSE;
+                verbose = true;
+                quiet = false;
             } else if (!strcmp("-quiet", argv[ii]) || !strcmp("-q", argv[ii])) {
-                verbose = FALSE;
-                quiet = TRUE;
+                verbose = false;
+                quiet = true;
             } else if (!strcmp("-buffer", argv[ii]) || !strcmp("-b", argv[ii])) {
                 CHECKARG("m2ts2ts", ii);
                 err = unsigned_value("m2ts2ts", argv[ii], argv[ii + 1], 0, &reorder_buff_size);
@@ -307,11 +307,11 @@ int main(int argc, char* argv[])
                     return 1;
                 ii++;
             } else if (!strcmp("-stdin", argv[ii])) {
-                use_stdin = TRUE;
-                had_input_name = TRUE; // and it's "stdin"...
+                use_stdin = true;
+                had_input_name = true; // and it's "stdin"...
             } else if (!strcmp("-stdout", argv[ii])) {
-                use_stdout = TRUE;
-                had_output_name = TRUE; // ish
+                use_stdout = true;
+                had_output_name = true; // ish
                 redirect_output_stderr();
             } else if (!strcmp("-err", argv[ii])) {
                 CHECKARG("m2ts2ts", ii);
@@ -340,11 +340,11 @@ int main(int argc, char* argv[])
             } else if (had_input_name) // and not had_output_name, inc "-stdout"
             {
                 output_name = argv[ii];
-                had_output_name = TRUE;
+                had_output_name = true;
             } else // had_output_name && !had_input_name
             {
                 input_name = argv[ii];
-                had_input_name = TRUE;
+                had_input_name = true;
             }
         }
         ii++;
@@ -362,14 +362,14 @@ int main(int argc, char* argv[])
 
     // Stop (as far as possible) extraneous data ending up in our output stream
     if (use_stdout) {
-        verbose = FALSE;
-        quiet = TRUE;
+        verbose = false;
+        quiet = true;
     }
 
     if (use_stdin) {
         input = STDIN_FILENO;
     } else {
-        input = open_binary_file(input_name, FALSE);
+        input = open_binary_file(input_name, false);
         if (input == -1) {
             fprint_err("### m2ts2ts: Unable to open input file %s\n", input_name);
             return 1;

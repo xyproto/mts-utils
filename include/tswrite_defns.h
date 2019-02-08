@@ -86,7 +86,7 @@ struct TS_writer {
 
     // When the user sends a new command (a different character than is
     // currently in `command`), the underpinnings of tswrite_write() set
-    // `command` to that command letter, and `command_changed` to TRUE.
+    // `command` to that command letter, and `command_changed` to true.
     // Various key functions that write to TS check `command_changed`, and
     // return COMMAND_RETURN_CODE if it is true.
     // Note, however, that it is left up to the top level to *unset*

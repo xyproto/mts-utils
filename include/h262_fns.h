@@ -127,7 +127,7 @@ void free_h262_picture(h262_picture_p* picture);
  * read from different locations in the input stream may be considered the
  * same if their data content is identical.
  *
- * Returns TRUE if the lists contain identical content, FALSE otherwise.
+ * Returns true if the lists contain identical content, false otherwise.
  */
 int same_h262_picture(h262_picture_p picture1, h262_picture_p picture2);
 /*

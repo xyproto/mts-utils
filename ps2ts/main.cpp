@@ -161,38 +161,38 @@ static void print_usage()
 
 int main(int argc, char** argv)
 {
-    int use_stdin = FALSE;
-    int use_stdout = FALSE;
-    int use_tcpip = FALSE;
+    int use_stdin = false;
+    int use_stdout = false;
+    int use_tcpip = false;
     int port = 88; // Useful default port number
     char* input_name = nullptr;
     char* output_name = nullptr;
-    int had_input_name = FALSE;
-    int had_output_name = FALSE;
+    int had_input_name = false;
+    int had_output_name = false;
     PS_reader_p ps = nullptr;
     TS_writer_p output = nullptr;
-    int verbose = FALSE;
-    int quiet = FALSE;
+    int verbose = false;
+    int quiet = false;
     int max = 0;
     uint32_t pmt_pid = 0x66;
     uint32_t video_pid = 0x68;
     uint32_t pcr_pid = video_pid; // Use PCRs from the video stream
     uint32_t audio_pid = 0x67;
-    int keep_audio = TRUE;
+    int keep_audio = true;
     int repeat_program_every = 100;
     int pad_start = 8;
     int err = 0;
     int ii = 1;
 
     int video_type = VIDEO_H262; // hopefully a sensible default
-    int force_stream_type = FALSE;
+    int force_stream_type = false;
 
     int video_stream = -1;
     int audio_stream = -1;
-    int want_ac3_audio = FALSE;
+    int want_ac3_audio = false;
 
-    int input_is_dvd = TRUE;
-    int want_dolby_as_dvb = TRUE;
+    int input_is_dvd = true;
+    int want_dolby_as_dvb = true;
 
     if (argc < 2) {
         print_usage();
@@ -206,38 +206,38 @@ int main(int argc, char** argv)
                 print_usage();
                 return 0;
             } else if (!strcmp("-avc", argv[ii]) || !strcmp("-h264", argv[ii])) {
-                force_stream_type = TRUE;
+                force_stream_type = true;
                 video_type = VIDEO_H264;
             } else if (!strcmp("-h262", argv[ii])) {
-                force_stream_type = TRUE;
+                force_stream_type = true;
                 video_type = VIDEO_H262;
             } else if (!strcmp("-vtype", argv[ii])) {
                 CHECKARG("ps2ts", ii);
-                err = int_value("ps2ts", argv[ii], argv[ii + 1], TRUE, 0, &video_type);
+                err = int_value("ps2ts", argv[ii], argv[ii + 1], true, 0, &video_type);
                 if (err)
                     return 1;
                 ii++;
-                force_stream_type = TRUE;
+                force_stream_type = true;
             } else if (!strcmp("-mp42", argv[ii])) {
-                force_stream_type = TRUE;
+                force_stream_type = true;
                 video_type = VIDEO_MPEG4_PART2;
             } else if (!strcmp("-dolby", argv[ii])) {
                 CHECKARG("ps2ts", ii);
                 if (!strcmp("dvb", argv[ii + 1]))
-                    want_dolby_as_dvb = TRUE;
+                    want_dolby_as_dvb = true;
                 else if (!strcmp("atsc", argv[ii + 1]))
-                    want_dolby_as_dvb = FALSE;
+                    want_dolby_as_dvb = false;
                 else {
                     print_err("### ps2ts: -dolby must be followed by dvb or atsc\n");
                     return 1;
                 }
                 ii++;
             } else if (!strcmp("-stdin", argv[ii])) {
-                had_input_name = TRUE; // more or less
-                use_stdin = TRUE;
+                had_input_name = true; // more or less
+                use_stdin = true;
             } else if (!strcmp("-stdout", argv[ii])) {
-                had_output_name = TRUE; // more or less
-                use_stdout = TRUE;
+                had_output_name = true; // more or less
+                use_stdout = true;
                 redirect_output_stderr();
             } else if (!strcmp("-err", argv[ii])) {
                 CHECKARG("ps2ts", ii);
@@ -254,38 +254,38 @@ int main(int argc, char** argv)
                 }
                 ii++;
             } else if (!strcmp("-dvd", argv[ii])) {
-                input_is_dvd = TRUE;
+                input_is_dvd = true;
             } else if (!strcmp("-notdvd", argv[ii]) || !strcmp("-nodvd", argv[ii])) {
-                input_is_dvd = FALSE;
+                input_is_dvd = false;
             } else if (!strcmp("-host", argv[ii])) {
                 CHECKARG("ps2ts", ii);
                 err = host_value("ps2ts", argv[ii], argv[ii + 1], &output_name, &port);
                 if (err)
                     return 1;
-                had_output_name = TRUE; // more or less
-                use_tcpip = TRUE;
+                had_output_name = true; // more or less
+                use_tcpip = true;
                 ii++;
             } else if (!strcmp("-verbose", argv[ii]) || !strcmp("-v", argv[ii])) {
-                verbose = TRUE;
-                quiet = FALSE;
+                verbose = true;
+                quiet = false;
             } else if (!strcmp("-quiet", argv[ii]) || !strcmp("-q", argv[ii])) {
-                verbose = FALSE;
-                quiet = TRUE;
+                verbose = false;
+                quiet = true;
             } else if (!strcmp("-max", argv[ii]) || !strcmp("-m", argv[ii])) {
                 CHECKARG("ps2ts", ii);
-                err = int_value("ps2ts", argv[ii], argv[ii + 1], TRUE, 10, &max);
+                err = int_value("ps2ts", argv[ii], argv[ii + 1], true, 10, &max);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-prepeat", argv[ii])) {
                 CHECKARG("ps2ts", ii);
-                err = int_value("ps2ts", argv[ii], argv[ii + 1], TRUE, 10, &repeat_program_every);
+                err = int_value("ps2ts", argv[ii], argv[ii + 1], true, 10, &repeat_program_every);
                 if (err)
                     return 1;
                 ii++;
             } else if (!strcmp("-pad", argv[ii])) {
                 CHECKARG("ps2ts", ii);
-                err = int_value("ps2ts", argv[ii], argv[ii + 1], TRUE, 10, &pad_start);
+                err = int_value("ps2ts", argv[ii], argv[ii + 1], true, 10, &pad_start);
                 if (err)
                     return 1;
                 ii++;
@@ -308,7 +308,7 @@ int main(int argc, char** argv)
                     return 1;
                 ii++;
             } else if (!strcmp("-noaudio", argv[ii])) {
-                keep_audio = FALSE;
+                keep_audio = false;
             } else if (!strcmp("-vstream", argv[ii])) {
                 CHECKARG("ps2ts", ii);
                 err = int_value_in_range(
@@ -322,7 +322,7 @@ int main(int argc, char** argv)
                     "ps2ts", argv[ii], argv[ii + 1], 0, 0x1F, 0, &audio_stream);
                 if (err)
                     return 1;
-                want_ac3_audio = FALSE;
+                want_ac3_audio = false;
                 ii++;
             } else if (!strcmp("-ac3stream", argv[ii])) {
                 CHECKARG("ps2ts", ii);
@@ -330,8 +330,8 @@ int main(int argc, char** argv)
                     "ps2ts", argv[ii], argv[ii + 1], 0, 0x7, 0, &audio_stream);
                 if (err)
                     return 1;
-                want_ac3_audio = TRUE;
-                input_is_dvd = TRUE;
+                want_ac3_audio = true;
+                input_is_dvd = true;
                 ii++;
             } else {
                 fprint_err("### ps2ts: "
@@ -345,10 +345,10 @@ int main(int argc, char** argv)
                 return 1;
             } else if (had_input_name) {
                 output_name = argv[ii];
-                had_output_name = TRUE;
+                had_output_name = true;
             } else {
                 input_name = argv[ii];
-                had_input_name = TRUE;
+                had_input_name = true;
             }
         }
         ii++;
@@ -365,8 +365,8 @@ int main(int argc, char** argv)
 
     // Try to stop extraneous data ending up in our output stream
     if (use_stdout) {
-        verbose = FALSE;
-        quiet = TRUE;
+        verbose = false;
+        quiet = true;
     }
 
     err = open_PS_file(input_name, quiet, &ps);
@@ -439,7 +439,7 @@ int main(int argc, char** argv)
     if (err) {
         print_err("### ps2ts: Error transferring data\n");
         (void)close_PS_file(&ps);
-        (void)tswrite_close(output, TRUE);
+        (void)tswrite_close(output, true);
         return 1;
     }
 

@@ -36,7 +36,7 @@
  * Build the internal arrays to remember video sequence bounds in,
  * for reversing.
  *
- * Builds a new `reverse_data` datastructure. If `is_h264` is FALSE (i.e., the
+ * Builds a new `reverse_data` datastructure. If `is_h264` is false (i.e., the
  * data to be reversed is not MPEG-1 or MPEG-2), then this datastructure may
  * be smaller.
  *

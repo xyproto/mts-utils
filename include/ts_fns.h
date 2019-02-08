@@ -156,9 +156,9 @@ int write_ES_as_TS_PES_packet(
  * - `pid` is the PID to use for this TS packet
  * - `stream_id` is the PES packet stream id to use (e.g.,
  *    DEFAULT_VIDEO_STREAM_ID)
- * - `got_pts` is TRUE if we have a PTS value, in which case
+ * - `got_pts` is true if we have a PTS value, in which case
  * - `pts` is said PTS value
- * - `got_dts` is TRUE if we also have DTS, in which case
+ * - `got_dts` is true if we also have DTS, in which case
  * - `dts` is said DTS value.
  *
  * We also want to try to write out a sensible PCR value.
@@ -211,7 +211,7 @@ int write_ES_as_TS_PES_packet_with_pcr(TS_writer_p output, byte data[], uint32_t
  * - `pid` is the PID to use for this TS packet
  * - `stream_id` is the PES packet stream id to use (e.g.,
  *    DEFAULT_VIDEO_STREAM_ID)
- * - `got_pcr` is TRUE if we have values for the PCR in this packet,
+ * - `got_pcr` is true if we have values for the PCR in this packet,
  *   in which case `pcr_base` and `pcr_extn` are the parts of the PCR.
  *
  * If the data to be written is more than 65535 bytes long (i.e., the
@@ -431,7 +431,7 @@ int read_buffered_TS_packet(TS_reader_p tsreader, uint32_t* count, byte* data[TS
  *
  * - `adapt` is the adaptation field content
  * - `adapt_len` is its length
- * - `got_PCR` is TRUE if the adaptation field contains a PCR
+ * - `got_PCR` is true if the adaptation field contains a PCR
  * - `pcr` is then the PCR value itself
  */
 void get_PCR_from_adaptation_field(byte adapt[], int adapt_len, int* got_pcr, uint64_t* pcr);
@@ -566,7 +566,7 @@ int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt
  *
  * - `buf` is the data for the packet
  * - `pid` is the PID of said data
- * - `payload_unit_start_indicator` is TRUE if any payload in this
+ * - `payload_unit_start_indicator` is true if any payload in this
  *   packet forms the start of a PES packet. Its meaning is not significant
  *   if there is no payload, or if the payload is not (part of) a PES packet.
  * - `adapt` is an offset into `buf`, acting as an array of the actual
@@ -594,7 +594,7 @@ int split_TS_packet(byte buf[TS_PACKET_SIZE], uint32_t* pid, int* payload_unit_s
  *
  * - `tsreader` is the TS packet reading context
  * - `pid` is the PID of said data
- * - `payload_unit_start_indicator` is TRUE if any payload in this
+ * - `payload_unit_start_indicator` is true if any payload in this
  *   packet forms the start of a PES packet. Its meaning is not significant
  *   if there is no payload, or if the payload is not (part of) a PES packet.
  * - `adapt` is an offset into `buf`, acting as an array of the actual

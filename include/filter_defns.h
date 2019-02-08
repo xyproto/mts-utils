@@ -49,7 +49,7 @@
 // ------------------------------------------------------------
 struct h262_filter_context {
     h262_context_p h262; // The H.262 stream we are reading from
-    int filter; // TRUE if filtering, FALSE if stripping
+    int filter; // true if filtering, false if stripping
     int freq; // Frequency of frames to try to keep if filtering
     int allref; // Keep all I and P pictures if stripping?
     // (the name `allref` is used for compatibility with the H.264 filter
@@ -76,18 +76,18 @@ typedef struct h262_filter_context* h262_filter_context_p;
 // ------------------------------------------------------------
 struct h264_filter_context {
     access_unit_context_p access_unit_context; // our "reader" for access units
-    int filter; // TRUE if filtering, FALSE if stripping
+    int filter; // true if filtering, false if stripping
     int freq; // Frequency of frames to try to keep if filtering
     int allref; // Keep all reference pictures
 
     // When filtering, we want:
     // a rolling count to compare with the desired frequency
     int count;
-    // `skipped_ref_pic` is TRUE if we've skipped any reference pictures
+    // `skipped_ref_pic` is true if we've skipped any reference pictures
     // since our last IDR.
     int skipped_ref_pic;
-    // `last_accepted_was_not_IDR` is TRUE if the last frame kept (output)
-    // was not an IDR. We set it TRUE initially so that we will decide
+    // `last_accepted_was_not_IDR` is true if the last frame kept (output)
+    // was not an IDR. We set it true initially so that we will decide
     // to output the first IDR we *do* find, regardless of the count.
     int last_accepted_was_not_IDR;
     int had_previous_access_unit;

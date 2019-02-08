@@ -269,6 +269,6 @@ int get_next_h264_frame(
  * If this access unit was read from PES, did any of its PES packets contain
  * a PTS?
  *
- * Returns TRUE if so, FALSE if not.
+ * Returns true if so, false if not.
  */
 int access_unit_has_PTS(access_unit_p access_unit);

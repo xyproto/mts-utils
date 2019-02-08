@@ -50,8 +50,8 @@
 // Should we report reserved bits that are set to the wrong value?
 // For the moment, make this a global, since it lets me suppress
 // it easily. There should be some sort of command line switch
-// to set this to FALSE in utilities that it matters for.
-static int report_bad_reserved_bits = FALSE;
+// to set this to false in utilities that it matters for.
+static int report_bad_reserved_bits = false;
 
 // ============================================================
 // Suppport for the creation of Transport Streams.
@@ -85,11 +85,11 @@ static inline int next_continuity_count(uint32_t pid)
  *   that same table), then the data_alignment_indicator flag will be set
  *   in the PES header - i.e., we assume that the audio frame *starts*
  *   (has its syncword) at the start of the PES packet payload.
- * - `with_PTS` should be TRUE if the PTS value in `pts` should be written
+ * - `with_PTS` should be true if the PTS value in `pts` should be written
  *   to the PES header.
- * - `with_DTS` should be TRUE if the DTS value in `dts` should be written
- *   to the PES header. Note that if `with_DTS` is TRUE, then `with_PTS`
- *   must also be TRUE. If it is not, then the DTS value will be used for
+ * - `with_DTS` should be true if the DTS value in `dts` should be written
+ *   to the PES header. Note that if `with_DTS` is true, then `with_PTS`
+ *   must also be true. If it is not, then the DTS value will be used for
  *   the PTS.
  * - `PES_hdr` is the resultant PES packet header, and
  * - `PES_hdr_len` its length (at the moment that's always the same, as
@@ -102,13 +102,13 @@ void PES_header(uint32_t data_len, byte stream_id, int with_PTS, uint64_t pts, i
     int extra_len = 0;
 
     if (with_DTS && !with_PTS) {
-        with_PTS = TRUE;
+        with_PTS = true;
         pts = dts;
     }
 
     // If PTS=DTS then there is no point explictly coding the DTS so junk it
     if (with_DTS && pts == dts)
-        with_DTS = FALSE;
+        with_DTS = false;
 
     // packet_start_code_prefix
     PES_hdr[0] = 0x00;
@@ -186,7 +186,7 @@ void PES_header(uint32_t data_len, byte stream_id, int with_PTS, uint64_t pts, i
  * information that is available for the packet. Thus:
  *
  * - `pid` is the PID for the packet
- * - `got_pcr` is TRUE if we have a PCR for the packet, in which case
+ * - `got_pcr` is true if we have a PCR for the packet, in which case
  * - `pcr` is that PCR.
  *
  * Restrictions
@@ -246,14 +246,14 @@ static int write_TS_packet_parts(TS_writer_p output, byte TS_packet[TS_PACKET_SI
  * - `start` is true if this is the first time we've called this function
  *   to output (part of) this data (in other words, this should be true
  *   when someone else calls this function, and false when the function
- *   calls itself). This is expected to be TRUE if a PES header is given...
- * - `set_pusi` is TRUE if we should set the payload unit start indicator
- *   (generally true if `start` is TRUE). This is ignored if `start` is FALSE.
+ *   calls itself). This is expected to be true if a PES header is given...
+ * - `set_pusi` is true if we should set the payload unit start indicator
+ *   (generally true if `start` is true). This is ignored if `start` is false.
  * - `pid` is the PID to use for this TS packet
  * - `stream_id` is the PES packet stream id to use (e.g.,
  *    DEFAULT_VIDEO_STREAM_ID)
- * - `got_PCR` is TRUE if we have a `PCR` value (this is only
- *   relevant when `start` is also TRUE).
+ * - `got_PCR` is true if we have a `PCR` value (this is only
+ *   relevant when `start` is also true).
  * - `PCR_base` and `PCR_extn` then encode that PCR value (ditto)
  *
  * Returns 0 if it worked, 1 if something went wrong.
@@ -268,7 +268,7 @@ static int write_some_TS_PES_packet(TS_writer_p output, byte* pes_hdr, int pes_h
     uint32_t controls = 0;
     uint32_t pes_data_len = 0;
     int err;
-    int got_adaptation_field = FALSE;
+    int got_adaptation_field = false;
     uint32_t space_left; // Bytes available for payload, after the TS header
 
     if (pid < 0x0010 || pid > 0x1ffe) {
@@ -291,7 +291,7 @@ static int write_some_TS_PES_packet(TS_writer_p output, byte* pes_hdr, int pes_h
         print_msg("TS_PES ");
     else
         print_msg("       ");
-    print_data(TRUE, "", data, data_len, 20);
+    print_data(true, "", data, data_len, 20);
 #endif
 
     // We always start with a sync_byte to identify this as a
@@ -322,7 +322,7 @@ static int write_some_TS_PES_packet(TS_writer_p output, byte* pes_hdr, int pes_h
         TS_packet[11] = (byte)(PCR_extn >> 1);
         TS_hdr_len = 12;
         space_left = MAX_TS_PAYLOAD_SIZE - 8;
-        got_adaptation_field = TRUE;
+        got_adaptation_field = true;
 #if DEBUG_THIS
         fprint_msg(
             "       start & got_PCR -> with adaptation field, space left %d, TS_packet[4] %d\n",
@@ -345,7 +345,7 @@ static int write_some_TS_PES_packet(TS_writer_p output, byte* pes_hdr, int pes_h
             TS_hdr_len = 6;
             space_left = MAX_TS_PAYLOAD_SIZE - 2; // i.e., 182
         }
-        got_adaptation_field = TRUE;
+        got_adaptation_field = true;
 #if DEBUG_THIS
         fprint_msg(
             "       <184, pad with empty adaptation field, space left %d, TS_packet[4] %d\n",
@@ -405,7 +405,7 @@ static int write_some_TS_PES_packet(TS_writer_p output, byte* pes_hdr, int pes_h
         // Is recursion going to be efficient enough?
         if ((data_len - increment) > 0) {
             err = write_some_TS_PES_packet(output, nullptr, 0, &(data[increment]),
-                data_len - increment, FALSE, FALSE, pid, stream_id, FALSE, 0, 0);
+                data_len - increment, false, false, pid, stream_id, false, 0, 0);
             if (err)
                 return err;
         }
@@ -441,10 +441,10 @@ int write_ES_as_TS_PES_packet(
     fprint_msg("||  ES as TS/PES, pid %x (%d)\n", pid, pid);
 #endif
 
-    PES_header(data_len, stream_id, FALSE, 0, FALSE, 0, pes_hdr, &pes_hdr_len);
+    PES_header(data_len, stream_id, false, 0, false, 0, pes_hdr, &pes_hdr_len);
 
     return write_some_TS_PES_packet(
-        output, pes_hdr, pes_hdr_len, data, data_len, TRUE, TRUE, pid, stream_id, FALSE, 0, 0);
+        output, pes_hdr, pes_hdr_len, data, data_len, true, true, pid, stream_id, false, 0, 0);
 }
 
 /*
@@ -457,9 +457,9 @@ int write_ES_as_TS_PES_packet(
  * - `pid` is the PID to use for this TS packet
  * - `stream_id` is the PES packet stream id to use (e.g.,
  *    DEFAULT_VIDEO_STREAM_ID)
- * - `got_pts` is TRUE if we have a PTS value, in which case
+ * - `got_pts` is true if we have a PTS value, in which case
  * - `pts` is said PTS value
- * - `got_dts` is TRUE if we also have DTS, in which case
+ * - `got_dts` is true if we also have DTS, in which case
  * - `dts` is said DTS value.
  *
  * We also want to try to write out a sensible PCR value.
@@ -493,7 +493,7 @@ int write_ES_as_TS_PES_packet_with_pts_dts(TS_writer_p output, byte data[], uint
     PES_header(data_len, stream_id, got_pts, pts, got_dts, dts, pes_hdr, &pes_hdr_len);
 
     return write_some_TS_PES_packet(
-        output, pes_hdr, pes_hdr_len, data, data_len, TRUE, TRUE, pid, stream_id, got_dts, dts, 0);
+        output, pes_hdr, pes_hdr_len, data, data_len, true, true, pid, stream_id, got_dts, dts, 0);
 }
 
 /*
@@ -525,10 +525,10 @@ int write_ES_as_TS_PES_packet_with_pcr(TS_writer_p output, byte data[], uint32_t
     fprint_msg("||  ES as TS/PES with PCR, pid %x (%d)\n", pid, pid);
 #endif
 
-    PES_header(data_len, stream_id, FALSE, 0, FALSE, 0, pes_hdr, &pes_hdr_len);
+    PES_header(data_len, stream_id, false, 0, false, 0, pes_hdr, &pes_hdr_len);
 
-    return write_some_TS_PES_packet(output, pes_hdr, pes_hdr_len, data, data_len, TRUE, TRUE, pid,
-        stream_id, TRUE, pcr_base, pcr_extn);
+    return write_some_TS_PES_packet(output, pes_hdr, pes_hdr_len, data, data_len, true, true, pid,
+        stream_id, true, pcr_base, pcr_extn);
 }
 
 /*
@@ -540,7 +540,7 @@ int write_ES_as_TS_PES_packet_with_pcr(TS_writer_p output, byte data[], uint32_t
  * - `pid` is the PID to use for this TS packet
  * - `stream_id` is the PES packet stream id to use (e.g.,
  *    DEFAULT_VIDEO_STREAM_ID)
- * - `got_pcr` is TRUE if we have values for the PCR in this packet,
+ * - `got_pcr` is true if we have values for the PCR in this packet,
  *   in which case `pcr_base` and `pcr_extn` are the parts of the PCR.
  *
  * If the data to be written is more than 65535 bytes long (i.e., the
@@ -564,14 +564,14 @@ int write_PES_as_TS_PES_packet(TS_writer_p output, byte data[], uint32_t data_le
 #endif
 
 #if 0 // XXX
-  print_data(TRUE,"TS_PES",data,data_len,20);
+  print_data(true,"TS_PES",data,data_len,20);
   print_end_of_data("      ",data,data_len,20);
 #endif // XXX
 
 #if MPEG1_AS_ES
     if (IS_H222_PES(data)) {
 #endif // MPEG1_AS_ES
-        return write_some_TS_PES_packet(output, nullptr, 0, data, data_len, TRUE, TRUE, pid,
+        return write_some_TS_PES_packet(output, nullptr, 0, data, data_len, true, true, pid,
             stream_id, got_pcr, pcr_base, pcr_extn);
 #if MPEG1_AS_ES
     } else {
@@ -582,8 +582,8 @@ int write_PES_as_TS_PES_packet(TS_writer_p output, byte data[], uint32_t data_le
         int err = find_PTS_DTS_in_PES(data, data_len, &got_pts, &pts, &got_dts, &dts);
         if (err) // Just try to carry on...
         {
-            got_pts = FALSE;
-            got_dts = FALSE;
+            got_pts = false;
+            got_dts = false;
         }
         return write_ES_as_TS_PES_packet_with_pts_dts(
             output, data + offset, data_len - offset, pid, stream_id, got_pts, pts, got_dts, dts);
@@ -787,7 +787,7 @@ int write_pat(TS_writer_p output, uint32_t transport_stream_id, pidint_list_p pr
     if (section_length > 1021) {
         print_err("### PAT data is too long - will not fit in 1021 bytes\n");
         // TODO: Ideally, would be to stderr
-        report_pidint_list(prog_list, "Program list", "Program", FALSE);
+        report_pidint_list(prog_list, "Program list", "Program", false);
         return 1;
     }
 
@@ -838,7 +838,7 @@ int write_pat(TS_writer_p output, uint32_t transport_stream_id, pidint_list_p pr
         return 1;
     }
     err = write_TS_packet_parts(
-        output, TS_packet, TS_hdr_len, nullptr, 0, data, data_length, 0x00, FALSE, 0);
+        output, TS_packet, TS_hdr_len, nullptr, 0, data, data_length, 0x00, false, 0);
     if (err) {
         print_err("### Error writing PAT\n");
         return 1;
@@ -888,7 +888,7 @@ int write_pmt(TS_writer_p output, uint32_t pmt_pid, pmt_p pmt)
         section_length += 5 + pmt->streams[ii].ES_info_length;
     if (section_length > 1021) {
         print_err("### PMT data is too long - will not fit in 1021 bytes\n");
-        report_pmt(FALSE, "    ", pmt);
+        report_pmt(false, "    ", pmt);
         return 1;
     }
 
@@ -946,7 +946,7 @@ int write_pmt(TS_writer_p output, uint32_t pmt_pid, pmt_p pmt)
         return 1;
     }
     err = write_TS_packet_parts(
-        output, TS_packet, TS_hdr_len, nullptr, 0, data, data_length, 0x02, FALSE, 0);
+        output, TS_packet, TS_hdr_len, nullptr, 0, data, data_length, 0x02, false, 0);
     if (err) {
         print_err("### Error writing PMT\n");
         return 1;
@@ -1038,7 +1038,7 @@ int write_TS_null_packet(TS_writer_p output)
         TS_packet[ii] = 0xFF;
 
     err = write_TS_packet_parts(
-        output, TS_packet, TS_PACKET_SIZE, nullptr, 0, nullptr, 0, 0x1FF, FALSE, 0);
+        output, TS_packet, TS_PACKET_SIZE, nullptr, 0, nullptr, 0, 0x1FF, false, 0);
     if (err) {
         print_err("### Error writing null TS packet\n");
         return 1;
@@ -1139,7 +1139,7 @@ int open_file_for_TS_read(char* filename, TS_reader_p* tsreader)
     if (filename == nullptr)
         file = STDIN_FILENO;
     else {
-        file = open_binary_file(filename, FALSE);
+        file = open_binary_file(filename, false);
         if (file == -1)
             return 1;
     }
@@ -1497,7 +1497,7 @@ int read_first_TS_packet_from_buffer(TS_reader_p tsreader, uint32_t pcr_pid, uin
     tsreader->pcrbuf->TS_buffer_posn = start_count;
     tsreader->pcrbuf->TS_buffer_len = 0;
     tsreader->pcrbuf->TS_buffer_pcr_pid = pcr_pid;
-    tsreader->pcrbuf->TS_had_EOF = FALSE;
+    tsreader->pcrbuf->TS_had_EOF = false;
 
     // Read TS packets into our buffer until we find one with a PCR
     err = fill_TS_packet_buffer(tsreader);
@@ -1560,7 +1560,7 @@ int read_next_TS_packet_from_buffer(
                 // at the end of the file. This proved unacceptable in practice,
                 // so our second best choice is to "play out" using the last
                 // known PCR rate-of-change.
-                tsreader->pcrbuf->TS_had_EOF = TRUE; // remember we're playing out
+                tsreader->pcrbuf->TS_had_EOF = true; // remember we're playing out
                 // Must move PCR start
                 tsreader->pcrbuf->TS_buffer_prev_pcr = tsreader->pcrbuf->TS_buffer_end_pcr;
                 // If we read nothing we must die now
@@ -1699,16 +1699,16 @@ int read_buffered_TS_packet(TS_reader_p tsreader, uint32_t* count, byte* data[TS
  *
  * - `adapt` is the adaptation field content
  * - `adapt_len` is its length
- * - `got_PCR` is TRUE if the adaptation field contains a PCR
+ * - `got_PCR` is true if the adaptation field contains a PCR
  * - `pcr` is then the PCR value itself
  */
 void get_PCR_from_adaptation_field(byte adapt[], int adapt_len, int* got_pcr, uint64_t* pcr)
 {
     if (adapt_len == 0 || adapt == nullptr)
-        *got_pcr = FALSE;
+        *got_pcr = false;
     else if (adapt[0] & 0x10) // We have a PCR
     {
-        *got_pcr = TRUE;
+        *got_pcr = true;
         // The program_clock_reference_base
         // NB: Force the first byte to be unsigned 64 bit, or else on Windows
         // it tends to get shifted as a signed integer, and sign-extended,
@@ -1719,7 +1719,7 @@ void get_PCR_from_adaptation_field(byte adapt[], int adapt_len, int* got_pcr, ui
         // Plus the program clock reference extension
         *pcr = ((*pcr) * 300) + ((adapt[5] & 1) << 8) + adapt[6];
     } else
-        *got_pcr = FALSE;
+        *got_pcr = false;
     return;
 }
 
@@ -1793,7 +1793,7 @@ void report_adaptation_timing(timing_p times, byte adapt[], int adapt_len, int p
         if (!times->had_first_pcr) {
             times->last_pcr_packet = times->first_pcr_packet = packet_count;
             times->last_pcr = times->first_pcr = pcr;
-            times->had_first_pcr = TRUE;
+            times->had_first_pcr = true;
         } else {
             if (pcr < times->last_pcr)
                 fprint_msg(" Discontinuity: PCR was %7" LLU_FORMAT_STUMP
@@ -1834,7 +1834,7 @@ void report_payload(int show_data, int stream_type, byte payload[MAX_TS_PAYLOAD_
     if (payload_unit_start_indicator)
         report_PES_data_array2(stream_type, payload, payload_len, show_data ? 1000 : 0);
     else if (show_data)
-        print_data(TRUE, "Data", payload, payload_len, 1000);
+        print_data(true, "Data", payload, payload_len, 1000);
 }
 
 /*
@@ -1875,7 +1875,7 @@ int extract_prog_list_from_pat(int verbose, byte data[], int data_len, pidint_li
     }
 
     if (DEBUG)
-        print_data(TRUE, "Data", data, data_len, 1000);
+        print_data(true, "Data", data, data_len, 1000);
 
     // The table id in a PAT should be 0
     table_id = data[0];
@@ -1949,7 +1949,7 @@ int extract_prog_list_from_pat(int verbose, byte data[], int data_len, pidint_li
     program_data = data + 8;
     program_data_len = data_len - 8 - 4; // The "-4" is for the CRC
 
-    // print_data(TRUE,"Rest:",program_data,program_data_len,1000);
+    // print_data(true,"Rest:",program_data,program_data_len,1000);
 
     err = build_pidint_list(prog_list);
     if (err)
@@ -2687,17 +2687,17 @@ int build_psi_data(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_l
             return 1;
         }
 
-        // if (DEBUG) print_data(TRUE,"PMT",payload,payload_len,1000);
+        // if (DEBUG) print_data(true,"PMT",payload,payload_len,1000);
         packet_data = payload + pointer + 1;
         packet_data_len = payload_len - pointer - 1;
         if (DEBUG)
-            print_data(TRUE, "Data", packet_data, packet_data_len, 1000);
+            print_data(true, "Data", packet_data, packet_data_len, 1000);
 
         section_length = ((packet_data[1] & 0xF) << 8) | packet_data[2];
 
 #if 0 // XXX
       print_msg("===========================================\n");
-      print_data(TRUE,"build_pmt_data(new2)",packet_data,packet_data_len,packet_data_len);
+      print_data(true,"build_pmt_data(new2)",packet_data,packet_data_len,packet_data_len);
 #endif
 
         *data_len = section_length + 3;
@@ -2723,11 +2723,11 @@ int build_psi_data(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_l
         packet_data = payload;
         packet_data_len = payload_len;
         if (DEBUG)
-            print_data(TRUE, "Data", packet_data, packet_data_len, 1000);
+            print_data(true, "Data", packet_data, packet_data_len, 1000);
 
 #if 0 // XXX
     print_msg("===========================================\n");
-    print_data(TRUE,"build_pmt_data(old)",packet_data,packet_data_len,100);
+    print_data(true,"build_pmt_data(old)",packet_data,packet_data_len,100);
 #endif
         if (space_left > packet_data_len) {
             // We have more than enough room - use all of this packet
@@ -2784,7 +2784,7 @@ int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt
     }
 
     if (DEBUG)
-        print_data(TRUE, "Data", data, data_len, 1000);
+        print_data(true, "Data", data, data_len, 1000);
 
     // Check the table id (maybe this should be done by our caller?)
     table_id = data[0];
@@ -2796,7 +2796,7 @@ int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt
         {
             if (verbose) {
                 fprint_msg("    'PMT' with PID %04x is user private table %02x\n", pid, table_id);
-                print_data(TRUE, "    Data", data, data_len, 20);
+                print_data(true, "    Data", data, data_len, 20);
             }
         } else {
             if (0x03 <= table_id && table_id <= 0x3F)
@@ -2808,7 +2808,7 @@ int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt
                     (table_id == 0x00
                             ? "PAT"
                             : table_id == 0x01 ? "CAT" : table_id == 0xFF ? "Forbidden" : "???"));
-            print_data(FALSE, "    Data", data, data_len, 20);
+            print_data(false, "    Data", data, data_len, 20);
         }
         // Best we can do is to pretend it didn't happen
         *pmt = build_pmt(0, 0, 0); // empty "PMT" with program number 0, PCR PID 0
@@ -2885,7 +2885,7 @@ int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt
 
     if (verbose && program_info_length > 0) {
         print_msg("  Program info:\n");
-        print_descriptors(TRUE, "    ", nullptr, &data[12], program_info_length);
+        print_descriptors(true, "    ", nullptr, &data[12], program_info_length);
     }
 
     // 32 bits at the end of a program association section is reserved for a CRC
@@ -2911,7 +2911,7 @@ int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt
     stream_data = data + 12 + program_info_length;
     stream_data_len = data_len - 12 - program_info_length - 4; // "-4" == CRC
 
-    // print_data(TRUE,"Rest:",stream_data,stream_data_len,1000);
+    // print_data(true,"Rest:",stream_data,stream_data_len,1000);
 
     *pmt = build_pmt(program_number, version_number, pcr_pid);
     if (*pmt == nullptr)
@@ -2935,7 +2935,7 @@ int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt
             fprint_msg("    PID %04x -> Stream %02x %s\n", pid, stream_type,
                 h222_stream_type_str(stream_type));
             if (ES_info_length > 0)
-                print_descriptors(TRUE, "        ", nullptr, &stream_data[5], ES_info_length);
+                print_descriptors(true, "        ", nullptr, &stream_data[5], ES_info_length);
         }
         err = add_stream_to_pmt(*pmt, pid, stream_type, ES_info_length, stream_data + 5);
         if (err) {
@@ -3001,11 +3001,11 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
         return 1;
     }
 
-    // if (DEBUG) print_data(TRUE,"PMT",payload,payload_len,1000);
+    // if (DEBUG) print_data(true,"PMT",payload,payload_len,1000);
     data = payload + pointer + 1;
     data_len = payload_len - pointer - 1;
     if (DEBUG)
-        print_data(TRUE, "Data", data, data_len, 1000);
+        print_data(true, "Data", data, data_len, 1000);
 
     // Check the table id (maybe this should be done by our caller?)
     table_id = data[0];
@@ -3017,7 +3017,7 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
         {
             if (verbose) {
                 fprint_msg("    'PMT' with PID %04x is user private table %02x\n", pid, table_id);
-                print_data(TRUE, "    Data", data, data_len, 20);
+                print_data(true, "    Data", data, data_len, 20);
             }
         } else {
             if (0x03 <= table_id && table_id <= 0x3F)
@@ -3029,7 +3029,7 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
                     (table_id == 0x00
                             ? "PAT"
                             : table_id == 0x01 ? "CAT" : table_id == 0xFF ? "Forbidden" : "???"));
-            print_data(FALSE, "    Data", data, data_len, 20);
+            print_data(false, "    Data", data, data_len, 20);
         }
         // Best we can do is to pretend it didn't happen
         *program_number = 0;
@@ -3104,7 +3104,7 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
 
     if (verbose && program_info_length > 0) {
         print_msg("  Program info:\n");
-        print_descriptors(TRUE, "    ", nullptr, &data[12], program_info_length);
+        print_descriptors(true, "    ", nullptr, &data[12], program_info_length);
     }
 
     // 32 bits at the end of a program association section is reserved for a CRC
@@ -3129,7 +3129,7 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
     stream_data = data + 12 + program_info_length;
     stream_data_len = data_len - 12 - program_info_length - 4; // "-4" == CRC
 
-    // print_data(TRUE,"Rest:",stream_data,stream_data_len,1000);
+    // print_data(true,"Rest:",stream_data,stream_data_len,1000);
 
     err = build_pidint_list(stream_list);
     if (err)
@@ -3150,7 +3150,7 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
 #undef SARRAYSIZE
             fprint_msg("    Stream %02x %-40s -> PID %04x\n", stream_type, buf, pid);
             if (ES_info_length > 0)
-                print_descriptors(TRUE, "        ", nullptr, &stream_data[5], ES_info_length);
+                print_descriptors(true, "        ", nullptr, &stream_data[5], ES_info_length);
         }
         // For the moment, we shan't bother to remember the extra info.
         err = append_to_pidint_list(*stream_list, pid, stream_type);
@@ -3167,7 +3167,7 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
  *
  * - `buf` is the data for the packet
  * - `pid` is the PID of said data
- * - `payload_unit_start_indicator` is TRUE if any payload in this
+ * - `payload_unit_start_indicator` is true if any payload in this
  *   packet forms the start of a PES packet. Its meaning is not significant
  *   if there is no payload, or if the payload is not (part of) a PES packet.
  * - `adapt` is an offset into `buf`, acting as an array of the actual
@@ -3262,7 +3262,7 @@ int split_TS_packet(byte buf[TS_PACKET_SIZE], uint32_t* pid, int* payload_unit_s
  *
  * - `tsreader` is the TS packet reading context
  * - `pid` is the PID of said data
- * - `payload_unit_start_indicator` is TRUE if any payload in this
+ * - `payload_unit_start_indicator` is true if any payload in this
  *   packet forms the start of a PES packet. Its meaning is not significant
  *   if there is no payload, or if the payload is not (part of) a PES packet.
  * - `adapt` is an offset into `buf`, acting as an array of the actual
@@ -3561,7 +3561,7 @@ int find_pmt(TS_reader_p tsreader, const int req_prog_no, int max, int verbose, 
 
     if (!quiet) {
         print_msg("\n");
-        report_pidint_list(prog_list, (char*)"Program list", (char*)"Program", FALSE);
+        report_pidint_list(prog_list, (char*)"Program list", (char*)"Program", false);
         print_msg("\n");
     }
 
@@ -3615,7 +3615,7 @@ int find_pmt(TS_reader_p tsreader, const int req_prog_no, int max, int verbose, 
     if (!quiet) {
         print_msg("\n");
         print_msg("Program map\n");
-        report_pmt(TRUE, "  ", *pmt);
+        report_pmt(true, "  ", *pmt);
         print_msg("\n");
     }
     return 0;

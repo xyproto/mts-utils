@@ -70,7 +70,7 @@ int open_elementary_stream(char* filename, ES_p* es)
     if (filename == nullptr)
         input = STDIN_FILENO;
     else {
-        input = open_binary_file(filename, FALSE);
+        input = open_binary_file(filename, false);
         if (input == -1)
             return 1;
     }
@@ -148,7 +148,7 @@ int build_elementary_stream_file(int input, ES_p* es)
         return 1;
     }
 
-    new2->reading_ES = TRUE;
+    new2->reading_ES = true;
     new2->input = input;
     new2->reader = nullptr;
 
@@ -179,7 +179,7 @@ int build_elementary_stream_PES(PES_reader_p reader, ES_p* es)
         return 1;
     }
 
-    new2->reading_ES = FALSE;
+    new2->reading_ES = false;
     new2->input = -1;
     new2->reader = reader;
 
@@ -240,15 +240,15 @@ void close_elementary_stream(ES_p* es)
  *
  * Calls `tswrite_command_changed()` on the TS writer associated with this ES.
  *
- * Returns TRUE if there is a changed command.
+ * Returns true if there is a changed command.
  */
 int es_command_changed(ES_p es)
 {
     if (es->reading_ES)
-        return FALSE;
+        return false;
 
     if (es->reader->tswriter == nullptr)
-        return FALSE;
+        return false;
 
     return tswrite_command_changed(es->reader->tswriter);
 }
@@ -275,7 +275,7 @@ int setup_ES_unit(ES_unit_p unit)
     unit->start_posn.infile = 0;
     unit->start_posn.inpacket = 0;
 
-    unit->PES_had_PTS = FALSE; // See the header file
+    unit->PES_had_PTS = false; // See the header file
     return 0;
 }
 
@@ -320,7 +320,7 @@ int build_ES_unit(ES_unit_p* unit)
  * Build a new ES unit datastructure, from a given data array.
  *
  * Takes a copy of 'data'. Sets 'start_code' appropriately,
- * sets 'start_posn' to (0,0), and 'PES_had_PTS' to FALSE.
+ * sets 'start_posn' to (0,0), and 'PES_had_PTS' to false.
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
@@ -342,7 +342,7 @@ int build_ES_unit_from_data(ES_unit_p* unit, byte* data, uint32_t data_len)
     new2->start_code = data[3];
     new2->start_posn.infile = 0;
     new2->start_posn.inpacket = 0;
-    new2->PES_had_PTS = FALSE; // See the header file
+    new2->PES_had_PTS = false; // See the header file
     *unit = new2;
     return 0;
 }
@@ -617,7 +617,7 @@ static int find_ES_unit_end(ES_p es, ES_unit_p unit)
             // being split between PES packets) that our ES unit has a PTS "around"
             // it
             if (es->reader->packet->has_PTS)
-                unit->PES_had_PTS = TRUE;
+                unit->PES_had_PTS = true;
         }
     }
 }
@@ -1132,7 +1132,7 @@ void report_ES_unit_list(char* name, ES_unit_list_p list)
             "%d item%s (size %d)\n", list->length, (list->length == 1 ? "" : "s"), list->size);
         for (ii = 0; ii < list->length; ii++) {
             print_msg("    ");
-            report_ES_unit(TRUE, &(list->array[ii]));
+            report_ES_unit(true, &(list->array[ii]));
         }
     }
 }
@@ -1173,32 +1173,32 @@ int get_ES_unit_list_bounds(ES_unit_list_p list, ES_offset* start, uint32_t* len
  *
  * - `list1` and `list2` are the two ES unit lists to compare.
  *
- * Returns TRUE if the lists contain identical content, FALSE otherwise.
+ * Returns true if the lists contain identical content, false otherwise.
  */
 int same_ES_unit_list(ES_unit_list_p list1, ES_unit_list_p list2)
 {
     int ii;
     if (list1 == list2)
-        return TRUE;
+        return true;
 
     if (list1->array == nullptr)
         return (list2->array == nullptr);
 
     if (list1->length != list2->length)
-        return FALSE;
+        return false;
 
     for (ii = 0; ii < list1->length; ii++) {
         ES_unit_p unit1 = &list1->array[ii];
         ES_unit_p unit2 = &list2->array[ii];
 
         if (unit1->data_len != unit2->data_len)
-            return FALSE;
+            return false;
 
         if (memcmp(unit1->data, unit2->data, unit1->data_len))
-            return FALSE;
+            return false;
     }
 
-    return TRUE;
+    return true;
 }
 
 /*
@@ -1266,16 +1266,16 @@ static int try_to_guess_video_type(
         if (*maybe_h264) {
             if (show_reasoning)
                 fprint_msg("  %02X has top bit set, so not H.264,\n", unit->start_code);
-            *maybe_h264 = FALSE;
+            *maybe_h264 = false;
         }
 
         if (unit->start_code == 0xB0 || unit->start_code == 0xB1 || unit->start_code == 0xB6) {
-            *maybe_h262 = FALSE;
+            *maybe_h262 = false;
             if (show_reasoning)
                 fprint_msg(
                     "  Start code %02X is reserved in H.262, so not H.262\n", unit->start_code);
         } else if (unit->start_code == 0xB4 || unit->start_code == 0xB8) {
-            *maybe_avs = FALSE;
+            *maybe_avs = false;
             if (show_reasoning)
                 fprint_msg("  Start code %02X is reserved in AVS, so not AVS\n", unit->start_code);
         }
@@ -1296,13 +1296,13 @@ static int try_to_guess_video_type(
                 fprint_msg("  H.264 reserves nal_unit_type %02X,"
                            " so not H.264\n",
                     nal_unit_type);
-            *maybe_h264 = FALSE;
+            *maybe_h264 = false;
         } else if (nal_unit_type > 23) {
             if (show_reasoning)
                 fprint_msg("  H.264 does not specify nal_unit_type %02X,"
                            " so not H.264\n",
                     nal_unit_type);
-            *maybe_h264 = FALSE;
+            *maybe_h264 = false;
         } else if (nal_ref_idc == 0) {
             if (nal_unit_type == 5 || // IDR picture
                 nal_unit_type == 7 || // sequence parameter set
@@ -1312,7 +1312,7 @@ static int try_to_guess_video_type(
                     fprint_msg("  H.264 does not allow nal_ref_idc 0 and nal_unit_type %d,"
                                " so not H.264\n",
                         nal_unit_type);
-                *maybe_h264 = FALSE;
+                *maybe_h264 = false;
             }
         } else // nal_ref_idc is NOT 0
         {
@@ -1327,7 +1327,7 @@ static int try_to_guess_video_type(
                     fprint_msg("  H.264 insists nal_ref_idc shall be 0 for nal_unit_type %d,"
                                " so not H.264\n",
                         nal_unit_type);
-                *maybe_h264 = FALSE;
+                *maybe_h264 = false;
             }
         }
     }
@@ -1354,10 +1354,10 @@ int decide_ES_video_type(ES_p es, int print_dots, int show_reasoning, int* video
 {
     int err;
     int ii;
-    int maybe_h262 = TRUE;
-    int maybe_h264 = TRUE;
-    int maybe_avs = TRUE;
-    int decided = FALSE;
+    int maybe_h262 = true;
+    int maybe_h264 = true;
+    int maybe_avs = true;
+    int decided = false;
 
     struct ES_unit unit;
 
@@ -1418,17 +1418,17 @@ int decide_ES_video_type(ES_p es, int print_dots, int show_reasoning, int* video
             if (show_reasoning)
                 print_msg("  Which leaves only H.264\n");
             *video_type = VIDEO_H264;
-            decided = TRUE;
+            decided = true;
         } else if (!maybe_h264 && maybe_h262 && !maybe_avs) {
             if (show_reasoning)
                 print_msg("  Which leaves only H.262\n");
             *video_type = VIDEO_H262;
-            decided = TRUE;
+            decided = true;
         } else if (!maybe_h264 && !maybe_h262 && maybe_avs) {
             if (show_reasoning)
                 print_msg("  Which leaves only AVS\n");
             *video_type = VIDEO_AVS;
-            decided = TRUE;
+            decided = true;
         } else {
             if (show_reasoning)
                 print_msg("  It is not possible to decide from that start code\n");

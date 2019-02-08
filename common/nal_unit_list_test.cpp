@@ -68,7 +68,7 @@ int main(int argc, char** argv)
     }
 
     printf("Test 1 - resetting list\n");
-    reset_nal_unit_list(list, TRUE);
+    reset_nal_unit_list(list, true);
     if (list->length != 0) {
         printf("Test failed - list length is %d, not 0\n", list->length);
         return 1;
@@ -104,7 +104,7 @@ int main(int argc, char** argv)
     }
 
     printf("Test 1 - clearing list\n");
-    free_nal_unit_list(&list, TRUE);
+    free_nal_unit_list(&list, true);
     printf("Test 1 succeeded\n");
 
     printf("Test 2 - the same NAL unit inserted multiple times\n");
@@ -129,7 +129,7 @@ int main(int argc, char** argv)
     }
 
     printf("Test 2 - clearing list\n");
-    free_nal_unit_list(&list, FALSE); // better only do a shallow free
+    free_nal_unit_list(&list, false); // better only do a shallow free
     free_nal_unit(&unit);
     printf("Test 2 succeeded\n");
     return 0;

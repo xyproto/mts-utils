@@ -81,7 +81,7 @@
  * Build the internal arrays to remember video sequence bounds in,
  * for reversing.
  *
- * Builds a new `reverse_data` datastructure. If `is_h264` is FALSE (i.e., the
+ * Builds a new `reverse_data` datastructure. If `is_h264` is false (i.e., the
  * data to be reversed is not MPEG-1 or MPEG-2), then this datastructure may
  * be smaller.
  *
@@ -788,10 +788,10 @@ static int read_h262_picture(
     context->reverse_data = nullptr;
 
     // But we *do* want to insist that the picture contain an AFD
-    context->add_fake_afd = TRUE;
+    context->add_fake_afd = true;
     context->last_afd = afd; // the value to use if the picture doesn't have one
 
-    err = get_next_h262_frame(context, verbose, TRUE, picture);
+    err = get_next_h262_frame(context, verbose, true, picture);
 
     context->reverse_data = reverse_data;
 
@@ -1004,7 +1004,7 @@ int output_from_reverse_data_as_TS(ES_p es, TS_writer_p tswriter, int verbose, i
 {
     WRITER writer;
     writer.ts_output = tswriter;
-    return output_from_reverse_data(es, writer, TRUE, verbose, quiet, offset, reverse_data);
+    return output_from_reverse_data(es, writer, true, verbose, quiet, offset, reverse_data);
 }
 
 /*
@@ -1034,7 +1034,7 @@ int output_from_reverse_data_as_ES(
 {
     WRITER writer;
     writer.es_output = output;
-    return output_from_reverse_data(es, writer, FALSE, verbose, quiet, offset, reverse_data);
+    return output_from_reverse_data(es, writer, false, verbose, quiet, offset, reverse_data);
 }
 
 /*
@@ -1139,7 +1139,7 @@ static int output_in_reverse(ES_p es, WRITER output, int as_TS, int frequency, i
 
     for (ii = start_index; ii >= first_actual_picture_index; ii--) {
         int err;
-        int keep = FALSE;
+        int keep = false;
         uint32_t index;
         ES_offset start_posn;
         uint32_t num_bytes;
@@ -1217,20 +1217,20 @@ static int output_in_reverse(ES_p es, WRITER output, int as_TS, int frequency, i
                         reverse_data->pictures_written++;
                     }
                 }
-                keep = TRUE;
+                keep = true;
                 if (verbose)
                     fprint_msg("++ %d/%d KEEP: writing out\n", gap, frequency);
                 last_index = index;
             }
         } else
-            keep = TRUE; // i.e., because frequency == 0
+            keep = true; // i.e., because frequency == 0
 
         // *But* always output the *first* picture, since if we reach it we've
         // "run out" of pictures to present
         if (ii == first_actual_picture_index) {
             if (verbose && !keep)
                 print_msg("++ but KEEP first picture regardless\n");
-            keep = TRUE;
+            keep = true;
         }
 
         if (keep) {
@@ -1363,7 +1363,7 @@ int output_in_reverse_as_TS(ES_p es, TS_writer_p tswriter, int frequency, int ve
     WRITER writer;
     writer.ts_output = tswriter;
     return output_in_reverse(
-        es, writer, TRUE, frequency, verbose, quiet, start_with, max, reverse_data);
+        es, writer, true, frequency, verbose, quiet, start_with, max, reverse_data);
 }
 
 /*
@@ -1398,5 +1398,5 @@ int output_in_reverse_as_ES(ES_p es, FILE* output, int frequency, int verbose, i
     WRITER writer;
     writer.es_output = output;
     return output_in_reverse(
-        es, writer, FALSE, frequency, verbose, quiet, start_with, max, reverse_data);
+        es, writer, false, frequency, verbose, quiet, start_with, max, reverse_data);
 }

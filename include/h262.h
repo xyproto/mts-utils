@@ -284,7 +284,7 @@ int build_h262_context(ES_p es, h262_context_p* context)
     new2->count_since_seq_hdr = 0;
     new2->last_aspect_ratio_info = H262_UNSET_ASPECT_RATIO_INFO;
     new2->last_afd = UNSET_AFD_BYTE;
-    new2->add_fake_afd = FALSE;
+    new2->add_fake_afd = false;
 
     *context = new2;
     return 0;
@@ -403,34 +403,34 @@ static int build_h262_picture(h262_context_p context, h262_picture_p* picture, h
     // Deduce what we can from the first item of the "picture"
     if (is_h262_picture_item(item)) {
         new2->picture_coding_type = item->picture_coding_type;
-        new2->is_picture = TRUE;
-        new2->is_sequence_header = FALSE;
+        new2->is_picture = true;
+        new2->is_sequence_header = false;
         new2->temporal_reference = (data[4] << 2) | ((data[5] & 0xC0) >> 6);
         // Assume that our picture is a frame, until we're told otherwise
         // (MPEG-1 data will never tell us otherwise)
         new2->picture_structure = 3;
-        new2->was_two_fields = FALSE;
+        new2->was_two_fields = false;
         // Assume the last AFD and aspect ratio info until told otherwise
         new2->afd = context->last_afd;
         new2->aspect_ratio_info = context->last_aspect_ratio_info;
-        new2->is_real_afd = FALSE;
+        new2->is_real_afd = false;
     } else if (is_h262_seq_header_item(item)) {
-        new2->is_picture = FALSE;
-        new2->is_sequence_header = TRUE;
+        new2->is_picture = false;
+        new2->is_sequence_header = true;
         new2->picture_coding_type = 0; // Forbidden value, just in case
         new2->aspect_ratio_info = (data[7] & 0xF0) >> 4;
         // Assume that we are only allowed progressive frames, until we're told
         // otherwise (MPEG-1 data will never tell us otherwise)
         new2->progressive_sequence = 1;
     } else if (is_h262_seq_end_item(item)) {
-        new2->is_picture = FALSE;
-        new2->is_sequence_header = FALSE;
+        new2->is_picture = false;
+        new2->is_sequence_header = false;
         new2->picture_coding_type = 0; // Forbidden value, just in case
     } else {
         fprint_err("!!! Building H.262 picture that starts with a %s (%02x)\n",
             H262_START_CODE_STR(item->unit.start_code), item->unit.start_code);
-        new2->is_picture = FALSE;
-        new2->is_sequence_header = FALSE;
+        new2->is_picture = false;
+        new2->is_sequence_header = false;
         new2->picture_coding_type = 0; // Forbidden value, just in case
     }
 
@@ -486,7 +486,7 @@ static int append_fake_afd(h262_picture_p picture, byte afd)
     }
 
     picture->afd = afd;
-    picture->is_real_afd = FALSE;
+    picture->is_real_afd = false;
     return 0;
 }
 
@@ -509,7 +509,7 @@ static int merge_fields(h262_picture_p picture1, h262_picture_p picture2)
             return 1;
         }
     }
-    picture1->was_two_fields = TRUE;
+    picture1->was_two_fields = true;
     return 0;
 }
 
@@ -541,14 +541,14 @@ void free_h262_picture(h262_picture_p* picture)
  * read from different locations in the input stream may be considered the
  * same if their data content is identical.
  *
- * Returns TRUE if the lists contain identical content, FALSE otherwise.
+ * Returns true if the lists contain identical content, false otherwise.
  */
 int same_h262_picture(h262_picture_p picture1, h262_picture_p picture2)
 {
     if (picture1 == picture2)
-        return TRUE;
+        return true;
     else if (picture1 == nullptr || picture2 == nullptr)
-        return FALSE;
+        return false;
     else
         return same_ES_unit_list(picture1->list, picture2->list);
 }
@@ -691,17 +691,17 @@ int get_next_h262_single_picture(h262_context_p context, int verbose, h262_pictu
 {
     int err = 0;
 
-    int in_sequence_header = FALSE;
-    int in_sequence_end = FALSE;
-    int in_picture = FALSE;
-    int last_was_slice = FALSE;
-    int had_afd = FALSE;
+    int in_sequence_header = false;
+    int in_sequence_end = false;
+    int in_picture = false;
+    int last_was_slice = false;
+    int had_afd = false;
 
     h262_item_p item = context->last_item;
 
 #if DEBUG_GET_NEXT_PICTURE
     int num_slices = 0;
-    int had_slice = FALSE;
+    int had_slice = false;
     int last_slice_start_code = 0;
     if (verbose && context->last_item)
         print_msg("__ reuse last item\n");
@@ -717,13 +717,13 @@ int get_next_h262_single_picture(h262_context_p context, int verbose, h262_pictu
                 return err;
         }
         if (is_h262_picture_item(item)) {
-            in_picture = TRUE;
+            in_picture = true;
             break;
         } else if (is_h262_seq_header_item(item)) {
-            in_sequence_header = TRUE;
+            in_sequence_header = true;
             break;
         } else if (is_h262_seq_end_item(item)) {
-            in_sequence_end = TRUE;
+            in_sequence_end = true;
             break;
         }
 #if DEBUG_GET_NEXT_PICTURE
@@ -787,15 +787,15 @@ int get_next_h262_single_picture(h262_context_p context, int verbose, h262_pictu
                 if (err)
                     fprint_err("!!! Assuming AFD %x at " OFFSET_T_FORMAT "/%d\n", (*picture)->afd,
                         item->unit.start_posn.infile, item->unit.start_posn.inpacket);
-                (*picture)->is_real_afd = TRUE;
+                (*picture)->is_real_afd = true;
 #if DEBUG_AFD
                 if ((*picture)->afd != context->last_afd) {
                     print_msg("* ");
-                    report_h262_picture(stdout, *picture, FALSE);
+                    report_h262_picture(stdout, *picture, false);
                 }
 #endif
                 context->last_afd = (*picture)->afd;
-                had_afd = TRUE;
+                had_afd = true;
             } else if (context->add_fake_afd && !had_afd && is_h262_slice_item(item)) {
                 // We've been asked to fake AFDs for pictures that don't have them,
                 // and this is the first slice of a picture, so now (i.e., before
@@ -805,7 +805,7 @@ int get_next_h262_single_picture(h262_context_p context, int verbose, h262_pictu
                     free_h262_picture(picture);
                     return 1;
                 }
-                had_afd = TRUE; // well, sort of
+                had_afd = true; // well, sort of
 #if DEBUG_GET_NEXT_PICTURE
                 if (verbose) {
                     print_msg("__ fake AFD ");
@@ -825,7 +825,7 @@ int get_next_h262_single_picture(h262_context_p context, int verbose, h262_pictu
                 num_slices++;
                 last_slice_start_code = item->unit.start_code;
                 if (!had_slice)
-                    had_slice = TRUE;
+                    had_slice = true;
             }
         }
 #endif
@@ -929,7 +929,7 @@ static int get_next_field_of_pair(
         // Try again
         free_h262_picture(picture);
         *picture = second;
-        err = get_next_field_of_pair(context, verbose, quiet, FALSE, picture);
+        err = get_next_field_of_pair(context, verbose, quiet, false, picture);
         if (err)
             return 1;
     } else {
@@ -993,7 +993,7 @@ int get_next_h262_frame(h262_context_p context, int verbose, int quiet, h262_pic
     if (is_h262_field_picture(*picture)) {
         // We assume (hope) the next picture will be our second half
         // - let's try to get it, and merge it into our current picture
-        err = get_next_field_of_pair(context, verbose, quiet, TRUE, picture);
+        err = get_next_field_of_pair(context, verbose, quiet, true, picture);
         if (err) {
             free_h262_picture(picture);
             return 1;

@@ -120,9 +120,9 @@ offset_t tell_file(int filedes);
  * a general purpose "open" replacement.
  *
  * - `filename` is the name of the file to open
- * - `for_write` should be TRUE if the file is to be written to,
+ * - `for_write` should be true if the file is to be written to,
  *   in which case it will be opened with flags O_WRONLY|O_CREAT|O_TRUNC,
- *   or FALSE if the file is to be read, in which case it will be
+ *   or false if the file is to be read, in which case it will be
  *   opened with flag O_RDONLY. In both cases, on Windows the flag
  *   O_BINARY will also be set.
  *
@@ -145,7 +145,7 @@ int close_file(int filedes);
  *
  * - `name` is the name of the file, or nullptr if standard input
  *   is to be read from (which is not allowed if `use_pes` is
- *   TRUE).
+ *   true).
  *
  * - If `use_pes` is true then the input file is PS or TS and should
  *   be read via a PES reader.
@@ -167,7 +167,7 @@ int close_file(int filedes);
  *   to whatever is determined (presumably one of VIDEO_H262, VIDEO_H264
  *   or VIDEO_AVS).
  *
- * - If input is from standard input, and `force_stream_type` is FALSE,
+ * - If input is from standard input, and `force_stream_type` is false,
  *   `is_data` will always be set to VIDEO_H262, which may be incorrect.
  *
  * - `es` is the new ES reader context.

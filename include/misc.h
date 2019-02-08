@@ -100,7 +100,7 @@ static void make_crc_table(void)
  */
 uint32_t crc32_block(uint32_t crc, byte* pData, int blk_len)
 {
-    static int table_made = FALSE;
+    static int table_made = false;
     int i, j;
 
     if (!table_made)
@@ -306,9 +306,9 @@ offset_t tell_file(int filedes)
  * a general purpose "open" replacement.
  *
  * - `filename` is the name of the file to open
- * - `for_write` should be TRUE if the file is to be written to,
+ * - `for_write` should be true if the file is to be written to,
  *   in which case it will be opened with flags O_WRONLY|O_CREAT|O_TRUNC,
- *   or FALSE if the file is to be read, in which case it will be
+ *   or false if the file is to be read, in which case it will be
  *   opened with flag O_RDONLY. In both cases, on Windows the flag
  *   O_BINARY will also be set.
  *
@@ -412,7 +412,7 @@ static int open_input_as_ES_direct(
     if (use_stdin) {
         input = STDIN_FILENO;
     } else {
-        input = open_binary_file(name, FALSE);
+        input = open_binary_file(name, false);
         if (input == -1)
             return 1;
     }
@@ -441,7 +441,7 @@ static int open_input_as_ES_direct(
                                                  : *is_data == VIDEO_AVS ? "AVS" : "???"));
     } else {
         int video_type;
-        err = decide_ES_video_type(*es, FALSE, FALSE, &video_type);
+        err = decide_ES_video_type(*es, false, false, &video_type);
         if (err) {
             fprint_err("### Error deciding on stream type for file %s\n", name);
             close_elementary_stream(es);
@@ -484,7 +484,7 @@ static int open_input_as_ES_direct(
  *
  * - `name` is the name of the file, or nullptr if standard input
  *   is to be read from (which is not allowed if `use_pes` is
- *   TRUE).
+ *   true).
  *
  * - If `use_pes` is true then the input file is PS or TS and should
  *   be read via a PES reader.
@@ -506,7 +506,7 @@ static int open_input_as_ES_direct(
  *   to whatever is determined (presumably one of VIDEO_H262, VIDEO_H264
  *   or VIDEO_AVS). It if cannot decide, then it will set it to VIDEO_UNKNOWN.
  *
- * - If input is from standard input, and `force_stream_type` is FALSE,
+ * - If input is from standard input, and `force_stream_type` is false,
  *   `is_data` will always be set to VIDEO_H262, which may be incorrect.
  *
  * - `es` is the new ES reader context.

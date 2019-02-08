@@ -83,7 +83,7 @@ int read_next_adts_frame(int file, audio_frame_p* frame, unsigned int flags)
 
 #if DEBUG
     print_msg("ADTS frame\n");
-    print_data(TRUE, "Start", header, JUST_ENOUGH, JUST_ENOUGH);
+    print_data(true, "Start", header, JUST_ENOUGH, JUST_ENOUGH);
 #endif
 
     if (header[0] != 0xFF || (header[1] & 0xF0) != 0xF0) {
@@ -142,7 +142,7 @@ int read_next_adts_frame(int file, audio_frame_p* frame, unsigned int flags)
         return 1;
     }
 #if DEBUG
-    print_data(TRUE, "Again", data, frame_length, 20);
+    print_data(true, "Again", data, frame_length, 20);
 #endif
 
     err = build_audio_frame(frame);

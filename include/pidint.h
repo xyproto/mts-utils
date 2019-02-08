@@ -237,11 +237,11 @@ int pid_int_in_pidint_list(pidint_list_p list, uint32_t pid, int* number)
 /*
  * Lookup a PID to see if it is in a pid/int list.
  *
- * Note that if `list` is nullptr, then FALSE will be returned - this is to
+ * Note that if `list` is nullptr, then false will be returned - this is to
  * allow the caller to make a query before they have read a list from the
  * bitstream.
  *
- * Returns TRUE if the PID is in the list, FALSE if it is not.
+ * Returns true if the PID is in the list, false if it is not.
  */
 int pid_in_pidint_list(pidint_list_p list, uint32_t pid)
 {
@@ -257,26 +257,26 @@ int pid_in_pidint_list(pidint_list_p list, uint32_t pid)
  *  - two nullptr lists compare as the same
  *  - the *order* of PID/int pairs in the lists does not matter
  *
- * Returns TRUE if the two have the same content, FALSE otherwise.
+ * Returns true if the two have the same content, false otherwise.
  */
 int same_pidint_list(pidint_list_p list1, pidint_list_p list2)
 {
     int ii;
     if (list1 == list2)
-        return TRUE;
+        return true;
     else if (list1 == nullptr || list2 == nullptr)
-        return FALSE;
+        return false;
     else if (list1->length != list2->length)
-        return FALSE;
+        return false;
     for (ii = 0; ii < list1->length; ii++) {
         uint32_t pid = list1->pid[ii];
         int idx = pid_index_in_pidint_list(list2, pid);
         if (idx == -1)
-            return FALSE;
+            return false;
         else if (list1->number[ii] != list2->number[idx])
-            return FALSE;
+            return false;
     }
-    return TRUE;
+    return true;
 }
 
 /*
@@ -571,31 +571,31 @@ pmt_stream_p pid_stream_in_pmt(pmt_p pmt, uint32_t pid)
 /*
  * Lookup a PID to see if it is in a PMT datastructure.
  *
- * Note that if `pmt` is nullptr, then FALSE will be returned.
+ * Note that if `pmt` is nullptr, then false will be returned.
  *
- * Returns TRUE if the PID is in the PMT's stream list, FALSE if it is not.
+ * Returns true if the PID is in the PMT's stream list, false if it is not.
  */
 int pid_in_pmt(pmt_p pmt, uint32_t pid) { return pid_index_in_pmt(pmt, pid) != -1; }
 
 /*
  * Check if two PMT streams have the same content.
  *
- * Returns TRUE if the two have the same content, FALSE otherwise.
+ * Returns true if the two have the same content, false otherwise.
  */
 static int same_pmt_stream(pmt_stream_p str1, pmt_stream_p str2)
 {
     if (str1 == str2) // !!!
-        return TRUE;
+        return true;
     else if (str1 == nullptr || str2 == nullptr) // !!!
-        return FALSE;
+        return false;
     else if (str1->elementary_PID != str2->elementary_PID)
-        return FALSE;
+        return false;
     else if (str1->ES_info_length != str2->ES_info_length)
-        return FALSE;
+        return false;
     else if (memcmp(str1->ES_info, str2->ES_info, str1->ES_info_length))
-        return FALSE;
+        return false;
     else
-        return TRUE;
+        return true;
 }
 
 /*
@@ -610,35 +610,35 @@ static int same_pmt_stream(pmt_stream_p str1, pmt_stream_p str2)
  *  - descriptors must be identical as well, and byte order therein
  *    does matter (this may need changing later on)
  *
- * Returns TRUE if the two have the same content, FALSE otherwise.
+ * Returns true if the two have the same content, false otherwise.
  */
 int same_pmt(pmt_p pmt1, pmt_p pmt2)
 {
     int ii;
     if (pmt1 == pmt2)
-        return TRUE;
+        return true;
     else if (pmt1 == nullptr || pmt2 == nullptr)
-        return FALSE;
+        return false;
     else if (pmt1->PCR_pid != pmt2->PCR_pid)
-        return FALSE;
+        return false;
     else if (pmt1->version_number != pmt2->version_number)
-        return FALSE;
+        return false;
     else if (pmt1->program_info_length != pmt2->program_info_length)
-        return FALSE;
+        return false;
     else if (pmt1->num_streams != pmt2->num_streams)
-        return FALSE;
+        return false;
     else if (memcmp(pmt1->program_info, pmt2->program_info, pmt1->program_info_length))
-        return FALSE;
+        return false;
 
     for (ii = 0; ii < pmt1->num_streams; ii++) {
         uint32_t pid = pmt1->streams[ii].elementary_PID;
         int idx = pid_index_in_pmt(pmt2, pid);
         if (idx == -1)
-            return FALSE;
+            return false;
         else if (!same_pmt_stream(&pmt1->streams[ii], &pmt2->streams[idx]))
-            return FALSE;
+            return false;
     }
-    return TRUE;
+    return true;
 }
 
 /*

@@ -48,7 +48,7 @@ void free_PES_packet_data(PES_packet_data_p* data);
  * it appears to start with several TS packets).
  *
  * - `input` is the file to check
- * - `is_TS` is TRUE if it looks like TS, as described above.
+ * - `is_TS` is true if it looks like TS, as described above.
  *
  * Returns 0 if all goes well, 1 if there was an error.
  */
@@ -57,10 +57,10 @@ int determine_if_TS_file(int input, int* is_TS);
  * Build a PES reader datastructure for PS data
  *
  * - `ps` is the Program Stream to read the PES data from
- * - `give_info` is TRUE if information about program data, etc., should be
+ * - `give_info` is true if information about program data, etc., should be
  *   output (to stdout).
- * - `give_warnings` is TRUE if warnings (starting with "!!!") should be
- *   output (to stderr), FALSE if they should be suppressed.
+ * - `give_warnings` is true if warnings (starting with "!!!") should be
+ *   output (to stderr), false if they should be suppressed.
  * - `reader` is the resulting PES reader
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
@@ -70,10 +70,10 @@ int build_PS_PES_reader(PS_reader_p ps, int give_info, int give_warnings, PES_re
  * Build a PES reader datastructure for TS data
  *
  * - `tsreader` is the Transport Stream to read the PES data from
- * - `give_info` is TRUE if information about program data, etc., should be
+ * - `give_info` is true if information about program data, etc., should be
  *   output (to stdout).
- * - `give_warnings` is TRUE if warnings (starting with "!!!") should be
- *   output (to stderr), FALSE if they should be suppressed.
+ * - `give_warnings` is true if warnings (starting with "!!!") should be
+ *   output (to stderr), false if they should be suppressed.
  * - `program_number` is only used for TS data, and identifies which program
  *   to read. If this is 0 then the first program encountered in the first PAT
  *   will be read.
@@ -87,11 +87,11 @@ int build_TS_PES_reader(TS_reader_p tsreader, int give_info, int give_warnings,
  * Build a PES reader datastructure
  *
  * - `input` is the file to read the PES data from
- * - `is_TS` should be TRUE if the data is TS, FALSE if it is PS
- * - `give_info` is TRUE if information about program data, etc., should be
+ * - `is_TS` should be true if the data is TS, false if it is PS
+ * - `give_info` is true if information about program data, etc., should be
  *   output (to stdout).
- * - `give_warnings` is TRUE if warnings (starting with "!!!") should be
- *   output (to stderr), FALSE if they should be suppressed.
+ * - `give_warnings` is true if warnings (starting with "!!!") should be
+ *   output (to stderr), false if they should be suppressed.
  * - `program_number` is only used for TS data, and identifies which program
  *   to read. If this is 0 then the first program encountered in the first PAT
  *   will be read.
@@ -107,12 +107,12 @@ int build_PES_reader(int input, int is_TS, int give_info, int give_warnings,
  * - `filename` is the name of the file to open.
  * - `program_number` identifies which program to read. If this is 0
  *   then the first program encountered in the first PAT will be read.
- * - `give_info` is TRUE if information about program data, etc., should be
+ * - `give_info` is true if information about program data, etc., should be
  *   output (to stdout). If information messages are requested, and the
  *   program number is given as 0, the actual program number chosen will
  *   be reported as well.
- * - `give_warnings` is TRUE if warnings (starting with "!!!") should be
- *   output (to stderr), FALSE if they should be suppressed.
+ * - `give_warnings` is true if warnings (starting with "!!!") should be
+ *   output (to stderr), false if they should be suppressed.
  * - `reader` is the PES reader context corresponding to the newly
  *   opened file.
  *
@@ -124,10 +124,10 @@ int open_PES_reader_for_TS(char* filename, uint16_t program_number, int give_inf
  * Open a Program Stream file for PES packet reading
  *
  * - `filename` is the name of the file to open.
- * - `give_info` is TRUE if information about program data, etc., should be
+ * - `give_info` is true if information about program data, etc., should be
  *   output (to stdout).
- * - `give_warnings` is TRUE if warnings (starting with "!!!") should be
- *   output (to stderr), FALSE if they should be suppressed.
+ * - `give_warnings` is true if warnings (starting with "!!!") should be
+ *   output (to stderr), false if they should be suppressed.
  * - `reader` is the PES reader context corresponding to the newly
  *   opened file.
  *
@@ -138,10 +138,10 @@ int open_PES_reader_for_PS(char* filename, int give_info, int give_warnings, PES
  * Open a Program Stream or Transport Stream file for PES packet reading
  *
  * - `filename` is the name of the file to open.
- * - `give_info` is TRUE if information about program data, etc., should be
+ * - `give_info` is true if information about program data, etc., should be
  *   output (to stdout).
- * - `give_warnings` is TRUE if warnings (starting with "!!!") should be
- *   output (to stderr), FALSE if they should be suppressed.
+ * - `give_warnings` is true if warnings (starting with "!!!") should be
+ *   output (to stderr), false if they should be suppressed.
  * - `reader` is the PES reader context corresponding to the newly
  *   opened file.
  *
@@ -158,7 +158,7 @@ int open_PES_reader(char* filename, int give_info, int give_warnings, PES_reader
 /*
  * Tell the PES reader whether we only want video data
  *
- * - `video_only` should be TRUE if audio is to be ignored, FALSE
+ * - `video_only` should be true if audio is to be ignored, false
  *   if audio should be retained.
  *
  * By default, the PES reader returns video data and a single audio
@@ -316,7 +316,7 @@ int read_next_PES_ES_packet(PES_reader_p reader);
  *
  * - `data` is the data for this PES packet
  * - `data_len` is its length
- * - `got_pts` is TRUE if a PTS field was found, in which case
+ * - `got_pts` is true if a PTS field was found, in which case
  * - `pts` is that PTS value
  *
  * Returns 0 if all went well, 1 if an error occurs.
@@ -327,7 +327,7 @@ int find_PTS_in_PES(byte data[], int32_t data_len, int* got_pts, uint64_t* pts);
  *
  * - `data` is the data for this PES packet
  * - `data_len` is its length
- * - `got_dts` is TRUE if a DTS field was found, in which case
+ * - `got_dts` is true if a DTS field was found, in which case
  * - `dts` is that DTS value
  *
  * Returns 0 if all went well, 1 if an error occurs.
@@ -338,9 +338,9 @@ int find_DTS_in_PES(byte data[], int32_t data_len, int* got_dts, uint64_t* dts);
  *
  * - `data` is the data for this PES packet
  * - `data_len` is its length
- * - `got_pts` is TRUE if a PTS field was found, in which case
+ * - `got_pts` is true if a PTS field was found, in which case
  * - `pts` is that PTS value
- * - `got_dts` is TRUE if a DTS field was found, in which case
+ * - `got_dts` is true if a DTS field was found, in which case
  * - `dts` is that DTS value
  *
  * Returns 0 if all went well, 1 if an error occurs.
@@ -352,7 +352,7 @@ int find_PTS_DTS_in_PES(
  *
  * - `data` is the data for this PES packet
  * - `data_len` is its length
- * - `got_escr` is TRUE if an ESCR field was found, in which case
+ * - `got_escr` is true if an ESCR field was found, in which case
  * - `escr` is that ESCR value
  *
  * Returns 0 if all went well, 1 if an error occurs.
@@ -383,7 +383,7 @@ void encode_pts_dts(byte data[], int guard_bits, uint64_t value);
  *
  * - `packet` is the PES packet datastructure
  *
- * Returns TRUE if it does, FALSE if it does not (or is in error)
+ * Returns true if it does, false if it does not (or is in error)
  */
 int PES_packet_has_PTS(PES_packet_data_p packet);
 /*
@@ -391,7 +391,7 @@ int PES_packet_has_PTS(PES_packet_data_p packet);
  *
  * - `prefix` is a string to put before each line of output
  * - `data` is the packet data, and `data_len` its length
- * - `show_data` should be TRUE if the start of the data for each packet should
+ * - `show_data` should be true if the start of the data for each packet should
  *   be shown
  *
  * Returns 0 if all went well, 1 if an error occurs.

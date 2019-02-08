@@ -29,15 +29,15 @@ def get_next_access_unit(context):
     """
     access_unit = build_access_unit()
     if context.pending_nal: # i.e., we already had a NAL to start this unit
-        access_unit.append(context.pending_nal,TRUE,context.pending_list)
+        access_unit.append(context.pending_nal,true,context.pending_list)
         context.pending_nal = nullptr
-        context.pending_list.reset(FALSE)
+        context.pending_list.reset(false)
     
     while 1:
         try:
             nal = context.find_next_NAL_unit()
         except EOF:
-            context.no_more_data = TRUE; # prevent future reads on this stream
+            context.no_more_data = true; # prevent future reads on this stream
             break
         except BrokenNALUnit:
             WARNING("!!! Ignoring broken NAL unit\n")
@@ -50,8 +50,8 @@ def get_next_access_unit(context):
                 # yet, so we can be lazy and assume that this must be the
                 # first slice
                 nal.start_reason = "First slice of new access unit"
-                access_unit.append(nal,TRUE,context.pending_list)
-                context.pending_list.reset(FALSE)
+                access_unit.append(nal,true,context.pending_list)
+                context.pending_list.reset(false)
                 context.remember_earlier_primary_start(nal)
             elif nal.is_first_VCL_NAL(context.earlier_primary_start):
                 # Regardless of what we determine next, we need to remember
@@ -67,8 +67,8 @@ def get_next_access_unit(context):
                     break;    # Ready to return the access unit
                 else:
                     # This access unit was waiting for its primary picture
-                    access_unit.append(nal,TRUE,context.pending_list)
-                    context.pending_list.reset(FALSE)
+                    access_unit.append(nal,true,context.pending_list)
+                    context.pending_list.reset(false)
             elif not access_unit.started_primary_picture:
                 # But this is not a NAL unit that may start a new
                 # access unit. So what should we do? Ignore it?
@@ -81,8 +81,8 @@ def get_next_access_unit(context):
                 pass
             else:
                 # We're part of the same access unit, but not special
-                access_unit.append(nal,FALSE,context.pending_list)
-                context.pending_list.reset(FALSE)
+                access_unit.append(nal,false,context.pending_list)
+                context.pending_list.reset(false)
         elif nal.nal_unit_type == NAL_ACCESS_UNIT_DELIM:
             # An access unit delimiter always starts a new access unit
             if access_unit.started_primary_picture:
@@ -94,12 +94,12 @@ def get_next_access_unit(context):
                     WARNING("!!! Ignoring items after last VCL NAL and"
                                 " before Access Unit Delimiter\n")
                     context.pending_list.report(stderr,"    ",nullptr,)
-                    context.pending_list.reset(TRUE)
+                    context.pending_list.reset(true)
                 if access_unit.nal_units.length > 0:
                     WARNING("!!! Ignoring incomplete access unit\n")
                     access_unit.nal_units.report(stderr,"    ",nullptr,)
-                    access_unit.nal_units.reset(TRUE)
-                access_unit.append(nal,FALSE,nullptr)
+                    access_unit.nal_units.reset(true)
+                access_unit.append(nal,false,nullptr)
         elif nal.nal_unit_type == NAL_SEI:
             # SEI units always precede the primary coded picture
             # - so they also implicitly end any access unit that has already
@@ -124,7 +124,7 @@ def get_next_access_unit(context):
             WARNING("!!! Ignoring items after last VCL NAL and"
                     " before End of Sequence\n")
             context.pending_list.report(stderr,"    ",nullptr,)
-            context.pending_list.reset(TRUE)
+            context.pending_list.reset(true)
             # And remember this as the End of Sequence marker
             context.end_of_sequence = nal
             break
@@ -134,7 +134,7 @@ def get_next_access_unit(context):
             # Which means there's no point in reading more from this stream
             # (setting no_more_data like this means that *next* time this
             # function is called, it will return EOF)
-            context.no_more_data = TRUE
+            context.no_more_data = true
             # And we're done
             break
         else:

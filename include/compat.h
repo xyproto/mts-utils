@@ -82,9 +82,6 @@ typedef off_t offset_t;
 
 typedef void* void_p;
 
-#define TRUE 1
-#define FALSE 0
-
 // The following defaults are common, and it's difficult
 // to decide which other header file they might belong in
 #define DEFAULT_VIDEO_PID 0x68

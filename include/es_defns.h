@@ -54,7 +54,7 @@ typedef struct _ES_offset* ES_offset_p;
 // A datastructure to represent our input elementary stream (ES)
 // (*output* elementary streams shouldn't need any particular housekeeping)
 struct elementary_stream {
-    int reading_ES; // TRUE if we're reading ES data direct, FALSE if PES
+    int reading_ES; // true if we're reading ES data direct, false if PES
 
     // If we're reading from an elementary data stream directly, then
     // we use the input directly
