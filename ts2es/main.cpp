@@ -70,8 +70,8 @@ typedef enum pid_extract EXTRACT;
 static int extract_av_via_pes(char* input_name, char* output_name, int want_video, int quiet)
 {
     int err;
-    PES_reader_p reader = NULL;
-    ES_p es = NULL;
+    PES_reader_p reader = nullptr;
+    ES_p es = nullptr;
     FILE* output;
 
     if (!want_video) {
@@ -80,7 +80,7 @@ static int extract_av_via_pes(char* input_name, char* output_name, int want_vide
     }
 
     output = fopen(output_name, "wb");
-    if (output == NULL) {
+    if (output == nullptr) {
         fprint_err("### Unable to open output file %s: %s\n", output_name, strerror(errno));
         return 1;
     }
@@ -272,8 +272,8 @@ static int extract_av(int input, FILE* output, int want_video, int max, int verb
     int max_to_read = max;
     int total_num_read = 0;
     uint32_t pid = 0;
-    TS_reader_p tsreader = NULL;
-    pmt_p pmt = NULL;
+    TS_reader_p tsreader = nullptr;
+    pmt_p pmt = nullptr;
 
     // Turn our file into a TS reader
     err = build_TS_reader(input, &tsreader);
@@ -350,7 +350,7 @@ static int extract_pid(
     int input, FILE* output, uint32_t pid_wanted, int max, int verbose, int quiet)
 {
     int err;
-    TS_reader_p tsreader = NULL;
+    TS_reader_p tsreader = nullptr;
 
     // Turn our file into a TS reader
     err = build_TS_reader(input, &tsreader);
@@ -404,15 +404,15 @@ int main(int argc, char** argv)
 {
     int use_stdout = FALSE;
     int use_stdin = FALSE;
-    char* input_name = NULL;
-    char* output_name = NULL;
+    char* input_name = nullptr;
+    char* output_name = nullptr;
     int had_input_name = FALSE;
     int had_output_name = FALSE;
     char* action_switch = "None";
 
     EXTRACT extract = EXTRACT_VIDEO; // What we're meant to extract
     int input = -1; // Our input file descriptor
-    FILE* output = NULL; // The stream we're writing to (if any)
+    FILE* output = nullptr; // The stream we're writing to (if any)
     int max = 0; // The maximum number of TS packets to read (or 0)
     uint32_t pid = 0; // The PID of the (single) stream to extract
     int quiet = FALSE; // True => be as quiet as possible
@@ -560,7 +560,7 @@ int main(int argc, char** argv)
             output = stdout;
         else {
             output = fopen(output_name, "wb");
-            if (output == NULL) {
+            if (output == nullptr) {
                 if (!use_stdin)
                     (void)close_file(input);
                 fprint_err("### ts2es: "

@@ -44,7 +44,7 @@ static inline int umod(unsigned int a, unsigned int b)
  */
 static int h262_item_dot(h262_item_p item, double* delta_gop, int show_gop_time)
 {
-    char* str = NULL;
+    char* str = nullptr;
 
     static int frames = 0;
     static int temp_frames = 0;
@@ -103,7 +103,7 @@ static int h262_item_dot(h262_item_p item, double* delta_gop, int show_gop_time)
         break; // Group start
 
     default:
-        if (str == NULL) {
+        if (str == nullptr) {
             if (item->unit.start_code >= 0x01 && item->unit.start_code <= 0xAF)
                 return 0; // str = "."; // Don't report slice data explicitly
             else
@@ -331,7 +331,7 @@ static char choose_nal_type(access_unit_p access_unit, int* gop_start_found)
     // TRUE:  a random access point is identified as an I frame + recovery_point SEI.
     //        The value recovery_frame_cnt is never considered (as if it was 0).
 
-    if (access_unit->primary_start == NULL)
+    if (access_unit->primary_start == nullptr)
         print_msg("_");
     else if (access_unit->primary_start->nal_ref_idc == 0) {
         if (all_slices_I(access_unit))
@@ -768,11 +768,11 @@ static void print_usage()
 
 int main(int argc, char** argv)
 {
-    char* input_name = NULL;
+    char* input_name = nullptr;
     int had_input_name = FALSE;
     int use_stdin = FALSE;
     int err = 0;
-    ES_p es = NULL;
+    ES_p es = nullptr;
     int max = 0;
     int verbose = FALSE;
     int ii = 1;
@@ -869,7 +869,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    err = open_input_as_ES((use_stdin ? NULL : input_name), use_pes, FALSE, force_stream_type,
+    err = open_input_as_ES((use_stdin ? nullptr : input_name), use_pes, FALSE, force_stream_type,
         want_data, &is_data, &es);
     if (err) {
         print_err("### esdots: Error opening input file\n");

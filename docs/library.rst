@@ -529,7 +529,7 @@ stream::
 In all cases, the caller must free ``frame`` when they have finished with
 it. However, for H.262 data, ``seq_hdr`` must not be freed.
 
-When filtering, ``frame`` is returned as NULL to indicate that the previous
+When filtering, ``frame`` is returned as nullptr to indicate that the previous
 frame should be repeated, to produce (an approximation to) the desired
 frequency.
 

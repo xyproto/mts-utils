@@ -50,7 +50,7 @@ int write_program_data_A(PES_reader_p reader, TS_writer_p output)
 
         if (reader->video_pid != 0) {
             pmt_stream_p stream = pid_stream_in_pmt(reader->program_map, reader->video_pid);
-            if (stream == NULL) {
+            if (stream == nullptr) {
                 fprintf(
                     stderr, "### Cannot find video PID %04x in program map\n", reader->video_pid);
                 return 1;
@@ -62,7 +62,7 @@ int write_program_data_A(PES_reader_p reader, TS_writer_p output)
         }
         if (reader->audio_pid != 0) {
             pmt_stream_p stream = pid_stream_in_pmt(reader->program_map, reader->audio_pid);
-            if (stream == NULL) {
+            if (stream == nullptr) {
                 fprintf(
                     stderr, "### Cannot find audio PID %04x in program map\n", reader->audio_pid);
                 return 1;
@@ -214,7 +214,7 @@ int test1(PES_reader_p reader, int verbose)
     }
 
     old_data = (byte*)malloc(packet->data_len);
-    if (old_data == NULL) {
+    if (old_data == nullptr) {
         fprintf(stderr, "### Error allocating data array\n");
         return 1;
     }
@@ -290,13 +290,13 @@ void print_usage()
 
 int main(int argc, char** argv)
 {
-    char* input_name = NULL;
-    char* output_name = NULL;
+    char* input_name = nullptr;
+    char* output_name = nullptr;
     int had_input_name = FALSE;
     int had_output_name = FALSE;
     int port = 88; // Useful default port number
-    PES_reader_p reader = NULL;
-    TS_writer_p output = NULL;
+    PES_reader_p reader = nullptr;
+    TS_writer_p output = nullptr;
     int quiet = FALSE;
     int verbose = FALSE;
     int video_only = FALSE;
@@ -337,7 +337,7 @@ int main(int argc, char** argv)
                 fprintf(stderr, "### test_pes: Unexpected '%s'\n", argv[ii]);
                 return 1;
             } else if (had_input_name && want_output) {
-                err = host_value("test_pes", NULL, argv[ii], &output_name, &port);
+                err = host_value("test_pes", nullptr, argv[ii], &output_name, &port);
                 if (err)
                     return 1;
                 had_output_name = TRUE; // more or less
@@ -371,7 +371,7 @@ int main(int argc, char** argv)
     set_PES_reader_video_only(reader, video_only);
 
     if (want_output) {
-        err = tswrite_open(TS_W_TCP, output_name, NULL, port, quiet, &output);
+        err = tswrite_open(TS_W_TCP, output_name, nullptr, port, quiet, &output);
         if (err) {
             (void)close_PES_reader(&reader);
             fprintf(stderr, "### test_pes: Unable to connect to %s\n", output_name);

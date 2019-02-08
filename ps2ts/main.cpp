@@ -165,12 +165,12 @@ int main(int argc, char** argv)
     int use_stdout = FALSE;
     int use_tcpip = FALSE;
     int port = 88; // Useful default port number
-    char* input_name = NULL;
-    char* output_name = NULL;
+    char* input_name = nullptr;
+    char* output_name = nullptr;
     int had_input_name = FALSE;
     int had_output_name = FALSE;
-    PS_reader_p ps = NULL;
-    TS_writer_p output = NULL;
+    PS_reader_p ps = nullptr;
+    TS_writer_p output = nullptr;
     int verbose = FALSE;
     int quiet = FALSE;
     int max = 0;
@@ -422,11 +422,11 @@ int main(int argc, char** argv)
     }
 
     if (use_stdout)
-        err = tswrite_open(TS_W_STDOUT, NULL, NULL, 0, quiet, &output);
+        err = tswrite_open(TS_W_STDOUT, nullptr, nullptr, 0, quiet, &output);
     else if (use_tcpip)
-        err = tswrite_open(TS_W_TCP, output_name, NULL, port, quiet, &output);
+        err = tswrite_open(TS_W_TCP, output_name, nullptr, port, quiet, &output);
     else
-        err = tswrite_open(TS_W_FILE, output_name, NULL, 0, quiet, &output);
+        err = tswrite_open(TS_W_FILE, output_name, nullptr, 0, quiet, &output);
     if (err) {
         fprint_err("### ps2ts: Unable to open %s\n", output_name);
         (void)close_PS_file(&ps);

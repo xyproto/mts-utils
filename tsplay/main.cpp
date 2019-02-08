@@ -304,7 +304,7 @@ int main(int argc, char** argv)
 {
     TS_writer_p tswriter;
     struct TS_context context;
-    char* input_name = NULL;
+    char* input_name = nullptr;
     int had_input_name = FALSE;
     int had_output_name = FALSE;
     int input = -1;
@@ -319,9 +319,9 @@ int main(int argc, char** argv)
 
     // Values relevent to "opening" the output file/socket
     enum TS_writer_type how = TS_W_UNDEFINED; // how to output our TS data
-    char* output_name = NULL; // the output filename/host
+    char* output_name = nullptr; // the output filename/host
     int port = 88; // the port to connect to
-    char* multicast_if = NULL; // IP address of multicast i/f
+    char* multicast_if = nullptr; // IP address of multicast i/f
 
     tsplay_output_pace_mode pace_mode = TSPLAY_OUTPUT_PACE_PCR2_TS;
 
@@ -424,11 +424,11 @@ int main(int argc, char** argv)
             } else if (!strcmp("-stdout", argv[ii])) {
                 had_output_name = TRUE; // more or less
                 how = TS_W_STDOUT;
-                output_name = NULL;
+                output_name = nullptr;
                 redirect_output_stderr();
             } else if (!strcmp("-stdin", argv[ii])) {
                 had_input_name = TRUE; // more or less
-                input_name = NULL;
+                input_name = nullptr;
             } else if (!strcmp("-err", argv[ii])) {
                 CHECKARG("tsplay", ii);
                 if (!strcmp(argv[ii + 1], "stderr"))
@@ -588,7 +588,7 @@ int main(int argc, char** argv)
                 had_input_name = TRUE;
             } else if (!had_output_name) {
                 // This is presumably the host to write to
-                err = host_value((char*)"tsplay", NULL, argv[ii], &output_name, &port);
+                err = host_value((char*)"tsplay", nullptr, argv[ii], &output_name, &port);
                 if (err)
                     return 1;
                 had_output_name = TRUE;
@@ -701,7 +701,7 @@ int main(int argc, char** argv)
     }
 
     if (!quiet)
-        start = time(NULL);
+        start = time(nullptr);
 
     // We can only use buffered output for TCP/IP and UDP
     // (it doesn't make much sense for output to a file)
@@ -730,7 +730,7 @@ int main(int argc, char** argv)
     }
 
     if (!quiet) {
-        end = time(NULL);
+        end = time(nullptr);
         fprint_msg("Started  output at %s", ctime(&start));
         fprint_msg("Finished output at %s", ctime(&end));
         fprint_msg("Elapsed time %.1fs\n", difftime(end, start));

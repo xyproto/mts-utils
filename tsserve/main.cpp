@@ -317,18 +317,18 @@ static inline void free_picture(picture* pic)
 static inline void unset_picture(int is_h262, picture* pic)
 {
     if (is_h262)
-        pic->u.h262 = NULL;
+        pic->u.h262 = nullptr;
     else
-        pic->u.h264 = NULL;
+        pic->u.h264 = nullptr;
     pic->is_h262 = is_h262;
 }
 
 static inline int is_null_picture(picture pic)
 {
     if (pic.is_h262)
-        return pic.u.h262 == NULL;
+        return pic.u.h262 == nullptr;
     else
-        return pic.u.h264 == NULL;
+        return pic.u.h264 == nullptr;
 }
 
 // NB: there is already a macro called "is_seq_header"
@@ -339,7 +339,7 @@ static inline int is_reference_picture(picture pic)
     if (pic.is_h262)
         return (pic.type == 1 || pic.type == 2);
     else
-        return (pic.u.h264->primary_start != NULL && pic.u.h264->primary_start->nal_ref_idc != 0);
+        return (pic.u.h264->primary_start != nullptr && pic.u.h264->primary_start->nal_ref_idc != 0);
 }
 
 static inline int is_I_or_IDR_picture(picture pic)
@@ -347,7 +347,7 @@ static inline int is_I_or_IDR_picture(picture pic)
     if (pic.is_h262)
         return (pic.type == 1);
     else
-        return (pic.u.h264->primary_start != NULL && pic.u.h264->primary_start->nal_ref_idc != 0
+        return (pic.u.h264->primary_start != nullptr && pic.u.h264->primary_start->nal_ref_idc != 0
             && (pic.u.h264->primary_start->nal_unit_type == NAL_IDR || all_slices_I(pic.u.h264)));
 }
 
@@ -359,7 +359,7 @@ static void print_picture(picture pic)
         else
             fprint_msg("%s picture", H262_PICTURE_CODING_STR(pic.type));
     } else {
-        if (pic.u.h264->primary_start == NULL)
+        if (pic.u.h264->primary_start == nullptr)
             print_msg("<null>");
         else
             fprint_msg("idc %d/type %d (%s)", pic.u.h264->primary_start->nal_ref_idc,
@@ -398,14 +398,14 @@ static inline int get_next_stripped(filter_context fcontext, int verbose, int qu
     unset_picture(fcontext.is_h262, this_picture);
 
     if (fcontext.is_h262) {
-        h262_picture_p _this_picture = NULL;
-        h262_picture_p _seq_hdr = NULL;
+        h262_picture_p _this_picture = nullptr;
+        h262_picture_p _seq_hdr = nullptr;
         err = get_next_stripped_h262_frame(
             fcontext.u.h262, verbose, quiet, &_seq_hdr, &_this_picture, delta_pictures_seen);
         seq_hdr->u.h262 = _seq_hdr;
         this_picture->u.h262 = _this_picture;
     } else {
-        access_unit_p this_unit = NULL;
+        access_unit_p this_unit = nullptr;
         err = get_next_stripped_h264_frame(
             fcontext.u.h264, verbose, quiet, &this_unit, delta_pictures_seen);
         this_picture->u.h264 = this_unit;
@@ -422,14 +422,14 @@ static inline int get_next_filtered(filter_context fcontext, int verbose, int qu
     unset_picture(fcontext.is_h262, this_picture);
 
     if (fcontext.is_h262) {
-        h262_picture_p _this_picture = NULL;
-        h262_picture_p _seq_hdr = NULL;
+        h262_picture_p _this_picture = nullptr;
+        h262_picture_p _seq_hdr = nullptr;
         err = get_next_filtered_h262_frame(
             fcontext.u.h262, verbose, quiet, &_seq_hdr, &_this_picture, delta_pictures_seen);
         seq_hdr->u.h262 = _seq_hdr;
         this_picture->u.h262 = _this_picture;
     } else {
-        access_unit_p this_unit = NULL;
+        access_unit_p this_unit = nullptr;
         err = get_next_filtered_h264_frame(
             fcontext.u.h264, verbose, quiet, &this_unit, delta_pictures_seen);
         this_picture->u.h264 = this_unit;
@@ -506,7 +506,7 @@ static int flush_after_normal(stream_context stream, TS_writer_p output, int ver
     if (extra_info)
         print_msg("Flushing PES data after normal play\n");
 
-    if (reader->packet == NULL) {
+    if (reader->packet == nullptr) {
         // We're apparently at the end of file, so there's not much we can do
         return 0;
     }
@@ -531,7 +531,7 @@ static int flush_after_normal(stream_context stream, TS_writer_p output, int ver
     // current picture.
 
     if (stream.is_h262) {
-        if (stream.u.h262->last_item == NULL) {
+        if (stream.u.h262->last_item == nullptr) {
             if (extra_info)
                 print_msg(".. no H.262 last item\n");
             return 0; // not much else we can do
@@ -540,7 +540,7 @@ static int flush_after_normal(stream_context stream, TS_writer_p output, int ver
         // last picture *starts* at:
         item_start = stream.u.h262->last_item->unit.start_posn;
     } else {
-        if (stream.u.h264->pending_nal == NULL) {
+        if (stream.u.h264->pending_nal == nullptr) {
             // We ended the previous access unit for some reason that didn't
             // need to read the next NAL unit, or we've not read anything in yet
             item_start = es->posn_of_next_byte;
@@ -584,7 +584,7 @@ static int flush_after_normal(stream_context stream, TS_writer_p output, int ver
         if (stream.is_h262)
             item_start = stream.u.h262->last_item->unit.start_posn;
         else {
-            if (stream.u.h264->pending_nal == NULL)
+            if (stream.u.h264->pending_nal == nullptr)
                 item_start = es->posn_of_next_byte;
             else
                 item_start = stream.u.h264->pending_nal->unit.start_posn;
@@ -847,7 +847,7 @@ static int back_to_normal(stream_context stream, TS_writer_p output, int tsdirec
     if (extra_info)
         print_msg("\nResynchronising PES packets for normal play\n");
 
-    if (reader->packet == NULL) {
+    if (reader->packet == nullptr) {
         // We appear to have reached the end of file - there's not much
         // we can do about this, nor (probably) should we
         return 0;
@@ -881,7 +881,7 @@ static int back_to_normal(stream_context stream, TS_writer_p output, int tsdirec
     // however, still know the first byte of the next piece of information after
     // that chunk of data, and that should be enough.
     if (stream.is_h262) {
-        if (stream.u.h262->last_item == NULL) {
+        if (stream.u.h262->last_item == nullptr) {
             if (extra_info)
                 print_msg(".. no H.262 last item, presumably been"
                           " reversing\n");
@@ -894,7 +894,7 @@ static int back_to_normal(stream_context stream, TS_writer_p output, int tsdirec
             item_start = stream.u.h262->last_item->unit.start_posn;
         }
     } else {
-        if (stream.u.h264->pending_nal == NULL) {
+        if (stream.u.h264->pending_nal == nullptr) {
             // Either we ended the previous access unit for some reason that
             // didn't need to read the next NAL unit, or we've been reversing
             // (or we just started and there was no previous access unit)
@@ -1222,7 +1222,7 @@ static int skip_forwards(stream_context stream, TS_writer_p output, filter_conte
 #if TIME_SKIPPING
     time_t start_time, end_time;
     clock_t start_clock, end_clock;
-    start_time = time(NULL);
+    start_time = time(nullptr);
     start_clock = clock();
 #endif
 
@@ -1279,10 +1279,10 @@ static int skip_forwards(stream_context stream, TS_writer_p output, filter_conte
         // Let the caller know what we did/where we are
         return EOF;
     } else {
-        // Since we're only skipping once, we shouldn't get a NULL (repeat)
+        // Since we're only skipping once, we shouldn't get a nullptr (repeat)
         // picture back
         if (is_null_picture(this_picture)) {
-            print_err("### Skipping returned a NULL picture\n");
+            print_err("### Skipping returned a nullptr picture\n");
             free_picture(&this_picture);
             tswrite_set_command_atomic(output, FALSE);
             return 1;
@@ -1315,7 +1315,7 @@ static int skip_forwards(stream_context stream, TS_writer_p output, filter_conte
 
 #if TIME_SKIPPING
     end_clock = clock();
-    end_time = time(NULL);
+    end_time = time(nullptr);
     fprint_msg("Started  skipping at %s", ctime(&start_time));
     fprint_msg("Finished skipping at %s", ctime(&end_time));
     fprint_msg("Elapsed time %.3fs\n", difftime(end_time, start_time));
@@ -1634,7 +1634,7 @@ static int obey_command(char this_command, char last_command, int* index,
                 fprint_msg("****************************************\n"
                            "** [%3d] File %d: Select file\n",
                     tswriter->where.socket, new_stream);
-            if (reader[new_stream] == NULL) {
+            if (reader[new_stream] == nullptr) {
                 fprint_msg(".. No input file defined for stream %d - ignored\n", new_stream);
             } else {
 #if 0 // The following would only make sense if we *knew* we'd just been doing 'n'ormal play...
@@ -1728,7 +1728,7 @@ static int play(int default_index, PES_reader_p reader[MAX_INPUT_FILES],
         started[ii] = FALSE;
 
     // Select our current PES reader
-    if (reader[which] == NULL) {
+    if (reader[which] == nullptr) {
         fprint_err("### Default input stream %d has no associated file\n", which);
         return 1;
     }
@@ -1792,7 +1792,7 @@ static int play_pes_packets(PES_reader_p reader[MAX_INPUT_FILES], TS_writer_p ts
     // and audio data), but the alternative is to write all TS packets (if the
     // data *is* TS)
     for (ii = 0; ii < MAX_INPUT_FILES; ii++) {
-        if (reader[ii] != NULL) {
+        if (reader[ii] != nullptr) {
             set_server_output(
                 reader[ii], tswriter, !context->tsdirect, context->repeat_program_every);
             set_server_padding(reader[ii], context->pes_padding);
@@ -1800,17 +1800,17 @@ static int play_pes_packets(PES_reader_p reader[MAX_INPUT_FILES], TS_writer_p ts
     }
 
     for (ii = 0; ii < MAX_INPUT_FILES; ii++) {
-        es[ii] = NULL;
-        reverse_data[ii] = NULL;
+        es[ii] = nullptr;
+        reverse_data[ii] = nullptr;
 
         // Closing uninitialised things is a bit dodgy if we don't indicate
         // what *type* of unset value is being used. However, in practice
         // it doesn't matter much, as both the H.262 and H.264 "destroy"
         // functions for streams and filter contexts sensibly do nothing
-        // with a NULL value - so we might as well just say the same for all...
+        // with a nullptr value - so we might as well just say the same for all...
         stream[ii].is_h262 = fcontext[ii].is_h262 = scontext[ii].is_h262 = FALSE;
-        stream[ii].u.h262 = NULL;
-        fcontext[ii].u.h262 = scontext[ii].u.h262 = NULL;
+        stream[ii].u.h262 = nullptr;
+        fcontext[ii].u.h262 = scontext[ii].u.h262 = nullptr;
     }
 
     // Start off our output with some null packets - this is in case the
@@ -1824,7 +1824,7 @@ static int play_pes_packets(PES_reader_p reader[MAX_INPUT_FILES], TS_writer_p ts
 
     // And sort out our stack-of-streams atop each input file
     for (ii = 0; ii < MAX_INPUT_FILES; ii++) {
-        if (reader[ii] == NULL)
+        if (reader[ii] == nullptr)
             continue;
 
         if (!quiet)
@@ -2256,7 +2256,7 @@ static int test_play_pes_packets(PES_reader_p reader, TS_writer_p tswriter,
     int err;
     int ii;
     ES_p es; // A view of our PES packets as ES units
-    reverse_data_p reverse_data = NULL;
+    reverse_data_p reverse_data = nullptr;
     stream_context stream;
     filter_context fcontext;
     filter_context scontext;
@@ -2301,8 +2301,8 @@ static int test_play_pes_packets(PES_reader_p reader, TS_writer_p tswriter,
 
     if (reader->is_h264) {
         access_unit_context_p acontext; // Our ES data as access units
-        h264_filter_context_p fcontext4 = NULL; // And a filter over that
-        h264_filter_context_p scontext4 = NULL; // And another
+        h264_filter_context_p fcontext4 = nullptr; // And a filter over that
+        h264_filter_context_p scontext4 = nullptr; // And another
 
         err = build_access_unit_context(es, &acontext);
         if (err) {
@@ -2349,8 +2349,8 @@ static int test_play_pes_packets(PES_reader_p reader, TS_writer_p tswriter,
         free_h264_filter_context(&scontext4);
     } else {
         h262_context_p h262; // Our ES data as H.262 items
-        h262_filter_context_p fcontext2 = NULL; // And a filter over that
-        h262_filter_context_p scontext2 = NULL; // And another
+        h262_filter_context_p fcontext2 = nullptr; // And a filter over that
+        h262_filter_context_p scontext2 = nullptr; // And another
 
         if (!with_seq_hdrs)
             reverse_data->output_sequence_headers = FALSE;
@@ -2449,8 +2449,8 @@ static int open_input_files(
     int ii;
     for (ii = 0; ii < MAX_INPUT_FILES; ii++) {
         int err;
-        if (context->input_names[ii] == NULL) {
-            reader[ii] = NULL;
+        if (context->input_names[ii] == nullptr) {
+            reader[ii] = nullptr;
             continue;
         }
 
@@ -2461,7 +2461,7 @@ static int open_input_files(
         if (err) {
             fprint_err("!!! Error opening file %d (%s)\n", ii, context->input_names[ii]);
             // return 1;
-            reader[ii] = NULL;
+            reader[ii] = nullptr;
             continue;
         }
 
@@ -2668,7 +2668,7 @@ static int run_server(tsserve_context_p context, int listen_port, int verbose, i
     }
 
     for (;;) {
-        TS_writer_p tswriter = NULL;
+        TS_writer_p tswriter = nullptr;
 
         if (!quiet)
             fprint_msg("\nListening for a connection on port %d"
@@ -2703,11 +2703,11 @@ static int test_reader(tsserve_context_p context, int output_to_file, char* outp
     int quiet, int tsdirect)
 {
     int err;
-    TS_writer_p tswriter = NULL;
-    PES_reader_p reader = NULL;
+    TS_writer_p tswriter = nullptr;
+    PES_reader_p reader = nullptr;
 
     err = tswrite_open(
-        (output_to_file ? TS_W_FILE : TS_W_TCP), output_name, NULL, port, quiet, &tswriter);
+        (output_to_file ? TS_W_FILE : TS_W_TCP), output_name, nullptr, port, quiet, &tswriter);
     if (err) {
         fprint_err("### Unable to connect to %s\n", output_name);
         return 1;
@@ -2759,10 +2759,10 @@ static int command_reader(
 {
     int err;
     int ii, had_err;
-    TS_writer_p tswriter = NULL;
+    TS_writer_p tswriter = nullptr;
     PES_reader_p reader[MAX_INPUT_FILES];
 
-    err = tswrite_open(TS_W_TCP, output_name, NULL, port, quiet, &tswriter);
+    err = tswrite_open(TS_W_TCP, output_name, nullptr, port, quiet, &tswriter);
     if (err) {
         fprint_err("### Unable to connect to %s\n", output_name);
         return 1;
@@ -3079,7 +3079,7 @@ static void print_detailed_usage()
 
 int main(int argc, char** argv)
 {
-    char* output_name = NULL;
+    char* output_name = nullptr;
     int had_input_name = FALSE;
     int had_output_name = FALSE;
     int output_port = 88; // Useful default port number
@@ -3105,7 +3105,7 @@ int main(int argc, char** argv)
     struct tsserve_context context;
 
     for (ii = 0; ii < MAX_INPUT_FILES; ii++)
-        context.input_names[ii] = NULL;
+        context.input_names[ii] = nullptr;
 
     context.video_only = FALSE;
     context.pad_start = 8;
@@ -3378,13 +3378,13 @@ int main(int argc, char** argv)
     if (!quiet) {
         print_msg("Input files:\n");
         for (ii = 0; ii < MAX_INPUT_FILES; ii++) {
-            if (context.input_names[ii] != NULL)
+            if (context.input_names[ii] != nullptr)
                 fprint_msg("   %2d: %s\n", ii, context.input_names[ii]);
         }
     }
 
     for (ii = 0; ii < MAX_INPUT_FILES; ii++) {
-        if (context.input_names[ii] != NULL) {
+        if (context.input_names[ii] != nullptr) {
             context.default_file_index = ii;
             if (!quiet)
                 fprint_msg("File %d (%s) selected as default\n", ii, context.input_names[ii]);

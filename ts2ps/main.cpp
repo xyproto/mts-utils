@@ -272,13 +272,13 @@ int main(int argc, char** argv)
 {
     int use_stdout = FALSE;
     int use_stdin = FALSE;
-    char* input_name = NULL;
-    char* output_name = NULL;
+    char* input_name = nullptr;
+    char* output_name = nullptr;
     int had_input_name = FALSE;
     int had_output_name = FALSE;
 
     int input = -1; // Our input file descriptor
-    FILE* output = NULL; // The stream we're writing to (if any)
+    FILE* output = nullptr; // The stream we're writing to (if any)
     int max = 0; // The maximum number of TS packets to read (or 0)
     int quiet = FALSE; // True => be as quiet as possible
     int verbose = FALSE; // True => output diagnostic/progress messages
@@ -394,7 +394,7 @@ int main(int argc, char** argv)
             output = stdout;
         else {
             output = fopen(output_name, "wb");
-            if (output == NULL) {
+            if (output == nullptr) {
                 if (!use_stdin)
                     (void)close_file(input);
                 fprint_err("### ts2ps: "

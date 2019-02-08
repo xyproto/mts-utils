@@ -30,7 +30,7 @@ def get_next_access_unit(context):
     access_unit = build_access_unit()
     if context.pending_nal: # i.e., we already had a NAL to start this unit
         access_unit.append(context.pending_nal,TRUE,context.pending_list)
-        context.pending_nal = NULL
+        context.pending_nal = nullptr
         context.pending_list.reset(FALSE)
     
     while 1:
@@ -93,13 +93,13 @@ def get_next_access_unit(context):
                 if context.pending_list.length > 0:
                     WARNING("!!! Ignoring items after last VCL NAL and"
                                 " before Access Unit Delimiter\n")
-                    context.pending_list.report(stderr,"    ",NULL,)
+                    context.pending_list.report(stderr,"    ",nullptr,)
                     context.pending_list.reset(TRUE)
                 if access_unit.nal_units.length > 0:
                     WARNING("!!! Ignoring incomplete access unit\n")
-                    access_unit.nal_units.report(stderr,"    ",NULL,)
+                    access_unit.nal_units.report(stderr,"    ",nullptr,)
                     access_unit.nal_units.reset(TRUE)
-                access_unit.append(nal,FALSE,NULL)
+                access_unit.append(nal,FALSE,nullptr)
         elif nal.nal_unit_type == NAL_SEI:
             # SEI units always precede the primary coded picture
             # - so they also implicitly end any access unit that has already
@@ -123,7 +123,7 @@ def get_next_access_unit(context):
           if context.pending_list.length > 0:
             WARNING("!!! Ignoring items after last VCL NAL and"
                     " before End of Sequence\n")
-            context.pending_list.report(stderr,"    ",NULL,)
+            context.pending_list.report(stderr,"    ",nullptr,)
             context.pending_list.reset(TRUE)
             # And remember this as the End of Sequence marker
             context.end_of_sequence = nal

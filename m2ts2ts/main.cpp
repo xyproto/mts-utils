@@ -83,8 +83,8 @@ static void parse_m2ts_packet(m2ts_packet_buffer_p packet_buffer)
         | (((uint32_t)(packet_buffer->m2ts_packet[2])) << 8)
         | ((uint32_t)(packet_buffer->m2ts_packet[3]));
     packet_buffer->ts_packet = packet_buffer->m2ts_packet + 4;
-    packet_buffer->next = NULL;
-    packet_buffer->prev = NULL;
+    packet_buffer->next = nullptr;
+    packet_buffer->prev = nullptr;
 }
 
 /*
@@ -98,10 +98,10 @@ static int extract_packets(
     int input, FILE* output, const unsigned int reorder_buffer_size, int verbose, int quiet)
 {
     int err;
-    m2ts_packet_buffer_p reorder_buffer_head = NULL;
-    m2ts_packet_buffer_p reorder_buffer_tail = NULL;
+    m2ts_packet_buffer_p reorder_buffer_head = nullptr;
+    m2ts_packet_buffer_p reorder_buffer_tail = nullptr;
     int reorder_buffer_entries = 0;
-    m2ts_packet_buffer_p packet_buffer_in_hand = NULL;
+    m2ts_packet_buffer_p packet_buffer_in_hand = nullptr;
     m2ts_packet_buffer_p packet_buffer;
     m2ts_packet_buffer_p p;
     int written;
@@ -109,21 +109,21 @@ static int extract_packets(
     // For test purposes, just grab packets and print the time stamps
     while (1) {
         // Get a new packet buffer
-        if (packet_buffer_in_hand != NULL) {
+        if (packet_buffer_in_hand != nullptr) {
             packet_buffer = packet_buffer_in_hand;
-            packet_buffer_in_hand = NULL;
+            packet_buffer_in_hand = nullptr;
         } else {
             packet_buffer = (m2ts_packet_buffer_p)malloc(sizeof(struct _m2ts_packet_buffer));
             /***DEBUG***/
             fprint_msg("Allocated buffer @ %p\n", packet_buffer);
-            if (packet_buffer == NULL) {
+            if (packet_buffer == nullptr) {
                 print_err("### m2ts2ts: out of memory allocating M2TS packet buffer\n");
-                while (reorder_buffer_head != NULL) {
+                while (reorder_buffer_head != nullptr) {
                     packet_buffer = reorder_buffer_head->next;
                     free(reorder_buffer_head);
                     reorder_buffer_head = packet_buffer;
                 }
-                if (packet_buffer_in_hand != NULL)
+                if (packet_buffer_in_hand != nullptr)
                     free(packet_buffer_in_hand);
                 return 1;
             }
@@ -136,12 +136,12 @@ static int extract_packets(
             break;
         } else if (err) {
             // Badness has occurred, no point in saying more here
-            while (reorder_buffer_head != NULL) {
+            while (reorder_buffer_head != nullptr) {
                 packet_buffer = reorder_buffer_head->next;
                 free(reorder_buffer_head);
                 reorder_buffer_head = packet_buffer;
             }
-            if (packet_buffer_in_hand != NULL)
+            if (packet_buffer_in_hand != nullptr)
                 free(packet_buffer_in_hand);
             return 1;
         }
@@ -153,21 +153,21 @@ static int extract_packets(
         // It's most likely that we'll get an up to date packet,
         // so start at the tail and work to the front
         p = reorder_buffer_tail;
-        if (p != NULL)
+        if (p != nullptr)
             fprint_msg("tail timestamp = 0x%08x @ %p\n", p->timestamp, p);
-        while (p != NULL && p->timestamp > packet_buffer->timestamp) {
+        while (p != nullptr && p->timestamp > packet_buffer->timestamp) {
             p = p->prev;
-            if (p != NULL)
+            if (p != nullptr)
                 fprint_msg("p timestamp = 0x%08x @ %p\n", p->timestamp, p);
         }
 
-        if (p == NULL) {
+        if (p == nullptr) {
             // Insert as the head of queue
             fprint_msg("### Insert %p at head: %p\n", packet_buffer, reorder_buffer_head);
             packet_buffer->next = reorder_buffer_head;
             reorder_buffer_head = packet_buffer;
-            packet_buffer->prev = NULL;
-            if (reorder_buffer_tail == NULL) {
+            packet_buffer->prev = nullptr;
+            if (reorder_buffer_tail == nullptr) {
                 // I.e. this is the only entry on the queue
                 reorder_buffer_tail = packet_buffer;
             } else {
@@ -197,13 +197,13 @@ static int extract_packets(
                 (reorder_buffer_head->next));
             packet_buffer = reorder_buffer_head;
             reorder_buffer_head = reorder_buffer_head->next;
-            reorder_buffer_head->prev = NULL;
+            reorder_buffer_head->prev = nullptr;
             written = fwrite(packet_buffer->ts_packet, TS_PACKET_SIZE, 1, output);
             if (written != 1) {
                 // Major output catastrophe!
                 fprint_err("### m2ts2ts: Error writing TS packet: %s\n", strerror(errno));
                 free(packet_buffer);
-                while (reorder_buffer_head != NULL) {
+                while (reorder_buffer_head != nullptr) {
                     packet_buffer = reorder_buffer_head->next;
                     free(reorder_buffer_head);
                     reorder_buffer_head = packet_buffer;
@@ -222,13 +222,13 @@ static int extract_packets(
     free(packet_buffer_in_hand);
 
     // Write out the remaining packets in the reorder buffer
-    while (reorder_buffer_head != NULL) {
+    while (reorder_buffer_head != nullptr) {
         packet_buffer = reorder_buffer_head->next;
         written = fwrite(reorder_buffer_head->ts_packet, TS_PACKET_SIZE, 1, output);
         if (written != 1) {
             // So close...
             fprint_err("### m2ts2ts: Error writing final TS packets: %s\n", strerror(errno));
-            while (reorder_buffer_head != NULL) {
+            while (reorder_buffer_head != nullptr) {
                 packet_buffer = reorder_buffer_head->next;
                 free(reorder_buffer_head);
                 reorder_buffer_head = packet_buffer;
@@ -268,13 +268,13 @@ int main(int argc, char* argv[])
 {
     int use_stdout = FALSE;
     int use_stdin = FALSE;
-    char* input_name = NULL;
-    char* output_name = NULL;
+    char* input_name = nullptr;
+    char* output_name = nullptr;
     int had_input_name = FALSE;
     int had_output_name = FALSE;
 
     int input = -1; // Our input file descriptor
-    FILE* output = NULL; // Our output stream (if any)
+    FILE* output = nullptr; // Our output stream (if any)
     unsigned int reorder_buff_size = 4; // Number of TS packets to delay output
     int quiet = FALSE; // True => be as quiet as possible
     int verbose = FALSE; // True => output diagnostic messages
@@ -382,7 +382,7 @@ int main(int argc, char* argv[])
         output = stdout;
     } else {
         output = fopen(output_name, "wb");
-        if (output == NULL) {
+        if (output == nullptr) {
             if (!use_stdin)
                 (void)close_file(input);
             fprint_err(

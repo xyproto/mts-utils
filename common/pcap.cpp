@@ -59,8 +59,8 @@ static int read_chunk(FILE* const f, const size_t len, uint8_t** const pBuf)
     int rv;
     void* buf = malloc(len);
 
-    *pBuf = NULL;
-    if (buf == NULL) {
+    *pBuf = nullptr;
+    if (buf == nullptr) {
         return PCAP_ERR_OUT_OF_MEMORY;
     }
 
@@ -83,7 +83,7 @@ static int read_options(FILE* const f, const size_t len, uint8_t** const pBuf)
     // If all we have is the final total length data - skip it
     if (len <= 4) {
         fseek(f, len, SEEK_CUR);
-        *pBuf = NULL;
+        *pBuf = nullptr;
         return 1;
     }
 
@@ -130,13 +130,13 @@ typedef struct pcapng_header_s {
 static void free_block(pcapng_header_t* const hdr)
 {
     hdr->type = PCAPNG_TYPE_INVALID_BLOCK;
-    if (hdr->data != NULL) {
+    if (hdr->data != nullptr) {
         free(hdr->data);
-        hdr->data = NULL;
+        hdr->data = nullptr;
     }
-    if (hdr->options != NULL) {
+    if (hdr->options != nullptr) {
         free(hdr->options);
-        hdr->options = NULL;
+        hdr->options = nullptr;
     }
 }
 
@@ -193,8 +193,8 @@ static int read_block(struct _pcap_io_ctx* const ctx, pcapng_header_t* const hdr
     uint32_t length;
 
     hdr->type = PCAPNG_TYPE_INVALID_BLOCK;
-    hdr->data = NULL;
-    hdr->options = NULL;
+    hdr->data = nullptr;
+    hdr->options = nullptr;
 
     if ((hdr_type = read_block_header(ctx, &length)) <= 0) {
         return hdr_type;
@@ -227,16 +227,16 @@ static int read_block(struct _pcap_io_ctx* const ctx, pcapng_header_t* const hdr
         // Now stash - cos we need it later
         // Alloc a new if (or at least check we have one)
         if (ctx->if_count + 1 > ctx->if_size) {
-            if (ctx->interfaces == NULL) {
+            if (ctx->interfaces == nullptr) {
                 if ((ctx->interfaces
                         = (pcapng_hdr_interface_t*)malloc(sizeof(*ctx->interfaces) * 4))
-                    == NULL)
+                    == nullptr)
                     return PCAP_ERR_OUT_OF_MEMORY;
                 ctx->if_size = 4;
             } else {
                 pcapng_hdr_interface_t* resized = (pcapng_hdr_interface_t*)realloc(
                     ctx->interfaces, sizeof(*ctx->interfaces) * ctx->if_size * 2);
-                if (resized == NULL)
+                if (resized == nullptr)
                     return PCAP_ERR_OUT_OF_MEMORY;
                 ctx->if_size *= 2;
                 ctx->interfaces = resized;
@@ -295,9 +295,9 @@ static int read_block(struct _pcap_io_ctx* const ctx, pcapng_header_t* const hdr
         // Clear out old data even if we error
 
         // All interfaces are toast
-        if (ctx->interfaces != NULL) {
+        if (ctx->interfaces != nullptr) {
             free(ctx->interfaces);
-            ctx->interfaces = NULL;
+            ctx->interfaces = nullptr;
             ctx->if_count = 0;
             ctx->if_size = 0;
         }
@@ -434,7 +434,7 @@ int pcap_open(PCAP_reader_p* ctx_p, pcap_hdr_t* out_hdr, const char* filename)
     PCAP_reader_p ctx;
     int rv;
 
-    (*ctx_p) = NULL;
+    (*ctx_p) = nullptr;
 
     if (!fptr) {
         // Couldn't open the file.
@@ -468,7 +468,7 @@ int pcap_read_next(
 {
     int rv;
 
-    (*out_data) = NULL;
+    (*out_data) = nullptr;
     (*out_len) = 0;
 
     if (ctx->is_ng) {
@@ -489,8 +489,8 @@ int pcap_read_next(
                 out_hdr->ts_sec = (uint32_t)(nghdr.hdr.packet.timestamp / 1000000);
                 out_hdr->ts_usec = (uint32_t)(nghdr.hdr.packet.timestamp % 1000000);
 
-                // NULL out so we don't free it here!
-                nghdr.data = NULL;
+                // nullptr out so we don't free it here!
+                nghdr.data = nullptr;
                 free_block(&nghdr);
                 return 1;
             }
@@ -516,7 +516,7 @@ int pcap_read_next(
         rv = fread((*out_data), (*out_len), 1, ctx->file);
         if (rv != 1) {
             free(*out_data);
-            (*out_data) = NULL;
+            (*out_data) = nullptr;
             *out_len = 0;
 
             if (feof(ctx->file)) {
@@ -539,13 +539,13 @@ int pcap_close(PCAP_reader_p* const pctx)
 {
     PCAP_reader_p ctx = *pctx;
 
-    if (ctx == NULL)
+    if (ctx == nullptr)
         return 0;
 
-    if (ctx->interfaces != NULL) {
+    if (ctx->interfaces != nullptr) {
         free(ctx->interfaces);
     }
-    if (ctx->file != NULL) {
+    if (ctx->file != nullptr) {
         fclose(ctx->file);
     }
     free(ctx);

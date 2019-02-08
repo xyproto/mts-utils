@@ -348,7 +348,7 @@ static void print_usage()
 
 int main(int argc, char** argv)
 {
-    char* input_name = NULL;
+    char* input_name = nullptr;
     int had_input_name = FALSE;
     int input = -1;
     int verbose = FALSE;

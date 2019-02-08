@@ -67,9 +67,9 @@ static uint8_t* create_out_packet(char* in_data, int in_len, uint16_t pid)
     uint16_t flags_pid;
 
     if (!ptr)
-        return NULL;
+        return nullptr;
     if (in_len > (TS_PACKET_SIZE - 4))
-        return NULL;
+        return nullptr;
 
     *ptr = 0x47;
     ptr++;
@@ -230,11 +230,11 @@ static void sort_positions(double* in_array, int size)
 int main(int argc, char** argv)
 {
     char* output_file_path = "out.ts";
-    char* in_file_path = NULL;
+    char* in_file_path = nullptr;
     long in_file_size = 0;
     /*an array of floats for the positions of packets to insert,values of 0-1*/
-    double* positions = NULL;
-    int* packet_numbers = NULL;
+    double* positions = nullptr;
+    int* packet_numbers = nullptr;
     int n_pos = 0;
 
     int argno = 1;
@@ -286,7 +286,7 @@ int main(int argc, char** argv)
 
                     fprint_msg("  %d%%", (int)(positions[pos_index] * 100));
 
-                    position_string = strtok(NULL, ":");
+                    position_string = strtok(nullptr, ":");
                     pos_index++;
                 }
                 print_msg("\n");

@@ -75,12 +75,12 @@ static const struct s2tsfss {
     int flags;
 } s2tsf[] = { { "hms", FMTX_TS_DISPLAY_HMS }, { "ms", FMTX_TS_DISPLAY_ms },
     { "90", FMTX_TS_DISPLAY_90kHz_RAW }, { "32", FMTX_TS_DISPLAY_90kHz_32BIT },
-    { "27", FMTX_TS_DISPLAY_27MHz_RAW }, { NULL, -1 } };
+    { "27", FMTX_TS_DISPLAY_27MHz_RAW }, { nullptr, -1 } };
 
 int fmtx_str_to_timestamp_flags(const TCHAR* arg_str)
 {
     const struct s2tsfss* p;
-    for (p = s2tsf; p->str != NULL; ++p) {
+    for (p = s2tsf; p->str != nullptr; ++p) {
         if (strcmp(p->str, arg_str) == 0)
             break;
     }

@@ -445,7 +445,7 @@ static void print_usage()
 int main(int argc, char** argv)
 {
     int use_stdin = FALSE;
-    char* input_name = NULL;
+    char* input_name = nullptr;
     int had_input_name = FALSE;
 
     PS_reader_p ps; // The PS file we're reading
