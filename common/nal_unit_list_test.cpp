@@ -1,7 +1,7 @@
 /*
  * A simple test for the NAL unit lists from nalunit.c
  *
-  */
+ */
 
 #include <cerrno>
 #include <cmath>

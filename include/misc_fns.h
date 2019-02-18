@@ -209,7 +209,8 @@ int close_input_as_ES(char* name, ES_p* es);
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int unsigned_value(const char* prefix, const char* cmd, const char* arg, int base, uint32_t* value);
+int unsigned_value(
+    const char* prefix, const char* cmd, const char* arg, int base, uint32_t* value);
 
 /*
  * Read in an integer value, checking for extraneous characters.
