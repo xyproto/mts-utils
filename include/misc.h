@@ -879,7 +879,7 @@ int connect_socket(char* hostname, int port, int use_tcpip, char* multicast_ifad
 
     if (IN_CLASSD(ntohl(ipaddr.sin_addr.s_addr))) {
         // Needed if we're doing multicast
-        byte ttl = 16;
+        byte ttl = 60;
         result = setsockopt(output, IPPROTO_IP, IP_MULTICAST_TTL, (char*)&ttl, sizeof(ttl));
         if (result < 0) {
             fprint_err("### Error setting socket for IP_MULTICAST_TTL: %s\n", strerror(errno));
