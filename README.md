@@ -25,11 +25,11 @@ Build a utility:
 
 * `cxx -C tsplay`
 
-Install the desired utility (use `sudo` if you need):
+Install the desired utility (use `sudo` if required):
 
 * `install -Dm755 -t /usr/bin tsplay/tsplay`
 
-Install the corresponding man page (use `sudo` if you need):
+Install the corresponding man page (use `sudo` if required):
 
 * `install -Dm644 -t /usr/share/man/man1 docs/mdoc/tsplay.1`
 
