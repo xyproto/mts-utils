@@ -46,7 +46,7 @@
  *
  * If `frame` is already nullptr, does nothing.
  */
-void free_audio_frame(audio_frame_p* frame);
+void free_audio_frame(audio_frame_p *frame);
 
 /*
  * Read the next audio frame.
@@ -60,7 +60,7 @@ void free_audio_frame(audio_frame_p* frame);
  * Returns 0 if all goes well, EOF if end-of-file is read, and 1 if something
  * goes wrong.
  */
-int read_next_l2audio_frame(int file, audio_frame_p* frame);
+int read_next_l2audio_frame(int file, audio_frame_p *frame);
 #endif // _l2audio_fns
 
 // Local Variables:

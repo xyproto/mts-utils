@@ -34,7 +34,7 @@
 /*
  * Return a string representing the start code
  */
-const char* avs_start_code_str(byte start_code);
+const char *avs_start_code_str(byte start_code);
 /*
  * Determine the picture coding type of an AVS ES unit
  *
@@ -53,7 +53,7 @@ int avs_picture_coding_type(ES_unit_p unit);
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_avs_context(ES_p es, avs_context_p* context);
+int build_avs_context(ES_p es, avs_context_p *context);
 /*
  * Free an AVS frame reading context.
  *
@@ -63,7 +63,7 @@ int build_avs_context(ES_p es, avs_context_p* context);
  *
  * Does nothing if `context` is already nullptr.
  */
-void free_avs_context(avs_context_p* context);
+void free_avs_context(avs_context_p *context);
 /*
  * Rewind a file being read as AVS frames
  *
@@ -83,7 +83,7 @@ int rewind_avs_context(avs_context_p context);
  *
  * Does nothing if `frame` is already nullptr.
  */
-void free_avs_frame(avs_frame_p* frame);
+void free_avs_frame(avs_frame_p *frame);
 /*
  * Retrieve the the next AVS "frame".
  *
@@ -110,7 +110,8 @@ void free_avs_frame(avs_frame_p* frame);
  * Returns 0 if it succeeds, EOF if we reach the end of file, or 1 if some
  * error occurs.
  */
-int get_next_avs_frame(avs_context_p context, int verbose, int quiet, avs_frame_p* frame);
+int get_next_avs_frame(avs_context_p context, int verbose, int quiet,
+                       avs_frame_p *frame);
 /*
  * Write out an AVS frame as TS
  *
@@ -120,7 +121,8 @@ int get_next_avs_frame(avs_context_p context, int verbose, int quiet, avs_frame_
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int write_avs_frame_as_TS(TS_writer_p tswriter, avs_frame_p frame, uint32_t pid);
+int write_avs_frame_as_TS(TS_writer_p tswriter, avs_frame_p frame,
+                          uint32_t pid);
 /*
  * Write out an AVS frame as TS, with PTS timing in the first PES packet
  * (and PCR timing in the first TS of the frame).
@@ -138,8 +140,9 @@ int write_avs_frame_as_TS(TS_writer_p tswriter, avs_frame_p frame, uint32_t pid)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int write_avs_frame_as_TS_with_pts_dts(avs_frame_p frame, TS_writer_p tswriter, uint32_t video_pid,
-    int got_pts, uint64_t pts, int got_dts, uint64_t dts);
+int write_avs_frame_as_TS_with_pts_dts(avs_frame_p frame, TS_writer_p tswriter,
+                                       uint32_t video_pid, int got_pts,
+                                       uint64_t pts, int got_dts, uint64_t dts);
 /*
  * Write out an AVS frame as TS, with PCR timing in the first TS of the
  * frame.
@@ -151,8 +154,9 @@ int write_avs_frame_as_TS_with_pts_dts(avs_frame_p frame, TS_writer_p tswriter, 
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int write_avs_frame_as_TS_with_PCR(avs_frame_p frame, TS_writer_p tswriter, uint32_t video_pid,
-    uint64_t pcr_base, uint32_t pcr_extn);
+int write_avs_frame_as_TS_with_PCR(avs_frame_p frame, TS_writer_p tswriter,
+                                   uint32_t video_pid, uint64_t pcr_base,
+                                   uint32_t pcr_extn);
 /*
  * Write out a frame (as stored in an ES unit list) as ES
  *
@@ -161,7 +165,7 @@ int write_avs_frame_as_TS_with_PCR(avs_frame_p frame, TS_writer_p tswriter, uint
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int write_avs_frame_as_ES(FILE* output, avs_frame_p frame);
+int write_avs_frame_as_ES(FILE *output, avs_frame_p frame);
 /*
  * Report on an AVS frame's contents.
  *

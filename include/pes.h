@@ -46,7 +46,7 @@
 
 #undef DEBUG
 
-//#define DEBUG
+// #define DEBUG
 #define DEBUG_READ_PACKETS 0
 #define DEBUG_PES_ASSEMBLY 0
 #define DEBUG_PROGRAM_INFO 1
@@ -82,25 +82,24 @@
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-static int build_PES_packet_data(PES_packet_data_p* data)
-{
-    PES_packet_data_p new2 = (PES_packet_data_p)malloc(SIZEOF_PES_PACKET_DATA);
-    if (new2 == nullptr) {
-        print_err("### Unable to allocate PES packet datastructure\n");
-        return 1;
-    }
+static int build_PES_packet_data(PES_packet_data_p *data) {
+  PES_packet_data_p new2 = (PES_packet_data_p)malloc(SIZEOF_PES_PACKET_DATA);
+  if (new2 == nullptr) {
+    print_err("### Unable to allocate PES packet datastructure\n");
+    return 1;
+  }
 
-    new2->data = nullptr;
-    new2->data_len = 0;
-    new2->es_data_len = 0;
-    new2->length = 0;
-    new2->posn = 0;
-    new2->is_video = true; // a guess
-    new2->data_alignment_indicator = false; // another
-    new2->has_PTS = false; // assumed until told otherwise
+  new2->data = nullptr;
+  new2->data_len = 0;
+  new2->es_data_len = 0;
+  new2->length = 0;
+  new2->posn = 0;
+  new2->is_video = true;                  // a guess
+  new2->data_alignment_indicator = false; // another
+  new2->has_PTS = false;                  // assumed until told otherwise
 
-    *data = new2;
-    return 0;
+  *data = new2;
+  return 0;
 }
 
 /*
@@ -112,26 +111,26 @@ static int build_PES_packet_data(PES_packet_data_p* data)
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-static inline int extend_PES_packet_data(PES_packet_data_p data, byte bytes[], int bytes_len)
-{
+static inline int extend_PES_packet_data(PES_packet_data_p data, byte bytes[],
+                                         int bytes_len) {
+  if (data->data == nullptr) {
+    data->data = (byte *)malloc(bytes_len);
     if (data->data == nullptr) {
-        data->data = (byte*)malloc(bytes_len);
-        if (data->data == nullptr) {
-            print_err("### Unable to extend PES packet data array\n");
-            return 1;
-        }
-        memcpy(data->data, bytes, bytes_len);
-        data->data_len = bytes_len;
-    } else {
-        data->data = (byte*)realloc(data->data, data->data_len + bytes_len);
-        if (data->data == nullptr) {
-            print_err("### Unable to extend PES packet data array\n");
-            return 1;
-        }
-        memcpy(&(data->data[data->data_len]), bytes, bytes_len);
-        data->data_len = data->data_len + bytes_len;
+      print_err("### Unable to extend PES packet data array\n");
+      return 1;
     }
-    return 0;
+    memcpy(data->data, bytes, bytes_len);
+    data->data_len = bytes_len;
+  } else {
+    data->data = (byte *)realloc(data->data, data->data_len + bytes_len);
+    if (data->data == nullptr) {
+      print_err("### Unable to extend PES packet data array\n");
+      return 1;
+    }
+    memcpy(&(data->data[data->data_len]), bytes, bytes_len);
+    data->data_len = data->data_len + bytes_len;
+  }
+  return 0;
 }
 
 /*
@@ -143,52 +142,52 @@ static inline int extend_PES_packet_data(PES_packet_data_p data, byte bytes[], i
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-static inline int build_dummy_PES_packet_data(PES_packet_data_p* data, int data_len)
-{
-    int err;
-    static PES_packet_data_p local_data = nullptr;
-    if (local_data == nullptr) {
-        err = build_PES_packet_data(&local_data);
-        if (err) {
-            print_err("### Error building dummy PES packet\n");
-            return 1;
-        }
-        local_data->is_video = false;
+static inline int build_dummy_PES_packet_data(PES_packet_data_p *data,
+                                              int data_len) {
+  int err;
+  static PES_packet_data_p local_data = nullptr;
+  if (local_data == nullptr) {
+    err = build_PES_packet_data(&local_data);
+    if (err) {
+      print_err("### Error building dummy PES packet\n");
+      return 1;
     }
+    local_data->is_video = false;
+  }
+  if (local_data->data == nullptr) {
+    local_data->data = (byte *)malloc(data_len);
     if (local_data->data == nullptr) {
-        local_data->data = (byte*)malloc(data_len);
-        if (local_data->data == nullptr) {
-            print_err("### Unable to extend dummy PES packet data array\n");
-            return 1;
-        }
-        memset(local_data->data, 0xFF, data_len);
-    } else if (data_len > local_data->data_len) {
-        local_data->data = (byte*)realloc(local_data->data, data_len);
-        if (local_data->data == nullptr) {
-            print_err("### Unable to extend dummy PES packet data array\n");
-            return 1;
-        }
-        memset(local_data->data, 0xFF, data_len);
+      print_err("### Unable to extend dummy PES packet data array\n");
+      return 1;
     }
+    memset(local_data->data, 0xFF, data_len);
+  } else if (data_len > local_data->data_len) {
+    local_data->data = (byte *)realloc(local_data->data, data_len);
+    if (local_data->data == nullptr) {
+      print_err("### Unable to extend dummy PES packet data array\n");
+      return 1;
+    }
+    memset(local_data->data, 0xFF, data_len);
+  }
 
-    if (data_len != local_data->data_len) {
-        int PES_packet_len = data_len - 6;
-        // Set up the data in the PES packet
-        local_data->data[0] = 0x00;
-        local_data->data[1] = 0x00;
-        local_data->data[2] = 0x01; // end of the packet_start_code_prefix
-        local_data->data[3] = STREAM_ID_PADDING_STREAM;
-        if (PES_packet_len > 0xFFFF) {
-            local_data->data[4] = 0;
-            local_data->data[5] = 0;
-        } else {
-            local_data->data[4] = (byte)((PES_packet_len & 0xFF00) >> 8);
-            local_data->data[5] = (byte)((PES_packet_len & 0x00FF));
-        }
-        local_data->data_len = data_len;
+  if (data_len != local_data->data_len) {
+    int PES_packet_len = data_len - 6;
+    // Set up the data in the PES packet
+    local_data->data[0] = 0x00;
+    local_data->data[1] = 0x00;
+    local_data->data[2] = 0x01; // end of the packet_start_code_prefix
+    local_data->data[3] = STREAM_ID_PADDING_STREAM;
+    if (PES_packet_len > 0xFFFF) {
+      local_data->data[4] = 0;
+      local_data->data[5] = 0;
+    } else {
+      local_data->data[4] = (byte)((PES_packet_len & 0xFF00) >> 8);
+      local_data->data[5] = (byte)((PES_packet_len & 0x00FF));
     }
-    *data = local_data;
-    return 0;
+    local_data->data_len = data_len;
+  }
+  *data = local_data;
+  return 0;
 }
 
 /*
@@ -197,19 +196,18 @@ static inline int build_dummy_PES_packet_data(PES_packet_data_p* data, int data_
  * - `data` is the PES packet datastructure, which will be freed,
  *   and returned as nullptr.
  */
-void free_PES_packet_data(PES_packet_data_p* data)
-{
-    if ((*data) == nullptr)
-        return;
-    if ((*data)->data != nullptr) {
-        free((*data)->data);
-        (*data)->data = nullptr;
-    }
-    (*data)->data_len = 0;
-    (*data)->length = 0;
-    free(*data);
-    *data = nullptr;
+void free_PES_packet_data(PES_packet_data_p *data) {
+  if ((*data) == nullptr)
     return;
+  if ((*data)->data != nullptr) {
+    free((*data)->data);
+    (*data)->data = nullptr;
+  }
+  (*data)->data_len = 0;
+  (*data)->length = 0;
+  free(*data);
+  *data = nullptr;
+  return;
 }
 
 // ============================================================
@@ -219,26 +217,26 @@ void free_PES_packet_data(PES_packet_data_p* data)
 /*
  * Initialise a new PID/PES data datastructure.
  */
-static int init_peslist(peslist_p list)
-{
-    int ii;
-    list->length = 0;
-    list->size = PESLIST_START_SIZE;
-    list->data = (PES_packet_data_p*)malloc(SIZEOF_PES_PACKET_DATA * PESLIST_START_SIZE);
-    if (list->data == nullptr) {
-        print_err("### Unable to allocate PES array in PID/PES data array");
-        return 1;
-    }
-    list->pid = (uint32_t*)malloc(sizeof(uint32_t) * PESLIST_START_SIZE);
-    if (list->pid == nullptr) {
-        free(list->data);
-        print_err("### Unable to allocate PID array in PID/PES data array\n");
-        return 1;
-    }
-    // Just in case...
-    for (ii = 0; ii < list->size; ii++)
-        list->data[ii] = nullptr;
-    return 0;
+static int init_peslist(peslist_p list) {
+  int ii;
+  list->length = 0;
+  list->size = PESLIST_START_SIZE;
+  list->data =
+      (PES_packet_data_p *)malloc(SIZEOF_PES_PACKET_DATA * PESLIST_START_SIZE);
+  if (list->data == nullptr) {
+    print_err("### Unable to allocate PES array in PID/PES data array");
+    return 1;
+  }
+  list->pid = (uint32_t *)malloc(sizeof(uint32_t) * PESLIST_START_SIZE);
+  if (list->pid == nullptr) {
+    free(list->data);
+    print_err("### Unable to allocate PID array in PID/PES data array\n");
+    return 1;
+  }
+  // Just in case...
+  for (ii = 0; ii < list->size; ii++)
+    list->data[ii] = nullptr;
+  return 0;
 }
 
 /*
@@ -246,19 +244,18 @@ static int init_peslist(peslist_p list)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-static int build_peslist(peslist_p* list)
-{
-    peslist_p new2 = (peslist_p)malloc(SIZEOF_PESLIST);
-    if (new2 == nullptr) {
-        print_err("### Unable to allocate PID/PES data array\n");
-        return 1;
-    }
+static int build_peslist(peslist_p *list) {
+  peslist_p new2 = (peslist_p)malloc(SIZEOF_PESLIST);
+  if (new2 == nullptr) {
+    print_err("### Unable to allocate PID/PES data array\n");
+    return 1;
+  }
 
-    if (init_peslist(new2))
-        return 1;
+  if (init_peslist(new2))
+    return 1;
 
-    *list = new2;
-    return 0;
+  *list = new2;
+  return 0;
 }
 
 /*
@@ -268,28 +265,27 @@ static int build_peslist(peslist_p* list)
  *
  * Does nothing if `list` is already nullptr.
  */
-static void free_peslist(peslist_p* peslist)
-{
-    peslist_p list = *peslist;
-    if (list == nullptr)
-        return;
-    if (list->data != nullptr) {
-        int ii;
-        for (ii = 0; ii < list->length; ii++) {
-            if (list->data[ii] != nullptr)
-                free_PES_packet_data(&list->data[ii]);
-        }
-        free(list->data);
-        list->data = nullptr;
+static void free_peslist(peslist_p *peslist) {
+  peslist_p list = *peslist;
+  if (list == nullptr)
+    return;
+  if (list->data != nullptr) {
+    int ii;
+    for (ii = 0; ii < list->length; ii++) {
+      if (list->data[ii] != nullptr)
+        free_PES_packet_data(&list->data[ii]);
     }
-    if (list->pid != nullptr) {
-        free(list->pid);
-        list->pid = nullptr;
-    }
-    list->length = 0;
-    list->size = 0;
-    free(list);
-    *peslist = nullptr;
+    free(list->data);
+    list->data = nullptr;
+  }
+  if (list->pid != nullptr) {
+    free(list->pid);
+    list->pid = nullptr;
+  }
+  list->length = 0;
+  list->size = 0;
+  free(list);
+  *peslist = nullptr;
 }
 
 /*
@@ -299,16 +295,15 @@ static void free_peslist(peslist_p* peslist)
  *
  * Returns its index (0 or more) if the PID is in the list, -1 if it is not.
  */
-static inline int pid_index_in_peslist(peslist_p list, uint32_t pid)
-{
-    int ii;
-    if (list == nullptr)
-        return -1;
-    for (ii = 0; ii < list->length; ii++) {
-        if (list->pid[ii] == pid)
-            return ii;
-    }
+static inline int pid_index_in_peslist(peslist_p list, uint32_t pid) {
+  int ii;
+  if (list == nullptr)
     return -1;
+  for (ii = 0; ii < list->length; ii++) {
+    if (list->pid[ii] == pid)
+      return ii;
+  }
+  return -1;
 }
 
 /*
@@ -318,9 +313,8 @@ static inline int pid_index_in_peslist(peslist_p list, uint32_t pid)
  *
  * Returns true if the PID is in the list, false if it is not.
  */
-static inline int pid_in_peslist(peslist_p list, uint32_t pid)
-{
-    return pid_index_in_peslist(list, pid) != -1;
+static inline int pid_in_peslist(peslist_p list, uint32_t pid) {
+  return pid_index_in_peslist(list, pid) != -1;
 }
 
 /*
@@ -331,65 +325,66 @@ static inline int pid_in_peslist(peslist_p list, uint32_t pid)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-static int start_packet_in_peslist(
-    PES_reader_p reader, uint32_t pid, int is_video, PES_packet_data_p* data)
-{
-    int err;
-    int ii;
-    peslist_p list = reader->packets;
+static int start_packet_in_peslist(PES_reader_p reader, uint32_t pid,
+                                   int is_video, PES_packet_data_p *data) {
+  int err;
+  int ii;
+  peslist_p list = reader->packets;
 
-    if (list == nullptr) {
-        print_err("### Unable to append to nullptr PID/PES data array\n");
-        return 1;
-    }
+  if (list == nullptr) {
+    print_err("### Unable to append to nullptr PID/PES data array\n");
+    return 1;
+  }
 
-    err = build_PES_packet_data(data);
-    if (err) {
-        print_err("### Unable to build new PES packet datastructure"
-                  " for PID/PES data array\n");
-        return 1;
-    }
-    (*data)->is_video = is_video;
+  err = build_PES_packet_data(data);
+  if (err) {
+    print_err("### Unable to build new PES packet datastructure"
+              " for PID/PES data array\n");
+    return 1;
+  }
+  (*data)->is_video = is_video;
 
-    for (ii = 0; ii < list->length; ii++) {
-        if (list->pid[ii] == pid) {
-            // There is already an entry for this PID - does it have data?
-            if (list->data[ii] != nullptr) {
-                PES_packet_data_p packet = list->data[ii];
-                if (reader->give_warning)
-                    fprint_err("!!! PID %04x (%d) already has an unfinished PES packet"
-                               " associated with it\n    %d byte%s of %d bytes were already"
-                               " read - ignoring them\n",
-                        pid, pid, packet->data_len, (packet->data_len == 1 ? "" : "s"),
-                        packet->length);
-                free_PES_packet_data(&(list->data[ii]));
-            }
-            list->data[ii] = *data;
-            return 0;
-        }
+  for (ii = 0; ii < list->length; ii++) {
+    if (list->pid[ii] == pid) {
+      // There is already an entry for this PID - does it have data?
+      if (list->data[ii] != nullptr) {
+        PES_packet_data_p packet = list->data[ii];
+        if (reader->give_warning)
+          fprint_err(
+              "!!! PID %04x (%d) already has an unfinished PES packet"
+              " associated with it\n    %d byte%s of %d bytes were already"
+              " read - ignoring them\n",
+              pid, pid, packet->data_len, (packet->data_len == 1 ? "" : "s"),
+              packet->length);
+        free_PES_packet_data(&(list->data[ii]));
+      }
+      list->data[ii] = *data;
+      return 0;
     }
+  }
 
-    // Otherwise, we need to add a new entry to the list
-    if (list->length == list->size) {
-        int newsize = list->size + PESLIST_INCREMENT;
-        list->data = (PES_packet_data_p*)realloc(list->data, newsize * SIZEOF_PES_PACKET_DATA);
-        if (list->data == nullptr) {
-            print_err("### Unable to extend PID/PES data array\n");
-            free_PES_packet_data(data);
-            return 1;
-        }
-        list->pid = (uint32_t*)realloc(list->pid, newsize * sizeof(uint32_t));
-        if (list->pid == nullptr) {
-            print_err("### Unable to extend PID/PES data array\n");
-            free_PES_packet_data(data);
-            return 1;
-        }
-        list->size = newsize;
+  // Otherwise, we need to add a new entry to the list
+  if (list->length == list->size) {
+    int newsize = list->size + PESLIST_INCREMENT;
+    list->data = (PES_packet_data_p *)realloc(list->data,
+                                              newsize * SIZEOF_PES_PACKET_DATA);
+    if (list->data == nullptr) {
+      print_err("### Unable to extend PID/PES data array\n");
+      free_PES_packet_data(data);
+      return 1;
     }
-    list->pid[list->length] = pid;
-    list->data[list->length] = *data;
-    list->length++;
-    return 0;
+    list->pid = (uint32_t *)realloc(list->pid, newsize * sizeof(uint32_t));
+    if (list->pid == nullptr) {
+      print_err("### Unable to extend PID/PES data array\n");
+      free_PES_packet_data(data);
+      return 1;
+    }
+    list->size = newsize;
+  }
+  list->pid[list->length] = pid;
+  list->data[list->length] = *data;
+  list->length++;
+  return 0;
 }
 
 /*
@@ -399,13 +394,13 @@ static int start_packet_in_peslist(
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-static inline int find_packet_in_peslist(peslist_p list, uint32_t pid, PES_packet_data_p* data)
-{
-    int index = pid_index_in_peslist(list, pid);
-    if (index == -1)
-        return 1;
-    *data = list->data[index];
-    return 0;
+static inline int find_packet_in_peslist(peslist_p list, uint32_t pid,
+                                         PES_packet_data_p *data) {
+  int index = pid_index_in_peslist(list, pid);
+  if (index == -1)
+    return 1;
+  *data = list->data[index];
+  return 0;
 }
 
 /*
@@ -416,24 +411,23 @@ static inline int find_packet_in_peslist(peslist_p list, uint32_t pid, PES_packe
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-static int clear_packet_in_peslist(peslist_p list, uint32_t pid)
-{
-    int index;
+static int clear_packet_in_peslist(peslist_p list, uint32_t pid) {
+  int index;
 
-    if (list == nullptr) {
-        print_msg("Unable to clear PES packet in nullptr PID/PES data array\n");
-        return 1;
-    }
+  if (list == nullptr) {
+    print_msg("Unable to clear PES packet in nullptr PID/PES data array\n");
+    return 1;
+  }
 
-    index = pid_index_in_peslist(list, pid);
-    if (index == -1) {
-        fprint_err("### Unable to find PID %04x (%x) in PID/PES data array,"
-                   " so cannot clear its data\n",
-            pid, pid);
-        return 1;
-    }
-    list->data[index] = nullptr;
-    return 0;
+  index = pid_index_in_peslist(list, pid);
+  if (index == -1) {
+    fprint_err("### Unable to find PID %04x (%x) in PID/PES data array,"
+               " so cannot clear its data\n",
+               pid, pid);
+    return 1;
+  }
+  list->data[index] = nullptr;
+  return 0;
 }
 
 // ============================================================
@@ -448,118 +442,121 @@ static int clear_packet_in_peslist(peslist_p list, uint32_t pid)
  * Returns 0 if all goes well, EOF if end of file is read, and 1 if
  * something goes wrong.
  */
-static int read_next_PES_packet_from_PS(PES_reader_p reader, PES_packet_data_p* packet_data)
-{
-    // Read PS packets
-    // If a packet is a PES packet, return it
+static int read_next_PES_packet_from_PS(PES_reader_p reader,
+                                        PES_packet_data_p *packet_data) {
+  // Read PS packets
+  // If a packet is a PES packet, return it
 
-    for (;;) {
-        int err;
-        byte stream_id; // The packet's stream id
-        int keep = false; // Keep this packet?
-        int is_video = false;
-        struct PS_packet packet = { 0 };
-        struct PS_pack_header header = { 0 };
+  for (;;) {
+    int err;
+    byte stream_id;   // The packet's stream id
+    int keep = false; // Keep this packet?
+    int is_video = false;
+    struct PS_packet packet = {0};
+    struct PS_pack_header header = {0};
 
-        err = read_PS_packet_start(reader->psreader, false, &reader->posn, &stream_id);
-        if (err == EOF) {
-            *packet_data = nullptr;
-            return EOF;
-        } else if (err)
-            return 1;
+    err = read_PS_packet_start(reader->psreader, false, &reader->posn,
+                               &stream_id);
+    if (err == EOF) {
+      *packet_data = nullptr;
+      return EOF;
+    } else if (err)
+      return 1;
 
-        // If it's the pack header, read it and ignore it
-        if (stream_id == 0xba) {
-            err = read_PS_pack_header_body(reader->psreader, &header);
-            if (err == EOF) {
-                fprint_err("!!! Unexpected EOF - partial PS packet at " OFFSET_T_FORMAT
-                           " ignored\n",
-                    reader->posn);
-                *packet_data = nullptr;
-                return EOF;
-            } else if (err) {
-                fprint_err("### Error reading data for pack header starting at " OFFSET_T_FORMAT
-                           "\n",
-                    reader->posn);
-                return 1;
-            }
-            continue;
-        }
-
-        err = read_PS_packet_body(reader->psreader, stream_id, &packet);
-        if (err == EOF) {
-            fprint_err("!!! Unexpected EOF - partial PS packet at " OFFSET_T_FORMAT " ignored\n",
-                reader->posn);
-            *packet_data = nullptr;
-            return EOF;
-        } else if (err) {
-            fprint_err(
-                "### Error reading PS packet starting at " OFFSET_T_FORMAT "\n", reader->posn);
-            return 1;
-        }
-
-        // We have to decide whether to discard this data because it is not
-        // a "PES" packet.
-
-        // First, we know we can discard things that we are sure are part of the
-        // PS infrastructure. Note that we don't need to check for 0xba (pack
-        // header) because we already did that above, and we shouldn't have to
-        // check for 0xb9 (MPEG_program_end_code), because that should already
-        // have been interpreted as EOF by read_PS_packet_start().
-        if (stream_id == 0xbb || // PS system header
-            stream_id == 0xbc || // PS map
-            stream_id == 0x01) // PS directory
-        {
-            /* pass */;
-        } else if (stream_id == PRIVATE1_AUDIO_STREAM_ID) {
-            // It's private stream 1, traditionally used for Dolby (AC-3) audio
-            if (reader->video_only)
-                keep = false;
-            else if (reader->audio_stream_id == stream_id) {
-                keep = true;
-                is_video = false;
-            }
-        } else if ((stream_id >= 0xc0) && (stream_id <= 0xdf)) {
-            // It's a non-Dolby audio stream
-            if (reader->video_only)
-                keep = false;
-            else if (reader->audio_stream_id == stream_id) {
-                keep = true;
-                is_video = false;
-            } else if (reader->audio_stream_id == 0) {
-                // Aha - we're looking for an audio stream to use, and this is it
-                reader->audio_stream_id = stream_id;
-                keep = true;
-                is_video = false;
-                if (reader->give_info)
-                    fprint_msg("Selecting audio stream number %d\n", stream_id & 0x1F);
-            }
-        } else if (stream_id >= 0xe0 && stream_id <= 0xef) {
-            // It's a video stream. We're assuming we only get one video
-            // stream, so this is a "keeper" regardless
-            keep = true;
-            is_video = true;
-        }
-
-        if (keep) {
-            err = build_PES_packet_data(packet_data);
-            if (err)
-                return 1;
-            // We needn't copy the bytes from one "packet" to another,
-            // it's easier to just transfer the array, if we're careful
-            (*packet_data)->data = packet.data;
-            (*packet_data)->data_len = packet.data_len;
-            (*packet_data)->length = packet.data_len;
-            (*packet_data)->posn = reader->posn;
-            (*packet_data)->is_video = is_video;
-            // So the data array is no longer "present" in the orignal "packet"
-            packet.data = nullptr;
-            packet.data_len = 0;
-            break;
-        }
-        clear_PS_packet(&packet);
+    // If it's the pack header, read it and ignore it
+    if (stream_id == 0xba) {
+      err = read_PS_pack_header_body(reader->psreader, &header);
+      if (err == EOF) {
+        fprint_err("!!! Unexpected EOF - partial PS packet at " OFFSET_T_FORMAT
+                   " ignored\n",
+                   reader->posn);
+        *packet_data = nullptr;
+        return EOF;
+      } else if (err) {
+        fprint_err("### Error reading data for pack header starting "
+                   "at " OFFSET_T_FORMAT "\n",
+                   reader->posn);
+        return 1;
+      }
+      continue;
     }
-    return 0;
+
+    err = read_PS_packet_body(reader->psreader, stream_id, &packet);
+    if (err == EOF) {
+      fprint_err("!!! Unexpected EOF - partial PS packet at " OFFSET_T_FORMAT
+                 " ignored\n",
+                 reader->posn);
+      *packet_data = nullptr;
+      return EOF;
+    } else if (err) {
+      fprint_err("### Error reading PS packet starting at " OFFSET_T_FORMAT
+                 "\n",
+                 reader->posn);
+      return 1;
+    }
+
+    // We have to decide whether to discard this data because it is not
+    // a "PES" packet.
+
+    // First, we know we can discard things that we are sure are part of the
+    // PS infrastructure. Note that we don't need to check for 0xba (pack
+    // header) because we already did that above, and we shouldn't have to
+    // check for 0xb9 (MPEG_program_end_code), because that should already
+    // have been interpreted as EOF by read_PS_packet_start().
+    if (stream_id == 0xbb || // PS system header
+        stream_id == 0xbc || // PS map
+        stream_id == 0x01)   // PS directory
+    {
+      /* pass */;
+    } else if (stream_id == PRIVATE1_AUDIO_STREAM_ID) {
+      // It's private stream 1, traditionally used for Dolby (AC-3) audio
+      if (reader->video_only)
+        keep = false;
+      else if (reader->audio_stream_id == stream_id) {
+        keep = true;
+        is_video = false;
+      }
+    } else if ((stream_id >= 0xc0) && (stream_id <= 0xdf)) {
+      // It's a non-Dolby audio stream
+      if (reader->video_only)
+        keep = false;
+      else if (reader->audio_stream_id == stream_id) {
+        keep = true;
+        is_video = false;
+      } else if (reader->audio_stream_id == 0) {
+        // Aha - we're looking for an audio stream to use, and this is it
+        reader->audio_stream_id = stream_id;
+        keep = true;
+        is_video = false;
+        if (reader->give_info)
+          fprint_msg("Selecting audio stream number %d\n", stream_id & 0x1F);
+      }
+    } else if (stream_id >= 0xe0 && stream_id <= 0xef) {
+      // It's a video stream. We're assuming we only get one video
+      // stream, so this is a "keeper" regardless
+      keep = true;
+      is_video = true;
+    }
+
+    if (keep) {
+      err = build_PES_packet_data(packet_data);
+      if (err)
+        return 1;
+      // We needn't copy the bytes from one "packet" to another,
+      // it's easier to just transfer the array, if we're careful
+      (*packet_data)->data = packet.data;
+      (*packet_data)->data_len = packet.data_len;
+      (*packet_data)->length = packet.data_len;
+      (*packet_data)->posn = reader->posn;
+      (*packet_data)->is_video = is_video;
+      // So the data array is no longer "present" in the orignal "packet"
+      packet.data = nullptr;
+      packet.data_len = 0;
+      break;
+    }
+    clear_PS_packet(&packet);
+  }
+  return 0;
 }
 
 // ============================================================
@@ -573,108 +570,107 @@ static int read_next_PES_packet_from_PS(PES_reader_p reader, PES_packet_data_p* 
  * TODO: The detection of different types of audio is not really strong enough
  * TODO: Take account of descriptors in deciding what things are, as well
  */
-static void decide_pids(PES_reader_p reader)
-{
-    pmt_p pmt = reader->program_map;
-    int ii;
-    int had_video = false;
-    int had_audio = false;
+static void decide_pids(PES_reader_p reader) {
+  pmt_p pmt = reader->program_map;
+  int ii;
+  int had_video = false;
+  int had_audio = false;
 
-    if (pmt == nullptr)
-        return;
+  if (pmt == nullptr)
+    return;
 
-    // Since we're not expecting our datastructure to be very big,
-    // or this function to be called very often, we can look at audio
-    // and video separately.
-    for (ii = 0; ii < pmt->num_streams; ii++) {
-        if (IS_VIDEO_STREAM_TYPE(pmt->streams[ii].stream_type)) {
-            if (had_video) {
-                if (reader->give_warning)
-                    fprint_err("!!! Multiple video streams in TS program %d, PMT"
-                               " at " OFFSET_T_FORMAT " - using PID %04x\n",
-                        reader->program_number, reader->posn, reader->video_pid);
-                break;
-            } else if (reader->video_pid == 0) {
-                reader->video_pid = pmt->streams[ii].elementary_PID;
-                switch (pmt->streams[ii].stream_type) {
-                case AVC_VIDEO_STREAM_TYPE:
-                    reader->is_h264 = true;
-                    reader->video_type = VIDEO_H264;
-                    break;
-                case MPEG2_VIDEO_STREAM_TYPE:
-                case MPEG1_VIDEO_STREAM_TYPE: // well, more-or-less
-                    reader->is_h264 = false;
-                    reader->video_type = VIDEO_H262;
-                    break;
-                case AVS_VIDEO_STREAM_TYPE:
-                    reader->is_h264 = false;
-                    reader->video_type = VIDEO_AVS;
-                    break;
-                default:
-                    reader->is_h264 = false;
-                    reader->video_type = VIDEO_UNKNOWN;
-                    break;
-                }
-                if (reader->give_info)
-                    fprint_msg("    Chose video PID %04x\n", reader->video_pid);
-            } else if (pmt->streams[ii].elementary_PID != reader->video_pid) {
-                if (reader->give_warning)
-                    fprint_err("!!! Video streams altered in TS program %d, PMT"
-                               " at " OFFSET_T_FORMAT " - still using PID %04x\n",
-                        reader->program_number, reader->posn, reader->video_pid);
-                break;
-            }
-            had_video = true;
+  // Since we're not expecting our datastructure to be very big,
+  // or this function to be called very often, we can look at audio
+  // and video separately.
+  for (ii = 0; ii < pmt->num_streams; ii++) {
+    if (IS_VIDEO_STREAM_TYPE(pmt->streams[ii].stream_type)) {
+      if (had_video) {
+        if (reader->give_warning)
+          fprint_err("!!! Multiple video streams in TS program %d, PMT"
+                     " at " OFFSET_T_FORMAT " - using PID %04x\n",
+                     reader->program_number, reader->posn, reader->video_pid);
+        break;
+      } else if (reader->video_pid == 0) {
+        reader->video_pid = pmt->streams[ii].elementary_PID;
+        switch (pmt->streams[ii].stream_type) {
+        case AVC_VIDEO_STREAM_TYPE:
+          reader->is_h264 = true;
+          reader->video_type = VIDEO_H264;
+          break;
+        case MPEG2_VIDEO_STREAM_TYPE:
+        case MPEG1_VIDEO_STREAM_TYPE: // well, more-or-less
+          reader->is_h264 = false;
+          reader->video_type = VIDEO_H262;
+          break;
+        case AVS_VIDEO_STREAM_TYPE:
+          reader->is_h264 = false;
+          reader->video_type = VIDEO_AVS;
+          break;
+        default:
+          reader->is_h264 = false;
+          reader->video_type = VIDEO_UNKNOWN;
+          break;
         }
-    }
-
-    if (reader->video_only) {
         if (reader->give_info)
-            print_msg("    Not interested in any audio streams\n");
-        return;
+          fprint_msg("    Chose video PID %04x\n", reader->video_pid);
+      } else if (pmt->streams[ii].elementary_PID != reader->video_pid) {
+        if (reader->give_warning)
+          fprint_err("!!! Video streams altered in TS program %d, PMT"
+                     " at " OFFSET_T_FORMAT " - still using PID %04x\n",
+                     reader->program_number, reader->posn, reader->video_pid);
+        break;
+      }
+      had_video = true;
     }
+  }
 
-    for (ii = 0; ii < pmt->num_streams; ii++) {
-        // Note that the audio detection will accept either DVB or ADTS Dolby
-        // (AC-3) stream types
-        if (IS_AUDIO_STREAM_TYPE(pmt->streams[ii].stream_type)) {
-            if (had_audio) {
-                if (reader->give_warning)
-                    fprint_err("!!! Multiple audio streams in TS program %d, PMT"
-                               " at " OFFSET_T_FORMAT " - using PID %04x\n",
-                        reader->program_number, reader->posn, reader->audio_pid);
-                break;
-            } else if (reader->audio_pid == 0) {
-                reader->audio_pid = pmt->streams[ii].elementary_PID;
-                if (reader->give_info)
-                    fprint_msg("    Chose audio PID %04x\n", reader->audio_pid);
-                if (IS_DOLBY_STREAM_TYPE(pmt->streams[ii].stream_type)) {
-                    // Remember what stream type this Dolby data is using
-                    // - we'll assume that this doesn't change under our feet,
-                    // and thus we don't need to report if it changes
-                    reader->dolby_stream_type = pmt->streams[ii].stream_type;
-                    // If we're not overriding the output stream type, use it as is
-                    if (!reader->override_dolby_stream_type)
-                        reader->output_dolby_stream_type = reader->dolby_stream_type;
-                }
-            } else if (pmt->streams[ii].elementary_PID != reader->audio_pid) {
-                if (reader->give_warning)
-                    fprint_err("!!! Audio streams altered in TS program %d, PMT"
-                               " at " OFFSET_T_FORMAT " - still using PID %04x\n",
-                        reader->program_number, reader->posn, reader->audio_pid);
-                break;
-            }
-            had_audio = true;
+  if (reader->video_only) {
+    if (reader->give_info)
+      print_msg("    Not interested in any audio streams\n");
+    return;
+  }
+
+  for (ii = 0; ii < pmt->num_streams; ii++) {
+    // Note that the audio detection will accept either DVB or ADTS Dolby
+    // (AC-3) stream types
+    if (IS_AUDIO_STREAM_TYPE(pmt->streams[ii].stream_type)) {
+      if (had_audio) {
+        if (reader->give_warning)
+          fprint_err("!!! Multiple audio streams in TS program %d, PMT"
+                     " at " OFFSET_T_FORMAT " - using PID %04x\n",
+                     reader->program_number, reader->posn, reader->audio_pid);
+        break;
+      } else if (reader->audio_pid == 0) {
+        reader->audio_pid = pmt->streams[ii].elementary_PID;
+        if (reader->give_info)
+          fprint_msg("    Chose audio PID %04x\n", reader->audio_pid);
+        if (IS_DOLBY_STREAM_TYPE(pmt->streams[ii].stream_type)) {
+          // Remember what stream type this Dolby data is using
+          // - we'll assume that this doesn't change under our feet,
+          // and thus we don't need to report if it changes
+          reader->dolby_stream_type = pmt->streams[ii].stream_type;
+          // If we're not overriding the output stream type, use it as is
+          if (!reader->override_dolby_stream_type)
+            reader->output_dolby_stream_type = reader->dolby_stream_type;
         }
+      } else if (pmt->streams[ii].elementary_PID != reader->audio_pid) {
+        if (reader->give_warning)
+          fprint_err("!!! Audio streams altered in TS program %d, PMT"
+                     " at " OFFSET_T_FORMAT " - still using PID %04x\n",
+                     reader->program_number, reader->posn, reader->audio_pid);
+        break;
+      }
+      had_audio = true;
     }
+  }
 
-    if (!reader->override_program_data) {
-        // Our output program data is to be the same as our input
-        reader->output_video_pid = reader->video_pid;
-        reader->output_audio_pid = reader->audio_pid;
-        reader->output_pcr_pid = reader->pcr_pid;
-        reader->output_pmt_pid = reader->pmt_pid;
-    }
+  if (!reader->override_program_data) {
+    // Our output program data is to be the same as our input
+    reader->output_video_pid = reader->video_pid;
+    reader->output_audio_pid = reader->audio_pid;
+    reader->output_pcr_pid = reader->pcr_pid;
+    reader->output_pmt_pid = reader->pmt_pid;
+  }
 }
 
 /*
@@ -685,64 +681,65 @@ static void decide_pids(PES_reader_p reader)
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static int refine_TS_program_info(PES_reader_p reader, pmt_p pmt)
-{
-    // If this is the *first* PMT, then just adopt its data wholesale
-    if (reader->program_map == nullptr) {
-        reader->program_map = pmt;
-        reader->pcr_pid = pmt->PCR_pid;
-#if DEBUG_PROGRAM_INFO
-        if (reader->give_info) {
-            fprint_msg("PMT packet at " OFFSET_T_FORMAT ": first PMT, used as-is\n", reader->posn);
-            report_pmt(true, "    ", reader->program_map);
-        }
-#else
-        if (reader->give_info)
-            report_pmt(true, "    ", reader->program_map);
-#endif
-        // And use its information to determine our video/audio PIDs
-        decide_pids(reader);
-        reader->got_program_data = true;
-        return 0;
-    }
-
-    // Otherwise, check if this PMT contains the same information
-
-    if (pmt->program_number != reader->program_number) {
-        if (reader->give_info)
-            fprint_msg("Ignoring PMT for program %d\n", pmt->program_number);
-        free_pmt(&pmt); // since our caller will not free it
-        return 0;
-    }
-
-    if (same_pmt(pmt, reader->program_map)) {
-        free_pmt(&pmt); // since our caller will not free it
-        return 0;
-    }
-
-    // Grumble or replace? Maybe both is safest
-    if (reader->give_warning) {
-        fprint_err("!!! PMT in TS packet at " OFFSET_T_FORMAT
-                   " replaces previous program information\n",
-            reader->posn);
-        print_err("    Program information was:\n");
-        report_pmt(false, "      ", reader->program_map);
-        print_err("    New program information is:\n");
-        report_pmt(false, "      ", pmt);
-    } else if (reader->give_info) {
-#if DEBUG_PROGRAM_INFO
-        fprint_msg("PMT packet at " OFFSET_T_FORMAT ": updating program info\n", reader->posn);
-#endif
-        report_pmt(true, "      ", pmt);
-    }
-
-    free_pmt(&reader->program_map);
+static int refine_TS_program_info(PES_reader_p reader, pmt_p pmt) {
+  // If this is the *first* PMT, then just adopt its data wholesale
+  if (reader->program_map == nullptr) {
     reader->program_map = pmt;
     reader->pcr_pid = pmt->PCR_pid;
-
-    // And use this new information to determine/check our video/audio PIDs
+#if DEBUG_PROGRAM_INFO
+    if (reader->give_info) {
+      fprint_msg("PMT packet at " OFFSET_T_FORMAT ": first PMT, used as-is\n",
+                 reader->posn);
+      report_pmt(true, "    ", reader->program_map);
+    }
+#else
+    if (reader->give_info)
+      report_pmt(true, "    ", reader->program_map);
+#endif
+    // And use its information to determine our video/audio PIDs
     decide_pids(reader);
+    reader->got_program_data = true;
     return 0;
+  }
+
+  // Otherwise, check if this PMT contains the same information
+
+  if (pmt->program_number != reader->program_number) {
+    if (reader->give_info)
+      fprint_msg("Ignoring PMT for program %d\n", pmt->program_number);
+    free_pmt(&pmt); // since our caller will not free it
+    return 0;
+  }
+
+  if (same_pmt(pmt, reader->program_map)) {
+    free_pmt(&pmt); // since our caller will not free it
+    return 0;
+  }
+
+  // Grumble or replace? Maybe both is safest
+  if (reader->give_warning) {
+    fprint_err("!!! PMT in TS packet at " OFFSET_T_FORMAT
+               " replaces previous program information\n",
+               reader->posn);
+    print_err("    Program information was:\n");
+    report_pmt(false, "      ", reader->program_map);
+    print_err("    New program information is:\n");
+    report_pmt(false, "      ", pmt);
+  } else if (reader->give_info) {
+#if DEBUG_PROGRAM_INFO
+    fprint_msg("PMT packet at " OFFSET_T_FORMAT ": updating program info\n",
+               reader->posn);
+#endif
+    report_pmt(true, "      ", pmt);
+  }
+
+  free_pmt(&reader->program_map);
+  reader->program_map = pmt;
+  reader->pcr_pid = pmt->PCR_pid;
+
+  // And use this new information to determine/check our video/audio PIDs
+  decide_pids(reader);
+  return 0;
 }
 
 /*
@@ -757,37 +754,38 @@ static int refine_TS_program_info(PES_reader_p reader, pmt_p pmt)
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static int extract_and_refine_TS_program_info(
-    PES_reader_p reader, uint32_t pmt_pid, byte pmt_data[], int pmt_data_len)
-{
-    int err;
-    pmt_p pmt = nullptr;
+static int extract_and_refine_TS_program_info(PES_reader_p reader,
+                                              uint32_t pmt_pid, byte pmt_data[],
+                                              int pmt_data_len) {
+  int err;
+  pmt_p pmt = nullptr;
 
-    err = extract_pmt(false, pmt_data, pmt_data_len, pmt_pid, &pmt);
-    if (err) {
-        print_err("### Error extracting stream list from PMT\n");
-        return 1;
-    }
+  err = extract_pmt(false, pmt_data, pmt_data_len, pmt_pid, &pmt);
+  if (err) {
+    print_err("### Error extracting stream list from PMT\n");
+    return 1;
+  }
 
-    // If it's the wrong program, we're not interested
-    if (pmt->program_number != reader->program_number) {
+  // If it's the wrong program, we're not interested
+  if (pmt->program_number != reader->program_number) {
 #if DEBUG_PROGRAM_INFO
-        if (reader->give_info)
-            fprint_msg("PMT packet at " OFFSET_T_FORMAT ": program number %d (not %d)\n",
-                reader->posn, pmt->program_number, reader->program_number);
+    if (reader->give_info)
+      fprint_msg("PMT packet at " OFFSET_T_FORMAT
+                 ": program number %d (not %d)\n",
+                 reader->posn, pmt->program_number, reader->program_number);
 #endif
-        free_pmt(&pmt);
-        return 0;
-    }
-
-    err = refine_TS_program_info(reader, pmt);
-    if (err) {
-        print_err("### Error refining TS program information from PMT\n");
-        free_pmt(&pmt);
-        return 1;
-    }
-    // Mustn't free `pmt` because it is remembered by the reader
+    free_pmt(&pmt);
     return 0;
+  }
+
+  err = refine_TS_program_info(reader, pmt);
+  if (err) {
+    print_err("### Error refining TS program information from PMT\n");
+    free_pmt(&pmt);
+    return 1;
+  }
+  // Mustn't free `pmt` because it is remembered by the reader
+  return 0;
 }
 
 /*
@@ -804,47 +802,49 @@ static int extract_and_refine_TS_program_info(
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static int find_first_PAT(PES_reader_p reader)
-{
-    int err;
-    int num_read;
-    pidint_list_p prog_list = nullptr;
+static int find_first_PAT(PES_reader_p reader) {
+  int err;
+  int num_read;
+  pidint_list_p prog_list = nullptr;
 
-    err = find_pat(reader->tsreader, 0, false, !reader->give_info, &num_read, &prog_list);
-    if (err) {
-        print_err("### Error finding first PAT\n");
-        return 1;
-    }
+  err = find_pat(reader->tsreader, 0, false, !reader->give_info, &num_read,
+                 &prog_list);
+  if (err) {
+    print_err("### Error finding first PAT\n");
+    return 1;
+  }
 
-    if (prog_list->length == 0) {
-        fprint_err("### No programs defined in first PAT (at " OFFSET_T_FORMAT ")\n",
-            reader->tsreader->posn - TS_PACKET_SIZE);
-        free_pidint_list(&prog_list);
-        return 1;
-    } else if (prog_list->length > 1 && reader->give_info)
-        print_msg("Multiple programs in PAT - using the first\n\n");
-
-    if (reader->program_number == 0) {
-        reader->program_number = prog_list->number[0];
-        reader->pmt_pid = prog_list->pid[0];
-    } else {
-        int ii;
-        int got_program = false;
-        for (ii = 0; ii < prog_list->length; ii++) {
-            if (prog_list->number[ii] == reader->program_number) {
-                got_program = true;
-                reader->pmt_pid = prog_list->pid[ii];
-                break;
-            }
-        }
-        if (!got_program) {
-            fprint_err("### Program %d not found in first PAT at " OFFSET_T_FORMAT "\n",
-                reader->program_number, reader->tsreader->posn - TS_PACKET_SIZE);
-            return 1;
-        }
-    }
+  if (prog_list->length == 0) {
+    fprint_err("### No programs defined in first PAT (at " OFFSET_T_FORMAT
+               ")\n",
+               reader->tsreader->posn - TS_PACKET_SIZE);
     free_pidint_list(&prog_list);
-    return 0;
+    return 1;
+  } else if (prog_list->length > 1 && reader->give_info)
+    print_msg("Multiple programs in PAT - using the first\n\n");
+
+  if (reader->program_number == 0) {
+    reader->program_number = prog_list->number[0];
+    reader->pmt_pid = prog_list->pid[0];
+  } else {
+    int ii;
+    int got_program = false;
+    for (ii = 0; ii < prog_list->length; ii++) {
+      if (prog_list->number[ii] == reader->program_number) {
+        got_program = true;
+        reader->pmt_pid = prog_list->pid[ii];
+        break;
+      }
+    }
+    if (!got_program) {
+      fprint_err(
+          "### Program %d not found in first PAT at " OFFSET_T_FORMAT "\n",
+          reader->program_number, reader->tsreader->posn - TS_PACKET_SIZE);
+      return 1;
+    }
+  }
+  free_pidint_list(&prog_list);
+  return 0;
 }
 
 /*
@@ -856,40 +856,39 @@ static int find_first_PAT(PES_reader_p reader)
  * Returns 0 if all goes well, 1 if something goes wrong, EOF if end-of-file
  * is found before the first (useful) PMT.
  */
-static int find_first_PMT(PES_reader_p reader)
-{
-    int err;
-    int nread = 0;
-    pmt_p pmt = nullptr;
+static int find_first_PMT(PES_reader_p reader) {
+  int err;
+  int nread = 0;
+  pmt_p pmt = nullptr;
 
-    for (;;) {
-        err = find_next_pmt(
-            reader->tsreader, reader->pmt_pid, -1, 0, false, !reader->give_info, &nread, &pmt);
-        if (err) {
-            fprint_err("### Error looking for program %d PMT with PID %04x"
-                       " after first PAT\n",
-                reader->program_number, reader->pmt_pid);
-            return 1;
-        }
-
-        if (pmt->program_number == reader->program_number)
-            break;
-
-        if (reader->give_info)
-            fprint_msg("(Program is %d, not %d - ignoring it)\n", pmt->program_number,
-                reader->program_number);
-
-        free_pmt(&pmt);
-    }
-
-    err = refine_TS_program_info(reader, pmt);
+  for (;;) {
+    err = find_next_pmt(reader->tsreader, reader->pmt_pid, -1, 0, false,
+                        !reader->give_info, &nread, &pmt);
     if (err) {
-        print_err("### Error refining TS program information from PMT\n");
-        free_pmt(&pmt);
-        return 1;
+      fprint_err("### Error looking for program %d PMT with PID %04x"
+                 " after first PAT\n",
+                 reader->program_number, reader->pmt_pid);
+      return 1;
     }
-    // Mustn't free `pmt` because it is remembered by the reader
-    return 0;
+
+    if (pmt->program_number == reader->program_number)
+      break;
+
+    if (reader->give_info)
+      fprint_msg("(Program is %d, not %d - ignoring it)\n", pmt->program_number,
+                 reader->program_number);
+
+    free_pmt(&pmt);
+  }
+
+  err = refine_TS_program_info(reader, pmt);
+  if (err) {
+    print_err("### Error refining TS program information from PMT\n");
+    free_pmt(&pmt);
+    return 1;
+  }
+  // Mustn't free `pmt` because it is remembered by the reader
+  return 0;
 }
 
 /*
@@ -917,33 +916,32 @@ static int find_first_PMT(PES_reader_p reader)
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static int determine_TS_program_info(PES_reader_p reader)
-{
-    int err;
-    err = find_first_PAT(reader);
+static int determine_TS_program_info(PES_reader_p reader) {
+  int err;
+  err = find_first_PAT(reader);
+  if (err) {
+    print_err("### Error finding TS program information\n");
+    return 1;
+  }
+  err = find_first_PMT(reader);
+  if (err) {
+    print_err("### Error finding TS program information\n");
+    return 1;
+  }
+  // It's only possible to rewind if we're not reading from standard
+  // input. If it's not feasible, don't try.
+  if (reader->tsreader->file != STDIN_FILENO) {
+    err = seek_using_TS_reader(reader->tsreader, 0);
     if (err) {
-        print_err("### Error finding TS program information\n");
-        return 1;
+      print_err("### Error rewinding TS stream after finding initial"
+                " program information\n");
+      return 1;
     }
-    err = find_first_PMT(reader);
-    if (err) {
-        print_err("### Error finding TS program information\n");
-        return 1;
-    }
-    // It's only possible to rewind if we're not reading from standard
-    // input. If it's not feasible, don't try.
-    if (reader->tsreader->file != STDIN_FILENO) {
-        err = seek_using_TS_reader(reader->tsreader, 0);
-        if (err) {
-            print_err("### Error rewinding TS stream after finding initial"
-                      " program information\n");
-            return 1;
-        }
-        // Having rewound, we mustn't forget to reset our notion of the TS packet
-        // position
-        reader->posn = 0;
-    }
-    return 0;
+    // Having rewound, we mustn't forget to reset our notion of the TS packet
+    // position
+    reader->posn = 0;
+  }
+  return 0;
 }
 
 /*
@@ -959,132 +957,133 @@ static int determine_TS_program_info(PES_reader_p reader)
  *
  * Returns 0 if all went well, 1 if something went wrong
  */
-static int start_new_PES_packet(PES_reader_p reader, uint32_t pid, byte payload[], int payload_len,
-    PES_packet_data_p* finished)
-{
-    int err;
-    int index;
-    PES_packet_data_p just_ended = nullptr;
-    PES_packet_data_p data;
+static int start_new_PES_packet(PES_reader_p reader, uint32_t pid,
+                                byte payload[], int payload_len,
+                                PES_packet_data_p *finished) {
+  int err;
+  int index;
+  PES_packet_data_p just_ended = nullptr;
+  PES_packet_data_p data;
 
-    // fprint_msg("%c",(pid==reader->video_pid?'V':'A'));fflush(stdout);
+  // fprint_msg("%c",(pid==reader->video_pid?'V':'A'));fflush(stdout);
 #if DEBUG_PES_ASSEMBLY
-    fprint_msg(": start new %s PES packet, payload_len = %d\n",
-        (pid == reader->video_pid ? "video" : "audio"), payload_len);
-    print_data(true, "Data", payload, payload_len, payload_len);
+  fprint_msg(": start new %s PES packet, payload_len = %d\n",
+             (pid == reader->video_pid ? "video" : "audio"), payload_len);
+  print_data(true, "Data", payload, payload_len, payload_len);
 #endif
 
-    if (payload_len < 6) {
-        // It is technically possible to start a PES packet with very few
-        // bytes in its first TS packet, but I can't see why anyone would
-        // do it (after all, the adaptation field itself cannot be more
-        // than 30 bytes (I counted quickly, I might be off by one) long,
-        // which leaves *lots* of space. So I shall assume that it is an
-        // error if the first six bytes (at least) of PES data are not
-        // in the first TS packet
-        fprint_err("### Only first %d byte%s of PES packet in its first TS packet,"
-                   " packet at " OFFSET_T_FORMAT "\n",
-            payload_len, (payload_len == 1 ? "" : "s"), reader->posn);
-        return 1;
-    }
-    if (payload[0] != 0 || payload[1] != 0 || payload[2] != 1) {
-        fprint_err("### PES data starting in TS packet at " OFFSET_T_FORMAT
-                   " starts %02X %02X %02X, not 00 00 01\n",
-            reader->posn, payload[0], payload[1], payload[2]);
-        return 1;
-    }
+  if (payload_len < 6) {
+    // It is technically possible to start a PES packet with very few
+    // bytes in its first TS packet, but I can't see why anyone would
+    // do it (after all, the adaptation field itself cannot be more
+    // than 30 bytes (I counted quickly, I might be off by one) long,
+    // which leaves *lots* of space. So I shall assume that it is an
+    // error if the first six bytes (at least) of PES data are not
+    // in the first TS packet
+    fprint_err("### Only first %d byte%s of PES packet in its first TS packet,"
+               " packet at " OFFSET_T_FORMAT "\n",
+               payload_len, (payload_len == 1 ? "" : "s"), reader->posn);
+    return 1;
+  }
+  if (payload[0] != 0 || payload[1] != 0 || payload[2] != 1) {
+    fprint_err("### PES data starting in TS packet at " OFFSET_T_FORMAT
+               " starts %02X %02X %02X, not 00 00 01\n",
+               reader->posn, payload[0], payload[1], payload[2]);
+    return 1;
+  }
 
-    // If PES packets with lengths of zero (i.e., meaning "unbounded") are
-    // being transmitted, then we can only tell that we have reached their
-    // end when we start the next PES packet for that same PID (or when we
-    // reach EOF).
-    index = pid_index_in_peslist(reader->packets, pid);
-    if (index != -1 && reader->packets->data[index] != nullptr
-        && reader->packets->data[index]->length == 0) {
+  // If PES packets with lengths of zero (i.e., meaning "unbounded") are
+  // being transmitted, then we can only tell that we have reached their
+  // end when we start the next PES packet for that same PID (or when we
+  // reach EOF).
+  index = pid_index_in_peslist(reader->packets, pid);
+  if (index != -1 && reader->packets->data[index] != nullptr &&
+      reader->packets->data[index]->length == 0) {
 #if DEBUG_PES_ASSEMBLY
-        print_msg("@@@ just ended previous packet (by implication)\n");
+    print_msg("@@@ just ended previous packet (by implication)\n");
 #endif
-        just_ended = reader->packets->data[index];
-        reader->packets->data[index] = nullptr;
-    }
+    just_ended = reader->packets->data[index];
+    reader->packets->data[index] = nullptr;
+  }
 
-    // Anyway, start a new PES packet for this TS packet's data
+  // Anyway, start a new PES packet for this TS packet's data
 #if DEBUG_PES_ASSEMBLY
-    print_msg("@@@ start packet in PES list\n");
+  print_msg("@@@ start packet in PES list\n");
 #endif
-    err = start_packet_in_peslist(reader, pid, pid == reader->video_pid, &data);
-    if (err) {
-        fprint_err("### Error trying to start a new PES packet,"
-                   " for TS packet " OFFSET_T_FORMAT "\n",
-            reader->posn);
-        return 1;
-    }
+  err = start_packet_in_peslist(reader, pid, pid == reader->video_pid, &data);
+  if (err) {
+    fprint_err("### Error trying to start a new PES packet,"
+               " for TS packet " OFFSET_T_FORMAT "\n",
+               reader->posn);
+    return 1;
+  }
 
 #if DEBUG_PES_ASSEMBLY
-    fprint_msg("@@@ extend packet - data_len was %d\n", data->data_len);
+  fprint_msg("@@@ extend packet - data_len was %d\n", data->data_len);
 #endif
-    err = extend_PES_packet_data(data, payload, payload_len);
-    if (err) {
-        print_err("### Error remembering data at start of PES packet\n");
-        return 1;
-    }
+  err = extend_PES_packet_data(data, payload, payload_len);
+  if (err) {
+    print_err("### Error remembering data at start of PES packet\n");
+    return 1;
+  }
 #if DEBUG_PES_ASSEMBLY
-    fprint_msg("@@@ data_len is now %d\n", data->data_len);
+  fprint_msg("@@@ data_len is now %d\n", data->data_len);
 #endif
 
-    data->length = ((payload[4] << 8) | payload[5]);
-    if (data->length != 0)
-        data->length += 6; // correct to the actual packet length
+  data->length = ((payload[4] << 8) | payload[5]);
+  if (data->length != 0)
+    data->length += 6; // correct to the actual packet length
 #if DEBUG_PES_ASSEMBLY
-    else
-        print_msg("@@@ PES packet marked as length 0\n");
+  else
+    print_msg("@@@ PES packet marked as length 0\n");
 #endif
-    data->posn = reader->posn;
+  data->posn = reader->posn;
 
-    // Unlikely, but have we already finished our PES packet?
-    if ((data->data_len > data->length) && data->length != 0) {
+  // Unlikely, but have we already finished our PES packet?
+  if ((data->data_len > data->length) && data->length != 0) {
 #if ALLOW_OVERLONG_PACKETS
-        int extra;
-        fprint_err("### Found %d bytes of PES data, but expected %d"
-                   " (PES packet length + 6)\n",
-            data->data_len, data->length);
-        extra = data->data_len - data->length;
-        if (extra > 0) {
+    int extra;
+    fprint_err("### Found %d bytes of PES data, but expected %d"
+               " (PES packet length + 6)\n",
+               data->data_len, data->length);
+    extra = data->data_len - data->length;
+    if (extra > 0) {
 #if 0
       int from = payload_len - extra;
       print_data(false,"   End of data",payload+from,extra,extra);
 #endif
-            fprint_err("    In %s PES packet, PID %x, starting at " OFFSET_T_FORMAT "\n",
-                (pid == reader->video_pid ? "video" : "audio"), pid, reader->posn);
-            print_err("!!! Accepting packet anyway\n");
-            *finished = data;
-            err = clear_packet_in_peslist(reader->packets, pid);
-            if (err)
-                return 1;
-        } else
-            return 1;
-#else
-        fprint_err("### Found %d bytes of PES data, but expected %d"
-                   " (PES packet length + 6)\n",
-            data->data_len, data->length);
+      fprint_err(
+          "    In %s PES packet, PID %x, starting at " OFFSET_T_FORMAT "\n",
+          (pid == reader->video_pid ? "video" : "audio"), pid, reader->posn);
+      print_err("!!! Accepting packet anyway\n");
+      *finished = data;
+      err = clear_packet_in_peslist(reader->packets, pid);
+      if (err)
         return 1;
-#endif
-    } else if (data->length == data->data_len) {
-        *finished = data;
-        err = clear_packet_in_peslist(reader->packets, pid);
-        if (err)
-            return 1;
     } else
-        *finished = nullptr;
+      return 1;
+#else
+    fprint_err("### Found %d bytes of PES data, but expected %d"
+               " (PES packet length + 6)\n",
+               data->data_len, data->length);
+    return 1;
+#endif
+  } else if (data->length == data->data_len) {
+    *finished = data;
+    err = clear_packet_in_peslist(reader->packets, pid);
+    if (err)
+      return 1;
+  } else
+    *finished = nullptr;
 
-    // And if we had a packet ended by this packet starting, defer this
-    // result until later...
-    if (just_ended) {
-        reader->deferred = *finished; // which might *not* be nullptr
-        *finished = just_ended;
-    }
+  // And if we had a packet ended by this packet starting, defer this
+  // result until later...
+  if (just_ended) {
+    reader->deferred = *finished; // which might *not* be nullptr
+    *finished = just_ended;
+  }
 
-    return 0;
+  return 0;
 }
 
 /*
@@ -1100,70 +1099,72 @@ static int start_new_PES_packet(PES_reader_p reader, uint32_t pid, byte payload[
  *
  * Returns 0 if all went well, 1 if something went wrong
  */
-static int continue_PES_packet(PES_reader_p reader, uint32_t pid, byte payload[], int payload_len,
-    PES_packet_data_p* finished)
-{
-    int err;
-    PES_packet_data_p data;
+static int continue_PES_packet(PES_reader_p reader, uint32_t pid,
+                               byte payload[], int payload_len,
+                               PES_packet_data_p *finished) {
+  int err;
+  PES_packet_data_p data;
 
 #if DEBUG_PES_ASSEMBLY
-    fprint_msg(": continue %s PES packet\n", (pid == reader->video_pid ? "video" : "audio"));
+  fprint_msg(": continue %s PES packet\n",
+             (pid == reader->video_pid ? "video" : "audio"));
 #endif
 
-    err = find_packet_in_peslist(reader->packets, pid, &data);
-    if (err || data == nullptr) {
-        if (reader->give_warning)
-            fprint_err("!!! TS packet with PID %04x at " OFFSET_T_FORMAT
-                       " continues an unstarted PES packet  - ignoring it\n",
-                pid, reader->posn);
-        *finished = nullptr;
-        return 0;
-    }
+  err = find_packet_in_peslist(reader->packets, pid, &data);
+  if (err || data == nullptr) {
+    if (reader->give_warning)
+      fprint_err("!!! TS packet with PID %04x at " OFFSET_T_FORMAT
+                 " continues an unstarted PES packet  - ignoring it\n",
+                 pid, reader->posn);
+    *finished = nullptr;
+    return 0;
+  }
 
-    // fprint_msg("%c",(pid==reader->video_pid?'v':'a'));fflush(stdout);
+  // fprint_msg("%c",(pid==reader->video_pid?'v':'a'));fflush(stdout);
 
-    err = extend_PES_packet_data(data, payload, payload_len);
-    if (err) {
-        print_err("### Error remembering data to continue PES packet\n");
-        return 1;
-    }
+  err = extend_PES_packet_data(data, payload, payload_len);
+  if (err) {
+    print_err("### Error remembering data to continue PES packet\n");
+    return 1;
+  }
 
-    if ((data->data_len > data->length) && data->length != 0) {
+  if ((data->data_len > data->length) && data->length != 0) {
 #if ALLOW_OVERLONG_PACKETS
-        int extra;
-        fprint_err("### Found %d bytes of PES data, but expected %d"
-                   " (PES packet length + 6)\n",
-            data->data_len, data->length);
-        extra = data->data_len - data->length;
-        if (extra > 0) {
+    int extra;
+    fprint_err("### Found %d bytes of PES data, but expected %d"
+               " (PES packet length + 6)\n",
+               data->data_len, data->length);
+    extra = data->data_len - data->length;
+    if (extra > 0) {
 #if 0
       int from = payload_len - extra;
       print_data(false,"   End of data",payload+from,extra,extra);
 #endif
-            fprint_err("    In %s PES packet, PID %x, starting at " OFFSET_T_FORMAT "\n",
-                (pid == reader->video_pid ? "video" : "audio"), pid, reader->posn);
-            print_err("!!! Accepting packet anyway\n");
-            *finished = data;
-            err = clear_packet_in_peslist(reader->packets, pid);
-            if (err)
-                return 1;
-        } else
-            return 1;
-#else
-        fprint_err("### Found %d bytes of PES data, but expected %d"
-                   " (PES packet length + 6)\n",
-            data->data_len, data->length);
+      fprint_err(
+          "    In %s PES packet, PID %x, starting at " OFFSET_T_FORMAT "\n",
+          (pid == reader->video_pid ? "video" : "audio"), pid, reader->posn);
+      print_err("!!! Accepting packet anyway\n");
+      *finished = data;
+      err = clear_packet_in_peslist(reader->packets, pid);
+      if (err)
         return 1;
-#endif
-    } else if (data->data_len == data->length) {
-        *finished = data;
-        err = clear_packet_in_peslist(reader->packets, pid);
-        if (err)
-            return 1;
     } else
-        *finished = nullptr;
+      return 1;
+#else
+    fprint_err("### Found %d bytes of PES data, but expected %d"
+               " (PES packet length + 6)\n",
+               data->data_len, data->length);
+    return 1;
+#endif
+  } else if (data->data_len == data->length) {
+    *finished = data;
+    err = clear_packet_in_peslist(reader->packets, pid);
+    if (err)
+      return 1;
+  } else
+    *finished = nullptr;
 
-    return 0;
+  return 0;
 }
 
 /*
@@ -1179,19 +1180,20 @@ static int continue_PES_packet(PES_reader_p reader, uint32_t pid, byte payload[]
  * stream (per program), so we need only expect to have to check for
  * one "outstanding" stream when we hit EOF.
  */
-static void check_for_EOF_packet(PES_reader_p reader, PES_packet_data_p* packet_data)
-{
-    int ii;
-    // Not trying to be very efficient - shouldn't matter
-    for (ii = 0; ii < reader->packets->length; ii++) {
-        if (reader->packets->data[ii] != nullptr && reader->packets->data[ii]->length == 0) {
-            *packet_data = reader->packets->data[ii];
-            reader->packets->data[ii] = nullptr;
-            return;
-        }
+static void check_for_EOF_packet(PES_reader_p reader,
+                                 PES_packet_data_p *packet_data) {
+  int ii;
+  // Not trying to be very efficient - shouldn't matter
+  for (ii = 0; ii < reader->packets->length; ii++) {
+    if (reader->packets->data[ii] != nullptr &&
+        reader->packets->data[ii]->length == 0) {
+      *packet_data = reader->packets->data[ii];
+      reader->packets->data[ii] = nullptr;
+      return;
     }
-    *packet_data = nullptr;
-    return;
+  }
+  *packet_data = nullptr;
+  return;
 }
 
 /*
@@ -1203,197 +1205,208 @@ static void check_for_EOF_packet(PES_reader_p reader, PES_packet_data_p* packet_
  * Returns 0 if all goes well, EOF if end of file is read, and 1 if
  * something goes wrong.
  */
-static int read_next_PES_packet_from_TS(PES_reader_p reader, PES_packet_data_p* packet_data)
-{
-    // If we have a packet "in hand" because we read it earlier, then
-    // just return it
-    if (reader->deferred) {
-        if (reader->video_only && !reader->deferred->is_video) {
-            free_PES_packet_data(&reader->deferred);
-        } else {
-            *packet_data = reader->deferred;
-            reader->deferred = nullptr;
+static int read_next_PES_packet_from_TS(PES_reader_p reader,
+                                        PES_packet_data_p *packet_data) {
+  // If we have a packet "in hand" because we read it earlier, then
+  // just return it
+  if (reader->deferred) {
+    if (reader->video_only && !reader->deferred->is_video) {
+      free_PES_packet_data(&reader->deferred);
+    } else {
+      *packet_data = reader->deferred;
+      reader->deferred = nullptr;
 #if DEBUG_PES_ASSEMBLY
-            print_msg("@@@ returning deferred PES packet\n");
+      print_msg("@@@ returning deferred PES packet\n");
 #endif
-            return 0;
-        }
+      return 0;
     }
+  }
 
-    // If we had read EOF earlier (but not said so because of a PES
-    // packet being finished by EOF), then admit to it now
-    if (reader->had_eof) {
-        *packet_data = nullptr;
+  // If we had read EOF earlier (but not said so because of a PES
+  // packet being finished by EOF), then admit to it now
+  if (reader->had_eof) {
+    *packet_data = nullptr;
+    return EOF;
+  }
+
+  for (;;) {
+    int err;
+    byte *ts_packet;
+    int payload_unit_start_indicator;
+    byte *adapt;
+    int adapt_len;
+    byte *payload;
+    int payload_len;
+
+    uint32_t pid;
+
+    // Remember the position of the packet we're going to read
+    reader->posn = reader->tsreader->posn;
+
+    // And read it
+    // Remember that `ts_packet` will not persist, as it is a pointer
+    // into the TS buffering innards
+    err = read_next_TS_packet(reader->tsreader, &ts_packet);
+    if (err == EOF) {
+      // If we've been given EOF, then either we're just *read* EOF
+      // instead of a packet (the obvious case), or we read some data
+      // that was terminated by EOF last time, and the EOF was "deferred"
+      // by the underlying buffering methods.
+      // So, just in case, we'll check for an unbounded (length marked as
+      // zero) video stream PES packet
+      check_for_EOF_packet(reader, packet_data);
+      if (*packet_data == nullptr)
         return EOF;
+      else
+        return 0;
+    } else if (err) {
+      fprint_err("### Error reading TS packet at " OFFSET_T_FORMAT "\n",
+                 reader->posn);
+      return 1;
     }
 
-    for (;;) {
-        int err;
-        byte* ts_packet;
-        int payload_unit_start_indicator;
-        byte* adapt;
-        int adapt_len;
-        byte* payload;
-        int payload_len;
-
-        uint32_t pid;
-
-        // Remember the position of the packet we're going to read
-        reader->posn = reader->tsreader->posn;
-
-        // And read it
-        // Remember that `ts_packet` will not persist, as it is a pointer
-        // into the TS buffering innards
-        err = read_next_TS_packet(reader->tsreader, &ts_packet);
-        if (err == EOF) {
-            // If we've been given EOF, then either we're just *read* EOF
-            // instead of a packet (the obvious case), or we read some data
-            // that was terminated by EOF last time, and the EOF was "deferred"
-            // by the underlying buffering methods.
-            // So, just in case, we'll check for an unbounded (length marked as
-            // zero) video stream PES packet
-            check_for_EOF_packet(reader, packet_data);
-            if (*packet_data == nullptr)
-                return EOF;
-            else
-                return 0;
-        } else if (err) {
-            fprint_err("### Error reading TS packet at " OFFSET_T_FORMAT "\n", reader->posn);
-            return 1;
-        }
-
-        err = split_TS_packet(ts_packet, &pid, &payload_unit_start_indicator, &adapt, &adapt_len,
-            &payload, &payload_len);
-        if (err) {
-            fprint_err("### Error interpreting TS packet at " OFFSET_T_FORMAT "\n", reader->posn);
-            return 1;
-        }
-
-#if DEBUG_PES_ASSEMBLY
-        fprint_msg("@@@ TS packet at " OFFSET_T_FORMAT " with pid %3x", reader->posn, pid);
-#endif
-
-        // If we're writing out TS packets directly to a client, then this
-        // is probably a sensible place to do it.
-        if (reader->write_TS_packets && reader->tswriter != nullptr && !reader->suppress_writing) {
-            err = tswrite_write(reader->tswriter, ts_packet, pid, false, 0);
-            if (err) {
-                fprint_err("### Error writing TS packet (PID %04x) at " OFFSET_T_FORMAT "\n", pid,
-                    reader->posn);
-                return 1;
-            }
-        }
-
-        if (pid == 0) // PAT
-        {
-            // XXX We should probably check that the PAT for our program
-            // has not changed...
-#if DEBUG_PES_ASSEMBLY
-            print_msg(": PAT\n");
-#endif
-        } else if (pid == reader->pmt_pid) {
-#if DEBUG_PES_ASSEMBLY
-            print_msg(": PMT\n");
-#endif
-
-            if (payload_unit_start_indicator && reader->pmt_data) {
-                // This is the start of a new PMT packet, but we'd already
-                // started one, so throw its data away
-                fprint_err("!!! Discarding previous (uncompleted) PMT data at " OFFSET_T_FORMAT
-                           "\n",
-                    reader->posn);
-                free(reader->pmt_data);
-                reader->pmt_data = nullptr;
-                reader->pmt_data_len = reader->pmt_data_used = 0;
-            } else if (!payload_unit_start_indicator && !reader->pmt_data) {
-                // This is the continuation of a PMT packet, but we hadn't
-                // started one yet
-                fprint_err("!!! Discarding PMT continuation, no PMT started, at " OFFSET_T_FORMAT
-                           "\n",
-                    reader->posn);
-                continue;
-            }
-
-            err = build_psi_data(false, payload, payload_len, pid, &reader->pmt_data,
-                &reader->pmt_data_len, &reader->pmt_data_used);
-            if (err) {
-                fprint_err("### Error %s PMT at " OFFSET_T_FORMAT "\n",
-                    (payload_unit_start_indicator ? "starting new" : "continuing"), reader->posn);
-                if (reader->pmt_data)
-                    free(reader->pmt_data);
-                return 1;
-            }
-
-            // Do we need more data to complete this PMT?
-            if (reader->pmt_data_len > reader->pmt_data_used)
-                continue;
-
-            err = extract_and_refine_TS_program_info(
-                reader, pid, reader->pmt_data, reader->pmt_data_len);
-            if (err) {
-                fprint_err("### Error updating program info from PMT"
-                           " (TS packet at " OFFSET_T_FORMAT ")\n",
-                    reader->posn);
-                if (reader->pmt_data)
-                    free(reader->pmt_data);
-                return 1;
-            }
-
-            free(reader->pmt_data);
-            reader->pmt_data = nullptr;
-            reader->pmt_data_len = reader->pmt_data_used = 0;
-
-            if (reader->write_PES_packets && !reader->suppress_writing) {
-                // XXX We *probably* should check if it's changed before doing this,
-                //     but at least by outputting it again we ensure it's current
-                err = write_program_data(reader, reader->tswriter);
-                if (err)
-                    return 1;
-                // At least make sure it doesn't get written again *too* soon
-                reader->program_index = reader->program_freq;
-            }
-        } else if (payload_len > 0
-            && (pid == reader->video_pid || (pid == reader->audio_pid && !reader->video_only))) {
-            // It's a packet we're interested in
-            PES_packet_data_p finished;
-            if (payload_unit_start_indicator)
-                err = start_new_PES_packet(reader, pid, payload, payload_len, &finished);
-            else
-                err = continue_PES_packet(reader, pid, payload, payload_len, &finished);
-            if (err) {
-                fprint_err("### Error %s PES packet (PID %04x)"
-                           " with TS packet at " OFFSET_T_FORMAT "\n",
-                    (payload_unit_start_indicator ? "starting" : "continuing"), pid, reader->posn);
-                print_data(false, "    Data", payload, payload_len, 20);
-                return 1;
-            }
-            if (finished) {
-#if DEBUG_PES_ASSEMBLY
-                fprint_msg("@@@ PES packet with pid %x finished\n", pid);
-                report_PES_data_array("    ", finished->data, finished->data_len, true);
-#endif
-
-                if (pid == reader->audio_pid && reader->video_only) {
-                    // Actually, they aren't interested in audio at the moment
-                    // (we check this now because the user can alter this over
-                    // time, and when we *started* collecting the packet, they
-                    // might have said they *were* interested in audio)
-                    free_PES_packet_data(&finished);
-                } else {
-#if DEBUG_PES_ASSEMBLY
-                    print_msg("@@@ return it\n");
-#endif
-                    *packet_data = finished;
-                    break;
-                }
-            }
-        }
-#if DEBUG_PES_ASSEMBLY
-        else
-            print_msg("\n");
-#endif
+    err = split_TS_packet(ts_packet, &pid, &payload_unit_start_indicator,
+                          &adapt, &adapt_len, &payload, &payload_len);
+    if (err) {
+      fprint_err("### Error interpreting TS packet at " OFFSET_T_FORMAT "\n",
+                 reader->posn);
+      return 1;
     }
-    return 0;
+
+#if DEBUG_PES_ASSEMBLY
+    fprint_msg("@@@ TS packet at " OFFSET_T_FORMAT " with pid %3x",
+               reader->posn, pid);
+#endif
+
+    // If we're writing out TS packets directly to a client, then this
+    // is probably a sensible place to do it.
+    if (reader->write_TS_packets && reader->tswriter != nullptr &&
+        !reader->suppress_writing) {
+      err = tswrite_write(reader->tswriter, ts_packet, pid, false, 0);
+      if (err) {
+        fprint_err("### Error writing TS packet (PID %04x) at " OFFSET_T_FORMAT
+                   "\n",
+                   pid, reader->posn);
+        return 1;
+      }
+    }
+
+    if (pid == 0) // PAT
+    {
+      // XXX We should probably check that the PAT for our program
+      // has not changed...
+#if DEBUG_PES_ASSEMBLY
+      print_msg(": PAT\n");
+#endif
+    } else if (pid == reader->pmt_pid) {
+#if DEBUG_PES_ASSEMBLY
+      print_msg(": PMT\n");
+#endif
+
+      if (payload_unit_start_indicator && reader->pmt_data) {
+        // This is the start of a new PMT packet, but we'd already
+        // started one, so throw its data away
+        fprint_err(
+            "!!! Discarding previous (uncompleted) PMT data at " OFFSET_T_FORMAT
+            "\n",
+            reader->posn);
+        free(reader->pmt_data);
+        reader->pmt_data = nullptr;
+        reader->pmt_data_len = reader->pmt_data_used = 0;
+      } else if (!payload_unit_start_indicator && !reader->pmt_data) {
+        // This is the continuation of a PMT packet, but we hadn't
+        // started one yet
+        fprint_err("!!! Discarding PMT continuation, no PMT started, "
+                   "at " OFFSET_T_FORMAT "\n",
+                   reader->posn);
+        continue;
+      }
+
+      err = build_psi_data(false, payload, payload_len, pid, &reader->pmt_data,
+                           &reader->pmt_data_len, &reader->pmt_data_used);
+      if (err) {
+        fprint_err(
+            "### Error %s PMT at " OFFSET_T_FORMAT "\n",
+            (payload_unit_start_indicator ? "starting new" : "continuing"),
+            reader->posn);
+        if (reader->pmt_data)
+          free(reader->pmt_data);
+        return 1;
+      }
+
+      // Do we need more data to complete this PMT?
+      if (reader->pmt_data_len > reader->pmt_data_used)
+        continue;
+
+      err = extract_and_refine_TS_program_info(reader, pid, reader->pmt_data,
+                                               reader->pmt_data_len);
+      if (err) {
+        fprint_err("### Error updating program info from PMT"
+                   " (TS packet at " OFFSET_T_FORMAT ")\n",
+                   reader->posn);
+        if (reader->pmt_data)
+          free(reader->pmt_data);
+        return 1;
+      }
+
+      free(reader->pmt_data);
+      reader->pmt_data = nullptr;
+      reader->pmt_data_len = reader->pmt_data_used = 0;
+
+      if (reader->write_PES_packets && !reader->suppress_writing) {
+        // XXX We *probably* should check if it's changed before doing this,
+        //     but at least by outputting it again we ensure it's current
+        err = write_program_data(reader, reader->tswriter);
+        if (err)
+          return 1;
+        // At least make sure it doesn't get written again *too* soon
+        reader->program_index = reader->program_freq;
+      }
+    } else if (payload_len > 0 &&
+               (pid == reader->video_pid ||
+                (pid == reader->audio_pid && !reader->video_only))) {
+      // It's a packet we're interested in
+      PES_packet_data_p finished;
+      if (payload_unit_start_indicator)
+        err =
+            start_new_PES_packet(reader, pid, payload, payload_len, &finished);
+      else
+        err = continue_PES_packet(reader, pid, payload, payload_len, &finished);
+      if (err) {
+        fprint_err("### Error %s PES packet (PID %04x)"
+                   " with TS packet at " OFFSET_T_FORMAT "\n",
+                   (payload_unit_start_indicator ? "starting" : "continuing"),
+                   pid, reader->posn);
+        print_data(false, "    Data", payload, payload_len, 20);
+        return 1;
+      }
+      if (finished) {
+#if DEBUG_PES_ASSEMBLY
+        fprint_msg("@@@ PES packet with pid %x finished\n", pid);
+        report_PES_data_array("    ", finished->data, finished->data_len, true);
+#endif
+
+        if (pid == reader->audio_pid && reader->video_only) {
+          // Actually, they aren't interested in audio at the moment
+          // (we check this now because the user can alter this over
+          // time, and when we *started* collecting the packet, they
+          // might have said they *were* interested in audio)
+          free_PES_packet_data(&finished);
+        } else {
+#if DEBUG_PES_ASSEMBLY
+          print_msg("@@@ return it\n");
+#endif
+          *packet_data = finished;
+          break;
+        }
+      }
+    }
+#if DEBUG_PES_ASSEMBLY
+    else
+      print_msg("\n");
+#endif
+  }
+  return 0;
 }
 
 // ============================================================
@@ -1412,33 +1425,32 @@ static int read_next_PES_packet_from_TS(PES_reader_p reader, PES_packet_data_p* 
  *
  * Returns 0 if all goes well, 1 if there was an error.
  */
-int determine_if_TS_file(int input, int* is_TS)
-{
-    int err;
-    int ii;
-    byte buf[TS_PACKET_SIZE];
+int determine_if_TS_file(int input, int *is_TS) {
+  int err;
+  int ii;
+  byte buf[TS_PACKET_SIZE];
 
-    *is_TS = true;
+  *is_TS = true;
 
-    for (ii = 0; ii < 100; ii++) {
-        err = read_bytes(input, TS_PACKET_SIZE, buf);
-        if (err == EOF)
-            break;
-        else if (err) {
-            print_err("### Error trying to check if file is TS\n");
-            return 1;
-        }
-        if (buf[0] != 0x47) {
-            *is_TS = false;
-            break;
-        }
+  for (ii = 0; ii < 100; ii++) {
+    err = read_bytes(input, TS_PACKET_SIZE, buf);
+    if (err == EOF)
+      break;
+    else if (err) {
+      print_err("### Error trying to check if file is TS\n");
+      return 1;
     }
-    err = seek_file(input, 0);
-    if (err) {
-        print_err("### Error rewinding file after determining if it is TS\n");
-        return 1;
+    if (buf[0] != 0x47) {
+      *is_TS = false;
+      break;
     }
-    return 0;
+  }
+  err = seek_file(input, 0);
+  if (err) {
+    print_err("### Error rewinding file after determining if it is TS\n");
+    return 1;
+  }
+  return 0;
 }
 
 /*
@@ -1453,38 +1465,37 @@ int determine_if_TS_file(int input, int* is_TS)
  * Returns 0 if all goes well, 1 if there was an error (including the
  * stream not appearing to be either).
  */
-static int determine_PES_video_type(PES_reader_p reader)
-{
-    int err;
-    ES_p es;
-    int old_video_only = reader->video_only;
+static int determine_PES_video_type(PES_reader_p reader) {
+  int err;
+  ES_p es;
+  int old_video_only = reader->video_only;
 
-    err = build_elementary_stream_PES(reader, &es);
-    if (err) {
-        print_err("### Error starting elementary stream before"
-                  " working out if PS is H.262 or H.264\n");
-        return 1;
-    }
+  err = build_elementary_stream_PES(reader, &es);
+  if (err) {
+    print_err("### Error starting elementary stream before"
+              " working out if PS is H.262 or H.264\n");
+    return 1;
+  }
 
-    reader->video_only = true;
+  reader->video_only = true;
 
-    err = decide_ES_video_type(es, false, false, &reader->video_type);
-    if (err) {
-        print_err("### Error deciding on PS video type\n");
-        free_elementary_stream(&es);
-        return 1;
-    }
+  err = decide_ES_video_type(es, false, false, &reader->video_type);
+  if (err) {
+    print_err("### Error deciding on PS video type\n");
     free_elementary_stream(&es);
+    return 1;
+  }
+  free_elementary_stream(&es);
 
-    reader->is_h264 = (reader->video_type == VIDEO_H264);
-    reader->video_only = old_video_only;
+  reader->is_h264 = (reader->video_type == VIDEO_H264);
+  reader->video_only = old_video_only;
 
-    err = rewind_program_stream(reader->psreader);
-    if (err) {
-        print_err("### Error rewinding PS stream after determining its type\n");
-        return 1;
-    }
-    return 0;
+  err = rewind_program_stream(reader->psreader);
+  if (err) {
+    print_err("### Error rewinding PS stream after determining its type\n");
+    return 1;
+  }
+  return 0;
 }
 
 /*
@@ -1498,66 +1509,67 @@ static int determine_PES_video_type(PES_reader_p reader)
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static int build_PES_reader_datastructure(int give_info, int give_warnings, PES_reader_p* reader)
-{
-    int err;
-    PES_reader_p new2 = (PES_reader_p)malloc(SIZEOF_PES_READER);
-    if (new2 == nullptr) {
-        print_err("### Unable to allocate PES reader datastructure\n");
-        return 1;
-    }
+static int build_PES_reader_datastructure(int give_info, int give_warnings,
+                                          PES_reader_p *reader) {
+  int err;
+  PES_reader_p new2 = (PES_reader_p)malloc(SIZEOF_PES_READER);
+  if (new2 == nullptr) {
+    print_err("### Unable to allocate PES reader datastructure\n");
+    return 1;
+  }
 
-    new2->tsreader = nullptr; // for the moment, at least
-    new2->psreader = nullptr; // for the moment, at least
-    new2->is_TS = false; // for want of better
-    new2->give_info = give_info;
-    new2->give_warning = give_warnings;
-    new2->posn = 0;
-    new2->is_h264 = false;
-    new2->video_type = VIDEO_UNKNOWN;
-    new2->packet = nullptr;
+  new2->tsreader = nullptr; // for the moment, at least
+  new2->psreader = nullptr; // for the moment, at least
+  new2->is_TS = false;      // for want of better
+  new2->give_info = give_info;
+  new2->give_warning = give_warnings;
+  new2->posn = 0;
+  new2->is_h264 = false;
+  new2->video_type = VIDEO_UNKNOWN;
+  new2->packet = nullptr;
 
-    new2->program_number = 0;
-    new2->program_map = nullptr;
-    new2->video_only = false;
-    new2->audio_stream_id = 0;
+  new2->program_number = 0;
+  new2->program_map = nullptr;
+  new2->video_only = false;
+  new2->audio_stream_id = 0;
 
-    new2->pmt_data = nullptr;
-    new2->pmt_data_len = 0;
-    new2->pmt_data_used = 0;
+  new2->pmt_data = nullptr;
+  new2->pmt_data_len = 0;
+  new2->pmt_data_used = 0;
 
-    new2->video_pid = new2->audio_pid = 0;
-    new2->pcr_pid = new2->pmt_pid = 0;
-    new2->got_program_data = false;
+  new2->video_pid = new2->audio_pid = 0;
+  new2->pcr_pid = new2->pmt_pid = 0;
+  new2->got_program_data = false;
 
-    new2->output_program_number = 0;
-    new2->output_video_pid = new2->output_audio_pid = 0;
-    new2->output_pcr_pid = new2->output_pmt_pid = 0;
-    new2->override_program_data = false;
+  new2->output_program_number = 0;
+  new2->output_video_pid = new2->output_audio_pid = 0;
+  new2->output_pcr_pid = new2->output_pmt_pid = 0;
+  new2->override_program_data = false;
 
-    new2->output_dolby_stream_type = new2->dolby_stream_type = DVB_DOLBY_AUDIO_STREAM_TYPE;
-    new2->override_dolby_stream_type = false;
+  new2->output_dolby_stream_type = new2->dolby_stream_type =
+      DVB_DOLBY_AUDIO_STREAM_TYPE;
+  new2->override_dolby_stream_type = false;
 
-    new2->tswriter = nullptr;
-    new2->write_PES_packets = false;
-    new2->write_TS_packets = false;
-    new2->suppress_writing = true;
-    new2->dont_write_current_packet = false;
-    new2->pes_padding = 0;
+  new2->tswriter = nullptr;
+  new2->write_PES_packets = false;
+  new2->write_TS_packets = false;
+  new2->suppress_writing = true;
+  new2->dont_write_current_packet = false;
+  new2->pes_padding = 0;
 
-    new2->debug_read_packets = false;
+  new2->debug_read_packets = false;
 
-    err = build_peslist(&new2->packets);
-    if (err) {
-        print_err("### Error building PES reader datastructure\n");
-        free(new2);
-        return 1;
-    }
+  err = build_peslist(&new2->packets);
+  if (err) {
+    print_err("### Error building PES reader datastructure\n");
+    free(new2);
+    return 1;
+  }
 
-    new2->deferred = nullptr;
-    new2->had_eof = false;
-    *reader = new2;
-    return 0;
+  new2->deferred = nullptr;
+  new2->had_eof = false;
+  *reader = new2;
+  return 0;
 }
 
 /*
@@ -1572,25 +1584,25 @@ static int build_PES_reader_datastructure(int give_info, int give_warnings, PES_
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int build_PS_PES_reader(PS_reader_p ps, int give_info, int give_warnings, PES_reader_p* reader)
-{
-    int err;
+int build_PS_PES_reader(PS_reader_p ps, int give_info, int give_warnings,
+                        PES_reader_p *reader) {
+  int err;
 
-    err = build_PES_reader_datastructure(give_info, give_warnings, reader);
-    if (err)
-        return 1;
+  err = build_PES_reader_datastructure(give_info, give_warnings, reader);
+  if (err)
+    return 1;
 
-    (*reader)->is_TS = false;
-    (*reader)->psreader = ps;
+  (*reader)->is_TS = false;
+  (*reader)->psreader = ps;
 
-    // Try to determine what sort of video this is (particularly, is it H.264)
-    err = determine_PES_video_type(*reader);
-    if (err) {
-        print_err("### Error determining PS stream type\n");
-        (void)free_PES_reader(reader);
-        return 1;
-    }
-    return 0;
+  // Try to determine what sort of video this is (particularly, is it H.264)
+  err = determine_PES_video_type(*reader);
+  if (err) {
+    print_err("### Error determining PS stream type\n");
+    (void)free_PES_reader(reader);
+    return 1;
+  }
+  return 0;
 }
 
 /*
@@ -1609,29 +1621,28 @@ int build_PS_PES_reader(PS_reader_p ps, int give_info, int give_warnings, PES_re
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
 int build_TS_PES_reader(TS_reader_p tsreader, int give_info, int give_warnings,
-    uint16_t program_number, PES_reader_p* reader)
-{
-    int err;
+                        uint16_t program_number, PES_reader_p *reader) {
+  int err;
 
-    err = build_PES_reader_datastructure(give_info, give_warnings, reader);
-    if (err)
-        return 1;
+  err = build_PES_reader_datastructure(give_info, give_warnings, reader);
+  if (err)
+    return 1;
 
-    (*reader)->is_TS = true;
-    (*reader)->tsreader = tsreader;
+  (*reader)->is_TS = true;
+  (*reader)->tsreader = tsreader;
 
-    (*reader)->program_number = program_number;
-    (*reader)->output_program_number = program_number;
+  (*reader)->program_number = program_number;
+  (*reader)->output_program_number = program_number;
 
-    // Work out the program information by reading the first PAT and
-    // the first (following) PMT
-    err = determine_TS_program_info(*reader);
-    if (err) {
-        print_err("### Error determining/checking program number\n");
-        (void)free_PES_reader(reader);
-        return 1;
-    }
-    return 0;
+  // Work out the program information by reading the first PAT and
+  // the first (following) PMT
+  err = determine_TS_program_info(*reader);
+  if (err) {
+    print_err("### Error determining/checking program number\n");
+    (void)free_PES_reader(reader);
+    return 1;
+  }
+  return 0;
 }
 
 /*
@@ -1651,38 +1662,38 @@ int build_TS_PES_reader(TS_reader_p tsreader, int give_info, int give_warnings,
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
 int build_PES_reader(int input, int is_TS, int give_info, int give_warnings,
-    uint16_t program_number, PES_reader_p* reader)
-{
-    int err;
+                     uint16_t program_number, PES_reader_p *reader) {
+  int err;
 
-    if (is_TS) {
-        TS_reader_p tsreader;
-        err = build_TS_reader(input, &tsreader);
-        if (err) {
-            print_err("### Error building TS specific reader\n");
-            return 1;
-        }
-        err = build_TS_PES_reader(tsreader, give_info, give_warnings, program_number, reader);
-        if (err) {
-            print_err("### Error building TS specific reader\n");
-            free_TS_reader(&tsreader);
-            return 1;
-        }
-    } else {
-        PS_reader_p ps;
-        err = build_PS_reader(input, !give_info, &ps);
-        if (err) {
-            print_err("### Error building PS specific reader\n");
-            return 1;
-        }
-        err = build_PS_PES_reader(ps, give_info, give_warnings, reader);
-        if (err) {
-            print_err("### Error building PS specific reader\n");
-            free_PS_reader(&ps);
-            return 1;
-        }
+  if (is_TS) {
+    TS_reader_p tsreader;
+    err = build_TS_reader(input, &tsreader);
+    if (err) {
+      print_err("### Error building TS specific reader\n");
+      return 1;
     }
-    return 0;
+    err = build_TS_PES_reader(tsreader, give_info, give_warnings,
+                              program_number, reader);
+    if (err) {
+      print_err("### Error building TS specific reader\n");
+      free_TS_reader(&tsreader);
+      return 1;
+    }
+  } else {
+    PS_reader_p ps;
+    err = build_PS_reader(input, !give_info, &ps);
+    if (err) {
+      print_err("### Error building PS specific reader\n");
+      return 1;
+    }
+    err = build_PS_PES_reader(ps, give_info, give_warnings, reader);
+    if (err) {
+      print_err("### Error building PS specific reader\n");
+      free_PS_reader(&ps);
+      return 1;
+    }
+  }
+  return 0;
 }
 
 /*
@@ -1705,21 +1716,22 @@ int build_PES_reader(int input, int is_TS, int give_info, int give_warnings,
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int open_PES_reader_for_TS(char* filename, uint16_t program_number, int give_info,
-    int give_warnings, PES_reader_p* reader)
-{
-    int err;
-    int input;
+int open_PES_reader_for_TS(char *filename, uint16_t program_number,
+                           int give_info, int give_warnings,
+                           PES_reader_p *reader) {
+  int err;
+  int input;
 
-    input = open_binary_file(filename, false);
-    if (input == -1) {
-        fprint_err("### Unable to open input TS file %s\n", filename);
-        return 1;
-    }
-    err = build_PES_reader(input, true, give_info, give_warnings, program_number, reader);
-    if (err)
-        return 1;
-    return 0;
+  input = open_binary_file(filename, false);
+  if (input == -1) {
+    fprint_err("### Unable to open input TS file %s\n", filename);
+    return 1;
+  }
+  err = build_PES_reader(input, true, give_info, give_warnings, program_number,
+                         reader);
+  if (err)
+    return 1;
+  return 0;
 }
 
 /*
@@ -1735,14 +1747,14 @@ int open_PES_reader_for_TS(char* filename, uint16_t program_number, int give_inf
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int open_PES_reader_for_PS(char* filename, int give_info, int give_warnings, PES_reader_p* reader)
-{
-    int input = open_binary_file(filename, false);
-    if (input == -1) {
-        fprint_err("### Unable to open input PS file %s\n", filename);
-        return 1;
-    }
-    return build_PES_reader(input, false, give_info, give_warnings, 0, reader);
+int open_PES_reader_for_PS(char *filename, int give_info, int give_warnings,
+                           PES_reader_p *reader) {
+  int input = open_binary_file(filename, false);
+  if (input == -1) {
+    fprint_err("### Unable to open input PS file %s\n", filename);
+    return 1;
+  }
+  return build_PES_reader(input, false, give_info, give_warnings, 0, reader);
 }
 
 /*
@@ -1784,26 +1796,26 @@ int open_PES_reader_for_PS(char* filename, int give_info, int give_warnings, PES
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int open_PES_reader(char* filename, int give_info, int give_warnings, PES_reader_p* reader)
-{
-    int err;
-    int input;
-    int is_TS;
+int open_PES_reader(char *filename, int give_info, int give_warnings,
+                    PES_reader_p *reader) {
+  int err;
+  int input;
+  int is_TS;
 
-    input = open_binary_file(filename, false);
-    if (input == -1) {
-        fprint_err("### Unable to open input file %s\n", filename);
-        return 1;
-    }
-    err = determine_if_TS_file(input, &is_TS);
-    if (err) {
-        (void)close_file(input);
-        return 1;
-    }
-    if (is_TS)
-        return build_PES_reader(input, true, give_info, give_warnings, 0, reader);
-    else
-        return build_PES_reader(input, false, give_info, give_warnings, 0, reader);
+  input = open_binary_file(filename, false);
+  if (input == -1) {
+    fprint_err("### Unable to open input file %s\n", filename);
+    return 1;
+  }
+  err = determine_if_TS_file(input, &is_TS);
+  if (err) {
+    (void)close_file(input);
+    return 1;
+  }
+  if (is_TS)
+    return build_PES_reader(input, true, give_info, give_warnings, 0, reader);
+  else
+    return build_PES_reader(input, false, give_info, give_warnings, 0, reader);
 }
 
 /*
@@ -1815,10 +1827,9 @@ int open_PES_reader(char* filename, int give_info, int give_warnings, PES_reader
  * By default, the PES reader returns video data and a single audio
  * stream (taken from the first audio stream encountered).
  */
-void set_PES_reader_video_only(PES_reader_p reader, int video_only)
-{
-    reader->video_only = video_only;
-    return;
+void set_PES_reader_video_only(PES_reader_p reader, int video_only) {
+  reader->video_only = video_only;
+  return;
 }
 
 /*
@@ -1836,14 +1847,14 @@ void set_PES_reader_video_only(PES_reader_p reader, int video_only)
  * Returns 0 if all went well, or 1 if there was an error (specifically,
  * that `stream_number` was not in the range 0-31).
  */
-int set_PES_reader_audio_stream(PES_reader_p reader, int stream_number)
-{
-    if (stream_number < 0 || stream_number > 0x1F) {
-        fprint_err("### Audio stream number %d is not in range 0-31\n", stream_number);
-        return 1;
-    }
-    reader->audio_stream_id = 0xc0 | stream_number;
-    return 0;
+int set_PES_reader_audio_stream(PES_reader_p reader, int stream_number) {
+  if (stream_number < 0 || stream_number > 0x1F) {
+    fprint_err("### Audio stream number %d is not in range 0-31\n",
+               stream_number);
+    return 1;
+  }
+  reader->audio_stream_id = 0xc0 | stream_number;
+  return 0;
 }
 
 /*
@@ -1858,10 +1869,9 @@ int set_PES_reader_audio_stream(PES_reader_p reader, int stream_number)
  *
  * This call only has effect if the input data is PS.
  */
-void set_PES_reader_audio_private1(PES_reader_p reader)
-{
-    reader->audio_stream_id = PRIVATE1_AUDIO_STREAM_ID;
-    return;
+void set_PES_reader_audio_private1(PES_reader_p reader) {
+  reader->audio_stream_id = PRIVATE1_AUDIO_STREAM_ID;
+  return;
 }
 
 /*
@@ -1888,38 +1898,37 @@ void set_PES_reader_audio_private1(PES_reader_p reader)
  * - `pcr_pid` is the PID to use for PCR data - this will often
  *   be the same as the `video_pid`
  */
-void set_PES_reader_program_data(PES_reader_p reader, uint16_t program_number, uint32_t pmt_pid,
-    uint32_t video_pid, uint32_t audio_pid, uint32_t pcr_pid)
-{
-    if (program_number == 0)
-        program_number = 1;
+void set_PES_reader_program_data(PES_reader_p reader, uint16_t program_number,
+                                 uint32_t pmt_pid, uint32_t video_pid,
+                                 uint32_t audio_pid, uint32_t pcr_pid) {
+  if (program_number == 0)
+    program_number = 1;
 
-    if (reader->is_TS) {
-        reader->override_program_data = true;
-        reader->output_program_number = program_number;
-        reader->output_pmt_pid = pmt_pid;
-        reader->output_pcr_pid = pcr_pid;
-        reader->output_video_pid = video_pid;
-        reader->output_audio_pid = audio_pid;
-    } else {
-        reader->output_program_number = reader->program_number = program_number;
-        reader->output_pmt_pid = reader->pmt_pid = pmt_pid;
-        reader->output_pcr_pid = reader->pcr_pid = pcr_pid;
-        reader->output_video_pid = reader->video_pid = video_pid;
-        reader->output_audio_pid = reader->audio_pid = audio_pid;
-        reader->got_program_data = true;
-        // Ideally we might also set the reader->program_map datastructure up
-    }
+  if (reader->is_TS) {
+    reader->override_program_data = true;
+    reader->output_program_number = program_number;
+    reader->output_pmt_pid = pmt_pid;
+    reader->output_pcr_pid = pcr_pid;
+    reader->output_video_pid = video_pid;
+    reader->output_audio_pid = audio_pid;
+  } else {
+    reader->output_program_number = reader->program_number = program_number;
+    reader->output_pmt_pid = reader->pmt_pid = pmt_pid;
+    reader->output_pcr_pid = reader->pcr_pid = pcr_pid;
+    reader->output_video_pid = reader->video_pid = video_pid;
+    reader->output_audio_pid = reader->audio_pid = audio_pid;
+    reader->got_program_data = true;
+    // Ideally we might also set the reader->program_map datastructure up
+  }
 }
 
 /*
  * Tell the PES reader that the PS data it is reading is MPEG-4/AVC,
  * as opposed to MPEG-1/MPEG-2.
  */
-void set_PES_reader_h264(PES_reader_p reader)
-{
-    reader->is_h264 = true;
-    reader->video_type = VIDEO_H264;
+void set_PES_reader_h264(PES_reader_p reader) {
+  reader->is_h264 = true;
+  reader->video_type = VIDEO_H264;
 }
 
 /*
@@ -1927,10 +1936,9 @@ void set_PES_reader_h264(PES_reader_p reader)
  * type `video_type` (which is assumed to be a legitimate value
  * such as VIDEO_H264, etc.)
  */
-void set_PES_reader_video_type(PES_reader_p reader, int video_type)
-{
-    reader->video_type = video_type;
-    reader->is_h264 = (video_type == VIDEO_H264);
+void set_PES_reader_video_type(PES_reader_p reader, int video_type) {
+  reader->video_type = video_type;
+  reader->is_h264 = (video_type == VIDEO_H264);
 }
 
 /*
@@ -1945,11 +1953,10 @@ void set_PES_reader_video_type(PES_reader_p reader, int video_type)
  *
  * This call only has effect if Dolby audio data is actually selected.
  */
-void set_PES_reader_dolby_stream_type(PES_reader_p reader, int is_dvb)
-{
-    reader->override_dolby_stream_type = true;
-    reader->output_dolby_stream_type
-        = (is_dvb ? DVB_DOLBY_AUDIO_STREAM_TYPE : ATSC_DOLBY_AUDIO_STREAM_TYPE);
+void set_PES_reader_dolby_stream_type(PES_reader_p reader, int is_dvb) {
+  reader->override_dolby_stream_type = true;
+  reader->output_dolby_stream_type =
+      (is_dvb ? DVB_DOLBY_AUDIO_STREAM_TYPE : ATSC_DOLBY_AUDIO_STREAM_TYPE);
 }
 
 /*
@@ -1971,32 +1978,31 @@ void set_PES_reader_dolby_stream_type(PES_reader_p reader, int is_dvb)
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int set_PES_reader_position(PES_reader_p reader, offset_t posn)
-{
-    int err;
-    // The positioning is easy
-    if (reader->is_TS)
-        err = seek_using_TS_reader(reader->tsreader, posn);
-    else
-        err = seek_using_PS_reader(reader->psreader, posn);
-    if (err)
-        return 1;
+int set_PES_reader_position(PES_reader_p reader, offset_t posn) {
+  int err;
+  // The positioning is easy
+  if (reader->is_TS)
+    err = seek_using_TS_reader(reader->tsreader, posn);
+  else
+    err = seek_using_PS_reader(reader->psreader, posn);
+  if (err)
+    return 1;
 
-    // (although it's important not to forget to set the TS packet position for
-    // the next packet...)
-    reader->posn = posn;
+  // (although it's important not to forget to set the TS packet position for
+  // the next packet...)
+  reader->posn = posn;
 
-    // But we must also make sure that we've lost any memory of previous
-    // PES packet data that we were building up
-    if (reader->is_TS) {
-        int ii;
-        for (ii = 0; ii < reader->packets->length; ii++)
-            free_PES_packet_data(&reader->packets->data[ii]);
-        if (reader->deferred)
-            free_PES_packet_data(&reader->deferred);
-        reader->had_eof = false;
-    }
-    return 0;
+  // But we must also make sure that we've lost any memory of previous
+  // PES packet data that we were building up
+  if (reader->is_TS) {
+    int ii;
+    for (ii = 0; ii < reader->packets->length; ii++)
+      free_PES_packet_data(&reader->packets->data[ii]);
+    if (reader->deferred)
+      free_PES_packet_data(&reader->deferred);
+    reader->had_eof = false;
+  }
+  return 0;
 }
 
 /*
@@ -2008,38 +2014,37 @@ int set_PES_reader_position(PES_reader_p reader, offset_t posn)
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int free_PES_reader(PES_reader_p* reader)
-{
-    int err = 0;
+int free_PES_reader(PES_reader_p *reader) {
+  int err = 0;
 
-    if ((*reader) == nullptr)
-        return 0;
-    if ((*reader)->packet != nullptr)
-        free_PES_packet_data(&(*reader)->packet);
+  if ((*reader) == nullptr)
+    return 0;
+  if ((*reader)->packet != nullptr)
+    free_PES_packet_data(&(*reader)->packet);
 
-    // Forget any file
-    (*reader)->tsreader = nullptr;
-    (*reader)->psreader = nullptr;
+  // Forget any file
+  (*reader)->tsreader = nullptr;
+  (*reader)->psreader = nullptr;
 
-    if ((*reader)->program_map != nullptr) {
-        free_pmt(&(*reader)->program_map);
-    }
-    if ((*reader)->pmt_data != nullptr) {
-        free((*reader)->pmt_data);
-        (*reader)->pmt_data = nullptr;
-        (*reader)->pmt_data_len = 0;
-        (*reader)->pmt_data_used = 0;
-    }
-    if ((*reader)->packets != nullptr) {
-        free_peslist(&(*reader)->packets);
-    }
-    if ((*reader)->is_TS)
-        free_TS_reader(&(*reader)->tsreader);
-    else
-        free_PS_reader(&(*reader)->psreader);
-    free(*reader);
-    *reader = nullptr;
-    return err;
+  if ((*reader)->program_map != nullptr) {
+    free_pmt(&(*reader)->program_map);
+  }
+  if ((*reader)->pmt_data != nullptr) {
+    free((*reader)->pmt_data);
+    (*reader)->pmt_data = nullptr;
+    (*reader)->pmt_data_len = 0;
+    (*reader)->pmt_data_used = 0;
+  }
+  if ((*reader)->packets != nullptr) {
+    free_peslist(&(*reader)->packets);
+  }
+  if ((*reader)->is_TS)
+    free_TS_reader(&(*reader)->tsreader);
+  else
+    free_PS_reader(&(*reader)->psreader);
+  free(*reader);
+  *reader = nullptr;
+  return err;
 }
 
 /*
@@ -2051,33 +2056,32 @@ int free_PES_reader(PES_reader_p* reader)
  * Returns 0 if all goes well, 1 if something goes wrong with closing the
  * file (although in that case, the `reader` will still have been freed).
  */
-int close_PES_reader(PES_reader_p* reader)
-{
-    int err = 0;
-    int err2;
+int close_PES_reader(PES_reader_p *reader) {
+  int err = 0;
+  int err2;
 
-    if ((*reader) == nullptr)
-        return 0;
+  if ((*reader) == nullptr)
+    return 0;
 
-    if ((*reader)->is_TS) {
-        if ((*reader)->tsreader != nullptr) {
-            err = close_TS_reader(&(*reader)->tsreader);
-            if (err)
-                print_err("### Error closing TS reader\n");
-        }
-    } else {
-        if ((*reader)->psreader != nullptr) {
-            err = close_PS_file(&(*reader)->psreader);
-            if (err)
-                print_err("### Error closing PS reader\n");
-        }
+  if ((*reader)->is_TS) {
+    if ((*reader)->tsreader != nullptr) {
+      err = close_TS_reader(&(*reader)->tsreader);
+      if (err)
+        print_err("### Error closing TS reader\n");
     }
+  } else {
+    if ((*reader)->psreader != nullptr) {
+      err = close_PS_file(&(*reader)->psreader);
+      if (err)
+        print_err("### Error closing PS reader\n");
+    }
+  }
 
-    err2 = free_PES_reader(reader);
-    if (err)
-        return err;
-    else
-        return err2;
+  err2 = free_PES_reader(reader);
+  if (err)
+    return err;
+  else
+    return err2;
 }
 
 /*
@@ -2088,90 +2092,92 @@ int close_PES_reader(PES_reader_p* reader)
  * Returns 0 if all goes well, EOF if end of file is read, and 1 if
  * something goes wrong.
  */
-int read_next_PES_packet(PES_reader_p reader)
-{
-    int err;
+int read_next_PES_packet(PES_reader_p reader) {
+  int err;
 
-    if (reader->packet != nullptr) {
-        if (reader->write_PES_packets && reader->tswriter != nullptr && !reader->suppress_writing
-            && !reader->dont_write_current_packet) {
-            // Aha - we need to output the previous PES packet
-            uint32_t pid;
-            byte stream_id;
-            if (reader->program_index == 0) {
-                // Output the current program information
-                err = write_program_data(reader, reader->tswriter);
-                if (err)
-                    return 1;
-                reader->program_index = reader->program_freq;
-            } else
-                reader->program_index--;
+  if (reader->packet != nullptr) {
+    if (reader->write_PES_packets && reader->tswriter != nullptr &&
+        !reader->suppress_writing && !reader->dont_write_current_packet) {
+      // Aha - we need to output the previous PES packet
+      uint32_t pid;
+      byte stream_id;
+      if (reader->program_index == 0) {
+        // Output the current program information
+        err = write_program_data(reader, reader->tswriter);
+        if (err)
+          return 1;
+        reader->program_index = reader->program_freq;
+      } else
+        reader->program_index--;
 #if DEBUG_READ_PACKETS
-            if (reader->debug_read_packets) {
-                fprint_msg("<<write PES packet at " OFFSET_T_FORMAT " len %d",
-                    reader->packet->posn, reader->packet->data_len);
-                if (reader->packet->is_video) {
-                    fprint_msg(" VIDEO eslen %d", reader->packet->es_data_len);
-                    if (reader->packet->data_alignment_indicator)
-                        print_msg(" aligned");
-                }
-                print_msg(">>\n");
-            }
-#endif
-            if (reader->packet->is_video) {
-                pid = reader->output_video_pid;
-                stream_id = DEFAULT_VIDEO_STREAM_ID;
-            } else {
-                pid = reader->output_audio_pid;
-                stream_id = DEFAULT_AUDIO_STREAM_ID;
-            }
-            err = write_PES_as_TS_PES_packet(reader->tswriter, reader->packet->data,
-                reader->packet->data_len, pid, stream_id, false, 0, 0);
-            if (err) {
-                print_err("### Error writing out PES packet as TS\n");
-                return 1;
-            }
-            if (reader->pes_padding) {
-                // Add some "dummy" PES packets to bulk out our output
-                int ii;
-                PES_packet_data_p dummy;
-                err = build_dummy_PES_packet_data(&dummy, reader->packet->data_len);
-                if (err)
-                    return 1;
-                for (ii = 0; ii < reader->pes_padding; ii++) {
-                    err = write_PES_as_TS_PES_packet(reader->tswriter, dummy->data,
-                        dummy->data_len, pid, STREAM_ID_PADDING_STREAM, false, 0, 0);
-                    if (err) {
-                        print_err("### Error writing out dummy PES packet as TS\n");
-                        return 1;
-                    }
-                }
-            }
+      if (reader->debug_read_packets) {
+        fprint_msg("<<write PES packet at " OFFSET_T_FORMAT " len %d",
+                   reader->packet->posn, reader->packet->data_len);
+        if (reader->packet->is_video) {
+          fprint_msg(" VIDEO eslen %d", reader->packet->es_data_len);
+          if (reader->packet->data_alignment_indicator)
+            print_msg(" aligned");
         }
-        // And it's our job to free each PES packet as it is no longer needed
-        free_PES_packet_data(&reader->packet);
+        print_msg(">>\n");
+      }
+#endif
+      if (reader->packet->is_video) {
+        pid = reader->output_video_pid;
+        stream_id = DEFAULT_VIDEO_STREAM_ID;
+      } else {
+        pid = reader->output_audio_pid;
+        stream_id = DEFAULT_AUDIO_STREAM_ID;
+      }
+      err = write_PES_as_TS_PES_packet(reader->tswriter, reader->packet->data,
+                                       reader->packet->data_len, pid, stream_id,
+                                       false, 0, 0);
+      if (err) {
+        print_err("### Error writing out PES packet as TS\n");
+        return 1;
+      }
+      if (reader->pes_padding) {
+        // Add some "dummy" PES packets to bulk out our output
+        int ii;
+        PES_packet_data_p dummy;
+        err = build_dummy_PES_packet_data(&dummy, reader->packet->data_len);
+        if (err)
+          return 1;
+        for (ii = 0; ii < reader->pes_padding; ii++) {
+          err = write_PES_as_TS_PES_packet(
+              reader->tswriter, dummy->data, dummy->data_len, pid,
+              STREAM_ID_PADDING_STREAM, false, 0, 0);
+          if (err) {
+            print_err("### Error writing out dummy PES packet as TS\n");
+            return 1;
+          }
+        }
+      }
     }
-    // We always undo the "don't write the current packet flag" after we (might)
-    // have written it out
-    reader->dont_write_current_packet = false;
+    // And it's our job to free each PES packet as it is no longer needed
+    free_PES_packet_data(&reader->packet);
+  }
+  // We always undo the "don't write the current packet flag" after we (might)
+  // have written it out
+  reader->dont_write_current_packet = false;
 
-    if (reader->is_TS)
-        err = read_next_PES_packet_from_TS(reader, &reader->packet);
-    else
-        err = read_next_PES_packet_from_PS(reader, &reader->packet);
+  if (reader->is_TS)
+    err = read_next_PES_packet_from_TS(reader, &reader->packet);
+  else
+    err = read_next_PES_packet_from_PS(reader, &reader->packet);
 #if DEBUG_READ_PACKETS
-    if (reader->debug_read_packets) {
-        if (err == EOF)
-            print_msg("<<EOF>>\n");
-        else if (!err)
-            fprint_msg("<<new   PES packet at " OFFSET_T_FORMAT ">>\n", reader->packet->posn);
-    }
+  if (reader->debug_read_packets) {
+    if (err == EOF)
+      print_msg("<<EOF>>\n");
+    else if (!err)
+      fprint_msg("<<new   PES packet at " OFFSET_T_FORMAT ">>\n",
+                 reader->packet->posn);
+  }
 #endif
 
-    // Higher layers want to know if a particular PES packet had a PTS or not
-    if (!err)
-        reader->packet->has_PTS = PES_packet_has_PTS(reader->packet);
-    return err;
+  // Higher layers want to know if a particular PES packet had a PTS or not
+  if (!err)
+    reader->packet->has_PTS = PES_packet_has_PTS(reader->packet);
+  return err;
 }
 
 // ============================================================
@@ -2187,31 +2193,30 @@ int read_next_PES_packet(PES_reader_p reader)
  * Returns the required offset (i.e., packet[offset] is the first byte
  * of the ES data within the PES packet).
  */
-int calc_mpeg1_pes_offset(byte* data, int data_len)
-{
-    int posn = 6;
+int calc_mpeg1_pes_offset(byte *data, int data_len) {
+  int posn = 6;
 
-    while (posn < data_len && data[posn] == 0xFF) // ignore padding bytes
-        posn++; // (should be <= 16, but...)
+  while (posn < data_len && data[posn] == 0xFF) // ignore padding bytes
+    posn++;                                     // (should be <= 16, but...)
 
-    if (posn < data_len) {
-        if ((data[posn] & 0xC0) == 0x40) // ignore buffer scale/size
-            posn += 2;
+  if (posn < data_len) {
+    if ((data[posn] & 0xC0) == 0x40) // ignore buffer scale/size
+      posn += 2;
 
-        if ((data[posn] & 0xF0) == 0x20) // ignore PTS
-            posn += 5;
-        else if ((data[posn] & 0xF0) == 0x30) // ignore PTS and DTS
-            posn += 10;
-        else if (data[posn] == 0x0F) // check for paranoia
-            posn++;
-        else {
-            fprint_err("### MPEG-1 PES packet has 0x%1xX"
-                       " instead of 0x40, 0x2X, 0x3X or 0x0F\n",
-                (data[posn] & 0xF0) >> 4);
-            posn++; // what else can we do?
-        }
+    if ((data[posn] & 0xF0) == 0x20) // ignore PTS
+      posn += 5;
+    else if ((data[posn] & 0xF0) == 0x30) // ignore PTS and DTS
+      posn += 10;
+    else if (data[posn] == 0x0F) // check for paranoia
+      posn++;
+    else {
+      fprint_err("### MPEG-1 PES packet has 0x%1xX"
+                 " instead of 0x40, 0x2X, 0x3X or 0x0F\n",
+                 (data[posn] & 0xF0) >> 4);
+      posn++; // what else can we do?
     }
-    return posn;
+  }
+  return posn;
 }
 /*
  * Set up ES data access for this PES packet - i.e., set up the `es_data`
@@ -2225,74 +2230,73 @@ int calc_mpeg1_pes_offset(byte* data, int data_len)
  *
  * - `packet` is the PES packet datastructure
  */
-static inline void setup_PES_as_ES(PES_packet_data_p packet)
-{
-    byte stream_id;
-    int offset;
+static inline void setup_PES_as_ES(PES_packet_data_p packet) {
+  byte stream_id;
+  int offset;
 
-    if (!packet->is_video) {
-        packet->es_data = packet->data + 6; // Perhaps safer than using nullptr
-        packet->es_data_len = 0;
-        return;
-    }
+  if (!packet->is_video) {
+    packet->es_data = packet->data + 6; // Perhaps safer than using nullptr
+    packet->es_data_len = 0;
+    return;
+  }
 
-    stream_id = packet->data[3];
+  stream_id = packet->data[3];
 
-    switch (stream_id) {
-    case STREAM_ID_PROGRAM_STREAM_MAP:
-    case STREAM_ID_PRIVATE_STREAM_2:
-    case STREAM_ID_ECM_STREAM:
-    case STREAM_ID_EMM_STREAM:
-    case STREAM_ID_PROGRAM_STREAM_DIRECTORY:
-    case STREAM_ID_DSMCC_STREAM:
-    case STREAM_ID_H222_E_STREAM:
-        // There is data, but it's not ES data
-        packet->es_data = packet->data + 6; // Perhaps safer than using nullptr
-        packet->es_data_len = 0;
-        return;
-    case STREAM_ID_PADDING_STREAM:
-        // There's no data, it's just padding bytes
-        packet->es_data = packet->data + 6; // Perhaps safer than using nullptr
-        packet->es_data_len = 0;
-        return;
-    default:
-        break; // Otherwise, we assume ES data
-    }
+  switch (stream_id) {
+  case STREAM_ID_PROGRAM_STREAM_MAP:
+  case STREAM_ID_PRIVATE_STREAM_2:
+  case STREAM_ID_ECM_STREAM:
+  case STREAM_ID_EMM_STREAM:
+  case STREAM_ID_PROGRAM_STREAM_DIRECTORY:
+  case STREAM_ID_DSMCC_STREAM:
+  case STREAM_ID_H222_E_STREAM:
+    // There is data, but it's not ES data
+    packet->es_data = packet->data + 6; // Perhaps safer than using nullptr
+    packet->es_data_len = 0;
+    return;
+  case STREAM_ID_PADDING_STREAM:
+    // There's no data, it's just padding bytes
+    packet->es_data = packet->data + 6; // Perhaps safer than using nullptr
+    packet->es_data_len = 0;
+    return;
+  default:
+    break; // Otherwise, we assume ES data
+  }
 
-    // We shan't "pull apart" PTS and DTS unless the user asks specifically
-    // So we just need to work out where out data is...
+  // We shan't "pull apart" PTS and DTS unless the user asks specifically
+  // So we just need to work out where out data is...
 
-    // The first two bits of the PES header flags should be '10' for H.222.0
-    if (IS_H222_PES(packet->data)) {
-        // Yes, it's H.222.0
-        // We have to discount:
-        //   * 3 bytes of packet_start_code_prefix (00 00 01)
-        //   * 1 byte  of stream_id
-        //   * 2 bytes of PES_packet_length
-        //   * 2 bytes of PES_header_flags
-        //   * 1 byte  of PES_header_data_length  -- i.e., 9 bytes thus far
-        //   * PES_header_data_length bytes of PES header data
-        // before we get to our ES data
-        int PES_header_data_length = packet->data[8];
-        offset = 9 + PES_header_data_length;
-        // The data alignment indicator seems like a sensible thing to remember
-        packet->data_alignment_indicator = (packet->data[6] & 0x04) >> 2;
-    } else {
-        // We assume it's MPEG-1
-        offset = calc_mpeg1_pes_offset(packet->data, packet->data_len);
-    }
-    packet->es_data = packet->data + offset;
-    packet->es_data_len = packet->data_len - offset;
+  // The first two bits of the PES header flags should be '10' for H.222.0
+  if (IS_H222_PES(packet->data)) {
+    // Yes, it's H.222.0
+    // We have to discount:
+    //   * 3 bytes of packet_start_code_prefix (00 00 01)
+    //   * 1 byte  of stream_id
+    //   * 2 bytes of PES_packet_length
+    //   * 2 bytes of PES_header_flags
+    //   * 1 byte  of PES_header_data_length  -- i.e., 9 bytes thus far
+    //   * PES_header_data_length bytes of PES header data
+    // before we get to our ES data
+    int PES_header_data_length = packet->data[8];
+    offset = 9 + PES_header_data_length;
+    // The data alignment indicator seems like a sensible thing to remember
+    packet->data_alignment_indicator = (packet->data[6] & 0x04) >> 2;
+  } else {
+    // We assume it's MPEG-1
+    offset = calc_mpeg1_pes_offset(packet->data, packet->data_len);
+  }
+  packet->es_data = packet->data + offset;
+  packet->es_data_len = packet->data_len - offset;
 #if 0 // XXX
   print_data(true,"      ",packet->es_data,packet->es_data_len,20);
 #endif
 
 #ifdef DEBUG
-    if (reader->give_info)
-        print_data(true, ".. ES data", packet->es_data, packet->es_data_len, 20);
+  if (reader->give_info)
+    print_data(true, ".. ES data", packet->es_data, packet->es_data_len, 20);
 #endif
 
-    return;
+  return;
 }
 
 /*
@@ -2304,32 +2308,32 @@ static inline void setup_PES_as_ES(PES_packet_data_p packet)
  * Returns 0 if all goes well, EOF if end of file is read, and 1 if
  * something goes wrong.
  */
-int read_next_PES_ES_packet(PES_reader_p reader)
-{
-    for (;;) {
-        int err = read_next_PES_packet(reader);
-        if (err)
-            return err; // either 1 or EOF
+int read_next_PES_ES_packet(PES_reader_p reader) {
+  for (;;) {
+    int err = read_next_PES_packet(reader);
+    if (err)
+      return err; // either 1 or EOF
 
 #ifdef DEBUG
-        if (reader->give_info) {
-            fprint_msg(".. PES packet at " OFFSET_T_FORMAT " is %x (", reader->packet->posn,
-                reader->packet->data[3]);
-            print_stream_id(true, reader->packet->data[3]);
-            fprint_msg(")%s\n", (reader->packet->is_video ? " VIDEO" : ""));
-        }
+    if (reader->give_info) {
+      fprint_msg(".. PES packet at " OFFSET_T_FORMAT " is %x (",
+                 reader->packet->posn, reader->packet->data[3]);
+      print_stream_id(true, reader->packet->data[3]);
+      fprint_msg(")%s\n", (reader->packet->is_video ? " VIDEO" : ""));
+    }
 #endif
 
-        if (reader->packet->is_video) {
-            if (reader->debug_read_packets)
-                report_PES_data_array("", reader->packet->data, reader->packet->data_len, true);
-            // Locate its ES data, and check we have some...
-            setup_PES_as_ES(reader->packet);
-            if (reader->packet->es_data_len > 0)
-                break;
-        }
+    if (reader->packet->is_video) {
+      if (reader->debug_read_packets)
+        report_PES_data_array("", reader->packet->data,
+                              reader->packet->data_len, true);
+      // Locate its ES data, and check we have some...
+      setup_PES_as_ES(reader->packet);
+      if (reader->packet->es_data_len > 0)
+        break;
     }
-    return 0;
+  }
+  return 0;
 }
 
 // ============================================================
@@ -2345,65 +2349,64 @@ int read_next_PES_ES_packet(PES_reader_p reader)
  *
  * Returns 0 if the PTS/DTS value is decoded successfully, 1 if an error occurs
  */
-int decode_pts_dts(byte data[], int required_guard, uint64_t* value)
-{
-    uint64_t pts1, pts2, pts3;
-    int marker;
-    char* what;
-    int guard = (data[0] & 0xF0) >> 4;
+int decode_pts_dts(byte data[], int required_guard, uint64_t *value) {
+  uint64_t pts1, pts2, pts3;
+  int marker;
+  char *what;
+  int guard = (data[0] & 0xF0) >> 4;
 
-    // Rather than try to use casts to make the arithmetic come out right on both
-    // Linux-with-gcc (old-style C rules) and Windows-with-VisualC++ (C99 rules),
-    // it's simpler just to use intermediates that won't get cast to "int".
-    unsigned int data0 = data[0];
-    unsigned int data1 = data[1];
-    unsigned int data2 = data[2];
-    unsigned int data3 = data[3];
-    unsigned int data4 = data[4];
+  // Rather than try to use casts to make the arithmetic come out right on both
+  // Linux-with-gcc (old-style C rules) and Windows-with-VisualC++ (C99 rules),
+  // it's simpler just to use intermediates that won't get cast to "int".
+  unsigned int data0 = data[0];
+  unsigned int data1 = data[1];
+  unsigned int data2 = data[2];
+  unsigned int data3 = data[3];
+  unsigned int data4 = data[4];
 
-    switch (required_guard) {
-    case 2:
-        what = "PTS";
-        break; // standalone
-    case 3:
-        what = "PTS";
-        break; // before a DTS
-    case 1:
-        what = "DTS";
-        break; // always after a PTS
-    default:
-        what = "PTS/DTS";
-        break; // surely some mistake?
-    }
+  switch (required_guard) {
+  case 2:
+    what = "PTS";
+    break; // standalone
+  case 3:
+    what = "PTS";
+    break; // before a DTS
+  case 1:
+    what = "DTS";
+    break; // always after a PTS
+  default:
+    what = "PTS/DTS";
+    break; // surely some mistake?
+  }
 
-    if (guard != required_guard) {
-        fprint_err(
-            "!!! Guard bits at start of %s data are %x, not %x\n", what, guard, required_guard);
-    }
+  if (guard != required_guard) {
+    fprint_err("!!! Guard bits at start of %s data are %x, not %x\n", what,
+               guard, required_guard);
+  }
 
-    pts1 = (data0 & 0x0E) >> 1;
-    marker = data0 & 0x01;
-    if (marker != 1) {
-        fprint_err("### First %s marker is not 1", what);
-        return 1;
-    }
+  pts1 = (data0 & 0x0E) >> 1;
+  marker = data0 & 0x01;
+  if (marker != 1) {
+    fprint_err("### First %s marker is not 1", what);
+    return 1;
+  }
 
-    pts2 = (data1 << 7) | ((data2 & 0xFE) >> 1);
-    marker = data2 & 0x01;
-    if (marker != 1) {
-        fprint_err("### Second %s marker is not 1", what);
-        return 1;
-    }
+  pts2 = (data1 << 7) | ((data2 & 0xFE) >> 1);
+  marker = data2 & 0x01;
+  if (marker != 1) {
+    fprint_err("### Second %s marker is not 1", what);
+    return 1;
+  }
 
-    pts3 = (data3 << 7) | ((data4 & 0xFE) >> 1);
-    marker = data4 & 0x01;
-    if (marker != 1) {
-        fprint_err("### Third %s marker is not 1", what);
-        return 1;
-    }
+  pts3 = (data3 << 7) | ((data4 & 0xFE) >> 1);
+  marker = data4 & 0x01;
+  if (marker != 1) {
+    fprint_err("### Third %s marker is not 1", what);
+    return 1;
+  }
 
-    *value = (pts1 << 30) | (pts2 << 15) | pts3;
-    return 0;
+  *value = (pts1 << 30) | (pts2 << 15) | pts3;
+  return 0;
 }
 
 /*
@@ -2414,46 +2417,45 @@ int decode_pts_dts(byte data[], int required_guard, uint64_t* value)
  *   a PTS before a DTS, or 1 for a DTS after a PTS
  * - `value` is the PTS or DTS value to be encoded
  */
-void encode_pts_dts(byte data[], int guard_bits, uint64_t value)
-{
-    int pts1, pts2, pts3;
+void encode_pts_dts(byte data[], int guard_bits, uint64_t value) {
+  int pts1, pts2, pts3;
 
 #define MAX_PTS_VALUE 0x1FFFFFFFFLL
 
-    if (value > MAX_PTS_VALUE) {
-        char* what;
-        uint64_t temp = value;
-        while (temp > MAX_PTS_VALUE)
-            temp -= MAX_PTS_VALUE;
-        switch (guard_bits) {
-        case 2:
-            what = "PTS alone";
-            break;
-        case 3:
-            what = "PTS before DTS";
-            break;
-        case 1:
-            what = "DTS after PTS";
-            break;
-        default:
-            what = "PTS/DTS/???";
-            break;
-        }
-        fprint_err("!!! value " LLU_FORMAT " for %s is more than " LLU_FORMAT
-                   " - reduced to " LLU_FORMAT "\n",
-            value, what, MAX_PTS_VALUE, temp);
-        value = temp;
+  if (value > MAX_PTS_VALUE) {
+    char *what;
+    uint64_t temp = value;
+    while (temp > MAX_PTS_VALUE)
+      temp -= MAX_PTS_VALUE;
+    switch (guard_bits) {
+    case 2:
+      what = "PTS alone";
+      break;
+    case 3:
+      what = "PTS before DTS";
+      break;
+    case 1:
+      what = "DTS after PTS";
+      break;
+    default:
+      what = "PTS/DTS/???";
+      break;
     }
+    fprint_err("!!! value " LLU_FORMAT " for %s is more than " LLU_FORMAT
+               " - reduced to " LLU_FORMAT "\n",
+               value, what, MAX_PTS_VALUE, temp);
+    value = temp;
+  }
 
-    pts1 = (int)((value >> 30) & 0x07);
-    pts2 = (int)((value >> 15) & 0x7FFF);
-    pts3 = (int)(value & 0x7FFF);
+  pts1 = (int)((value >> 30) & 0x07);
+  pts2 = (int)((value >> 15) & 0x7FFF);
+  pts3 = (int)(value & 0x7FFF);
 
-    data[0] = (guard_bits << 4) | (pts1 << 1) | 0x01;
-    data[1] = (pts2 & 0x7F80) >> 7;
-    data[2] = ((pts2 & 0x007F) << 1) | 0x01;
-    data[3] = (pts3 & 0x7F80) >> 7;
-    data[4] = ((pts3 & 0x007F) << 1) | 0x01;
+  data[0] = (guard_bits << 4) | (pts1 << 1) | 0x01;
+  data[1] = (pts2 & 0x7F80) >> 7;
+  data[2] = ((pts2 & 0x007F) << 1) | 0x01;
+  data[3] = (pts3 & 0x7F80) >> 7;
+  data[4] = ((pts3 & 0x007F) << 1) | 0x01;
 }
 
 /*
@@ -2463,74 +2465,73 @@ void encode_pts_dts(byte data[], int guard_bits, uint64_t value)
  *
  * Returns true if it does, false if it does not (or is in error)
  */
-int PES_packet_has_PTS(PES_packet_data_p packet)
-{
-    byte* data = packet->data;
+int PES_packet_has_PTS(PES_packet_data_p packet) {
+  byte *data = packet->data;
 
-    byte stream_id;
-    int packet_length;
-    byte* bytes;
+  byte stream_id;
+  int packet_length;
+  byte *bytes;
 
-    int PTS_DTS_flags;
+  int PTS_DTS_flags;
 
-    if (data[0] != 0 || data[1] != 0 || data[2] != 1) {
-        fprint_err("### PES_packet_has_PTS: "
-                   "PES packet start code prefix is %02x %02x %02x, not 00 00 01",
-            data[0], data[1], data[2]);
-        return false;
-    }
+  if (data[0] != 0 || data[1] != 0 || data[2] != 1) {
+    fprint_err("### PES_packet_has_PTS: "
+               "PES packet start code prefix is %02x %02x %02x, not 00 00 01",
+               data[0], data[1], data[2]);
+    return false;
+  }
 
-    stream_id = data[3];
-    packet_length = (data[4] << 8) | data[5];
-    bytes = data + 6;
+  stream_id = data[3];
+  packet_length = (data[4] << 8) | data[5];
+  bytes = data + 6;
 
-    // if (packet_length == 0)  // Elementary video data of unspecified length
-    //   return 0;
+  // if (packet_length == 0)  // Elementary video data of unspecified length
+  //   return 0;
 
-    if (packet_length == 0)
-        packet_length = packet->data_len - 6;
+  if (packet_length == 0)
+    packet_length = packet->data_len - 6;
 
-    switch (stream_id) {
-    case STREAM_ID_PROGRAM_STREAM_MAP:
-    case STREAM_ID_PRIVATE_STREAM_2:
-    case STREAM_ID_ECM_STREAM:
-    case STREAM_ID_EMM_STREAM:
-    case STREAM_ID_PROGRAM_STREAM_DIRECTORY:
-    case STREAM_ID_DSMCC_STREAM:
-    case STREAM_ID_H222_E_STREAM:
-        return false; // Just data bytes
-    case STREAM_ID_PADDING_STREAM:
-        return false; // Just padding bytes
-    default:
-        break; // Some sort of data we might be interested in dissecting
-    }
+  switch (stream_id) {
+  case STREAM_ID_PROGRAM_STREAM_MAP:
+  case STREAM_ID_PRIVATE_STREAM_2:
+  case STREAM_ID_ECM_STREAM:
+  case STREAM_ID_EMM_STREAM:
+  case STREAM_ID_PROGRAM_STREAM_DIRECTORY:
+  case STREAM_ID_DSMCC_STREAM:
+  case STREAM_ID_H222_E_STREAM:
+    return false; // Just data bytes
+  case STREAM_ID_PADDING_STREAM:
+    return false; // Just padding bytes
+  default:
+    break; // Some sort of data we might be interested in dissecting
+  }
 
-    if (IS_H222_PES(data)) {
-        // It's H.222.0
-        PTS_DTS_flags = (bytes[1] & 0xC0) >> 6;
-    } else {
-        // We assume it's MPEG-1
-        // Note that the following duplicates code in calc_mpeg1_pes_offset,
-        // since it wants to look partway through the data offset...
-        int posn = 0;
-        // Ignore any up-front padding bytes
-        while (posn < packet_length && bytes[posn] == 0xFF)
-            posn++;
-        if (posn == packet_length)
-            return false; // no space for anything else
-        if ((bytes[posn] & 0xC0) == 0x40) // ignore buffer scale/size
-            posn += 2;
-        if (posn == packet_length)
-            return false; // no space for PTS/DTS
-        if ((bytes[posn] & 0xF0) == 0x20) // ignore PTS
-            PTS_DTS_flags = 2;
-        else if ((bytes[posn] & 0xF0) == 0x30) // ignore PTS and DTS
-            PTS_DTS_flags = 3;
-        else
-            PTS_DTS_flags = 0;
-    }
+  if (IS_H222_PES(data)) {
+    // It's H.222.0
+    PTS_DTS_flags = (bytes[1] & 0xC0) >> 6;
+  } else {
+    // We assume it's MPEG-1
+    // Note that the following duplicates code in calc_mpeg1_pes_offset,
+    // since it wants to look partway through the data offset...
+    int posn = 0;
+    // Ignore any up-front padding bytes
+    while (posn < packet_length && bytes[posn] == 0xFF)
+      posn++;
+    if (posn == packet_length)
+      return false;                   // no space for anything else
+    if ((bytes[posn] & 0xC0) == 0x40) // ignore buffer scale/size
+      posn += 2;
+    if (posn == packet_length)
+      return false;                   // no space for PTS/DTS
+    if ((bytes[posn] & 0xF0) == 0x20) // ignore PTS
+      PTS_DTS_flags = 2;
+    else if ((bytes[posn] & 0xF0) == 0x30) // ignore PTS and DTS
+      PTS_DTS_flags = 3;
+    else
+      PTS_DTS_flags = 0;
+  }
 
-    return (PTS_DTS_flags == 2 || PTS_DTS_flags == 3);
+  return (PTS_DTS_flags == 2 || PTS_DTS_flags == 3);
 }
 
 /*
@@ -2543,198 +2544,202 @@ int PES_packet_has_PTS(PES_packet_data_p packet)
  *
  * Returns 0 if all went well, 1 if an error occurs.
  */
-int report_PES_data_array(char* prefix, byte* data, int data_len, int show_data)
-{
-    // This code was originally translated from the Python code in TS.py
+int report_PES_data_array(char *prefix, byte *data, int data_len,
+                          int show_data) {
+  // This code was originally translated from the Python code in TS.py
 
-    byte stream_id;
-    int packet_length;
-    byte* bytes;
+  byte stream_id;
+  int packet_length;
+  byte *bytes;
 
-    int err;
-    uint64_t pts, dts;
+  int err;
+  uint64_t pts, dts;
 
-    int got_pts = false; // pessimistic
-    int got_dts = false; // pessimistic
+  int got_pts = false; // pessimistic
+  int got_dts = false; // pessimistic
 
-    if (data[0] != 0 || data[1] != 0 || data[2] != 1) {
-        fprint_err("### PES packet start code prefix is %02x %02x %02x, not 00 00 01", data[0],
-            data[1], data[2]);
+  if (data[0] != 0 || data[1] != 0 || data[2] != 1) {
+    fprint_err(
+        "### PES packet start code prefix is %02x %02x %02x, not 00 00 01",
+        data[0], data[1], data[2]);
+    return 1;
+  }
+
+  stream_id = data[3];
+  packet_length = (data[4] << 8) | data[5];
+  bytes = data + 6;
+
+  // if (packet_length == 0)  // Elementary video data of unspecified length
+  //   return 0;
+
+  fprint_msg("%sPES packet: stream id %02x (", prefix, stream_id);
+  print_stream_id(true, stream_id);
+  fprint_msg("), packet length %d", packet_length);
+  if (packet_length == 0) {
+    packet_length = data_len - 6;
+    fprint_msg(" (actual length %d)", packet_length);
+  } else if (packet_length != data_len - 6) {
+    fprint_msg(" (actual length %d)", data_len - 6);
+  }
+
+  switch (stream_id) {
+  case STREAM_ID_PROGRAM_STREAM_MAP:
+  case STREAM_ID_PRIVATE_STREAM_2:
+  case STREAM_ID_ECM_STREAM:
+  case STREAM_ID_EMM_STREAM:
+  case STREAM_ID_PROGRAM_STREAM_DIRECTORY:
+  case STREAM_ID_DSMCC_STREAM:
+  case STREAM_ID_H222_E_STREAM:
+    print_msg("\n    Just data bytes\n");
+    print_data(true, "    ", bytes, packet_length, 20);
+    return 0; // Just data bytes
+  case STREAM_ID_PADDING_STREAM:
+    print_msg("\n");
+    return 0; // Just padding bytes
+  default:
+    break; // Some sort of data we might be interested in dissecting
+  }
+
+  if (IS_H222_PES(data)) {
+    // Yes, it's H.222.0
+    int PES_scrambling_control;
+    int PES_priority;
+    int data_alignment_indicator;
+    int copyright;
+    int original_or_copy;
+    int PTS_DTS_flags;
+    int ESCR_flag;
+    int ES_rate_flag;
+    int DSM_trick_mode_flag;
+    int additional_copy_info_flag;
+    int PES_CRC_flag;
+    int PES_extension_flag;
+    int PES_header_data_length;
+    print_msg("\n");
+
+    PES_scrambling_control = (bytes[0] & 0x30) >> 4;
+    PES_priority = (bytes[0] & 0x08) >> 3;
+    data_alignment_indicator = (bytes[0] & 0x04) >> 2;
+    copyright = (bytes[0] & 0x02) >> 1;
+    original_or_copy = bytes[0] & 0x01;
+
+    fprint_msg("%s    scrambling %d, priority %d, data %s, %s, %s\n", prefix,
+               PES_scrambling_control, PES_priority,
+               (data_alignment_indicator ? "aligned" : "unaligned"),
+               (copyright ? "copyrighted" : "copyright undefined"),
+               (original_or_copy ? "original" : "copy"));
+
+    PTS_DTS_flags = (bytes[1] & 0xC0) >> 6;
+    ESCR_flag = (bytes[1] & 0x20) >> 5;
+    ES_rate_flag = (bytes[1] & 0x10) >> 4;
+    DSM_trick_mode_flag = (bytes[1] & 0x08) >> 3;
+    additional_copy_info_flag = (bytes[1] & 0x04) >> 2;
+    PES_CRC_flag = (bytes[1] & 0x02) >> 1;
+    PES_extension_flag = bytes[1] & 0x01;
+
+    fprint_msg(
+        "%s    %s, ESCR %d, ES_rate %d, DSM trick mode %d, additional copy"
+        " info %d, PES CRC %d, PES extension %d\n",
+        prefix,
+        (PTS_DTS_flags == 2   ? "PTS"
+         : PTS_DTS_flags == 3 ? "PTS & DTS"
+         : PTS_DTS_flags == 0 ? "no PTS/DTS"
+                              : "<bad PTS/DTS flag>"),
+        ESCR_flag, ES_rate_flag, DSM_trick_mode_flag, additional_copy_info_flag,
+        PES_CRC_flag, PES_extension_flag);
+
+    PES_header_data_length = bytes[2];
+
+    fprint_msg("%s    PES header data length %d\n", prefix,
+               PES_header_data_length);
+
+    if (PTS_DTS_flags == 2) {
+      err = decode_pts_dts(&bytes[3], 2, &pts);
+      if (err)
         return 1;
+      got_pts = true;
+    }
+    if (PTS_DTS_flags == 3) {
+      err = decode_pts_dts(&bytes[3], 3, &pts);
+      if (err)
+        return 1;
+      got_pts = true;
+      err = decode_pts_dts(&bytes[8], 1, &dts);
+      if (err)
+        return 1;
+      got_dts = true;
+    }
+    if (got_pts || got_dts) {
+      fprint_msg("%s    PTS " LLU_FORMAT, prefix, pts);
+      if (got_dts)
+        fprint_msg(", DTS " LLU_FORMAT, dts);
+      print_msg("\n");
     }
 
-    stream_id = data[3];
-    packet_length = (data[4] << 8) | data[5];
-    bytes = data + 6;
-
-    // if (packet_length == 0)  // Elementary video data of unspecified length
-    //   return 0;
-
-    fprint_msg("%sPES packet: stream id %02x (", prefix, stream_id);
-    print_stream_id(true, stream_id);
-    fprint_msg("), packet length %d", packet_length);
-    if (packet_length == 0) {
-        packet_length = data_len - 6;
-        fprint_msg(" (actual length %d)", packet_length);
-    } else if (packet_length != data_len - 6) {
-        fprint_msg(" (actual length %d)", data_len - 6);
+    if (show_data) {
+      bytes += 3 + PES_header_data_length;
+      if (prefix && strlen(prefix) > 0)
+        fprint_msg("%s", prefix);
+      print_data(true, "    ", bytes,
+                 packet_length - 3 - PES_header_data_length, 20);
     }
+  } else {
+    // We assume it's MPEG-1
+    int posn = 0;
+    print_msg(" (MPEG-1)\n");
+    // Ignore any up-front padding bytes
+    while (posn < packet_length && bytes[posn] == 0xFF)
+      posn++;
+    if (posn < packet_length) {
+      if ((bytes[posn] & 0xC0) == 0x40) // ignore buffer scale/size
+        posn += 2;
+      if (posn == packet_length)
+        return 0; // no space for PTS/DTS
 
-    switch (stream_id) {
-    case STREAM_ID_PROGRAM_STREAM_MAP:
-    case STREAM_ID_PRIVATE_STREAM_2:
-    case STREAM_ID_ECM_STREAM:
-    case STREAM_ID_EMM_STREAM:
-    case STREAM_ID_PROGRAM_STREAM_DIRECTORY:
-    case STREAM_ID_DSMCC_STREAM:
-    case STREAM_ID_H222_E_STREAM:
-        print_msg("\n    Just data bytes\n");
-        print_data(true, "    ", bytes, packet_length, 20);
-        return 0; // Just data bytes
-    case STREAM_ID_PADDING_STREAM:
+      if ((bytes[posn] & 0xF0) == 0x20) // PTS
+      {
+        err = decode_pts_dts(&bytes[posn], 2, &pts);
+        if (err)
+          return 1;
+        got_pts = true;
+        posn += 5;
+      } else if ((bytes[posn] & 0xF0) == 0x30) // PTS and DTS
+      {
+        err = decode_pts_dts(&bytes[posn], 3, &pts);
+        if (err)
+          return 1;
+        got_pts = true;
+        posn += 5;
+        err = decode_pts_dts(&bytes[posn], 1, &dts);
+        if (err)
+          return 1;
+        got_dts = true;
+        posn += 5;
+      } else if (bytes[posn] == 0x0F) // check for paranoia
+        posn++;
+      else {
+        fprint_err("### MPEG-1 PES packet has 0x%1xX"
+                   " instead of 0x40, 0x2X, 0x3X or 0x0F\n",
+                   (bytes[posn] & 0xF0) >> 4);
+        posn++; // what else can we do?
+      }
+      if (got_pts || got_dts) {
+        fprint_msg("%s    PTS " LLU_FORMAT, prefix, pts);
+        if (got_dts)
+          fprint_msg(", DTS " LLU_FORMAT, dts);
         print_msg("\n");
-        return 0; // Just padding bytes
-    default:
-        break; // Some sort of data we might be interested in dissecting
+      }
+
+      if (show_data) {
+        bytes += posn;
+        if (prefix && strlen(prefix) > 0)
+          fprint_msg("%s", prefix);
+        print_data(true, "    ", bytes, packet_length - posn, 20);
+      }
     }
+  }
 
-    if (IS_H222_PES(data)) {
-        // Yes, it's H.222.0
-        int PES_scrambling_control;
-        int PES_priority;
-        int data_alignment_indicator;
-        int copyright;
-        int original_or_copy;
-        int PTS_DTS_flags;
-        int ESCR_flag;
-        int ES_rate_flag;
-        int DSM_trick_mode_flag;
-        int additional_copy_info_flag;
-        int PES_CRC_flag;
-        int PES_extension_flag;
-        int PES_header_data_length;
-        print_msg("\n");
-
-        PES_scrambling_control = (bytes[0] & 0x30) >> 4;
-        PES_priority = (bytes[0] & 0x08) >> 3;
-        data_alignment_indicator = (bytes[0] & 0x04) >> 2;
-        copyright = (bytes[0] & 0x02) >> 1;
-        original_or_copy = bytes[0] & 0x01;
-
-        fprint_msg("%s    scrambling %d, priority %d, data %s, %s, %s\n", prefix,
-            PES_scrambling_control, PES_priority,
-            (data_alignment_indicator ? "aligned" : "unaligned"),
-            (copyright ? "copyrighted" : "copyright undefined"),
-            (original_or_copy ? "original" : "copy"));
-
-        PTS_DTS_flags = (bytes[1] & 0xC0) >> 6;
-        ESCR_flag = (bytes[1] & 0x20) >> 5;
-        ES_rate_flag = (bytes[1] & 0x10) >> 4;
-        DSM_trick_mode_flag = (bytes[1] & 0x08) >> 3;
-        additional_copy_info_flag = (bytes[1] & 0x04) >> 2;
-        PES_CRC_flag = (bytes[1] & 0x02) >> 1;
-        PES_extension_flag = bytes[1] & 0x01;
-
-        fprint_msg("%s    %s, ESCR %d, ES_rate %d, DSM trick mode %d, additional copy"
-                   " info %d, PES CRC %d, PES extension %d\n",
-            prefix,
-            (PTS_DTS_flags == 2 ? "PTS"
-                                : PTS_DTS_flags == 3
-                        ? "PTS & DTS"
-                        : PTS_DTS_flags == 0 ? "no PTS/DTS" : "<bad PTS/DTS flag>"),
-            ESCR_flag, ES_rate_flag, DSM_trick_mode_flag, additional_copy_info_flag, PES_CRC_flag,
-            PES_extension_flag);
-
-        PES_header_data_length = bytes[2];
-
-        fprint_msg("%s    PES header data length %d\n", prefix, PES_header_data_length);
-
-        if (PTS_DTS_flags == 2) {
-            err = decode_pts_dts(&bytes[3], 2, &pts);
-            if (err)
-                return 1;
-            got_pts = true;
-        }
-        if (PTS_DTS_flags == 3) {
-            err = decode_pts_dts(&bytes[3], 3, &pts);
-            if (err)
-                return 1;
-            got_pts = true;
-            err = decode_pts_dts(&bytes[8], 1, &dts);
-            if (err)
-                return 1;
-            got_dts = true;
-        }
-        if (got_pts || got_dts) {
-            fprint_msg("%s    PTS " LLU_FORMAT, prefix, pts);
-            if (got_dts)
-                fprint_msg(", DTS " LLU_FORMAT, dts);
-            print_msg("\n");
-        }
-
-        if (show_data) {
-            bytes += 3 + PES_header_data_length;
-            if (prefix && strlen(prefix) > 0)
-                fprint_msg("%s", prefix);
-            print_data(true, "    ", bytes, packet_length - 3 - PES_header_data_length, 20);
-        }
-    } else {
-        // We assume it's MPEG-1
-        int posn = 0;
-        print_msg(" (MPEG-1)\n");
-        // Ignore any up-front padding bytes
-        while (posn < packet_length && bytes[posn] == 0xFF)
-            posn++;
-        if (posn < packet_length) {
-            if ((bytes[posn] & 0xC0) == 0x40) // ignore buffer scale/size
-                posn += 2;
-            if (posn == packet_length)
-                return 0; // no space for PTS/DTS
-
-            if ((bytes[posn] & 0xF0) == 0x20) // PTS
-            {
-                err = decode_pts_dts(&bytes[posn], 2, &pts);
-                if (err)
-                    return 1;
-                got_pts = true;
-                posn += 5;
-            } else if ((bytes[posn] & 0xF0) == 0x30) // PTS and DTS
-            {
-                err = decode_pts_dts(&bytes[posn], 3, &pts);
-                if (err)
-                    return 1;
-                got_pts = true;
-                posn += 5;
-                err = decode_pts_dts(&bytes[posn], 1, &dts);
-                if (err)
-                    return 1;
-                got_dts = true;
-                posn += 5;
-            } else if (bytes[posn] == 0x0F) // check for paranoia
-                posn++;
-            else {
-                fprint_err("### MPEG-1 PES packet has 0x%1xX"
-                           " instead of 0x40, 0x2X, 0x3X or 0x0F\n",
-                    (bytes[posn] & 0xF0) >> 4);
-                posn++; // what else can we do?
-            }
-            if (got_pts || got_dts) {
-                fprint_msg("%s    PTS " LLU_FORMAT, prefix, pts);
-                if (got_dts)
-                    fprint_msg(", DTS " LLU_FORMAT, dts);
-                print_msg("\n");
-            }
-
-            if (show_data) {
-                bytes += posn;
-                if (prefix && strlen(prefix) > 0)
-                    fprint_msg("%s", prefix);
-                print_data(true, "    ", bytes, packet_length - posn, 20);
-            }
-        }
-    }
-
-    return 0;
+  return 0;
 }
 
 /*
@@ -2753,185 +2758,187 @@ int report_PES_data_array(char* prefix, byte* data, int data_len, int show_data)
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-void report_PES_data_array2(int stream_type, byte* payload, int payload_len, int show_data_len)
-{
-    int err;
-    int with_pts = false;
-    int with_dts = false;
-    uint64_t pts, dts;
-    int PES_packet_length;
-    byte* data = nullptr;
-    int data_len = 0;
-    byte stream_id;
+void report_PES_data_array2(int stream_type, byte *payload, int payload_len,
+                            int show_data_len) {
+  int err;
+  int with_pts = false;
+  int with_dts = false;
+  uint64_t pts, dts;
+  int PES_packet_length;
+  byte *data = nullptr;
+  int data_len = 0;
+  byte stream_id;
 
-    if (payload_len == 0) {
-        print_msg("  Payload has length 0\n");
-        return;
-    } else if (payload == nullptr) {
-        fprint_msg("  Payload is nullptr, but should be length %d\n", payload_len);
-        return;
+  if (payload_len == 0) {
+    print_msg("  Payload has length 0\n");
+    return;
+  } else if (payload == nullptr) {
+    fprint_msg("  Payload is nullptr, but should be length %d\n", payload_len);
+    return;
+  }
+
+  stream_id = payload[3];
+  PES_packet_length = (payload[4] << 8) | payload[5];
+  print_msg("  PES header\n");
+  fprint_msg("    Start code:        %02x %02x %02x\n", payload[0], payload[1],
+             payload[2]);
+  fprint_msg("    Stream ID:         %02x   (%d) ", stream_id, stream_id);
+  print_h262_start_code_str(stream_id);
+  print_msg("\n");
+  fprint_msg("    PES packet length: %04x (%d)\n", PES_packet_length,
+             PES_packet_length);
+
+  if (IS_H222_PES(payload)) {
+    // Looks like H.222.0
+    switch (stream_id) {
+    case STREAM_ID_PROGRAM_STREAM_MAP:
+    case STREAM_ID_PRIVATE_STREAM_2:
+    case STREAM_ID_ECM_STREAM:
+    case STREAM_ID_EMM_STREAM:
+    case STREAM_ID_PROGRAM_STREAM_DIRECTORY:
+    case STREAM_ID_DSMCC_STREAM:
+    case STREAM_ID_H222_E_STREAM:
+      print_msg("    Just data bytes\n");
+      print_data(true, "    Data", payload + 6, payload_len - 6, 1000);
+      return; // Just data bytes
+    case STREAM_ID_PADDING_STREAM:
+      print_msg("    Padding stream\n");
+      return; // Just padding bytes
+    default:
+      break; // Some sort of data we might be interested in dissecting
     }
 
-    stream_id = payload[3];
-    PES_packet_length = (payload[4] << 8) | payload[5];
-    print_msg("  PES header\n");
-    fprint_msg("    Start code:        %02x %02x %02x\n", payload[0], payload[1], payload[2]);
-    fprint_msg("    Stream ID:         %02x   (%d) ", stream_id, stream_id);
-    print_h262_start_code_str(stream_id);
+    fprint_msg("    Flags:             %02x %02x", payload[6], payload[7]);
+    if (payload[6] != 0) {
+      int scramble = (payload[6] & 0x30) >> 8;
+      if (scramble != 0)
+        fprint_msg(" scramble-control %d", scramble);
+      if (ON(payload[6], 0x08))
+        print_msg(" PES-priority");
+      if (ON(payload[6], 0x04))
+        print_msg(" data-aligned");
+      if (ON(payload[6], 0x02))
+        print_msg(" copyright");
+      if (ON(payload[6], 0x01))
+        print_msg(" original/copy");
+    }
+    if (payload[7] != 0) {
+      print_msg(" :");
+      if (ON(payload[7], 0x80)) {
+        with_pts = true;
+        print_msg(" PTS");
+      }
+      if (ON(payload[7], 0x40)) {
+        with_dts = true;
+        print_msg(" DTS");
+      }
+      if (ON(payload[7], 0x20))
+        print_msg(" ESCR");
+      if (ON(payload[7], 0x10))
+        print_msg(" ES-rate");
+      if (ON(payload[7], 0x08))
+        print_msg(" DSM-trick-mode");
+      if (ON(payload[7], 0x04))
+        print_msg(" more-copy-info");
+      if (ON(payload[7], 0x02))
+        print_msg(" CRC");
+      if (ON(payload[7], 0x01))
+        print_msg(" extension");
+    }
     print_msg("\n");
-    fprint_msg("    PES packet length: %04x (%d)\n", PES_packet_length, PES_packet_length);
+    fprint_msg("    PES header len %d\n", payload[8]);
 
-    if (IS_H222_PES(payload)) {
-        // Looks like H.222.0
-        switch (stream_id) {
-        case STREAM_ID_PROGRAM_STREAM_MAP:
-        case STREAM_ID_PRIVATE_STREAM_2:
-        case STREAM_ID_ECM_STREAM:
-        case STREAM_ID_EMM_STREAM:
-        case STREAM_ID_PROGRAM_STREAM_DIRECTORY:
-        case STREAM_ID_DSMCC_STREAM:
-        case STREAM_ID_H222_E_STREAM:
-            print_msg("    Just data bytes\n");
-            print_data(true, "    Data", payload + 6, payload_len - 6, 1000);
-            return; // Just data bytes
-        case STREAM_ID_PADDING_STREAM:
-            print_msg("    Padding stream\n");
-            return; // Just padding bytes
-        default:
-            break; // Some sort of data we might be interested in dissecting
-        }
-
-        fprint_msg("    Flags:             %02x %02x", payload[6], payload[7]);
-        if (payload[6] != 0) {
-            int scramble = (payload[6] & 0x30) >> 8;
-            if (scramble != 0)
-                fprint_msg(" scramble-control %d", scramble);
-            if (ON(payload[6], 0x08))
-                print_msg(" PES-priority");
-            if (ON(payload[6], 0x04))
-                print_msg(" data-aligned");
-            if (ON(payload[6], 0x02))
-                print_msg(" copyright");
-            if (ON(payload[6], 0x01))
-                print_msg(" original/copy");
-        }
-        if (payload[7] != 0) {
-            print_msg(" :");
-            if (ON(payload[7], 0x80)) {
-                with_pts = true;
-                print_msg(" PTS");
-            }
-            if (ON(payload[7], 0x40)) {
-                with_dts = true;
-                print_msg(" DTS");
-            }
-            if (ON(payload[7], 0x20))
-                print_msg(" ESCR");
-            if (ON(payload[7], 0x10))
-                print_msg(" ES-rate");
-            if (ON(payload[7], 0x08))
-                print_msg(" DSM-trick-mode");
-            if (ON(payload[7], 0x04))
-                print_msg(" more-copy-info");
-            if (ON(payload[7], 0x02))
-                print_msg(" CRC");
-            if (ON(payload[7], 0x01))
-                print_msg(" extension");
-        }
-        print_msg("\n");
-        fprint_msg("    PES header len %d\n", payload[8]);
-
-        if (with_pts) {
-            err = decode_pts_dts(&(payload[9]), (with_dts ? 3 : 2), &pts);
-            if (!err)
-                fprint_msg("    PTS " LLU_FORMAT "\n", pts);
-        }
-        if (with_dts) {
-            err = decode_pts_dts(&(payload[14]), 1, &dts);
-            if (!err)
-                fprint_msg("    DTS " LLU_FORMAT "\n", dts);
-        }
-
-        data = payload + 9 + payload[8];
-        data_len = payload_len - 9 - payload[8];
-
-        // We know this is the start of a packet. If it is private_stream_1,
-        // look to see if it is AC3 or DTS
-        // If it is stream type 0x81, then do the same...
-        // (maybe should do this for *any* of the 0x8N private streams?)
-        if (stream_type == 0x06 || stream_type == 0x81) {
-            if (data_len >= 2 && data[0] == 0x0B && data[1] == 0x77)
-                print_msg("  AC-3 audio data\n");
-            else if (data_len >= 4 && data[0] == 0x7F && data[1] == 0xFE && data[1] == 0x80
-                && data[2] == 0x01)
-                print_msg("  DTS audio data\n");
-        }
-    } else {
-        // We assume it's MPEG-1
-        int posn = 0;
-        print_msg("    MPEG-1 packet layer packet\n");
-
-        if (stream_id != STREAM_ID_PRIVATE_STREAM_2) {
-            // Skip any up-front padding bytes
-            while (posn < PES_packet_length && payload[6 + posn] == 0xFF)
-                posn++;
-            if (posn != 0)
-                fprint_msg("      %d stuffing byte%s\n", posn, posn == 1 ? "" : "s");
-
-            if (posn < PES_packet_length) {
-                if ((payload[6 + posn] & 0xC0) == 0x40) {
-                    fprint_msg("      STD buffer scale %d\n", ON(payload[6 + posn], 5));
-                    fprint_msg("      STD buffer size %d\n",
-                        (payload[6 + posn] & 0x1F) << 8 | (payload[6 + posn + 1]));
-                    posn += 2;
-                }
-                if (posn == PES_packet_length)
-                    return; // no space for PTS/DTS
-
-                if ((payload[6 + posn] & 0xF0) == 0x20) // PTS
-                {
-                    err = decode_pts_dts(&payload[6 + posn], 2, &pts);
-                    if (err)
-                        return;
-                    with_pts = true;
-                    posn += 5;
-                } else if ((payload[6 + posn] & 0xF0) == 0x30) // PTS and DTS
-                {
-                    err = decode_pts_dts(&payload[6 + posn], 3, &pts);
-                    if (err)
-                        return;
-                    with_pts = true;
-                    posn += 5;
-                    err = decode_pts_dts(&payload[6 + posn], 1, &dts);
-                    if (err)
-                        return;
-                    with_dts = true;
-                    posn += 5;
-                } else if (payload[6 + posn] == 0x0F) // check for paranoia
-                    posn++;
-                else {
-                    fprint_err("### MPEG-1 PES packet has 0x%1xX"
-                               " instead of 0x40, 0x2X, 0x3X or 0x0F\n",
-                        (payload[posn] & 0xF0) >> 4);
-                    posn++; // what else can we do?
-                }
-                if (with_pts || with_dts) {
-                    fprint_msg("      PTS " LLU_FORMAT "\n", pts);
-                    if (with_dts)
-                        fprint_msg("      DTS " LLU_FORMAT "\n", dts);
-                    print_msg("\n");
-                }
-
-                data = payload + 6 + posn;
-                data_len = payload_len - 6 - posn;
-            }
-        } else {
-            data = payload + 6;
-            data_len = payload_len - 6;
-        }
+    if (with_pts) {
+      err = decode_pts_dts(&(payload[9]), (with_dts ? 3 : 2), &pts);
+      if (!err)
+        fprint_msg("    PTS " LLU_FORMAT "\n", pts);
     }
-    if (show_data_len)
-        print_data(true, "    Data", data, data_len, show_data_len);
+    if (with_dts) {
+      err = decode_pts_dts(&(payload[14]), 1, &dts);
+      if (!err)
+        fprint_msg("    DTS " LLU_FORMAT "\n", dts);
+    }
+
+    data = payload + 9 + payload[8];
+    data_len = payload_len - 9 - payload[8];
+
+    // We know this is the start of a packet. If it is private_stream_1,
+    // look to see if it is AC3 or DTS
+    // If it is stream type 0x81, then do the same...
+    // (maybe should do this for *any* of the 0x8N private streams?)
+    if (stream_type == 0x06 || stream_type == 0x81) {
+      if (data_len >= 2 && data[0] == 0x0B && data[1] == 0x77)
+        print_msg("  AC-3 audio data\n");
+      else if (data_len >= 4 && data[0] == 0x7F && data[1] == 0xFE &&
+               data[1] == 0x80 && data[2] == 0x01)
+        print_msg("  DTS audio data\n");
+    }
+  } else {
+    // We assume it's MPEG-1
+    int posn = 0;
+    print_msg("    MPEG-1 packet layer packet\n");
+
+    if (stream_id != STREAM_ID_PRIVATE_STREAM_2) {
+      // Skip any up-front padding bytes
+      while (posn < PES_packet_length && payload[6 + posn] == 0xFF)
+        posn++;
+      if (posn != 0)
+        fprint_msg("      %d stuffing byte%s\n", posn, posn == 1 ? "" : "s");
+
+      if (posn < PES_packet_length) {
+        if ((payload[6 + posn] & 0xC0) == 0x40) {
+          fprint_msg("      STD buffer scale %d\n", ON(payload[6 + posn], 5));
+          fprint_msg("      STD buffer size %d\n",
+                     (payload[6 + posn] & 0x1F) << 8 | (payload[6 + posn + 1]));
+          posn += 2;
+        }
+        if (posn == PES_packet_length)
+          return; // no space for PTS/DTS
+
+        if ((payload[6 + posn] & 0xF0) == 0x20) // PTS
+        {
+          err = decode_pts_dts(&payload[6 + posn], 2, &pts);
+          if (err)
+            return;
+          with_pts = true;
+          posn += 5;
+        } else if ((payload[6 + posn] & 0xF0) == 0x30) // PTS and DTS
+        {
+          err = decode_pts_dts(&payload[6 + posn], 3, &pts);
+          if (err)
+            return;
+          with_pts = true;
+          posn += 5;
+          err = decode_pts_dts(&payload[6 + posn], 1, &dts);
+          if (err)
+            return;
+          with_dts = true;
+          posn += 5;
+        } else if (payload[6 + posn] == 0x0F) // check for paranoia
+          posn++;
+        else {
+          fprint_err("### MPEG-1 PES packet has 0x%1xX"
+                     " instead of 0x40, 0x2X, 0x3X or 0x0F\n",
+                     (payload[posn] & 0xF0) >> 4);
+          posn++; // what else can we do?
+        }
+        if (with_pts || with_dts) {
+          fprint_msg("      PTS " LLU_FORMAT "\n", pts);
+          if (with_dts)
+            fprint_msg("      DTS " LLU_FORMAT "\n", dts);
+          print_msg("\n");
+        }
+
+        data = payload + 6 + posn;
+        data_len = payload_len - 6 - posn;
+      }
+    } else {
+      data = payload + 6;
+      data_len = payload_len - 6;
+    }
+  }
+  if (show_data_len)
+    print_data(true, "    Data", data, data_len, show_data_len);
 }
 
 /*
@@ -2944,79 +2951,80 @@ void report_PES_data_array2(int stream_type, byte* payload, int payload_len, int
  *
  * Returns 0 if all went well, 1 if an error occurs.
  */
-int find_PTS_in_PES(byte data[], int32_t data_len, int* got_pts, uint64_t* pts)
-{
-    byte stream_id;
-    int packet_length;
-    byte* bytes;
+int find_PTS_in_PES(byte data[], int32_t data_len, int *got_pts,
+                    uint64_t *pts) {
+  byte stream_id;
+  int packet_length;
+  byte *bytes;
 
-    int PTS_DTS_flags;
+  int PTS_DTS_flags;
 
-    *got_pts = false; // pessimistic
+  *got_pts = false; // pessimistic
 
-    if (data[0] != 0 || data[1] != 0 || data[2] != 1) {
-        fprint_err("### find_PTS_in_PES:"
-                   " PES packet start code prefix is %02x %02x %02x, not 00 00 01\n",
-            data[0], data[1], data[2]);
+  if (data[0] != 0 || data[1] != 0 || data[2] != 1) {
+    fprint_err(
+        "### find_PTS_in_PES:"
+        " PES packet start code prefix is %02x %02x %02x, not 00 00 01\n",
+        data[0], data[1], data[2]);
+    return 1;
+  }
+
+  stream_id = data[3];
+  packet_length = (data[4] << 8) | data[5];
+
+  // if (packet_length == 0)  // Elementary video data of unspecified length
+  //   return 0;
+
+  switch (stream_id) {
+  case STREAM_ID_PROGRAM_STREAM_MAP:
+  case STREAM_ID_PRIVATE_STREAM_2:
+  case STREAM_ID_ECM_STREAM:
+  case STREAM_ID_EMM_STREAM:
+  case STREAM_ID_PROGRAM_STREAM_DIRECTORY:
+  case STREAM_ID_DSMCC_STREAM:
+  case STREAM_ID_H222_E_STREAM:
+    return 0; // Just data bytes
+  case STREAM_ID_PADDING_STREAM:
+    return 0; // Just padding bytes
+  default:
+    break; // Some sort of data we might be interested in dissecting
+  }
+
+  bytes = data + 6;
+  if (IS_H222_PES(data)) {
+    // Yes, it's H.222.0
+    PTS_DTS_flags = (bytes[1] & 0xC0) >> 6;
+
+    if (PTS_DTS_flags == 2 || PTS_DTS_flags == 3) {
+      int err = decode_pts_dts(&bytes[3], PTS_DTS_flags, pts);
+      if (err)
         return 1;
+      *got_pts = true;
     }
-
-    stream_id = data[3];
-    packet_length = (data[4] << 8) | data[5];
-
-    // if (packet_length == 0)  // Elementary video data of unspecified length
-    //   return 0;
-
-    switch (stream_id) {
-    case STREAM_ID_PROGRAM_STREAM_MAP:
-    case STREAM_ID_PRIVATE_STREAM_2:
-    case STREAM_ID_ECM_STREAM:
-    case STREAM_ID_EMM_STREAM:
-    case STREAM_ID_PROGRAM_STREAM_DIRECTORY:
-    case STREAM_ID_DSMCC_STREAM:
-    case STREAM_ID_H222_E_STREAM:
-        return 0; // Just data bytes
-    case STREAM_ID_PADDING_STREAM:
-        return 0; // Just padding bytes
-    default:
-        break; // Some sort of data we might be interested in dissecting
+  } else {
+    int posn = 0;
+    int marker;
+    // We assume it's MPEG-1
+    // Ignore any up-front padding bytes
+    while (posn < packet_length && bytes[posn] == 0xFF)
+      posn++;
+    if (posn < packet_length) {
+      if ((bytes[posn] & 0xC0) == 0x40) // ignore buffer scale/size
+        posn += 2;
+      if (posn == packet_length)
+        return 0; // no space for PTS/DTS
+      marker = (bytes[posn] & 0xF0) >> 4;
+      if (marker == 2 || // PTS
+          marker == 3)   // PTS and DTS
+      {
+        int err = decode_pts_dts(&bytes[posn], marker, pts);
+        if (err)
+          return 1;
+        *got_pts = true;
+      }
     }
-
-    bytes = data + 6;
-    if (IS_H222_PES(data)) {
-        // Yes, it's H.222.0
-        PTS_DTS_flags = (bytes[1] & 0xC0) >> 6;
-
-        if (PTS_DTS_flags == 2 || PTS_DTS_flags == 3) {
-            int err = decode_pts_dts(&bytes[3], PTS_DTS_flags, pts);
-            if (err)
-                return 1;
-            *got_pts = true;
-        }
-    } else {
-        int posn = 0;
-        int marker;
-        // We assume it's MPEG-1
-        // Ignore any up-front padding bytes
-        while (posn < packet_length && bytes[posn] == 0xFF)
-            posn++;
-        if (posn < packet_length) {
-            if ((bytes[posn] & 0xC0) == 0x40) // ignore buffer scale/size
-                posn += 2;
-            if (posn == packet_length)
-                return 0; // no space for PTS/DTS
-            marker = (bytes[posn] & 0xF0) >> 4;
-            if (marker == 2 || // PTS
-                marker == 3) // PTS and DTS
-            {
-                int err = decode_pts_dts(&bytes[posn], marker, pts);
-                if (err)
-                    return 1;
-                *got_pts = true;
-            }
-        }
-    }
-    return 0;
+  }
+  return 0;
 }
 
 /*
@@ -3029,78 +3037,79 @@ int find_PTS_in_PES(byte data[], int32_t data_len, int* got_pts, uint64_t* pts)
  *
  * Returns 0 if all went well, 1 if an error occurs.
  */
-int find_DTS_in_PES(byte data[], int32_t data_len, int* got_dts, uint64_t* dts)
-{
-    byte stream_id;
-    int packet_length;
-    byte* bytes;
+int find_DTS_in_PES(byte data[], int32_t data_len, int *got_dts,
+                    uint64_t *dts) {
+  byte stream_id;
+  int packet_length;
+  byte *bytes;
 
-    int PTS_DTS_flags;
+  int PTS_DTS_flags;
 
-    *got_dts = false; // pessimistic
+  *got_dts = false; // pessimistic
 
-    if (data[0] != 0 || data[1] != 0 || data[2] != 1) {
-        fprint_err("### find_DTS_in_PES:"
-                   " PES packet start code prefix is %02x %02x %02x, not 00 00 01\n",
-            data[0], data[1], data[2]);
+  if (data[0] != 0 || data[1] != 0 || data[2] != 1) {
+    fprint_err(
+        "### find_DTS_in_PES:"
+        " PES packet start code prefix is %02x %02x %02x, not 00 00 01\n",
+        data[0], data[1], data[2]);
+    return 1;
+  }
+
+  stream_id = data[3];
+  packet_length = (data[4] << 8) | data[5];
+
+  // if (packet_length == 0)  // Elementary video data of unspecified length
+  //   return 0;
+
+  switch (stream_id) {
+  case STREAM_ID_PROGRAM_STREAM_MAP:
+  case STREAM_ID_PRIVATE_STREAM_2:
+  case STREAM_ID_ECM_STREAM:
+  case STREAM_ID_EMM_STREAM:
+  case STREAM_ID_PROGRAM_STREAM_DIRECTORY:
+  case STREAM_ID_DSMCC_STREAM:
+  case STREAM_ID_H222_E_STREAM:
+    return 0; // Just data bytes
+  case STREAM_ID_PADDING_STREAM:
+    return 0; // Just padding bytes
+  default:
+    break; // Some sort of data we might be interested in dissecting
+  }
+
+  bytes = data + 6;
+  if (IS_H222_PES(data)) {
+    // Yes, it's H.222.0
+    PTS_DTS_flags = (bytes[1] & 0xC0) >> 6;
+
+    if (PTS_DTS_flags == 3) {
+      // err = decode_pts_dts(&bytes[3],3,&pts);
+      int err = decode_pts_dts(&bytes[8], 1, dts);
+      if (err)
         return 1;
+      *got_dts = true;
     }
+  } else {
+    int posn = 0;
+    // We assume it's MPEG-1
+    // Ignore any up-front padding bytes
+    while (posn < packet_length && bytes[posn] == 0xFF)
+      posn++;
+    if (posn < packet_length) {
+      if ((bytes[posn] & 0xC0) == 0x40) // ignore buffer scale/size
+        posn += 2;
+      if (posn == packet_length)
+        return 0; // no space for PTS/DTS
 
-    stream_id = data[3];
-    packet_length = (data[4] << 8) | data[5];
-
-    // if (packet_length == 0)  // Elementary video data of unspecified length
-    //   return 0;
-
-    switch (stream_id) {
-    case STREAM_ID_PROGRAM_STREAM_MAP:
-    case STREAM_ID_PRIVATE_STREAM_2:
-    case STREAM_ID_ECM_STREAM:
-    case STREAM_ID_EMM_STREAM:
-    case STREAM_ID_PROGRAM_STREAM_DIRECTORY:
-    case STREAM_ID_DSMCC_STREAM:
-    case STREAM_ID_H222_E_STREAM:
-        return 0; // Just data bytes
-    case STREAM_ID_PADDING_STREAM:
-        return 0; // Just padding bytes
-    default:
-        break; // Some sort of data we might be interested in dissecting
+      if ((bytes[posn] & 0xF0) == 0x30) // PTS and DTS
+      {
+        int err = decode_pts_dts(&bytes[posn + 5], 1, dts);
+        if (err)
+          return 1;
+        *got_dts = true;
+      }
     }
-
-    bytes = data + 6;
-    if (IS_H222_PES(data)) {
-        // Yes, it's H.222.0
-        PTS_DTS_flags = (bytes[1] & 0xC0) >> 6;
-
-        if (PTS_DTS_flags == 3) {
-            // err = decode_pts_dts(&bytes[3],3,&pts);
-            int err = decode_pts_dts(&bytes[8], 1, dts);
-            if (err)
-                return 1;
-            *got_dts = true;
-        }
-    } else {
-        int posn = 0;
-        // We assume it's MPEG-1
-        // Ignore any up-front padding bytes
-        while (posn < packet_length && bytes[posn] == 0xFF)
-            posn++;
-        if (posn < packet_length) {
-            if ((bytes[posn] & 0xC0) == 0x40) // ignore buffer scale/size
-                posn += 2;
-            if (posn == packet_length)
-                return 0; // no space for PTS/DTS
-
-            if ((bytes[posn] & 0xF0) == 0x30) // PTS and DTS
-            {
-                int err = decode_pts_dts(&bytes[posn + 5], 1, dts);
-                if (err)
-                    return 1;
-                *got_dts = true;
-            }
-        }
-    }
-    return 0;
+  }
+  return 0;
 }
 
 /*
@@ -3115,101 +3124,101 @@ int find_DTS_in_PES(byte data[], int32_t data_len, int* got_dts, uint64_t* dts)
  *
  * Returns 0 if all went well, 1 if an error occurs.
  */
-int find_PTS_DTS_in_PES(
-    byte data[], int32_t data_len, int* got_pts, uint64_t* pts, int* got_dts, uint64_t* dts)
-{
-    byte stream_id;
-    int packet_length;
-    byte* bytes;
+int find_PTS_DTS_in_PES(byte data[], int32_t data_len, int *got_pts,
+                        uint64_t *pts, int *got_dts, uint64_t *dts) {
+  byte stream_id;
+  int packet_length;
+  byte *bytes;
 
-    int PTS_DTS_flags;
+  int PTS_DTS_flags;
 
-    *got_pts = false; // pessimistic
-    *got_dts = false;
+  *got_pts = false; // pessimistic
+  *got_dts = false;
 
-    if (data[0] != 0 || data[1] != 0 || data[2] != 1) {
-        fprint_err("### find_PTS_DTS_in_PES"
-                   ": PES packet start code prefix is %02x %02x %02x, not 00 00 01\n",
-            data[0], data[1], data[2]);
+  if (data[0] != 0 || data[1] != 0 || data[2] != 1) {
+    fprint_err(
+        "### find_PTS_DTS_in_PES"
+        ": PES packet start code prefix is %02x %02x %02x, not 00 00 01\n",
+        data[0], data[1], data[2]);
+    return 1;
+  }
+
+  stream_id = data[3];
+  packet_length = (data[4] << 8) | data[5];
+
+  // if (packet_length == 0)  // Elementary video data of unspecified length
+  //   return 0;
+
+  switch (stream_id) {
+  case STREAM_ID_PROGRAM_STREAM_MAP:
+  case STREAM_ID_PRIVATE_STREAM_2:
+  case STREAM_ID_ECM_STREAM:
+  case STREAM_ID_EMM_STREAM:
+  case STREAM_ID_PROGRAM_STREAM_DIRECTORY:
+  case STREAM_ID_DSMCC_STREAM:
+  case STREAM_ID_H222_E_STREAM:
+    return 0; // Just data bytes
+  case STREAM_ID_PADDING_STREAM:
+    return 0; // Just padding bytes
+  default:
+    break; // Some sort of data we might be interested in dissecting
+  }
+
+  bytes = data + 6;
+  if (IS_H222_PES(data)) {
+    // Yes, it's H.222.0
+    PTS_DTS_flags = (bytes[1] & 0xC0) >> 6;
+
+    if (PTS_DTS_flags == 2 || PTS_DTS_flags == 3) {
+      int err = decode_pts_dts(&bytes[3], PTS_DTS_flags, pts);
+      if (err)
         return 1;
+      *got_pts = true;
     }
-
-    stream_id = data[3];
-    packet_length = (data[4] << 8) | data[5];
-
-    // if (packet_length == 0)  // Elementary video data of unspecified length
-    //   return 0;
-
-    switch (stream_id) {
-    case STREAM_ID_PROGRAM_STREAM_MAP:
-    case STREAM_ID_PRIVATE_STREAM_2:
-    case STREAM_ID_ECM_STREAM:
-    case STREAM_ID_EMM_STREAM:
-    case STREAM_ID_PROGRAM_STREAM_DIRECTORY:
-    case STREAM_ID_DSMCC_STREAM:
-    case STREAM_ID_H222_E_STREAM:
-        return 0; // Just data bytes
-    case STREAM_ID_PADDING_STREAM:
-        return 0; // Just padding bytes
-    default:
-        break; // Some sort of data we might be interested in dissecting
+    if (PTS_DTS_flags == 3) {
+      // err = decode_pts_dts(&bytes[3],3,&pts);
+      int err = decode_pts_dts(&bytes[8], 1, dts);
+      if (err)
+        return 1;
+      *got_dts = true;
     }
-
-    bytes = data + 6;
-    if (IS_H222_PES(data)) {
-        // Yes, it's H.222.0
-        PTS_DTS_flags = (bytes[1] & 0xC0) >> 6;
-
-        if (PTS_DTS_flags == 2 || PTS_DTS_flags == 3) {
-            int err = decode_pts_dts(&bytes[3], PTS_DTS_flags, pts);
-            if (err)
-                return 1;
-            *got_pts = true;
-        }
-        if (PTS_DTS_flags == 3) {
-            // err = decode_pts_dts(&bytes[3],3,&pts);
-            int err = decode_pts_dts(&bytes[8], 1, dts);
-            if (err)
-                return 1;
-            *got_dts = true;
-        }
-    } else {
-        int posn = 0;
-        int marker;
-        // We assume it's MPEG-1
-        // Ignore any up-front padding bytes
-        while (posn < packet_length && bytes[posn] == 0xFF)
-            posn++;
-        if (posn < packet_length) {
-            if ((bytes[posn] & 0xC0) == 0x40) // ignore buffer scale/size
-                posn += 2;
-            if (posn == packet_length)
-                return 0; // no space for PTS/DTS
-            marker = (bytes[posn] & 0xF0) >> 4;
-            if (marker == 2 || // PTS
-                marker == 3) // PTS and DTS
-            {
-                int err = decode_pts_dts(&bytes[posn], marker, pts);
-                if (err)
-                    return 1;
-                *got_pts = true;
-            }
-            if (marker == 3) // PTS and DTS
-            {
-                int err = decode_pts_dts(&bytes[posn + 5], 1, dts);
-                if (err)
-                    return 1;
-                *got_dts = true;
-            }
-        }
-    }
-
-    // If we have no DTS then it is the same as PTS
-    if (*got_pts && !*got_dts) {
-        *dts = *pts;
+  } else {
+    int posn = 0;
+    int marker;
+    // We assume it's MPEG-1
+    // Ignore any up-front padding bytes
+    while (posn < packet_length && bytes[posn] == 0xFF)
+      posn++;
+    if (posn < packet_length) {
+      if ((bytes[posn] & 0xC0) == 0x40) // ignore buffer scale/size
+        posn += 2;
+      if (posn == packet_length)
+        return 0; // no space for PTS/DTS
+      marker = (bytes[posn] & 0xF0) >> 4;
+      if (marker == 2 || // PTS
+          marker == 3)   // PTS and DTS
+      {
+        int err = decode_pts_dts(&bytes[posn], marker, pts);
+        if (err)
+          return 1;
+        *got_pts = true;
+      }
+      if (marker == 3) // PTS and DTS
+      {
+        int err = decode_pts_dts(&bytes[posn + 5], 1, dts);
+        if (err)
+          return 1;
         *got_dts = true;
+      }
     }
-    return 0;
+  }
+
+  // If we have no DTS then it is the same as PTS
+  if (*got_pts && !*got_dts) {
+    *dts = *pts;
+    *got_dts = true;
+  }
+  return 0;
 }
 
 /*
@@ -3222,68 +3231,69 @@ int find_PTS_DTS_in_PES(
  *
  * Returns 0 if all went well, 1 if an error occurs.
  */
-int find_ESCR_in_PES(byte data[], int32_t data_len, int* got_escr, uint64_t* escr)
-{
-    byte stream_id;
-    //  int   packet_length;
-    byte* bytes;
+int find_ESCR_in_PES(byte data[], int32_t data_len, int *got_escr,
+                     uint64_t *escr) {
+  byte stream_id;
+  //  int   packet_length;
+  byte *bytes;
 
-    *got_escr = false; // pessimistic
-    *escr = 0;
+  *got_escr = false; // pessimistic
+  *escr = 0;
 
-    if (data[0] != 0 || data[1] != 0 || data[2] != 1) {
-        fprint_err("### find_ESCR_in_PES:"
-                   " PES packet start code prefix is %02x %02x %02x, not 00 00 01\n",
-            data[0], data[1], data[2]);
-        return 1;
+  if (data[0] != 0 || data[1] != 0 || data[2] != 1) {
+    fprint_err(
+        "### find_ESCR_in_PES:"
+        " PES packet start code prefix is %02x %02x %02x, not 00 00 01\n",
+        data[0], data[1], data[2]);
+    return 1;
+  }
+
+  stream_id = data[3];
+  //  packet_length = (data[4] << 8) | data[5];
+
+  // if (packet_length == 0)  // Elementary video data of unspecified length
+  //   return 0;
+
+  switch (stream_id) {
+  case STREAM_ID_PROGRAM_STREAM_MAP:
+  case STREAM_ID_PRIVATE_STREAM_2:
+  case STREAM_ID_ECM_STREAM:
+  case STREAM_ID_EMM_STREAM:
+  case STREAM_ID_PROGRAM_STREAM_DIRECTORY:
+  case STREAM_ID_DSMCC_STREAM:
+  case STREAM_ID_H222_E_STREAM:
+    return 0; // Just data bytes
+  case STREAM_ID_PADDING_STREAM:
+    return 0; // Just padding bytes
+  default:
+    break; // Some sort of data we might be interested in dissecting
+  }
+
+  bytes = data + 6;
+  if (IS_H222_PES(data)) // H.222.0 may have ESCR, MPEG-1 mayn't
+  {
+    // Yes, it's H.222.0
+    *got_escr = (bytes[1] & 0x20) == 0x20;
+    if (*got_escr) {
+      uint64_t ESCR_base;
+      uint32_t ESCR_extn;
+      int PTS_DTS_flags = (bytes[1] & 0xC0) >> 6;
+      int offset;
+      if (PTS_DTS_flags == 2)
+        offset = 2 + 5;
+      else if (PTS_DTS_flags == 3)
+        offset = 2 + 10;
+      else
+        offset = 2 + 0; // or so we hope
+      ESCR_base = (bytes[offset + 4] >> 3) | (bytes[offset + 3] << 5) |
+                  (bytes[offset + 2] << 13) | (bytes[offset + 1] << 20) |
+                  ((((uint64_t)bytes[offset]) & 0x03) << 28) |
+                  ((((uint64_t)bytes[offset]) & 0x38) << 27);
+      ESCR_extn = (bytes[offset + 5] >> 1) | (bytes[offset + 4] << 7);
+      *escr = ESCR_base * 300 + ESCR_extn;
     }
-
-    stream_id = data[3];
-    //  packet_length = (data[4] << 8) | data[5];
-
-    // if (packet_length == 0)  // Elementary video data of unspecified length
-    //   return 0;
-
-    switch (stream_id) {
-    case STREAM_ID_PROGRAM_STREAM_MAP:
-    case STREAM_ID_PRIVATE_STREAM_2:
-    case STREAM_ID_ECM_STREAM:
-    case STREAM_ID_EMM_STREAM:
-    case STREAM_ID_PROGRAM_STREAM_DIRECTORY:
-    case STREAM_ID_DSMCC_STREAM:
-    case STREAM_ID_H222_E_STREAM:
-        return 0; // Just data bytes
-    case STREAM_ID_PADDING_STREAM:
-        return 0; // Just padding bytes
-    default:
-        break; // Some sort of data we might be interested in dissecting
-    }
-
-    bytes = data + 6;
-    if (IS_H222_PES(data)) // H.222.0 may have ESCR, MPEG-1 mayn't
-    {
-        // Yes, it's H.222.0
-        *got_escr = (bytes[1] & 0x20) == 0x20;
-        if (*got_escr) {
-            uint64_t ESCR_base;
-            uint32_t ESCR_extn;
-            int PTS_DTS_flags = (bytes[1] & 0xC0) >> 6;
-            int offset;
-            if (PTS_DTS_flags == 2)
-                offset = 2 + 5;
-            else if (PTS_DTS_flags == 3)
-                offset = 2 + 10;
-            else
-                offset = 2 + 0; // or so we hope
-            ESCR_base = (bytes[offset + 4] >> 3) | (bytes[offset + 3] << 5)
-                | (bytes[offset + 2] << 13) | (bytes[offset + 1] << 20)
-                | ((((uint64_t)bytes[offset]) & 0x03) << 28)
-                | ((((uint64_t)bytes[offset]) & 0x38) << 27);
-            ESCR_extn = (bytes[offset + 5] >> 1) | (bytes[offset + 4] << 7);
-            *escr = ESCR_base * 300 + ESCR_extn;
-        }
-    }
-    return 0;
+  }
+  return 0;
 }
 
 // ============================================================
@@ -3308,15 +3318,15 @@ int find_ESCR_in_PES(byte data[], int32_t data_len, int* got_escr, uint64_t* esc
  *   if we are writing PES data (if we are writing TS data, then the
  *   program data will be in the original TS packets)
  */
-void set_server_output(PES_reader_p reader, TS_writer_p tswriter, int write_PES, int program_freq)
-{
-    reader->tswriter = tswriter;
-    reader->program_freq = program_freq;
-    reader->program_index = 0;
-    reader->write_PES_packets = write_PES;
-    reader->write_TS_packets = !write_PES;
-    reader->suppress_writing = false;
-    return;
+void set_server_output(PES_reader_p reader, TS_writer_p tswriter, int write_PES,
+                       int program_freq) {
+  reader->tswriter = tswriter;
+  reader->program_freq = program_freq;
+  reader->program_index = 0;
+  reader->write_PES_packets = write_PES;
+  reader->write_TS_packets = !write_PES;
+  reader->suppress_writing = false;
+  return;
 }
 
 /*
@@ -3329,11 +3339,10 @@ void set_server_output(PES_reader_p reader, TS_writer_p tswriter, int write_PES,
  *
  * If `reader` is nullptr, nothing is done.
  */
-void start_server_output(PES_reader_p reader)
-{
-    if (reader != nullptr)
-        reader->suppress_writing = false;
-    return;
+void start_server_output(PES_reader_p reader) {
+  if (reader != nullptr)
+    reader->suppress_writing = false;
+  return;
 }
 
 /*
@@ -3343,11 +3352,10 @@ void start_server_output(PES_reader_p reader)
  *
  * If `reader` is nullptr, nothing is done.
  */
-void stop_server_output(PES_reader_p reader)
-{
-    if (reader != nullptr)
-        reader->suppress_writing = true;
-    return;
+void stop_server_output(PES_reader_p reader) {
+  if (reader != nullptr)
+    reader->suppress_writing = true;
+  return;
 }
 
 /*
@@ -3365,10 +3373,9 @@ void stop_server_output(PES_reader_p reader)
  * - `reader` is our PES reader context
  * - `extra` is how many extra packets to output per "real" packet.
  */
-void set_server_padding(PES_reader_p reader, int extra)
-{
-    reader->pes_padding = extra;
-    return;
+void set_server_padding(PES_reader_p reader, int extra) {
+  reader->pes_padding = extra;
+  return;
 }
 
 /*
@@ -3378,114 +3385,121 @@ void set_server_padding(PES_reader_p reader, int extra)
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int write_program_data(PES_reader_p reader, TS_writer_p output)
-{
-    // We know we support at most two program streams for output
-    int num_progs = 0;
-    uint32_t prog_pids[2];
-    byte prog_type[2];
-    int err;
-    uint32_t pcr_pid;
+int write_program_data(PES_reader_p reader, TS_writer_p output) {
+  // We know we support at most two program streams for output
+  int num_progs = 0;
+  uint32_t prog_pids[2];
+  byte prog_type[2];
+  int err;
+  uint32_t pcr_pid;
 
-    // If we are writing out TS data as a side effect of reading TS when
-    // assembling our PES packets, we should not write out any program
-    // data ourselves, as it is (or should be) already in the TS data
-    if (reader->write_TS_packets && !reader->suppress_writing) // should we care about suppression?
-        return 0;
+  // If we are writing out TS data as a side effect of reading TS when
+  // assembling our PES packets, we should not write out any program
+  // data ourselves, as it is (or should be) already in the TS data
+  if (reader->write_TS_packets &&
+      !reader->suppress_writing) // should we care about suppression?
+    return 0;
 
-    // Of course, if we haven't *found* any program information yet,
-    // there's not much we can do (even if the user is overriding the
-    // program information for TS data, we still won't have worked out
-    // exactly what we're doing until we've read the program information,
-    // so this is probably still a sensible restriction)
-    if (!reader->got_program_data)
-        return 0;
+  // Of course, if we haven't *found* any program information yet,
+  // there's not much we can do (even if the user is overriding the
+  // program information for TS data, we still won't have worked out
+  // exactly what we're doing until we've read the program information,
+  // so this is probably still a sensible restriction)
+  if (!reader->got_program_data)
+    return 0;
 
-    if (reader->is_TS) {
-        // For TS, we can use the stream types from the PMT itself
-        if (reader->video_pid != 0) {
-            pmt_stream_p stream = pid_stream_in_pmt(reader->program_map, reader->video_pid);
-            if (stream == nullptr) {
-                fprint_err("### Cannot find video PID %04x in program map\n", reader->video_pid);
-                return 1;
-            }
-            prog_pids[0] = reader->output_video_pid; // may not be the same
-            prog_type[0] = stream->stream_type;
-            num_progs = 1;
-        }
-        if (reader->audio_pid != 0) {
-            pmt_stream_p stream = pid_stream_in_pmt(reader->program_map, reader->audio_pid);
-            if (stream == nullptr) {
-                fprint_err("### Cannot find audio PID %04x in program map\n", reader->audio_pid);
-                return 1;
-            }
-            prog_pids[num_progs] = reader->output_audio_pid; // may not be the same
-            prog_type[num_progs] = stream->stream_type;
-            num_progs++;
-        }
-    } else {
-        // For PS, we have to be given appropriate PIDs (which we'll assume the
-        // user has done via the reader), and we need to deduce stream types from
-        // the stream ids.
+  if (reader->is_TS) {
+    // For TS, we can use the stream types from the PMT itself
+    if (reader->video_pid != 0) {
+      pmt_stream_p stream =
+          pid_stream_in_pmt(reader->program_map, reader->video_pid);
+      if (stream == nullptr) {
+        fprint_err("### Cannot find video PID %04x in program map\n",
+                   reader->video_pid);
+        return 1;
+      }
+      prog_pids[0] = reader->output_video_pid; // may not be the same
+      prog_type[0] = stream->stream_type;
+      num_progs = 1;
+    }
+    if (reader->audio_pid != 0) {
+      pmt_stream_p stream =
+          pid_stream_in_pmt(reader->program_map, reader->audio_pid);
+      if (stream == nullptr) {
+        fprint_err("### Cannot find audio PID %04x in program map\n",
+                   reader->audio_pid);
+        return 1;
+      }
+      prog_pids[num_progs] = reader->output_audio_pid; // may not be the same
+      prog_type[num_progs] = stream->stream_type;
+      num_progs++;
+    }
+  } else {
+    // For PS, we have to be given appropriate PIDs (which we'll assume the
+    // user has done via the reader), and we need to deduce stream types from
+    // the stream ids.
 
-        // XXX For audio data, we can't yet tell what sort of audio we're reading,
-        // so we'll make a (quiet possibly wrong) guess.
+    // XXX For audio data, we can't yet tell what sort of audio we're reading,
+    // so we'll make a (quiet possibly wrong) guess.
 
-        num_progs = 1;
-        prog_pids[0] = reader->output_video_pid;
-        switch (reader->video_type) {
-        case VIDEO_H264:
-            prog_type[0] = AVC_VIDEO_STREAM_TYPE;
-            break;
-        case VIDEO_H262:
-            prog_type[0] = MPEG2_VIDEO_STREAM_TYPE;
-            break;
-        case VIDEO_AVS:
-            prog_type[0] = AVS_VIDEO_STREAM_TYPE;
-            break;
-        default:
-            prog_type[0] = MPEG2_VIDEO_STREAM_TYPE; // what else to do?
-            break;
-        }
-
-        prog_pids[1] = reader->output_audio_pid;
-        if (reader->audio_stream_id == 0) {
-            // The user has asked for (not private data) audio, but we haven't
-            // found it yet. Make something sensible up...
-            prog_type[1] = MPEG2_AUDIO_STREAM_TYPE; // a random guess
-        } else {
-            if (reader->audio_stream_id == PRIVATE1_AUDIO_STREAM_ID)
-                prog_type[1] = reader->output_dolby_stream_type;
-            else
-                prog_type[1] = MPEG2_AUDIO_STREAM_TYPE; // a random guess
-        }
-        num_progs = 2;
+    num_progs = 1;
+    prog_pids[0] = reader->output_video_pid;
+    switch (reader->video_type) {
+    case VIDEO_H264:
+      prog_type[0] = AVC_VIDEO_STREAM_TYPE;
+      break;
+    case VIDEO_H262:
+      prog_type[0] = MPEG2_VIDEO_STREAM_TYPE;
+      break;
+    case VIDEO_AVS:
+      prog_type[0] = AVS_VIDEO_STREAM_TYPE;
+      break;
+    default:
+      prog_type[0] = MPEG2_VIDEO_STREAM_TYPE; // what else to do?
+      break;
     }
 
-    pcr_pid = reader->output_pcr_pid;
-    if (pcr_pid == 0)
-        pcr_pid = reader->output_video_pid;
+    prog_pids[1] = reader->output_audio_pid;
+    if (reader->audio_stream_id == 0) {
+      // The user has asked for (not private data) audio, but we haven't
+      // found it yet. Make something sensible up...
+      prog_type[1] = MPEG2_AUDIO_STREAM_TYPE; // a random guess
+    } else {
+      if (reader->audio_stream_id == PRIVATE1_AUDIO_STREAM_ID)
+        prog_type[1] = reader->output_dolby_stream_type;
+      else
+        prog_type[1] = MPEG2_AUDIO_STREAM_TYPE; // a random guess
+    }
+    num_progs = 2;
+  }
+
+  pcr_pid = reader->output_pcr_pid;
+  if (pcr_pid == 0)
+    pcr_pid = reader->output_video_pid;
 
 #if SHOW_PROGRAM_INFO
-    if (reader->give_info) {
-        fprint_msg("PROGRAM %d: pmt %x (%d), pcr %x (%d)\n"
-                   "           video %x (%d) type %02x (%s)\n",
-            reader->output_program_number, reader->output_pmt_pid, reader->output_pmt_pid, pcr_pid,
-            pcr_pid, reader->output_video_pid, reader->output_video_pid, prog_type[0],
-            h222_stream_type_str(prog_type[0]));
-        if (num_progs == 2)
-            fprint_msg("         audio %x (%d) type %02x (%s)\n", reader->output_audio_pid,
-                reader->output_audio_pid, prog_type[1], h222_stream_type_str(prog_type[1]));
-    }
+  if (reader->give_info) {
+    fprint_msg("PROGRAM %d: pmt %x (%d), pcr %x (%d)\n"
+               "           video %x (%d) type %02x (%s)\n",
+               reader->output_program_number, reader->output_pmt_pid,
+               reader->output_pmt_pid, pcr_pid, pcr_pid,
+               reader->output_video_pid, reader->output_video_pid, prog_type[0],
+               h222_stream_type_str(prog_type[0]));
+    if (num_progs == 2)
+      fprint_msg("         audio %x (%d) type %02x (%s)\n",
+                 reader->output_audio_pid, reader->output_audio_pid,
+                 prog_type[1], h222_stream_type_str(prog_type[1]));
+  }
 #endif
 
-    err = write_TS_program_data2(output,
-        1, // transport stream id
-        reader->output_program_number, reader->output_pmt_pid, pcr_pid, num_progs, prog_pids,
-        prog_type);
-    if (err) {
-        print_err("### Error writing out TS program data\n");
-        return 1;
-    }
-    return 0;
+  err = write_TS_program_data2(output,
+                               1, // transport stream id
+                               reader->output_program_number,
+                               reader->output_pmt_pid, pcr_pid, num_progs,
+                               prog_pids, prog_type);
+  if (err) {
+    print_err("### Error writing out TS program data\n");
+    return 1;
+  }
+  return 0;
 }

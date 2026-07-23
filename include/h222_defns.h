@@ -84,10 +84,10 @@
 // 81	  Traditionally ATSC Dolby (AC-3)
 
 #define MPEG1_VIDEO_STREAM_TYPE 0x01
-#define MPEG2_VIDEO_STREAM_TYPE 0x02 // H.262
-#define AVC_VIDEO_STREAM_TYPE 0x1B // MPEG-4 part10 - H.264
-#define AVS_VIDEO_STREAM_TYPE 0x42 // AVS -- Chinese standard
-#define DVB_DOLBY_AUDIO_STREAM_TYPE 0x06 // [1]
+#define MPEG2_VIDEO_STREAM_TYPE 0x02      // H.262
+#define AVC_VIDEO_STREAM_TYPE 0x1B        // MPEG-4 part10 - H.264
+#define AVS_VIDEO_STREAM_TYPE 0x42        // AVS -- Chinese standard
+#define DVB_DOLBY_AUDIO_STREAM_TYPE 0x06  // [1]
 #define ATSC_DOLBY_AUDIO_STREAM_TYPE 0x81 // [1]
 #define MPEG2_AUDIO_STREAM_TYPE 0x04
 #define MPEG1_AUDIO_STREAM_TYPE 0x03
@@ -96,7 +96,7 @@
 #define LATM_AUDIO_STREAM_TYPE 0x11 // How much do we support this?
 #define H265_VIDEO_STREAM_TYPE 0x24
 
-#define DOLBY_DVB_STREAM_TYPE 0x06 // [1]
+#define DOLBY_DVB_STREAM_TYPE 0x06  // [1]
 #define DOLBY_ATSC_STREAM_TYPE 0x81 // [1]
 
 // [1] In DVB (the European transmission standard) Dolby (AC-3) audio is
@@ -106,10 +106,10 @@
 //     descriptors in the PMT as well to say we really mean Dolby (AC-3)
 //     Also, in DVB, other types of stream can be in 0x06.
 
-#define IS_VIDEO_STREAM_TYPE(s)                                                                   \
-    ((s) == MPEG1_VIDEO_STREAM_TYPE || (s) == MPEG2_VIDEO_STREAM_TYPE                             \
-        || (s) == AVC_VIDEO_STREAM_TYPE || (s) == H265_VIDEO_STREAM_TYPE                          \
-        || (s) == AVS_VIDEO_STREAM_TYPE || (s) == MPEG4_PART2_VIDEO_STREAM_TYPE)
+#define IS_VIDEO_STREAM_TYPE(s)                                                \
+  ((s) == MPEG1_VIDEO_STREAM_TYPE || (s) == MPEG2_VIDEO_STREAM_TYPE ||         \
+   (s) == AVC_VIDEO_STREAM_TYPE || (s) == H265_VIDEO_STREAM_TYPE ||            \
+   (s) == AVS_VIDEO_STREAM_TYPE || (s) == MPEG4_PART2_VIDEO_STREAM_TYPE)
 
 // Although I include Dolby in the "standard" audio types, beware that the
 // stream type usage is not specified by H.222 itself - it is "convention"
@@ -120,12 +120,13 @@
 // other hand, practice seems to be to use the stream types only in the
 // expected manner.
 
-#define IS_DOLBY_STREAM_TYPE(s) ((s) == DOLBY_DVB_STREAM_TYPE || (s) == DOLBY_ATSC_STREAM_TYPE)
+#define IS_DOLBY_STREAM_TYPE(s)                                                \
+  ((s) == DOLBY_DVB_STREAM_TYPE || (s) == DOLBY_ATSC_STREAM_TYPE)
 
-#define IS_AUDIO_STREAM_TYPE(s)                                                                   \
-    ((s) == MPEG1_AUDIO_STREAM_TYPE || (s) == MPEG2_AUDIO_STREAM_TYPE                             \
-        || (s) == ADTS_AUDIO_STREAM_TYPE || (s) == LATM_AUDIO_STREAM_TYPE                         \
-        || IS_DOLBY_STREAM_TYPE((s)))
+#define IS_AUDIO_STREAM_TYPE(s)                                                \
+  ((s) == MPEG1_AUDIO_STREAM_TYPE || (s) == MPEG2_AUDIO_STREAM_TYPE ||         \
+   (s) == ADTS_AUDIO_STREAM_TYPE || (s) == LATM_AUDIO_STREAM_TYPE ||           \
+   IS_DOLBY_STREAM_TYPE((s)))
 
 // ------------------------------------------------------------
 // Stream ids, as used in PES headers
@@ -196,13 +197,13 @@
 // ------------------------------------------------------------
 // Timing info (used in reporting on packets). Initialise to all zeroes...
 struct timing {
-    uint64_t first_pcr;
-    uint64_t last_pcr;
-    int first_pcr_packet;
-    int last_pcr_packet;
-    int had_first_pcr; // false until we've started
+  uint64_t first_pcr;
+  uint64_t last_pcr;
+  int first_pcr_packet;
+  int last_pcr_packet;
+  int had_first_pcr; // false until we've started
 };
-typedef struct timing* timing_p;
+typedef struct timing *timing_p;
 
 #endif // _h222_defns
 

@@ -39,7 +39,7 @@
 #include "compat.h"
 #include "printing_fns.h"
 
-static int MASK[] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
+static int MASK[] = {0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
 
 /*
  * Build a new bitdata datastructure.
@@ -49,21 +49,20 @@ static int MASK[] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_bitdata(bitdata_p* bitdata, byte data[], int data_len)
-{
-    bitdata_p new2 = (bitdata_p)malloc(SIZEOF_BITDATA);
-    if (new2 == nullptr) {
-        print_err("### Unable to allocate bitdata datastructure\n");
-        return 1;
-    }
+int build_bitdata(bitdata_p *bitdata, byte data[], int data_len) {
+  bitdata_p new2 = (bitdata_p)malloc(SIZEOF_BITDATA);
+  if (new2 == nullptr) {
+    print_err("### Unable to allocate bitdata datastructure\n");
+    return 1;
+  }
 
-    new2->data = data;
-    new2->data_len = data_len;
-    new2->cur_byte = 0;
-    new2->cur_bit = -1;
+  new2->data = data;
+  new2->data_len = data_len;
+  new2->cur_byte = 0;
+  new2->cur_bit = -1;
 
-    *bitdata = new2;
-    return 0;
+  *bitdata = new2;
+  return 0;
 }
 
 /*
@@ -73,15 +72,14 @@ int build_bitdata(bitdata_p* bitdata, byte data[], int data_len)
  *
  * Does nothing if `bitdata` is already nullptr.
  */
-void free_bitdata(bitdata_p* bitdata)
-{
-    if (*bitdata == nullptr)
-        return;
-    (*bitdata)->data = nullptr;
-    (*bitdata)->cur_byte = 0;
-    (*bitdata)->cur_bit = -1;
-    free(*bitdata);
-    *bitdata = nullptr;
+void free_bitdata(bitdata_p *bitdata) {
+  if (*bitdata == nullptr)
+    return;
+  (*bitdata)->data = nullptr;
+  (*bitdata)->cur_byte = 0;
+  (*bitdata)->cur_bit = -1;
+  free(*bitdata);
+  *bitdata = nullptr;
 }
 
 /*
@@ -90,18 +88,18 @@ void free_bitdata(bitdata_p* bitdata)
  * Returns 0 or 1 if it reads the bit correctly, -1 if there are no more
  * bits to be read.
  */
-static inline int next_bit(bitdata_p bitdata)
-{
-    bitdata->cur_bit += 1;
-    if (bitdata->cur_bit == 8) {
-        bitdata->cur_bit = 0;
-        bitdata->cur_byte += 1;
-        if (bitdata->cur_byte > (bitdata->data_len - 1)) {
-            print_err("### No more bits to read from input stream\n");
-            return -1;
-        }
+static inline int next_bit(bitdata_p bitdata) {
+  bitdata->cur_bit += 1;
+  if (bitdata->cur_bit == 8) {
+    bitdata->cur_bit = 0;
+    bitdata->cur_byte += 1;
+    if (bitdata->cur_byte > (bitdata->data_len - 1)) {
+      print_err("### No more bits to read from input stream\n");
+      return -1;
     }
-    return (bitdata->data[bitdata->cur_byte] & MASK[bitdata->cur_bit]) >> (7 - bitdata->cur_bit);
+  }
+  return (bitdata->data[bitdata->cur_byte] & MASK[bitdata->cur_bit]) >>
+         (7 - bitdata->cur_bit);
 }
 
 /*
@@ -110,15 +108,14 @@ static inline int next_bit(bitdata_p bitdata)
  * Returns 0 if it reads the bit correctly, 1 if there are no more
  * bits to be read.
  */
-int read_bit(bitdata_p bitdata, byte* bit)
-{
-    int next = next_bit(bitdata);
-    if (next < 0)
-        return 1;
-    else {
-        *bit = next;
-        return 0;
-    }
+int read_bit(bitdata_p bitdata, byte *bit) {
+  int next = next_bit(bitdata);
+  if (next < 0)
+    return 1;
+  else {
+    *bit = next;
+    return 0;
+  }
 }
 
 /*
@@ -128,22 +125,21 @@ int read_bit(bitdata_p bitdata, byte* bit)
  *
  * Returns 0 if all went well, 1 if there were not enough bits in the data.
  */
-int read_bits(bitdata_p bitdata, int count, uint32_t* bits)
-{
-    int index = 0;
-    uint32_t result = 0;
+int read_bits(bitdata_p bitdata, int count, uint32_t *bits) {
+  int index = 0;
+  uint32_t result = 0;
 
-    assert((count >= 0 && count <= 32));
+  assert((count >= 0 && count <= 32));
 
-    for (index = 0; index < count; index++) {
-        int bit = next_bit(bitdata);
-        if (bit < 0)
-            return 1;
-        else
-            result = (result << 1) | bit;
-    }
-    *bits = result;
-    return 0;
+  for (index = 0; index < count; index++) {
+    int bit = next_bit(bitdata);
+    if (bit < 0)
+      return 1;
+    else
+      result = (result << 1) | bit;
+  }
+  *bits = result;
+  return 0;
 }
 
 /*
@@ -153,22 +149,21 @@ int read_bits(bitdata_p bitdata, int count, uint32_t* bits)
  *
  * Returns 0 if all went well, 1 if there were not enough bits in the data.
  */
-int read_bits_into_byte(bitdata_p bitdata, int count, byte* bits)
-{
-    int index = 0;
-    byte result = 0;
+int read_bits_into_byte(bitdata_p bitdata, int count, byte *bits) {
+  int index = 0;
+  byte result = 0;
 
-    assert((count >= 0 && count <= 8));
+  assert((count >= 0 && count <= 8));
 
-    for (index = 0; index < count; index++) {
-        int bit = next_bit(bitdata);
-        if (bit < 0)
-            return 1;
-        else
-            result = (result << 1) | bit;
-    }
-    *bits = result;
-    return 0;
+  for (index = 0; index < count; index++) {
+    int bit = next_bit(bitdata);
+    if (bit < 0)
+      return 1;
+    else
+      result = (result << 1) | bit;
+  }
+  *bits = result;
+  return 0;
 }
 
 /*
@@ -178,12 +173,11 @@ int read_bits_into_byte(bitdata_p bitdata, int count, byte* bits)
  * "unread" in any way, so reading another bit will retrieve the first bit
  * thereafter.
  */
-int count_zero_bits(bitdata_p bitdata)
-{
-    int count = 0;
-    while (next_bit(bitdata) == 0)
-        count++;
-    return count;
+int count_zero_bits(bitdata_p bitdata) {
+  int count = 0;
+  while (next_bit(bitdata) == 0)
+    count++;
+  return count;
 }
 
 /*
@@ -193,18 +187,17 @@ int count_zero_bits(bitdata_p bitdata)
  *
  * Returns 0 if all went well, 1 if there were not enough bits in the data.
  */
-int read_exp_golomb(bitdata_p bitdata, uint32_t* result)
-{
-    uint32_t next = 0;
-    int leading_zero_bits = count_zero_bits(bitdata);
-    int err = read_bits(bitdata, leading_zero_bits, &next);
-    if (err) {
-        fprint_err(
-            "### Unable to read ExpGolomb value - not enough bits (%d)\n", leading_zero_bits);
-        return err;
-    }
-    *result = (int)(pow(2, leading_zero_bits) - 1 + next);
-    return 0;
+int read_exp_golomb(bitdata_p bitdata, uint32_t *result) {
+  uint32_t next = 0;
+  int leading_zero_bits = count_zero_bits(bitdata);
+  int err = read_bits(bitdata, leading_zero_bits, &next);
+  if (err) {
+    fprint_err("### Unable to read ExpGolomb value - not enough bits (%d)\n",
+               leading_zero_bits);
+    return err;
+  }
+  *result = (int)(pow(2, leading_zero_bits) - 1 + next);
+  return 0;
 }
 
 /*
@@ -214,14 +207,13 @@ int read_exp_golomb(bitdata_p bitdata, uint32_t* result)
  *
  * Returns 0 if all went well, 1 if there were not enough bits in the data.
  */
-int read_signed_exp_golomb(bitdata_p bitdata, int32_t* result)
-{
-    uint32_t val = 0;
-    int err = read_exp_golomb(bitdata, &val);
-    if (err) {
-        print_err("### Unable to read signed ExpGolomb value\n");
-        return err;
-    }
-    *result = (int)(pow(-1, (val + 1)) * ceil(val / 2.0));
-    return 0;
+int read_signed_exp_golomb(bitdata_p bitdata, int32_t *result) {
+  uint32_t val = 0;
+  int err = read_exp_golomb(bitdata, &val);
+  if (err) {
+    print_err("### Unable to read signed ExpGolomb value\n");
+    return err;
+  }
+  *result = (int)(pow(-1, (val + 1)) * ceil(val / 2.0));
+  return 0;
 }

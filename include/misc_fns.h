@@ -20,7 +20,7 @@
  *        else return value from previous call (not sure if that
  *        needs complementing before being passed back in).
  */
-uint32_t crc32_block(uint32_t crc, byte* pData, int blk_len);
+uint32_t crc32_block(uint32_t crc, byte *pData, int blk_len);
 
 /*
  * Print out the bottom N bits from a byte
@@ -43,7 +43,8 @@ void print_bits(int num_bits, byte value);
  * where no more than `max` bytes are to be printed (and "..." is printed
  * if not all bytes were shown).
  */
-void print_data(int is_msg, const char* name, const byte data[], int length, int max);
+void print_data(int is_msg, const char *name, const byte data[], int length,
+                int max);
 /*
  * Print out (the last `max`) bytes of a byte array.
  *
@@ -59,7 +60,7 @@ void print_data(int is_msg, const char* name, const byte data[], int length, int
  * where no more than `max` bytes are to be printed (and "..." is printed
  * if not all bytes were shown).
  */
-void print_end_of_data(char* name, byte data[], int length, int max);
+void print_end_of_data(char *name, byte data[], int length, int max);
 /*
  * Calculate log2 of `x` - for some reason this is missing from <math.h>
  */
@@ -82,7 +83,7 @@ double log2(double x);
  * other error occurred (in which case it will already have output a message
  * on stderr about the problem).
  */
-int read_bytes(int input, int num_bytes, byte* data);
+int read_bytes(int input, int num_bytes, byte *data);
 /*
  * Utility function to seek within a file
  *
@@ -129,7 +130,7 @@ offset_t tell_file(int filedes);
  * Returns the file descriptor for the file, or -1 if it failed to open
  * the file.
  */
-int open_binary_file(char* filename, int for_write);
+int open_binary_file(char *filename, int for_write);
 /*
  * Utility function to close a file (descriptor), and report any errors
  *
@@ -175,8 +176,8 @@ int close_file(int filedes);
  * Returns 0 if all goes well, 1 if something goes wrong. In the latter case,
  * suitable messages will have been written out to standard error.
  */
-int open_input_as_ES(char* name, int use_pes, int quiet, int force_stream_type, int want_data,
-    int* is_data, ES_p* es);
+int open_input_as_ES(char *name, int use_pes, int quiet, int force_stream_type,
+                     int want_data, int *is_data, ES_p *es);
 /*
  * Close an input ES stream opened with `open_input_as_ES`.
  *
@@ -189,7 +190,7 @@ int open_input_as_ES(char* name, int use_pes, int quiet, int force_stream_type, 
  * Returns 0 if all goes well, 1 if something goes wrong. In the latter case,
  * suitable messages will have been written out to standard error.
  */
-int close_input_as_ES(char* name, ES_p* es);
+int close_input_as_ES(char *name, ES_p *es);
 
 // ============================================================
 // Command line "helpers"
@@ -209,8 +210,8 @@ int close_input_as_ES(char* name, ES_p* es);
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int unsigned_value(
-    const char* prefix, const char* cmd, const char* arg, int base, uint32_t* value);
+int unsigned_value(const char *prefix, const char *cmd, const char *arg,
+                   int base, uint32_t *value);
 
 /*
  * Read in an integer value, checking for extraneous characters.
@@ -228,8 +229,8 @@ int unsigned_value(
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int int_value(
-    const char* prefix, const char* cmd, const char* str, int positive, int base, int* value);
+int int_value(const char *prefix, const char *cmd, const char *str,
+              int positive, int base, int *value);
 /*
  * Read in an integer value, checking for extraneous characters and a range.
  *
@@ -247,8 +248,8 @@ int int_value(
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int int_value_in_range(
-    char* prefix, char* cmd, char* arg, int minimum, int maximum, int base, int* value);
+int int_value_in_range(char *prefix, char *cmd, char *arg, int minimum,
+                       int maximum, int base, int *value);
 /*
  * Read in a double value, checking for extraneous characters.
  *
@@ -263,7 +264,8 @@ int int_value_in_range(
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int double_value(char* prefix, char* cmd, char* arg, int positive, double* value);
+int double_value(char *prefix, char *cmd, char *arg, int positive,
+                 double *value);
 /*
  * Read in a hostname and (optional) port
  *
@@ -285,7 +287,8 @@ int double_value(char* prefix, char* cmd, char* arg, int positive, double* value
  * Returns 0 if all went well, 1 otherwise (in which case a message
  * explaining will have been written to stderr).
  */
-int host_value(const char* prefix, const char* cmd, const char* arg, char** hostname, int* port);
+int host_value(const char *prefix, const char *cmd, const char *arg,
+               char **hostname, int *port);
 
 // ============================================================
 // Sockets
@@ -309,7 +312,8 @@ int host_value(const char* prefix, const char* cmd, const char* arg, char** host
  * succeeds, or -1 if it fails, in which case it will have complained on
  * stderr.
  */
-int connect_socket(char* hostname, int port, int use_tcpip, char* multicast_ifaddr);
+int connect_socket(char *hostname, int port, int use_tcpip,
+                   char *multicast_ifaddr);
 
 /*
  * Disconnect from a socket (close it).
@@ -319,35 +323,31 @@ int connect_socket(char* hostname, int port, int use_tcpip, char* multicast_ifad
 int disconnect_socket(int socket);
 
 /*! Decode a host byte order address to a static buffer. */
-const char* ipv4_addr_to_string(const uint32_t addr);
+const char *ipv4_addr_to_string(const uint32_t addr);
 
 /*! Decode a string to a host byte order address */
-int ipv4_string_to_addr(uint32_t* dest, const char* addr);
+int ipv4_string_to_addr(uint32_t *dest, const char *addr);
 
 // ============================================================
 // Byte order handling
 // ============================================================
 
-inline uint32_t uint_32_be(const uint8_t* const p)
-{
-    return (((int)p[0] & 0xff) << 24) | (((int)p[1] & 0xff) << 16) | (((int)p[2] & 0xff) << 8)
-        | (((int)p[3] & 0xff));
+inline uint32_t uint_32_be(const uint8_t *const p) {
+  return (((int)p[0] & 0xff) << 24) | (((int)p[1] & 0xff) << 16) |
+         (((int)p[2] & 0xff) << 8) | (((int)p[3] & 0xff));
 }
 
-inline uint32_t uint_32_le(const uint8_t* const p)
-{
-    return (((int)p[0] & 0xff) | (((int)p[1] & 0xff) << 8) | (((int)p[2] & 0xff) << 16)
-        | (((int)p[3] & 0xff) << 24));
+inline uint32_t uint_32_le(const uint8_t *const p) {
+  return (((int)p[0] & 0xff) | (((int)p[1] & 0xff) << 8) |
+          (((int)p[2] & 0xff) << 16) | (((int)p[3] & 0xff) << 24));
 }
 
-inline uint16_t uint_16_be(const uint8_t* const p)
-{
-    return ((((int)p[0]) & 0xff) << 8) | ((((int)p[1]) & 0xff));
+inline uint16_t uint_16_be(const uint8_t *const p) {
+  return ((((int)p[0]) & 0xff) << 8) | ((((int)p[1]) & 0xff));
 }
 
-inline uint16_t uint_16_le(const uint8_t* const p)
-{
-    return (((int)p[0] & 0xff) | ((int)p[1] & 0xff) << 8);
+inline uint16_t uint_16_le(const uint8_t *const p) {
+  return (((int)p[0] & 0xff) | ((int)p[1] & 0xff) << 8);
 }
 
 // ============================================================
@@ -357,9 +357,8 @@ inline uint16_t uint_16_le(const uint8_t* const p)
 #define PCR_UNSIGNED_WRAP (300ULL * (1ULL << 33))
 
 // (x - y) with allowance for PCR wrap - unsigned version
-inline uint64_t pcr_unsigned_diff(uint64_t x, uint64_t y)
-{
-    return x > y ? x - y : 300ULL * (1ULL << 33) - (y - x);
+inline uint64_t pcr_unsigned_diff(uint64_t x, uint64_t y) {
+  return x > y ? x - y : 300ULL * (1ULL << 33) - (y - x);
 }
 
 #define PCR_SIGNED_WRAP (300LL * (1LL << 33))
@@ -367,21 +366,20 @@ inline uint64_t pcr_unsigned_diff(uint64_t x, uint64_t y)
 #define PCR_SIGNED_MIN (-PCR_SIGNED_WRAP / 2LL)
 
 // (x - y) with allowance for PCR wrap - signed version
-inline int64_t pcr_signed_diff(uint64_t x, uint64_t y)
-{
-    int64_t r = x - y;
+inline int64_t pcr_signed_diff(uint64_t x, uint64_t y) {
+  int64_t r = x - y;
 
-    return r < PCR_SIGNED_MIN ? r + PCR_SIGNED_WRAP : r > PCR_SIGNED_MAX ? r - PCR_SIGNED_WRAP : r;
+  return r < PCR_SIGNED_MIN   ? r + PCR_SIGNED_WRAP
+         : r > PCR_SIGNED_MAX ? r - PCR_SIGNED_WRAP
+                              : r;
 }
 
 // Deal with simple overflow
-inline uint64_t pcr_unsigned_wrap(uint64_t x)
-{
-    return x >= PCR_UNSIGNED_WRAP ? x - PCR_UNSIGNED_WRAP : x;
+inline uint64_t pcr_unsigned_wrap(uint64_t x) {
+  return x >= PCR_UNSIGNED_WRAP ? x - PCR_UNSIGNED_WRAP : x;
 }
 
-inline int64_t pts_signed_diff(uint64_t x, uint64_t y)
-{
-    int64_t r = x - y;
-    return (r << 31) >> 31;
+inline int64_t pts_signed_diff(uint64_t x, uint64_t y) {
+  int64_t r = x - y;
+  return (r << 31) >> 31;
 }

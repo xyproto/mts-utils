@@ -49,7 +49,7 @@
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-int open_elementary_stream(char* filename, ES_p* es);
+int open_elementary_stream(char *filename, ES_p *es);
 
 /*
  * Build an elementary stream datastructure attached to an input file.
@@ -65,7 +65,7 @@ int open_elementary_stream(char* filename, ES_p* es);
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-int build_elementary_stream_file(int input, ES_p* es);
+int build_elementary_stream_file(int input, ES_p *es);
 
 /*
  * Build an elementary stream datastructure for use with a PES reader.
@@ -80,7 +80,7 @@ int build_elementary_stream_file(int input, ES_p* es);
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-int build_elementary_stream_PES(PES_reader_p reader, ES_p* es);
+int build_elementary_stream_PES(PES_reader_p reader, ES_p *es);
 
 /*
  * Tidy up the elementary stream datastructure after we've finished with it.
@@ -94,7 +94,7 @@ int build_elementary_stream_PES(PES_reader_p reader, ES_p* es);
  * *did* go wrong, and if something went wrong and the program is continuing,
  * it's bound to show up pretty soon.
  */
-void free_elementary_stream(ES_p* es);
+void free_elementary_stream(ES_p *es);
 
 /*
  * Tidy up the elementary stream datastructure after we've finished with it.
@@ -108,7 +108,7 @@ void free_elementary_stream(ES_p* es);
  * *did* go wrong, and if something went wrong and the program is continuing,
  * it's bound to show up pretty soon.
  */
-void close_elementary_stream(ES_p* es);
+void close_elementary_stream(ES_p *es);
 
 /*
  * Ask an ES context if changed input is available.
@@ -147,7 +147,7 @@ void clear_ES_unit(ES_unit_p unit);
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_ES_unit(ES_unit_p* unit);
+int build_ES_unit(ES_unit_p *unit);
 
 /*
  * Build a new ES unit datastructure, from a given data array.
@@ -157,7 +157,7 @@ int build_ES_unit(ES_unit_p* unit);
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_ES_unit_from_data(ES_unit_p* unit, byte* data, uint32_t data_len);
+int build_ES_unit_from_data(ES_unit_p *unit, byte *data, uint32_t data_len);
 
 /*
  * Tidy up and free an ES unit datastructure after we've finished with it.
@@ -166,7 +166,7 @@ int build_ES_unit_from_data(ES_unit_p* unit, byte* data, uint32_t data_len);
  *
  * If `unit` is already nullptr, does nothing.
  */
-void free_ES_unit(ES_unit_p* unit);
+void free_ES_unit(ES_unit_p *unit);
 
 /*
  * Print out some information this ES unit, on normal or error output
@@ -186,7 +186,7 @@ void report_ES_unit(int is_msg, ES_unit_p unit);
  *
  * Returns 0 if all goes well, 1 if an error occurs.
  */
-int get_end_of_underlying_PES_packet(ES_p es, byte** data, int* data_len);
+int get_end_of_underlying_PES_packet(ES_p es, byte **data, int *data_len);
 
 /*
  * Find and read in the next ES unit.
@@ -215,7 +215,7 @@ int find_next_ES_unit(ES_p es, ES_unit_p unit);
  * Returns 0 if it succeeds, EOF if the end-of-file is read (i.e., there
  * is no next ES unit), otherwise 1 if some error occurs.
  */
-int find_and_build_next_ES_unit(ES_p es, ES_unit_p* unit);
+int find_and_build_next_ES_unit(ES_p es, ES_unit_p *unit);
 
 /*
  * Write (copy) the current ES unit to the output stream.
@@ -228,7 +228,7 @@ int find_and_build_next_ES_unit(ES_p es, ES_unit_p* unit);
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int write_ES_unit(FILE* output, ES_unit_p unit);
+int write_ES_unit(FILE *output, ES_unit_p unit);
 
 // ------------------------------------------------------------
 // Arbitrary reading from ES data
@@ -269,14 +269,14 @@ int seek_ES(ES_p es, ES_offset where);
  *   `num_bytes` regardless. If it is non-nullptr, it should be passed *in*
  *    as the size that `data` *was*, and will be returned as the size
  *    that `data` is when the function returns.
- * - `data` is the data array to read into. If this is nullptr, or if `num_bytes`
- *   is nullptr, or if `num_bytes` is greater than `data_len`, then it will be
- *   reallocated to size `num_bytes`.
+ * - `data` is the data array to read into. If this is nullptr, or if
+ * `num_bytes` is nullptr, or if `num_bytes` is greater than `data_len`, then it
+ * will be reallocated to size `num_bytes`.
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int read_ES_data(
-    ES_p es, ES_offset start_posn, uint32_t num_bytes, uint32_t* data_len, byte** data);
+int read_ES_data(ES_p es, ES_offset start_posn, uint32_t num_bytes,
+                 uint32_t *data_len, byte **data);
 
 // ============================================================
 // Lists of ES units
@@ -286,7 +286,7 @@ int read_ES_data(
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_ES_unit_list(ES_unit_list_p* list);
+int build_ES_unit_list(ES_unit_list_p *list);
 
 /*
  * Add a copy of an ES unit to the end of the ES unit list
@@ -310,7 +310,7 @@ void reset_ES_unit_list(ES_unit_list_p list);
  *
  * Does nothing if `list` is already nullptr.
  */
-void free_ES_unit_list(ES_unit_list_p* list);
+void free_ES_unit_list(ES_unit_list_p *list);
 
 /*
  * Report on an ES unit list's contents.
@@ -318,7 +318,7 @@ void free_ES_unit_list(ES_unit_list_p* list);
  * - `name` is the name of the list (used in the header)
  * - `list` is the list to report on
  */
-void report_ES_unit_list(char* name, ES_unit_list_p list);
+void report_ES_unit_list(char *name, ES_unit_list_p list);
 
 /*
  * Retrieve the bounds of this ES unit list in the file it was read from.
@@ -330,7 +330,8 @@ void report_ES_unit_list(char* name, ES_unit_list_p list);
  *
  * Returns 0 if all goes well, 1 if the ES unit list has no content.
  */
-int get_ES_unit_list_bounds(ES_unit_list_p list, ES_offset* start, uint32_t* length);
+int get_ES_unit_list_bounds(ES_unit_list_p list, ES_offset *start,
+                            uint32_t *length);
 /*
  * Compare two ES unit lists. The comparison does not include the start
  * position of the unit data, but just the actual data - i.e., two unit lists
@@ -370,7 +371,8 @@ int compare_ES_offsets(ES_offset offset1, ES_offset offset2);
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-int decide_ES_video_type(ES_p es, int print_dots, int show_reasoning, int* video_type);
+int decide_ES_video_type(ES_p es, int print_dots, int show_reasoning,
+                         int *video_type);
 /*
  * Look at the start of an elementary stream to try to determine it's
  * video type.
@@ -390,7 +392,8 @@ int decide_ES_video_type(ES_p es, int print_dots, int show_reasoning, int* video
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-int decide_ES_file_video_type(int input, int print_dots, int show_reasoning, int* video_type);
+int decide_ES_file_video_type(int input, int print_dots, int show_reasoning,
+                              int *video_type);
 #endif // _es_fns
 
 // Local Variables:

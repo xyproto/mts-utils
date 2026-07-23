@@ -62,71 +62,70 @@ static inline int get_more_data(ES_p es);
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-int open_elementary_stream(char* filename, ES_p* es)
-{
-    int err;
-    int input;
+int open_elementary_stream(char *filename, ES_p *es) {
+  int err;
+  int input;
 
-    if (filename == nullptr)
-        input = STDIN_FILENO;
-    else {
-        input = open_binary_file(filename, false);
-        if (input == -1)
-            return 1;
-    }
+  if (filename == nullptr)
+    input = STDIN_FILENO;
+  else {
+    input = open_binary_file(filename, false);
+    if (input == -1)
+      return 1;
+  }
 
-    err = build_elementary_stream_file(input, es);
-    if (err) {
-        fprint_err("### Error building elementary stream for file %s\n", filename);
-        return 1;
-    }
-    return 0;
+  err = build_elementary_stream_file(input, es);
+  if (err) {
+    fprint_err("### Error building elementary stream for file %s\n", filename);
+    return 1;
+  }
+  return 0;
 }
 
-static int setup_readahead(ES_p es)
-{
-    int err;
+static int setup_readahead(ES_p es) {
+  int err;
 
-    es->read_ahead_len = 0;
-    es->read_ahead_posn = 0;
+  es->read_ahead_len = 0;
+  es->read_ahead_posn = 0;
 
-    es->data = nullptr;
-    es->data_end = nullptr;
-    es->data_ptr = nullptr;
+  es->data = nullptr;
+  es->data_end = nullptr;
+  es->data_ptr = nullptr;
 
-    es->last_packet_posn = 0;
-    es->last_packet_es_data_len = 0;
+  es->last_packet_posn = 0;
+  es->last_packet_es_data_len = 0;
 
-    // Try to get the first chunk of data from the file
-    err = get_more_data(es);
-    if (err)
-        return err;
+  // Try to get the first chunk of data from the file
+  err = get_more_data(es);
+  if (err)
+    return err;
 
-    if (es->reading_ES) {
-        if (es->read_ahead_len < 3) {
-            fprint_err("### File only contains %d byte%s\n", es->read_ahead_len,
-                (es->read_ahead_len == 1 ? "" : "s"));
-            return 1;
-        }
-    } else {
-        if (es->reader->packet->es_data_len < 3) {
-            fprint_err("### File PES packet only contains %d byte%s\n",
-                es->reader->packet->es_data_len,
-                (es->reader->packet->es_data_len == 1 ? "" : "s"));
-            return 1;
-        }
+  if (es->reading_ES) {
+    if (es->read_ahead_len < 3) {
+      fprint_err("### File only contains %d byte%s\n", es->read_ahead_len,
+                 (es->read_ahead_len == 1 ? "" : "s"));
+      return 1;
     }
+  } else {
+    if (es->reader->packet->es_data_len < 3) {
+      fprint_err("### File PES packet only contains %d byte%s\n",
+                 es->reader->packet->es_data_len,
+                 (es->reader->packet->es_data_len == 1 ? "" : "s"));
+      return 1;
+    }
+  }
 
-    if (DEBUG)
-        fprint_msg("File starts %02x %02x %02x\n", es->data[0], es->data[1], es->data[2]);
+  if (DEBUG)
+    fprint_msg("File starts %02x %02x %02x\n", es->data[0], es->data[1],
+               es->data[2]);
 
-    // Despite (maybe) reporting the above, we haven't actually read anything
-    // yet
-    es->prev2_byte = es->prev1_byte = es->cur_byte = 0xFF;
-    es->posn_of_next_byte.infile = 0;
-    es->posn_of_next_byte.inpacket = 0;
+  // Despite (maybe) reporting the above, we haven't actually read anything
+  // yet
+  es->prev2_byte = es->prev1_byte = es->cur_byte = 0xFF;
+  es->posn_of_next_byte.infile = 0;
+  es->posn_of_next_byte.inpacket = 0;
 
-    return 0;
+  return 0;
 }
 
 /*
@@ -140,22 +139,21 @@ static int setup_readahead(ES_p es)
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-int build_elementary_stream_file(int input, ES_p* es)
-{
-    ES_p new2 = (ES_p)malloc(SIZEOF_ES);
-    if (new2 == nullptr) {
-        print_err("### Unable to allocate elementary stream datastructure\n");
-        return 1;
-    }
+int build_elementary_stream_file(int input, ES_p *es) {
+  ES_p new2 = (ES_p)malloc(SIZEOF_ES);
+  if (new2 == nullptr) {
+    print_err("### Unable to allocate elementary stream datastructure\n");
+    return 1;
+  }
 
-    new2->reading_ES = true;
-    new2->input = input;
-    new2->reader = nullptr;
+  new2->reading_ES = true;
+  new2->input = input;
+  new2->reader = nullptr;
 
-    setup_readahead(new2);
+  setup_readahead(new2);
 
-    *es = new2;
-    return 0;
+  *es = new2;
+  return 0;
 }
 
 /*
@@ -171,22 +169,21 @@ int build_elementary_stream_file(int input, ES_p* es)
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-int build_elementary_stream_PES(PES_reader_p reader, ES_p* es)
-{
-    ES_p new2 = (ES_p)malloc(SIZEOF_ES);
-    if (new2 == nullptr) {
-        print_err("### Unable to allocate elementary stream datastructure\n");
-        return 1;
-    }
+int build_elementary_stream_PES(PES_reader_p reader, ES_p *es) {
+  ES_p new2 = (ES_p)malloc(SIZEOF_ES);
+  if (new2 == nullptr) {
+    print_err("### Unable to allocate elementary stream datastructure\n");
+    return 1;
+  }
 
-    new2->reading_ES = false;
-    new2->input = -1;
-    new2->reader = reader;
+  new2->reading_ES = false;
+  new2->input = -1;
+  new2->reader = reader;
 
-    setup_readahead(new2);
+  setup_readahead(new2);
 
-    *es = new2;
-    return 0;
+  *es = new2;
+  return 0;
 }
 
 /*
@@ -201,11 +198,10 @@ int build_elementary_stream_PES(PES_reader_p reader, ES_p* es)
  * *did* go wrong, and if something went wrong and the program is continuing,
  * it's bound to show up pretty soon.
  */
-void free_elementary_stream(ES_p* es)
-{
-    (*es)->input = -1; // "forget" our input
-    free(*es);
-    *es = nullptr;
+void free_elementary_stream(ES_p *es) {
+  (*es)->input = -1; // "forget" our input
+  free(*es);
+  *es = nullptr;
 }
 
 /*
@@ -220,15 +216,14 @@ void free_elementary_stream(ES_p* es)
  * *did* go wrong, and if something went wrong and the program is continuing,
  * it's bound to show up pretty soon.
  */
-void close_elementary_stream(ES_p* es)
-{
-    int input;
-    if (*es == nullptr)
-        return;
-    input = (*es)->input;
-    if (input != -1 && input != STDIN_FILENO)
-        (void)close_file(input);
-    free_elementary_stream(es);
+void close_elementary_stream(ES_p *es) {
+  int input;
+  if (*es == nullptr)
+    return;
+  input = (*es)->input;
+  if (input != -1 && input != STDIN_FILENO)
+    (void)close_file(input);
+  free_elementary_stream(es);
 }
 
 /*
@@ -242,15 +237,14 @@ void close_elementary_stream(ES_p* es)
  *
  * Returns true if there is a changed command.
  */
-int es_command_changed(ES_p es)
-{
-    if (es->reading_ES)
-        return false;
+int es_command_changed(ES_p es) {
+  if (es->reading_ES)
+    return false;
 
-    if (es->reader->tswriter == nullptr)
-        return false;
+  if (es->reader->tswriter == nullptr)
+    return false;
 
-    return tswrite_command_changed(es->reader->tswriter);
+  return tswrite_command_changed(es->reader->tswriter);
 }
 
 // ------------------------------------------------------------
@@ -263,20 +257,19 @@ int es_command_changed(ES_p es)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int setup_ES_unit(ES_unit_p unit)
-{
-    unit->data = (byte*)malloc(ES_UNIT_DATA_START_SIZE);
-    if (unit->data == nullptr) {
-        print_err("### Unable to allocate ES unit data buffer\n");
-        return 1;
-    }
-    unit->data_len = 0;
-    unit->data_size = ES_UNIT_DATA_START_SIZE;
-    unit->start_posn.infile = 0;
-    unit->start_posn.inpacket = 0;
+int setup_ES_unit(ES_unit_p unit) {
+  unit->data = (byte *)malloc(ES_UNIT_DATA_START_SIZE);
+  if (unit->data == nullptr) {
+    print_err("### Unable to allocate ES unit data buffer\n");
+    return 1;
+  }
+  unit->data_len = 0;
+  unit->data_size = ES_UNIT_DATA_START_SIZE;
+  unit->start_posn.infile = 0;
+  unit->start_posn.inpacket = 0;
 
-    unit->PES_had_PTS = false; // See the header file
-    return 0;
+  unit->PES_had_PTS = false; // See the header file
+  return 0;
 }
 
 /*
@@ -284,14 +277,13 @@ int setup_ES_unit(ES_unit_p unit)
  *
  * (Frees the internal data array, and unsets the counts)
  */
-void clear_ES_unit(ES_unit_p unit)
-{
-    if (unit->data != nullptr) {
-        free(unit->data);
-        unit->data = nullptr;
-        unit->data_size = 0;
-        unit->data_len = 0;
-    }
+void clear_ES_unit(ES_unit_p unit) {
+  if (unit->data != nullptr) {
+    free(unit->data);
+    unit->data = nullptr;
+    unit->data_size = 0;
+    unit->data_len = 0;
+  }
 }
 
 /*
@@ -299,21 +291,20 @@ void clear_ES_unit(ES_unit_p unit)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_ES_unit(ES_unit_p* unit)
-{
-    int err;
-    ES_unit_p new2 = (ES_unit_p)malloc(SIZEOF_ES_UNIT);
-    if (new2 == nullptr) {
-        print_err("### Unable to allocate ES unit datastructure\n");
-        return 1;
-    }
-    err = setup_ES_unit(new2);
-    if (err) {
-        free(new2);
-        return 1;
-    }
-    *unit = new2;
-    return 0;
+int build_ES_unit(ES_unit_p *unit) {
+  int err;
+  ES_unit_p new2 = (ES_unit_p)malloc(SIZEOF_ES_UNIT);
+  if (new2 == nullptr) {
+    print_err("### Unable to allocate ES unit datastructure\n");
+    return 1;
+  }
+  err = setup_ES_unit(new2);
+  if (err) {
+    free(new2);
+    return 1;
+  }
+  *unit = new2;
+  return 0;
 }
 
 /*
@@ -324,27 +315,26 @@ int build_ES_unit(ES_unit_p* unit)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_ES_unit_from_data(ES_unit_p* unit, byte* data, uint32_t data_len)
-{
-    ES_unit_p new2 = (ES_unit_p)malloc(SIZEOF_ES_UNIT);
-    if (new2 == nullptr) {
-        print_err("### Unable to allocate ES unit datastructure\n");
-        return 1;
-    }
-    new2->data = (byte*)malloc(data_len);
-    if (new2->data == nullptr) {
-        print_err("### Unable to allocate ES unit data buffer\n");
-        return 1;
-    }
-    (void)memcpy(new2->data, data, data_len);
-    new2->data_len = data_len;
-    new2->data_size = data_len;
-    new2->start_code = data[3];
-    new2->start_posn.infile = 0;
-    new2->start_posn.inpacket = 0;
-    new2->PES_had_PTS = false; // See the header file
-    *unit = new2;
-    return 0;
+int build_ES_unit_from_data(ES_unit_p *unit, byte *data, uint32_t data_len) {
+  ES_unit_p new2 = (ES_unit_p)malloc(SIZEOF_ES_UNIT);
+  if (new2 == nullptr) {
+    print_err("### Unable to allocate ES unit datastructure\n");
+    return 1;
+  }
+  new2->data = (byte *)malloc(data_len);
+  if (new2->data == nullptr) {
+    print_err("### Unable to allocate ES unit data buffer\n");
+    return 1;
+  }
+  (void)memcpy(new2->data, data, data_len);
+  new2->data_len = data_len;
+  new2->data_size = data_len;
+  new2->start_code = data[3];
+  new2->start_posn.infile = 0;
+  new2->start_posn.inpacket = 0;
+  new2->PES_had_PTS = false; // See the header file
+  *unit = new2;
+  return 0;
 }
 
 /*
@@ -354,39 +344,38 @@ int build_ES_unit_from_data(ES_unit_p* unit, byte* data, uint32_t data_len)
  *
  * If `unit` is already nullptr, does nothing.
  */
-void free_ES_unit(ES_unit_p* unit)
-{
-    if (*unit == nullptr)
-        return;
-    clear_ES_unit(*unit);
-    free(*unit);
-    *unit = nullptr;
+void free_ES_unit(ES_unit_p *unit) {
+  if (*unit == nullptr)
+    return;
+  clear_ES_unit(*unit);
+  free(*unit);
+  *unit = nullptr;
 }
 
 /*
  * Print out some information this ES unit, on normal or error output
  */
-void report_ES_unit(int is_msg, ES_unit_p unit)
-{
-    byte s = unit->start_code;
-    fprint_msg_or_err(is_msg, OFFSET_T_FORMAT_08 "/%4d: ES unit (%02x '%d%d%d%d %d%d%d%d')",
-        unit->start_posn.infile, unit->start_posn.inpacket, s, (s & 0x80) >> 7, (s & 0x40) >> 6,
-        (s & 0x20) >> 5, (s & 0x10) >> 4, (s & 0x08) >> 3, (s & 0x04) >> 2, (s & 0x02) >> 1,
-        (s & 0x01));
+void report_ES_unit(int is_msg, ES_unit_p unit) {
+  byte s = unit->start_code;
+  fprint_msg_or_err(
+      is_msg, OFFSET_T_FORMAT_08 "/%4d: ES unit (%02x '%d%d%d%d %d%d%d%d')",
+      unit->start_posn.infile, unit->start_posn.inpacket, s, (s & 0x80) >> 7,
+      (s & 0x40) >> 6, (s & 0x20) >> 5, (s & 0x10) >> 4, (s & 0x08) >> 3,
+      (s & 0x04) >> 2, (s & 0x02) >> 1, (s & 0x01));
 
-    // Show the data bytes - but we don't need to show the first 4,
-    // since we know they're 00 00 01 <start-code>
-    if (unit->data_len > 0) {
-        int ii;
-        int data_len = unit->data_len - 4;
-        int show_len = (data_len > 10 ? 10 : data_len);
-        fprint_msg_or_err(is_msg, " %6d:", data_len);
-        for (ii = 0; ii < show_len; ii++)
-            fprint_msg_or_err(is_msg, " %02x", unit->data[4 + ii]);
-        if (show_len < data_len)
-            fprint_msg_or_err(is_msg, "...");
-    }
-    fprint_msg_or_err(is_msg, "\n");
+  // Show the data bytes - but we don't need to show the first 4,
+  // since we know they're 00 00 01 <start-code>
+  if (unit->data_len > 0) {
+    int ii;
+    int data_len = unit->data_len - 4;
+    int show_len = (data_len > 10 ? 10 : data_len);
+    fprint_msg_or_err(is_msg, " %6d:", data_len);
+    for (ii = 0; ii < show_len; ii++)
+      fprint_msg_or_err(is_msg, " %02x", unit->data[4 + ii]);
+    if (show_len < data_len)
+      fprint_msg_or_err(is_msg, "...");
+  }
+  fprint_msg_or_err(is_msg, "\n");
 }
 
 // ------------------------------------------------------------
@@ -399,33 +388,32 @@ void report_ES_unit(int is_msg, ES_unit_p unit)
  * Returns 0 if it succeeds, EOF if the end-of-file is read, otherwise
  * 1 if some error occurs.
  */
-static inline int get_next_pes_packet(ES_p es)
-{
-    int err;
-    PES_reader_p reader = es->reader;
+static inline int get_next_pes_packet(ES_p es) {
+  int err;
+  PES_reader_p reader = es->reader;
 
-    // Before reading the *next* packet, remember where the last one was
-    if (reader->packet == nullptr) {
-        // What can we do if there was no last packet?
-        es->last_packet_posn = 0;
-        es->last_packet_es_data_len = 0;
-    } else {
-        es->last_packet_posn = reader->packet->posn;
-        es->last_packet_es_data_len = reader->packet->es_data_len;
-    }
+  // Before reading the *next* packet, remember where the last one was
+  if (reader->packet == nullptr) {
+    // What can we do if there was no last packet?
+    es->last_packet_posn = 0;
+    es->last_packet_es_data_len = 0;
+  } else {
+    es->last_packet_posn = reader->packet->posn;
+    es->last_packet_es_data_len = reader->packet->es_data_len;
+  }
 
-    err = read_next_PES_ES_packet(es->reader);
-    if (err)
-        return err;
+  err = read_next_PES_ES_packet(es->reader);
+  if (err)
+    return err;
 
-    // Point to our (new2) data buffer
-    es->data = reader->packet->es_data;
-    es->data_end = es->data + reader->packet->es_data_len;
-    es->data_ptr = es->data;
+  // Point to our (new2) data buffer
+  es->data = reader->packet->es_data;
+  es->data_end = es->data + reader->packet->es_data_len;
+  es->data_ptr = es->data;
 
-    es->posn_of_next_byte.infile = reader->packet->posn;
-    es->posn_of_next_byte.inpacket = 0;
-    return 0;
+  es->posn_of_next_byte.infile = reader->packet->posn;
+  es->posn_of_next_byte.inpacket = 0;
+  return 0;
 }
 
 /*
@@ -436,27 +424,26 @@ static inline int get_next_pes_packet(ES_p es)
  * Returns 0 if it succeeds, EOF if the end-of-file is read, otherwise
  * 1 if some error occurs.
  */
-static inline int get_more_data(ES_p es)
-{
-    if (es->reading_ES) {
-        // Call `read` directly - we don't particularly mind if we get a "short"
-        // read, since we'll just catch up later on
-        ssize_t len = read(es->input, &es->read_ahead, ES_READ_AHEAD_SIZE);
-        if (len == 0)
-            return EOF;
-        else if (len == -1) {
-            fprint_err("### Error reading next bytes: %s\n", strerror(errno));
-            return 1;
-        }
-        es->read_ahead_posn += es->read_ahead_len; // length of the *last* buffer
-        es->read_ahead_len = len;
-        es->data = es->read_ahead; // should be done in the setup function
-        es->data_end = es->data + len; // one beyond the last byte
-        es->data_ptr = es->data;
-        return 0;
-    } else {
-        return get_next_pes_packet(es);
+static inline int get_more_data(ES_p es) {
+  if (es->reading_ES) {
+    // Call `read` directly - we don't particularly mind if we get a "short"
+    // read, since we'll just catch up later on
+    ssize_t len = read(es->input, &es->read_ahead, ES_READ_AHEAD_SIZE);
+    if (len == 0)
+      return EOF;
+    else if (len == -1) {
+      fprint_err("### Error reading next bytes: %s\n", strerror(errno));
+      return 1;
     }
+    es->read_ahead_posn += es->read_ahead_len; // length of the *last* buffer
+    es->read_ahead_len = len;
+    es->data = es->read_ahead;     // should be done in the setup function
+    es->data_end = es->data + len; // one beyond the last byte
+    es->data_ptr = es->data;
+    return 0;
+  } else {
+    return get_next_pes_packet(es);
+  }
 }
 
 /*
@@ -471,49 +458,48 @@ static inline int get_more_data(ES_p es)
  * Returns 0 if it succeeds, EOF if the end-of-file is read, otherwise
  * 1 if some error occurs.
  */
-static int find_ES_unit_start(ES_p es, ES_unit_p unit)
-{
-    int err;
-    byte prev1 = es->prev1_byte;
-    byte prev2 = es->prev2_byte;
+static int find_ES_unit_start(ES_p es, ES_unit_p unit) {
+  int err;
+  byte prev1 = es->prev1_byte;
+  byte prev2 = es->prev2_byte;
 
-    // In almost all cases (hopefully, except for the very start of the file),
-    // a previous call to find_ES_unit_end will already have positioned us
-    // "over" the start of the next unit
-    for (;;) {
-        byte* ptr;
-        for (ptr = es->data_ptr; ptr < es->data_end; ptr++) {
-            if (prev2 == 0x00 && prev1 == 0x00 && *ptr == 0x01) {
-                es->prev1_byte = es->prev2_byte = 0x00;
-                es->cur_byte = 0x01;
-                if (es->reading_ES) {
-                    unit->start_posn.infile = es->read_ahead_posn + (ptr - es->data) - 2;
-                } else {
-                    unit->start_posn.infile = es->reader->packet->posn;
-                    unit->start_posn.inpacket = (ptr - es->data) - 2;
-                    if (unit->start_posn.inpacket < 0) {
-                        unit->start_posn.infile = es->last_packet_posn;
-                        unit->start_posn.inpacket += es->last_packet_es_data_len;
-                    }
-                    // Does the PES packet that we are starting in have a PTS?
-                    unit->PES_had_PTS = es->reader->packet->has_PTS;
-                }
-                es->data_ptr = ptr + 1; // the *next* byte to read
-                unit->data[0] = 0x00; // i.e., the values we just read
-                unit->data[1] = 0x00;
-                unit->data[2] = 0x01;
-                unit->data_len = 3;
-                return 0;
-            }
-            prev2 = prev1;
-            prev1 = *ptr;
+  // In almost all cases (hopefully, except for the very start of the file),
+  // a previous call to find_ES_unit_end will already have positioned us
+  // "over" the start of the next unit
+  for (;;) {
+    byte *ptr;
+    for (ptr = es->data_ptr; ptr < es->data_end; ptr++) {
+      if (prev2 == 0x00 && prev1 == 0x00 && *ptr == 0x01) {
+        es->prev1_byte = es->prev2_byte = 0x00;
+        es->cur_byte = 0x01;
+        if (es->reading_ES) {
+          unit->start_posn.infile = es->read_ahead_posn + (ptr - es->data) - 2;
+        } else {
+          unit->start_posn.infile = es->reader->packet->posn;
+          unit->start_posn.inpacket = (ptr - es->data) - 2;
+          if (unit->start_posn.inpacket < 0) {
+            unit->start_posn.infile = es->last_packet_posn;
+            unit->start_posn.inpacket += es->last_packet_es_data_len;
+          }
+          // Does the PES packet that we are starting in have a PTS?
+          unit->PES_had_PTS = es->reader->packet->has_PTS;
         }
-
-        // We've run out of data - get some more
-        err = get_more_data(es);
-        if (err)
-            return err;
+        es->data_ptr = ptr + 1; // the *next* byte to read
+        unit->data[0] = 0x00;   // i.e., the values we just read
+        unit->data[1] = 0x00;
+        unit->data[2] = 0x01;
+        unit->data_len = 3;
+        return 0;
+      }
+      prev2 = prev1;
+      prev1 = *ptr;
     }
+
+    // We've run out of data - get some more
+    err = get_more_data(es);
+    if (err)
+      return err;
+  }
 }
 
 /*
@@ -543,83 +529,83 @@ static int find_ES_unit_start(ES_p es, ES_unit_p unit)
  * Note that finding end-of-file is not counted as an error - it is
  * assumed that it is just the natural end of the ES unit.
  */
-static int find_ES_unit_end(ES_p es, ES_unit_p unit)
-{
-    int err;
-    byte prev1 = es->cur_byte;
-    byte prev2 = es->prev1_byte;
-    for (;;) {
-        byte* ptr;
-        for (ptr = es->data_ptr; ptr < es->data_end; ptr++) {
-            // Have we reached the end of our unit?
-            // We know we are if we've found the next 00 00 01 start code prefix.
-            // (as stated in the header comment above, we're ignoring the H.264
-            // ability to end if we've found a 00 00 00 sequence)
-            if (prev2 == 0x00 && prev1 == 0x00 && *ptr == 0x01) {
-                es->data_ptr = ptr; // remember where we've got to
-                es->prev2_byte = 0x00; // we know prev1_byte is already 0
-                es->cur_byte = 0x01;
-                // We've read two 00 bytes we don't need into our data buffer...
-                unit->data_len -= 2;
+static int find_ES_unit_end(ES_p es, ES_unit_p unit) {
+  int err;
+  byte prev1 = es->cur_byte;
+  byte prev2 = es->prev1_byte;
+  for (;;) {
+    byte *ptr;
+    for (ptr = es->data_ptr; ptr < es->data_end; ptr++) {
+      // Have we reached the end of our unit?
+      // We know we are if we've found the next 00 00 01 start code prefix.
+      // (as stated in the header comment above, we're ignoring the H.264
+      // ability to end if we've found a 00 00 00 sequence)
+      if (prev2 == 0x00 && prev1 == 0x00 && *ptr == 0x01) {
+        es->data_ptr = ptr;    // remember where we've got to
+        es->prev2_byte = 0x00; // we know prev1_byte is already 0
+        es->cur_byte = 0x01;
+        // We've read two 00 bytes we don't need into our data buffer...
+        unit->data_len -= 2;
 
-                if (es->reading_ES) {
-                    es->posn_of_next_byte.infile = es->read_ahead_posn + (ptr - es->data) - 2;
-                } else {
-                    es->posn_of_next_byte.infile = es->reader->packet->posn;
-                    es->posn_of_next_byte.inpacket = (ptr - es->data) - 2;
-                }
-                return 0;
-            }
-
-            // Otherwise, it's a data byte
-            if (unit->data_len == unit->data_size) {
-                int newsize = unit->data_size + ES_UNIT_DATA_INCREMENT;
-                unit->data = (byte*)realloc(unit->data, newsize);
-                if (unit->data == nullptr) {
-                    print_err("### Unable to extend ES unit data array\n");
-                    return 1;
-                }
-                unit->data_size = newsize;
-            }
-            unit->data[unit->data_len++] = *ptr;
-
-            prev2 = prev1;
-            prev1 = *ptr;
+        if (es->reading_ES) {
+          es->posn_of_next_byte.infile =
+              es->read_ahead_posn + (ptr - es->data) - 2;
+        } else {
+          es->posn_of_next_byte.infile = es->reader->packet->posn;
+          es->posn_of_next_byte.inpacket = (ptr - es->data) - 2;
         }
+        return 0;
+      }
 
-        // We've run out of data (ptr == es->data_end) - get some more
-        err = get_more_data(es);
-        if (err == EOF) {
-            // Reaching the end of file is a legitimate way of stopping!
-            es->data_ptr = ptr; // remember where we've got to
-            es->prev2_byte = prev2;
-            es->prev1_byte = prev1;
-            es->cur_byte = 0xFF; // the notional byte off the end of the file
-            // es->cur_byte   = *ptr;
-
-            // Pretend there's a "next byte"
-            if (es->reading_ES) {
-                es->posn_of_next_byte.infile = es->read_ahead_posn + (ptr - es->data);
-            } else {
-                es->posn_of_next_byte.inpacket = (ptr - es->data);
-            }
-            return 0;
-        } else if (err)
-            return err;
-
-        if (!es->reading_ES) {
-            // If we update this now, it will be correct when we return,
-            // even if we return because of a later EOF
-            es->posn_of_next_byte.infile = es->reader->packet->posn;
-
-            // Does the PES packet that we have just read in have a PTS?
-            // If it does, then there's a very good chance (subject to a 00 00 01
-            // being split between PES packets) that our ES unit has a PTS "around"
-            // it
-            if (es->reader->packet->has_PTS)
-                unit->PES_had_PTS = true;
+      // Otherwise, it's a data byte
+      if (unit->data_len == unit->data_size) {
+        int newsize = unit->data_size + ES_UNIT_DATA_INCREMENT;
+        unit->data = (byte *)realloc(unit->data, newsize);
+        if (unit->data == nullptr) {
+          print_err("### Unable to extend ES unit data array\n");
+          return 1;
         }
+        unit->data_size = newsize;
+      }
+      unit->data[unit->data_len++] = *ptr;
+
+      prev2 = prev1;
+      prev1 = *ptr;
     }
+
+    // We've run out of data (ptr == es->data_end) - get some more
+    err = get_more_data(es);
+    if (err == EOF) {
+      // Reaching the end of file is a legitimate way of stopping!
+      es->data_ptr = ptr; // remember where we've got to
+      es->prev2_byte = prev2;
+      es->prev1_byte = prev1;
+      es->cur_byte = 0xFF; // the notional byte off the end of the file
+      // es->cur_byte   = *ptr;
+
+      // Pretend there's a "next byte"
+      if (es->reading_ES) {
+        es->posn_of_next_byte.infile = es->read_ahead_posn + (ptr - es->data);
+      } else {
+        es->posn_of_next_byte.inpacket = (ptr - es->data);
+      }
+      return 0;
+    } else if (err)
+      return err;
+
+    if (!es->reading_ES) {
+      // If we update this now, it will be correct when we return,
+      // even if we return because of a later EOF
+      es->posn_of_next_byte.infile = es->reader->packet->posn;
+
+      // Does the PES packet that we have just read in have a PTS?
+      // If it does, then there's a very good chance (subject to a 00 00 01
+      // being split between PES packets) that our ES unit has a PTS "around"
+      // it
+      if (es->reader->packet->has_PTS)
+        unit->PES_had_PTS = true;
+    }
+  }
 }
 
 /*
@@ -635,23 +621,22 @@ static int find_ES_unit_end(ES_p es, ES_unit_p unit)
  * Returns 0 if it succeeds, EOF if the end-of-file is read (i.e., there
  * is no next ES unit), otherwise 1 if some error occurs.
  */
-int find_next_ES_unit(ES_p es, ES_unit_p unit)
-{
-    int err;
+int find_next_ES_unit(ES_p es, ES_unit_p unit) {
+  int err;
 
-    err = find_ES_unit_start(es, unit);
-    if (err)
-        return err; // 1 or EOF
+  err = find_ES_unit_start(es, unit);
+  if (err)
+    return err; // 1 or EOF
 
-    err = find_ES_unit_end(es, unit);
-    if (err)
-        return err;
+  err = find_ES_unit_end(es, unit);
+  if (err)
+    return err;
 
-    // The first byte after the 00 00 01 prefix tells us what sort of thing
-    // we've found - we'll be friendly and extract it for the user
-    unit->start_code = unit->data[3];
+  // The first byte after the 00 00 01 prefix tells us what sort of thing
+  // we've found - we'll be friendly and extract it for the user
+  unit->start_code = unit->data[3];
 
-    return 0;
+  return 0;
 }
 
 /*
@@ -664,20 +649,19 @@ int find_next_ES_unit(ES_p es, ES_unit_p unit)
  * Returns 0 if it succeeds, EOF if the end-of-file is read (i.e., there
  * is no next ES unit), otherwise 1 if some error occurs.
  */
-int find_and_build_next_ES_unit(ES_p es, ES_unit_p* unit)
-{
-    int err;
+int find_and_build_next_ES_unit(ES_p es, ES_unit_p *unit) {
+  int err;
 
-    err = build_ES_unit(unit);
-    if (err)
-        return 1;
+  err = build_ES_unit(unit);
+  if (err)
+    return 1;
 
-    err = find_next_ES_unit(es, *unit);
-    if (err) {
-        free_ES_unit(unit);
-        return err;
-    }
-    return 0;
+  err = find_next_ES_unit(es, *unit);
+  if (err) {
+    free_ES_unit(unit);
+    return err;
+  }
+  return 0;
 }
 
 /*
@@ -691,16 +675,15 @@ int find_and_build_next_ES_unit(ES_p es, ES_unit_p* unit)
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int write_ES_unit(FILE* output, ES_unit_p unit)
-{
-    size_t written = fwrite(unit->data, 1, unit->data_len, output);
-    if (written != unit->data_len) {
-        fprint_err("### Error writing out ES unit data: %s\n"
-                   "    Wrote %ld bytes instead of %d\n",
-            strerror(errno), (long int)written, unit->data_len);
-        return 1;
-    } else
-        return 0;
+int write_ES_unit(FILE *output, ES_unit_p unit) {
+  size_t written = fwrite(unit->data, 1, unit->data_len, output);
+  if (written != unit->data_len) {
+    fprint_err("### Error writing out ES unit data: %s\n"
+               "    Wrote %ld bytes instead of %d\n",
+               strerror(errno), (long int)written, unit->data_len);
+    return 1;
+  } else
+    return 0;
 }
 
 // ------------------------------------------------------------
@@ -715,70 +698,69 @@ int write_ES_unit(FILE* output, ES_unit_p unit)
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static int seek_in_PES(ES_p es, ES_offset where)
-{
-    int err;
+static int seek_in_PES(ES_p es, ES_offset where) {
+  int err;
 
-    if (es->reader == nullptr) {
-        print_err("### Attempt to seek in PES for an ES reader that"
-                  " is not attached to a PES reader\n");
-        return 1;
-    }
+  if (es->reader == nullptr) {
+    print_err("### Attempt to seek in PES for an ES reader that"
+              " is not attached to a PES reader\n");
+    return 1;
+  }
 
-    // Force the reader to forget its current packet
-    if (es->reader->packet != nullptr)
-        free_PES_packet_data(&es->reader->packet);
+  // Force the reader to forget its current packet
+  if (es->reader->packet != nullptr)
+    free_PES_packet_data(&es->reader->packet);
 
-    // Seek to the right packet in the PES data
-    err = set_PES_reader_position(es->reader, where.infile);
-    if (err) {
-        fprint_err("### Error seeking for PES packet at " OFFSET_T_FORMAT "\n", where.infile);
-        return 1;
-    }
-    // Read the PES packet containing ES (ignoring packets we don't care about)
-    err = get_next_pes_packet(es);
-    if (err) {
-        fprint_err("### Error reading PES packet at " OFFSET_T_FORMAT "/%d\n", where.infile,
-            where.inpacket);
-        return 1;
-    }
+  // Seek to the right packet in the PES data
+  err = set_PES_reader_position(es->reader, where.infile);
+  if (err) {
+    fprint_err("### Error seeking for PES packet at " OFFSET_T_FORMAT "\n",
+               where.infile);
+    return 1;
+  }
+  // Read the PES packet containing ES (ignoring packets we don't care about)
+  err = get_next_pes_packet(es);
+  if (err) {
+    fprint_err("### Error reading PES packet at " OFFSET_T_FORMAT "/%d\n",
+               where.infile, where.inpacket);
+    return 1;
+  }
 
-    // Now sort out the byte offset
-    if (where.inpacket > es->reader->packet->es_data_len) {
-        fprint_err("### Error seeking PES packet at " OFFSET_T_FORMAT "/%d: "
-                   " packet ES data is only %d bytes long\n",
-            where.infile, where.inpacket, es->reader->packet->es_data_len);
-        return 1;
-    }
-    es->posn_of_next_byte = where;
-    return 0;
+  // Now sort out the byte offset
+  if (where.inpacket > es->reader->packet->es_data_len) {
+    fprint_err("### Error seeking PES packet at " OFFSET_T_FORMAT "/%d: "
+               " packet ES data is only %d bytes long\n",
+               where.infile, where.inpacket, es->reader->packet->es_data_len);
+    return 1;
+  }
+  es->posn_of_next_byte = where;
+  return 0;
 }
 
 /*
  * Update our current position information after a seek or direct read.
  */
-static inline void deduce_correct_position(ES_p es)
-{
-    // We don't know what the previous three bytes were, but we (strongly)
-    // assume that they were not 00 00 01
-    es->cur_byte = 0xff;
-    es->prev1_byte = 0xff;
-    es->prev2_byte = 0xff;
+static inline void deduce_correct_position(ES_p es) {
+  // We don't know what the previous three bytes were, but we (strongly)
+  // assume that they were not 00 00 01
+  es->cur_byte = 0xff;
+  es->prev1_byte = 0xff;
+  es->prev2_byte = 0xff;
 
-    if (es->reading_ES) {
-        // For ES data, we want to force new data to be read in from the file
-        es->data_ptr = es->data_end = nullptr;
-        es->read_ahead_len = 0; // to stop the read ahead posn being incremented
-        es->read_ahead_posn = es->posn_of_next_byte.infile;
-    } else {
-        // For PES data, we have whatever is left in the current packet
-        PES_packet_data_p packet = es->reader->packet;
-        es->data = packet->es_data;
-        es->data_ptr = packet->es_data + es->posn_of_next_byte.inpacket;
-        es->data_end = packet->es_data + packet->es_data_len;
-        // And, of course, we have no idea about the *previous* packet in the file
-        es->last_packet_posn = es->last_packet_es_data_len = 0;
-    }
+  if (es->reading_ES) {
+    // For ES data, we want to force new data to be read in from the file
+    es->data_ptr = es->data_end = nullptr;
+    es->read_ahead_len = 0; // to stop the read ahead posn being incremented
+    es->read_ahead_posn = es->posn_of_next_byte.infile;
+  } else {
+    // For PES data, we have whatever is left in the current packet
+    PES_packet_data_p packet = es->reader->packet;
+    es->data = packet->es_data;
+    es->data_ptr = packet->es_data + es->posn_of_next_byte.inpacket;
+    es->data_end = packet->es_data + packet->es_data_len;
+    // And, of course, we have no idea about the *previous* packet in the file
+    es->last_packet_posn = es->last_packet_es_data_len = 0;
+  }
 }
 
 /*
@@ -791,28 +773,28 @@ static inline void deduce_correct_position(ES_p es)
  *
  * Returns 0 if all went well, 1 is something went wrong
  */
-int seek_ES(ES_p es, ES_offset where)
-{
-    int err;
-    if (es->reading_ES) {
-        err = seek_file(es->input, where.infile);
-        if (err) {
-            print_err("### Error seeking within ES file\n");
-            return 1;
-        }
-    } else {
-        err = seek_in_PES(es, where);
-        if (err) {
-            fprint_err("### Error seeking within ES over PES (offset " OFFSET_T_FORMAT "/%d)\n",
-                where.infile, where.inpacket);
-            return 1;
-        }
+int seek_ES(ES_p es, ES_offset where) {
+  int err;
+  if (es->reading_ES) {
+    err = seek_file(es->input, where.infile);
+    if (err) {
+      print_err("### Error seeking within ES file\n");
+      return 1;
     }
+  } else {
+    err = seek_in_PES(es, where);
+    if (err) {
+      fprint_err("### Error seeking within ES over PES (offset " OFFSET_T_FORMAT
+                 "/%d)\n",
+                 where.infile, where.inpacket);
+      return 1;
+    }
+  }
 
-    // And make it look as if we reached this position sensibly
-    es->posn_of_next_byte = where;
-    deduce_correct_position(es);
-    return 0;
+  // And make it look as if we reached this position sensibly
+  es->posn_of_next_byte = where;
+  deduce_correct_position(es);
+  return 0;
 }
 
 /*
@@ -822,33 +804,34 @@ int seek_ES(ES_p es, ES_offset where)
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static int read_bytes_from_PES(ES_p es, byte* data, uint32_t num_bytes)
-{
-    int err;
-    int offset = 0;
-    int num_bytes_wanted = num_bytes;
-    int32_t from = es->posn_of_next_byte.inpacket;
-    int32_t num_bytes_left = es->reader->packet->es_data_len - from;
+static int read_bytes_from_PES(ES_p es, byte *data, uint32_t num_bytes) {
+  int err;
+  int offset = 0;
+  int num_bytes_wanted = num_bytes;
+  int32_t from = es->posn_of_next_byte.inpacket;
+  int32_t num_bytes_left = es->reader->packet->es_data_len - from;
 
-    for (;;) {
-        if (num_bytes_left < num_bytes_wanted) {
-            memcpy(&(data[offset]), &(es->reader->packet->es_data[from]), num_bytes_left);
-            offset += num_bytes_left;
-            num_bytes_wanted -= num_bytes_left;
-            err = get_next_pes_packet(es);
-            if (err)
-                return err;
-            from = 0;
-            num_bytes_left = es->reader->packet->es_data_len;
-        } else {
-            memcpy(&(data[offset]), &(es->reader->packet->es_data[from]), num_bytes_wanted);
-            from += num_bytes_wanted;
-            break;
-        }
+  for (;;) {
+    if (num_bytes_left < num_bytes_wanted) {
+      memcpy(&(data[offset]), &(es->reader->packet->es_data[from]),
+             num_bytes_left);
+      offset += num_bytes_left;
+      num_bytes_wanted -= num_bytes_left;
+      err = get_next_pes_packet(es);
+      if (err)
+        return err;
+      from = 0;
+      num_bytes_left = es->reader->packet->es_data_len;
+    } else {
+      memcpy(&(data[offset]), &(es->reader->packet->es_data[from]),
+             num_bytes_wanted);
+      from += num_bytes_wanted;
+      break;
     }
-    es->posn_of_next_byte.inpacket = from;
-    // es->posn_of_next_byte.infile   = es->reader->packet->posn;
-    return 0;
+  }
+  es->posn_of_next_byte.inpacket = from;
+  // es->posn_of_next_byte.infile   = es->reader->packet->posn;
+  return 0;
 }
 
 /*
@@ -876,57 +859,56 @@ static int read_bytes_from_PES(ES_p es, byte* data, uint32_t num_bytes)
  *   `num_bytes` regardless. If it is non-nullptr, it should be passed *in*
  *    as the size that `data` *was*, and will be returned as the size
  *    that `data` is when the function returns.
- * - `data` is the data array to read into. If this is nullptr, or if `num_bytes`
- *   is nullptr, or if `num_bytes` is greater than `data_len`, then it will be
- *   reallocated to size `num_bytes`.
+ * - `data` is the data array to read into. If this is nullptr, or if
+ * `num_bytes` is nullptr, or if `num_bytes` is greater than `data_len`, then it
+ * will be reallocated to size `num_bytes`.
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int read_ES_data(
-    ES_p es, ES_offset start_posn, uint32_t num_bytes, uint32_t* data_len, byte** data)
-{
-    int err;
-    if (*data == nullptr || data_len == nullptr || num_bytes > *data_len) {
-        *data = (byte*)realloc(*data, num_bytes);
-        if (*data == nullptr) {
-            print_err("### Unable to reallocate data space\n");
-            return 1;
-        }
-        if (data_len != nullptr)
-            *data_len = num_bytes;
+int read_ES_data(ES_p es, ES_offset start_posn, uint32_t num_bytes,
+                 uint32_t *data_len, byte **data) {
+  int err;
+  if (*data == nullptr || data_len == nullptr || num_bytes > *data_len) {
+    *data = (byte *)realloc(*data, num_bytes);
+    if (*data == nullptr) {
+      print_err("### Unable to reallocate data space\n");
+      return 1;
     }
-    err = seek_ES(es, start_posn);
-    if (err)
+    if (data_len != nullptr)
+      *data_len = num_bytes;
+  }
+  err = seek_ES(es, start_posn);
+  if (err)
+    return err;
+  if (es->reading_ES) {
+    err = read_bytes(es->input, num_bytes, *data);
+    if (err) {
+      if (err == EOF) {
+        fprint_err("### Error (EOF) reading %d bytes\n", num_bytes);
+        return 1;
+      } else
         return err;
-    if (es->reading_ES) {
-        err = read_bytes(es->input, num_bytes, *data);
-        if (err) {
-            if (err == EOF) {
-                fprint_err("### Error (EOF) reading %d bytes\n", num_bytes);
-                return 1;
-            } else
-                return err;
-        }
-        es->posn_of_next_byte.infile = start_posn.infile + num_bytes;
-    } else {
-        err = read_bytes_from_PES(es, *data, num_bytes);
-        if (err) {
-            fprint_err("### Error reading %d bytes from PES\n", num_bytes);
-            return 1;
-        }
     }
-    // Make it look as if we "read" to this position by the normal means,
-    // but ensure that we have no data left "in hand"
-    //
-    // We could leave it up to our caller to do this, on the assumption that
-    // they're likely to call us several times when, for example, reversing,
-    // without wanting to read onwards on all but the last of those occasions.
-    // That would, indeed, save some time each time we are called, but it would
-    // also allow our caller to forget to do this, with rather bad results.
-    //
-    // So, since it shouldn't really take very long...
-    deduce_correct_position(es);
-    return 0;
+    es->posn_of_next_byte.infile = start_posn.infile + num_bytes;
+  } else {
+    err = read_bytes_from_PES(es, *data, num_bytes);
+    if (err) {
+      fprint_err("### Error reading %d bytes from PES\n", num_bytes);
+      return 1;
+    }
+  }
+  // Make it look as if we "read" to this position by the normal means,
+  // but ensure that we have no data left "in hand"
+  //
+  // We could leave it up to our caller to do this, on the assumption that
+  // they're likely to call us several times when, for example, reversing,
+  // without wanting to read onwards on all but the last of those occasions.
+  // That would, indeed, save some time each time we are called, but it would
+  // also allow our caller to forget to do this, with rather bad results.
+  //
+  // So, since it shouldn't really take very long...
+  deduce_correct_position(es);
+  return 0;
 }
 
 /*
@@ -942,66 +924,66 @@ int read_ES_data(
  *
  * Returns 0 if all goes well, 1 if an error occurs.
  */
-int get_end_of_underlying_PES_packet(ES_p es, byte** data, int* data_len)
-{
-    int32_t offset;
+int get_end_of_underlying_PES_packet(ES_p es, byte **data, int *data_len) {
+  int32_t offset;
 
-    if (es->reading_ES) {
-        fprint_err("### Cannot retrieve end of PES packet - the ES data"
-                   " is direct ES, not ES read from PES\n");
-        return 1;
-    }
-    if (es->reader->packet == nullptr) {
-        // This is naughty, but we'll pretend to cope
-        *data = nullptr;
-        *data_len = 0;
-        return 0;
-    }
-
-    // The offset (in this packet) of the next ES byte to read.
-    // We assume that this must also be the offset of the first byte
-    // of the next ES unit (or, at least, of one of the 00 bytes that
-    // come before it).
-    offset = es->posn_of_next_byte.inpacket;
-
-    // The way that we read (using our "triple byte" mechanism) means that
-    // we will generally already have read the start of the next ES unit.
-    // Life gets interesting if the 00 00 01 triplet (or, possibly, 00 00 00
-    // triplet - but we're not supporting that option for the moment - see
-    // find_ES_unit_end for details) is split over a PES packet boundary.
-
-    // So we know we 00 00 01 to "start" a new ES unit and end the previous
-    // one. (In fact, even if it was 00 00 00, the relevant values are held in
-    // our triple byte memory, so we don't particularly care which it is.)
-    //
-    // If offset is 0, then then next byte to read is the first byte of
-    // this packet's ES data, so we need to "pretend" to have all three
-    // of the triple bytes "in front of" the actual ES data for this PES
-    // packet.
-    //
-    // If offset is 1, then presumably the cur_byte was at offset 0, and
-    // we have two "dangling" bytes in the previous packet.
-    //
-    // If offset is 2, then there would only be one "dangling" byte.
-    //
-    // Finally, if offset is 3 or more, we know there was room for the
-    // 00 00 01 or 00 00 00 before the next byte we'll read, so we don't
-    // need to bluff at all.
-
-    // So, to calculation - we must remember to leave room for those
-    // three bytes at the start of the data we return
-    *data_len = es->reader->packet->es_data_len - offset + 3;
-    *data = (byte*)malloc(*data_len);
-    if (*data == nullptr) {
-        print_err("### Cannot allocate space for rest of PES packet\n");
-        return 1;
-    }
-    (*data)[0] = es->prev2_byte; // Hmm - should be 0x00
-    (*data)[1] = es->prev1_byte; // Hmm - should be 0x00
-    (*data)[2] = es->cur_byte; // Hmm - should be 0x01 (see above)
-    memcpy(&((*data)[3]), &(es->reader->packet->es_data[offset]), (*data_len) - 3);
-
+  if (es->reading_ES) {
+    fprint_err("### Cannot retrieve end of PES packet - the ES data"
+               " is direct ES, not ES read from PES\n");
+    return 1;
+  }
+  if (es->reader->packet == nullptr) {
+    // This is naughty, but we'll pretend to cope
+    *data = nullptr;
+    *data_len = 0;
     return 0;
+  }
+
+  // The offset (in this packet) of the next ES byte to read.
+  // We assume that this must also be the offset of the first byte
+  // of the next ES unit (or, at least, of one of the 00 bytes that
+  // come before it).
+  offset = es->posn_of_next_byte.inpacket;
+
+  // The way that we read (using our "triple byte" mechanism) means that
+  // we will generally already have read the start of the next ES unit.
+  // Life gets interesting if the 00 00 01 triplet (or, possibly, 00 00 00
+  // triplet - but we're not supporting that option for the moment - see
+  // find_ES_unit_end for details) is split over a PES packet boundary.
+
+  // So we know we 00 00 01 to "start" a new ES unit and end the previous
+  // one. (In fact, even if it was 00 00 00, the relevant values are held in
+  // our triple byte memory, so we don't particularly care which it is.)
+  //
+  // If offset is 0, then then next byte to read is the first byte of
+  // this packet's ES data, so we need to "pretend" to have all three
+  // of the triple bytes "in front of" the actual ES data for this PES
+  // packet.
+  //
+  // If offset is 1, then presumably the cur_byte was at offset 0, and
+  // we have two "dangling" bytes in the previous packet.
+  //
+  // If offset is 2, then there would only be one "dangling" byte.
+  //
+  // Finally, if offset is 3 or more, we know there was room for the
+  // 00 00 01 or 00 00 00 before the next byte we'll read, so we don't
+  // need to bluff at all.
+
+  // So, to calculation - we must remember to leave room for those
+  // three bytes at the start of the data we return
+  *data_len = es->reader->packet->es_data_len - offset + 3;
+  *data = (byte *)malloc(*data_len);
+  if (*data == nullptr) {
+    print_err("### Cannot allocate space for rest of PES packet\n");
+    return 1;
+  }
+  (*data)[0] = es->prev2_byte; // Hmm - should be 0x00
+  (*data)[1] = es->prev1_byte; // Hmm - should be 0x00
+  (*data)[2] = es->cur_byte;   // Hmm - should be 0x01 (see above)
+  memcpy(&((*data)[3]), &(es->reader->packet->es_data[offset]),
+         (*data_len) - 3);
+
+  return 0;
 }
 
 // ------------------------------------------------------------
@@ -1012,24 +994,23 @@ int get_end_of_underlying_PES_packet(ES_p es, byte** data, int* data_len)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_ES_unit_list(ES_unit_list_p* list)
-{
-    ES_unit_list_p new2 = (ES_unit_list_p)malloc(SIZEOF_ES_UNIT_LIST);
-    if (new2 == nullptr) {
-        print_err("### Unable to allocate ES unit list datastructure\n");
-        return 1;
-    }
+int build_ES_unit_list(ES_unit_list_p *list) {
+  ES_unit_list_p new2 = (ES_unit_list_p)malloc(SIZEOF_ES_UNIT_LIST);
+  if (new2 == nullptr) {
+    print_err("### Unable to allocate ES unit list datastructure\n");
+    return 1;
+  }
 
-    new2->length = 0;
-    new2->size = ES_UNIT_LIST_START_SIZE;
-    new2->array = (ES_unit_p)malloc(SIZEOF_ES_UNIT * ES_UNIT_LIST_START_SIZE);
-    if (new2->array == nullptr) {
-        free(new2);
-        print_err("### Unable to allocate array in ES unit list datastructure\n");
-        return 1;
-    }
-    *list = new2;
-    return 0;
+  new2->length = 0;
+  new2->size = ES_UNIT_LIST_START_SIZE;
+  new2->array = (ES_unit_p)malloc(SIZEOF_ES_UNIT * ES_UNIT_LIST_START_SIZE);
+  if (new2->array == nullptr) {
+    free(new2);
+    print_err("### Unable to allocate array in ES unit list datastructure\n");
+    return 1;
+  }
+  *list = new2;
+  return 0;
 }
 
 /*
@@ -1040,63 +1021,60 @@ int build_ES_unit_list(ES_unit_list_p* list)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int append_to_ES_unit_list(ES_unit_list_p list, ES_unit_p unit)
-{
-    ES_unit_p ptr;
-    if (list->length == list->size) {
-        int newsize = list->size + ES_UNIT_LIST_INCREMENT;
-        list->array = (ES_unit_p)realloc(list->array, newsize * SIZEOF_ES_UNIT);
-        if (list->array == nullptr) {
-            print_err("### Unable to extend ES unit list array\n");
-            return 1;
-        }
-        list->size = newsize;
+int append_to_ES_unit_list(ES_unit_list_p list, ES_unit_p unit) {
+  ES_unit_p ptr;
+  if (list->length == list->size) {
+    int newsize = list->size + ES_UNIT_LIST_INCREMENT;
+    list->array = (ES_unit_p)realloc(list->array, newsize * SIZEOF_ES_UNIT);
+    if (list->array == nullptr) {
+      print_err("### Unable to extend ES unit list array\n");
+      return 1;
     }
-    ptr = &list->array[list->length++];
-    // Some things can be copied directly
-    *ptr = *unit;
-    // But some need adjusting
-    ptr->data = (byte*)malloc(unit->data_len);
-    if (ptr->data == nullptr) {
-        print_err("### Unable to copy ES unit data array\n");
-        return 1;
-    }
-    memcpy(ptr->data, unit->data, unit->data_len);
-    ptr->data_size = unit->data_len;
-    return 0;
+    list->size = newsize;
+  }
+  ptr = &list->array[list->length++];
+  // Some things can be copied directly
+  *ptr = *unit;
+  // But some need adjusting
+  ptr->data = (byte *)malloc(unit->data_len);
+  if (ptr->data == nullptr) {
+    print_err("### Unable to copy ES unit data array\n");
+    return 1;
+  }
+  memcpy(ptr->data, unit->data, unit->data_len);
+  ptr->data_size = unit->data_len;
+  return 0;
 }
 
 /*
  * Tidy up an ES unit list datastructure after we've finished with it.
  */
-static inline void clear_ES_unit_list(ES_unit_list_p list)
-{
-    if (list->array != nullptr) {
-        int ii;
-        for (ii = 0; ii < list->length; ii++) {
-            clear_ES_unit(&list->array[ii]);
-        }
-        free(list->array);
-        list->array = nullptr;
+static inline void clear_ES_unit_list(ES_unit_list_p list) {
+  if (list->array != nullptr) {
+    int ii;
+    for (ii = 0; ii < list->length; ii++) {
+      clear_ES_unit(&list->array[ii]);
     }
-    list->length = 0;
-    list->size = 0;
+    free(list->array);
+    list->array = nullptr;
+  }
+  list->length = 0;
+  list->size = 0;
 }
 
 /*
  * Reset (empty) an ES unit list.
  */
-void reset_ES_unit_list(ES_unit_list_p list)
-{
-    if (list->array != nullptr) {
-        int ii;
-        for (ii = 0; ii < list->length; ii++) {
-            clear_ES_unit(&list->array[ii]);
-        }
-        // We *could* also shrink it - as it is, it will never get smaller
-        // than its maximum size. Is that likely to be a problem?
+void reset_ES_unit_list(ES_unit_list_p list) {
+  if (list->array != nullptr) {
+    int ii;
+    for (ii = 0; ii < list->length; ii++) {
+      clear_ES_unit(&list->array[ii]);
     }
-    list->length = 0;
+    // We *could* also shrink it - as it is, it will never get smaller
+    // than its maximum size. Is that likely to be a problem?
+  }
+  list->length = 0;
 }
 
 /*
@@ -1106,13 +1084,12 @@ void reset_ES_unit_list(ES_unit_list_p list)
  *
  * Does nothing if `list` is already nullptr.
  */
-void free_ES_unit_list(ES_unit_list_p* list)
-{
-    if (*list == nullptr)
-        return;
-    clear_ES_unit_list(*list);
-    free(*list);
-    *list = nullptr;
+void free_ES_unit_list(ES_unit_list_p *list) {
+  if (*list == nullptr)
+    return;
+  clear_ES_unit_list(*list);
+  free(*list);
+  *list = nullptr;
 }
 
 /*
@@ -1121,20 +1098,19 @@ void free_ES_unit_list(ES_unit_list_p* list)
  * - `name` is the name of the list (used in the header)
  * - `list` is the list to report on
  */
-void report_ES_unit_list(char* name, ES_unit_list_p list)
-{
-    fprint_msg("ES unit list '%s': ", name);
-    if (list->array == nullptr)
-        print_msg("<empty>\n");
-    else {
-        int ii;
-        fprint_msg(
-            "%d item%s (size %d)\n", list->length, (list->length == 1 ? "" : "s"), list->size);
-        for (ii = 0; ii < list->length; ii++) {
-            print_msg("    ");
-            report_ES_unit(true, &(list->array[ii]));
-        }
+void report_ES_unit_list(char *name, ES_unit_list_p list) {
+  fprint_msg("ES unit list '%s': ", name);
+  if (list->array == nullptr)
+    print_msg("<empty>\n");
+  else {
+    int ii;
+    fprint_msg("%d item%s (size %d)\n", list->length,
+               (list->length == 1 ? "" : "s"), list->size);
+    for (ii = 0; ii < list->length; ii++) {
+      print_msg("    ");
+      report_ES_unit(true, &(list->array[ii]));
     }
+  }
 }
 
 /*
@@ -1147,22 +1123,23 @@ void report_ES_unit_list(char* name, ES_unit_list_p list)
  *
  * Returns 0 if all goes well, 1 if the ES unit list has no content.
  */
-int get_ES_unit_list_bounds(ES_unit_list_p list, ES_offset* start, uint32_t* length)
-{
-    int ii;
-    if (list->array == nullptr || list->length == 0) {
-        print_err("### Cannot determine bounds of an ES unit list with no content\n");
-        return 1;
-    }
+int get_ES_unit_list_bounds(ES_unit_list_p list, ES_offset *start,
+                            uint32_t *length) {
+  int ii;
+  if (list->array == nullptr || list->length == 0) {
+    print_err(
+        "### Cannot determine bounds of an ES unit list with no content\n");
+    return 1;
+  }
 
-    *start = list->array[0].start_posn;
-    *length = 0;
+  *start = list->array[0].start_posn;
+  *length = 0;
 
-    // Maybe we should precalculate, or even cache, the total length...
-    for (ii = 0; ii < list->length; ii++)
-        (*length) += list->array[ii].data_len;
+  // Maybe we should precalculate, or even cache, the total length...
+  for (ii = 0; ii < list->length; ii++)
+    (*length) += list->array[ii].data_len;
 
-    return 0;
+  return 0;
 }
 
 /*
@@ -1175,30 +1152,29 @@ int get_ES_unit_list_bounds(ES_unit_list_p list, ES_offset* start, uint32_t* len
  *
  * Returns true if the lists contain identical content, false otherwise.
  */
-int same_ES_unit_list(ES_unit_list_p list1, ES_unit_list_p list2)
-{
-    int ii;
-    if (list1 == list2)
-        return true;
-
-    if (list1->array == nullptr)
-        return (list2->array == nullptr);
-
-    if (list1->length != list2->length)
-        return false;
-
-    for (ii = 0; ii < list1->length; ii++) {
-        ES_unit_p unit1 = &list1->array[ii];
-        ES_unit_p unit2 = &list2->array[ii];
-
-        if (unit1->data_len != unit2->data_len)
-            return false;
-
-        if (memcmp(unit1->data, unit2->data, unit1->data_len))
-            return false;
-    }
-
+int same_ES_unit_list(ES_unit_list_p list1, ES_unit_list_p list2) {
+  int ii;
+  if (list1 == list2)
     return true;
+
+  if (list1->array == nullptr)
+    return (list2->array == nullptr);
+
+  if (list1->length != list2->length)
+    return false;
+
+  for (ii = 0; ii < list1->length; ii++) {
+    ES_unit_p unit1 = &list1->array[ii];
+    ES_unit_p unit2 = &list2->array[ii];
+
+    if (unit1->data_len != unit2->data_len)
+      return false;
+
+    if (memcmp(unit1->data, unit2->data, unit1->data_len))
+      return false;
+  }
+
+  return true;
 }
 
 /*
@@ -1207,18 +1183,17 @@ int same_ES_unit_list(ES_unit_list_p list1, ES_unit_list_p list2)
  * Returns -1 if offset1 < offset2, 0 if they are the same, and 1 if
  * offset1 > offset2.
  */
-int compare_ES_offsets(ES_offset offset1, ES_offset offset2)
-{
-    if (offset1.infile < offset2.infile)
-        return -1;
-    else if (offset1.infile > offset2.infile)
-        return 1;
-    else if (offset1.inpacket < offset2.inpacket)
-        return -1;
-    else if (offset1.inpacket > offset2.inpacket)
-        return 1;
-    else
-        return 0;
+int compare_ES_offsets(ES_offset offset1, ES_offset offset2) {
+  if (offset1.infile < offset2.infile)
+    return -1;
+  else if (offset1.infile > offset2.infile)
+    return 1;
+  else if (offset1.inpacket < offset2.inpacket)
+    return -1;
+  else if (offset1.inpacket > offset2.inpacket)
+    return 1;
+  else
+    return 0;
 }
 
 // ============================================================
@@ -1229,109 +1204,114 @@ int compare_ES_offsets(ES_offset offset1, ES_offset offset2)
  *
  * Return 0 if all goes well, 1 if things go wrong.
  */
-static int try_to_guess_video_type(
-    ES_unit_p unit, int show_reasoning, int* maybe_h264, int* maybe_h262, int* maybe_avs)
-{
+static int try_to_guess_video_type(ES_unit_p unit, int show_reasoning,
+                                   int *maybe_h264, int *maybe_h262,
+                                   int *maybe_avs) {
 
-    byte nal_ref_idc = 0;
-    byte nal_unit_type = 0;
+  byte nal_ref_idc = 0;
+  byte nal_unit_type = 0;
+
+  if (show_reasoning)
+    fprint_msg("Looking at ES unit with start code %02X\n", unit->start_code);
+
+  // The following are *not allowed*
+  //
+  // - In AVS:   B4, B8     and B9..FF are system start codes
+  // - In H.262: B0, B1, B6 and B9..FF are system start codes
+  // - In H.264: Anything with top bit set
+
+  if (unit->start_code == 0xBA) // PS pack header
+  {
+    print_err("### ES unit start code is 0xBA, which looks like a PS pack"
+              " header\n    i.e., data may be PS\n");
+    return 1;
+  }
+
+  if (unit->start_code >= 0xB9) // system start code - probably PES
+  {
+    fprint_err(
+        "### ES unit start code %02X is more than 0xB9, which is probably"
+        " a PES system start code\n    i.e., data may be PES, "
+        "and is thus probably PS or TS\n",
+        unit->start_code);
+    return 1;
+  }
+
+  if (unit->start_code & 0x80) // top bit set means not H.264
+  {
+    if (*maybe_h264) {
+      if (show_reasoning)
+        fprint_msg("  %02X has top bit set, so not H.264,\n", unit->start_code);
+      *maybe_h264 = false;
+    }
+
+    if (unit->start_code == 0xB0 || unit->start_code == 0xB1 ||
+        unit->start_code == 0xB6) {
+      *maybe_h262 = false;
+      if (show_reasoning)
+        fprint_msg("  Start code %02X is reserved in H.262, so not H.262\n",
+                   unit->start_code);
+    } else if (unit->start_code == 0xB4 || unit->start_code == 0xB8) {
+      *maybe_avs = false;
+      if (show_reasoning)
+        fprint_msg("  Start code %02X is reserved in AVS, so not AVS\n",
+                   unit->start_code);
+    }
+  } else if (*maybe_h264) {
+    if (show_reasoning)
+      print_msg("  Top bit not set, so might be H.264\n");
+
+    // If we don't have that top bit set, then we need to work a bit harder
+    nal_ref_idc = (unit->start_code & 0x60) >> 5;
+    nal_unit_type = (unit->start_code & 0x1F);
 
     if (show_reasoning)
-        fprint_msg("Looking at ES unit with start code %02X\n", unit->start_code);
+      fprint_msg("  Interpreting it as nal_ref_idc %d, nal_unit_type %d\n",
+                 nal_ref_idc, nal_unit_type);
 
-    // The following are *not allowed*
-    //
-    // - In AVS:   B4, B8     and B9..FF are system start codes
-    // - In H.262: B0, B1, B6 and B9..FF are system start codes
-    // - In H.264: Anything with top bit set
-
-    if (unit->start_code == 0xBA) // PS pack header
-    {
-        print_err("### ES unit start code is 0xBA, which looks like a PS pack"
-                  " header\n    i.e., data may be PS\n");
-        return 1;
-    }
-
-    if (unit->start_code >= 0xB9) // system start code - probably PES
-    {
-        fprint_err("### ES unit start code %02X is more than 0xB9, which is probably"
-                   " a PES system start code\n    i.e., data may be PES, "
-                   "and is thus probably PS or TS\n",
-            unit->start_code);
-        return 1;
-    }
-
-    if (unit->start_code & 0x80) // top bit set means not H.264
-    {
-        if (*maybe_h264) {
-            if (show_reasoning)
-                fprint_msg("  %02X has top bit set, so not H.264,\n", unit->start_code);
-            *maybe_h264 = false;
-        }
-
-        if (unit->start_code == 0xB0 || unit->start_code == 0xB1 || unit->start_code == 0xB6) {
-            *maybe_h262 = false;
-            if (show_reasoning)
-                fprint_msg(
-                    "  Start code %02X is reserved in H.262, so not H.262\n", unit->start_code);
-        } else if (unit->start_code == 0xB4 || unit->start_code == 0xB8) {
-            *maybe_avs = false;
-            if (show_reasoning)
-                fprint_msg("  Start code %02X is reserved in AVS, so not AVS\n", unit->start_code);
-        }
-    } else if (*maybe_h264) {
+    if (nal_unit_type > 12 && nal_unit_type < 24) {
+      if (show_reasoning)
+        fprint_msg("  H.264 reserves nal_unit_type %02X,"
+                   " so not H.264\n",
+                   nal_unit_type);
+      *maybe_h264 = false;
+    } else if (nal_unit_type > 23) {
+      if (show_reasoning)
+        fprint_msg("  H.264 does not specify nal_unit_type %02X,"
+                   " so not H.264\n",
+                   nal_unit_type);
+      *maybe_h264 = false;
+    } else if (nal_ref_idc == 0) {
+      if (nal_unit_type == 5 || // IDR picture
+          nal_unit_type == 7 || // sequence parameter set
+          nal_unit_type == 8)   // picture parameter set
+      {
         if (show_reasoning)
-            print_msg("  Top bit not set, so might be H.264\n");
-
-        // If we don't have that top bit set, then we need to work a bit harder
-        nal_ref_idc = (unit->start_code & 0x60) >> 5;
-        nal_unit_type = (unit->start_code & 0x1F);
-
+          fprint_msg(
+              "  H.264 does not allow nal_ref_idc 0 and nal_unit_type %d,"
+              " so not H.264\n",
+              nal_unit_type);
+        *maybe_h264 = false;
+      }
+    } else // nal_ref_idc is NOT 0
+    {
+      // Which means it should *not* be:
+      if (nal_unit_type == 6 ||  // SEI
+          nal_unit_type == 9 ||  // access unit delimiter
+          nal_unit_type == 10 || // end of sequence
+          nal_unit_type == 11 || // end of stream
+          nal_unit_type == 12)   // fille
+      {
         if (show_reasoning)
-            fprint_msg("  Interpreting it as nal_ref_idc %d, nal_unit_type %d\n", nal_ref_idc,
-                nal_unit_type);
-
-        if (nal_unit_type > 12 && nal_unit_type < 24) {
-            if (show_reasoning)
-                fprint_msg("  H.264 reserves nal_unit_type %02X,"
-                           " so not H.264\n",
-                    nal_unit_type);
-            *maybe_h264 = false;
-        } else if (nal_unit_type > 23) {
-            if (show_reasoning)
-                fprint_msg("  H.264 does not specify nal_unit_type %02X,"
-                           " so not H.264\n",
-                    nal_unit_type);
-            *maybe_h264 = false;
-        } else if (nal_ref_idc == 0) {
-            if (nal_unit_type == 5 || // IDR picture
-                nal_unit_type == 7 || // sequence parameter set
-                nal_unit_type == 8) // picture parameter set
-            {
-                if (show_reasoning)
-                    fprint_msg("  H.264 does not allow nal_ref_idc 0 and nal_unit_type %d,"
-                               " so not H.264\n",
-                        nal_unit_type);
-                *maybe_h264 = false;
-            }
-        } else // nal_ref_idc is NOT 0
-        {
-            // Which means it should *not* be:
-            if (nal_unit_type == 6 || // SEI
-                nal_unit_type == 9 || // access unit delimiter
-                nal_unit_type == 10 || // end of sequence
-                nal_unit_type == 11 || // end of stream
-                nal_unit_type == 12) // fille
-            {
-                if (show_reasoning)
-                    fprint_msg("  H.264 insists nal_ref_idc shall be 0 for nal_unit_type %d,"
-                               " so not H.264\n",
-                        nal_unit_type);
-                *maybe_h264 = false;
-            }
-        }
+          fprint_msg(
+              "  H.264 insists nal_ref_idc shall be 0 for nal_unit_type %d,"
+              " so not H.264\n",
+              nal_unit_type);
+        *maybe_h264 = false;
+      }
     }
-    return 0;
+  }
+  return 0;
 }
 
 /*
@@ -1350,96 +1330,98 @@ static int try_to_guess_video_type(
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-int decide_ES_video_type(ES_p es, int print_dots, int show_reasoning, int* video_type)
-{
-    int err;
-    int ii;
-    int maybe_h262 = true;
-    int maybe_h264 = true;
-    int maybe_avs = true;
-    int decided = false;
+int decide_ES_video_type(ES_p es, int print_dots, int show_reasoning,
+                         int *video_type) {
+  int err;
+  int ii;
+  int maybe_h262 = true;
+  int maybe_h264 = true;
+  int maybe_avs = true;
+  int decided = false;
 
-    struct ES_unit unit;
+  struct ES_unit unit;
 
-    *video_type = VIDEO_UNKNOWN;
+  *video_type = VIDEO_UNKNOWN;
 
-    err = setup_ES_unit(&unit);
-    if (err) {
-        print_err("### Error trying to setup ES unit before"
-                  " working out video type\n");
-        return 1;
-    }
+  err = setup_ES_unit(&unit);
+  if (err) {
+    print_err("### Error trying to setup ES unit before"
+              " working out video type\n");
+    return 1;
+  }
 
-    // Otherwise, look at the first 500 packets to see if we can tell
-    //
-    // Basically, if we find anything with the top byte as B, then it is
-    // not H.264. Since H.262 allows up to AF (175) slices (which start with
-    // 01..AF), and AVS the same (or perhaps one more) and each "surrounds" those
-    // with entities with top byte B, it's rather hard to see how we could go
-    // very far without finding something with the top bit of the high byte set
-    // (certainly not as far as 500 units). So if we *do* go that far, we can be
-    // *very* sure it is not H.262 or AVS. And if the only other choice is H.264,
-    // then...
-    if (show_reasoning)
-        print_msg("Looking through first 500 ES units to try to decide video type\n");
-    for (ii = 0; ii < 500; ii++) {
-        if (print_dots) {
-            print_msg(".");
-            fflush(stdout);
-        } else if (show_reasoning)
-            fprint_msg("%d: ", ii + 1);
+  // Otherwise, look at the first 500 packets to see if we can tell
+  //
+  // Basically, if we find anything with the top byte as B, then it is
+  // not H.264. Since H.262 allows up to AF (175) slices (which start with
+  // 01..AF), and AVS the same (or perhaps one more) and each "surrounds" those
+  // with entities with top byte B, it's rather hard to see how we could go
+  // very far without finding something with the top bit of the high byte set
+  // (certainly not as far as 500 units). So if we *do* go that far, we can be
+  // *very* sure it is not H.262 or AVS. And if the only other choice is H.264,
+  // then...
+  if (show_reasoning)
+    print_msg(
+        "Looking through first 500 ES units to try to decide video type\n");
+  for (ii = 0; ii < 500; ii++) {
+    if (print_dots) {
+      print_msg(".");
+      fflush(stdout);
+    } else if (show_reasoning)
+      fprint_msg("%d: ", ii + 1);
 
-        err = find_next_ES_unit(es, &unit);
-        if (err == EOF) {
-            if (print_dots)
-                print_msg("\n");
-            if (show_reasoning)
-                fprint_msg("End of file, trying to read ES unit %d\n", ii + 2);
-            break;
-        } else if (err) {
-            if (print_dots)
-                print_msg("\n");
-            fprint_err("### Error trying to find 'unit' %d in ES whilst"
-                       " working out video type\n",
-                ii + 2);
-            clear_ES_unit(&unit);
-            return 1;
-        }
-        err = try_to_guess_video_type(&unit, show_reasoning, &maybe_h264, &maybe_h262, &maybe_avs);
-        if (err) {
-            if (print_dots)
-                print_msg("\n");
-            print_err("### Whilst trying to work out video_type\n");
-            clear_ES_unit(&unit);
-            return 1;
-        }
-
-        if (maybe_h264 && !maybe_h262 && !maybe_avs) {
-            if (show_reasoning)
-                print_msg("  Which leaves only H.264\n");
-            *video_type = VIDEO_H264;
-            decided = true;
-        } else if (!maybe_h264 && maybe_h262 && !maybe_avs) {
-            if (show_reasoning)
-                print_msg("  Which leaves only H.262\n");
-            *video_type = VIDEO_H262;
-            decided = true;
-        } else if (!maybe_h264 && !maybe_h262 && maybe_avs) {
-            if (show_reasoning)
-                print_msg("  Which leaves only AVS\n");
-            *video_type = VIDEO_AVS;
-            decided = true;
-        } else {
-            if (show_reasoning)
-                print_msg("  It is not possible to decide from that start code\n");
-        }
-        if (decided)
-            break;
-    }
-    if (print_dots)
+    err = find_next_ES_unit(es, &unit);
+    if (err == EOF) {
+      if (print_dots)
         print_msg("\n");
-    clear_ES_unit(&unit);
-    return 0;
+      if (show_reasoning)
+        fprint_msg("End of file, trying to read ES unit %d\n", ii + 2);
+      break;
+    } else if (err) {
+      if (print_dots)
+        print_msg("\n");
+      fprint_err("### Error trying to find 'unit' %d in ES whilst"
+                 " working out video type\n",
+                 ii + 2);
+      clear_ES_unit(&unit);
+      return 1;
+    }
+    err = try_to_guess_video_type(&unit, show_reasoning, &maybe_h264,
+                                  &maybe_h262, &maybe_avs);
+    if (err) {
+      if (print_dots)
+        print_msg("\n");
+      print_err("### Whilst trying to work out video_type\n");
+      clear_ES_unit(&unit);
+      return 1;
+    }
+
+    if (maybe_h264 && !maybe_h262 && !maybe_avs) {
+      if (show_reasoning)
+        print_msg("  Which leaves only H.264\n");
+      *video_type = VIDEO_H264;
+      decided = true;
+    } else if (!maybe_h264 && maybe_h262 && !maybe_avs) {
+      if (show_reasoning)
+        print_msg("  Which leaves only H.262\n");
+      *video_type = VIDEO_H262;
+      decided = true;
+    } else if (!maybe_h264 && !maybe_h262 && maybe_avs) {
+      if (show_reasoning)
+        print_msg("  Which leaves only AVS\n");
+      *video_type = VIDEO_AVS;
+      decided = true;
+    } else {
+      if (show_reasoning)
+        print_msg("  It is not possible to decide from that start code\n");
+    }
+    if (decided)
+      break;
+  }
+  if (print_dots)
+    print_msg("\n");
+  clear_ES_unit(&unit);
+  return 0;
 }
 
 /*
@@ -1461,46 +1443,46 @@ int decide_ES_video_type(ES_p es, int print_dots, int show_reasoning, int* video
  *
  * Returns 0 if all goes well, 1 if something goes wrong
  */
-int decide_ES_file_video_type(int input, int print_dots, int show_reasoning, int* video_type)
-{
-    offset_t start_posn;
-    int err;
-    ES_p es = nullptr;
+int decide_ES_file_video_type(int input, int print_dots, int show_reasoning,
+                              int *video_type) {
+  offset_t start_posn;
+  int err;
+  ES_p es = nullptr;
 
-    start_posn = tell_file(input);
-    if (start_posn == -1) {
-        print_err("### Error remembering start position in file before"
-                  " working out video type\n");
-        return 1;
-    }
+  start_posn = tell_file(input);
+  if (start_posn == -1) {
+    print_err("### Error remembering start position in file before"
+              " working out video type\n");
+    return 1;
+  }
 
-    err = seek_file(input, 0);
-    if (err) {
-        print_err("### Error rewinding file before working out video type\n");
-        return 1;
-    }
+  err = seek_file(input, 0);
+  if (err) {
+    print_err("### Error rewinding file before working out video type\n");
+    return 1;
+  }
 
-    err = build_elementary_stream_file(input, &es);
-    if (err) {
-        print_err("### Error starting elementary stream before"
-                  " working out video type\n");
-        return 1;
-    }
+  err = build_elementary_stream_file(input, &es);
+  if (err) {
+    print_err("### Error starting elementary stream before"
+              " working out video type\n");
+    return 1;
+  }
 
-    err = decide_ES_video_type(es, print_dots, show_reasoning, video_type);
-    if (err) {
-        print_err("### Error deciding video type of file\n");
-        free_elementary_stream(&es);
-        return 1;
-    }
-
+  err = decide_ES_video_type(es, print_dots, show_reasoning, video_type);
+  if (err) {
+    print_err("### Error deciding video type of file\n");
     free_elementary_stream(&es);
+    return 1;
+  }
 
-    err = seek_file(input, start_posn);
-    if (err) {
-        print_err("### Error returning to start position in file after"
-                  " working out video type\n");
-        return 1;
-    }
-    return 0;
+  free_elementary_stream(&es);
+
+  err = seek_file(input, start_posn);
+  if (err) {
+    print_err("### Error returning to start position in file after"
+              " working out video type\n");
+    return 1;
+  }
+  return 0;
 }

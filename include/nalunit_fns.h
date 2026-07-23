@@ -41,7 +41,7 @@ void set_show_nal_reading_details(nal_unit_context_p context, int show);
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_nal_unit_context(ES_p es, nal_unit_context_p* context);
+int build_nal_unit_context(ES_p es, nal_unit_context_p *context);
 /*
  * Free a NAL unit context datastructure.
  *
@@ -49,7 +49,7 @@ int build_nal_unit_context(ES_p es, nal_unit_context_p* context);
  *
  * Does nothing if `context` is already nullptr.
  */
-void free_nal_unit_context(nal_unit_context_p* context);
+void free_nal_unit_context(nal_unit_context_p *context);
 /*
  * Rewind a file being read as NAL units.
  *
@@ -67,7 +67,7 @@ int rewind_nal_unit_context(nal_unit_context_p context);
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_nal_unit(nal_unit_p* nal);
+int build_nal_unit(nal_unit_p *nal);
 
 /*
  * Tidy up and free a NAL unit datastructure after we've finished with it.
@@ -76,7 +76,7 @@ int build_nal_unit(nal_unit_p* nal);
  *
  * If `nal` is already nullptr, does nothing.
  */
-void free_nal_unit(nal_unit_p* nal);
+void free_nal_unit(nal_unit_p *nal);
 
 /*
  * Find and read in the next NAL unit.
@@ -93,7 +93,8 @@ void free_nal_unit(nal_unit_p* nal);
  *   (specifically, if the NAL unit's RBSP data cannot be understood),
  * * 1 if some other error occurs.
  */
-int find_next_NAL_unit(nal_unit_context_p context, int verbose, nal_unit_p* nal);
+int find_next_NAL_unit(nal_unit_context_p context, int verbose,
+                       nal_unit_p *nal);
 
 /*
  * Write (copy) the current NAL unit to the ES output stream.
@@ -103,7 +104,7 @@ int find_next_NAL_unit(nal_unit_context_p context, int verbose, nal_unit_p* nal)
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int write_NAL_unit_as_ES(FILE* output, nal_unit_p nal);
+int write_NAL_unit_as_ES(FILE *output, nal_unit_p nal);
 /*
  * Write (copy) the current NAL unit to the output stream, wrapped up in a
  * PES within TS.
@@ -114,7 +115,8 @@ int write_NAL_unit_as_ES(FILE* output, nal_unit_p nal);
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int write_NAL_unit_as_TS(TS_writer_p tswriter, nal_unit_p nal, uint32_t video_pid);
+int write_NAL_unit_as_TS(TS_writer_p tswriter, nal_unit_p nal,
+                         uint32_t video_pid);
 
 /*
  * Create a new "dictionary" for remembering picture or sequence
@@ -122,7 +124,7 @@ int write_NAL_unit_as_TS(TS_writer_p tswriter, nal_unit_p nal, uint32_t video_pi
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_param_dict(param_dict_p* param_dict);
+int build_param_dict(param_dict_p *param_dict);
 
 /*
  * Tidy up and free a parameters "dictionary" datastructure after we've
@@ -132,7 +134,7 @@ int build_param_dict(param_dict_p* param_dict);
  *
  * Does nothing if `param_dict` is already nullptr.
  */
-void free_param_dict(param_dict_p* param_dict);
+void free_param_dict(param_dict_p *param_dict);
 
 /*
  * Remember parameter set data in a "dictionary".
@@ -150,7 +152,8 @@ void free_param_dict(param_dict_p* param_dict);
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int remember_param_data(param_dict_p param_dict, uint32_t param_id, nal_unit_p nal);
+int remember_param_data(param_dict_p param_dict, uint32_t param_id,
+                        nal_unit_p nal);
 
 /*
  * Retrieve the picture parameter set data for the given id.
@@ -167,8 +170,8 @@ int remember_param_data(param_dict_p param_dict, uint32_t param_id, nal_unit_p n
  *
  * Returns 0 if it succeeds, 1 if the id is not recognised.
  */
-int get_pic_param_data(
-    param_dict_p pic_param_dict, uint32_t pic_param_id, nal_pic_param_data_p* pic_param_data);
+int get_pic_param_data(param_dict_p pic_param_dict, uint32_t pic_param_id,
+                       nal_pic_param_data_p *pic_param_data);
 
 /*
  * Retrieve the sequence parameter set data for the given id.
@@ -185,8 +188,8 @@ int get_pic_param_data(
  *
  * Returns 0 if it succeeds, 1 if the id is not recognised.
  */
-int get_seq_param_data(
-    param_dict_p seq_param_dict, uint32_t seq_param_id, nal_seq_param_data_p* seq_param_data);
+int get_seq_param_data(param_dict_p seq_param_dict, uint32_t seq_param_id,
+                       nal_seq_param_data_p *seq_param_data);
 
 /*
  * Is this NAL unit a slice?
@@ -284,7 +287,7 @@ int nal_is_first_VCL_NAL(nal_unit_p nal, nal_unit_p last);
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_nal_unit_list(nal_unit_list_p* list);
+int build_nal_unit_list(nal_unit_list_p *list);
 
 /*
  * Add a NAL unit to the end of the NAL unit list. Does not take a copy.
@@ -310,12 +313,12 @@ void reset_nal_unit_list(nal_unit_list_p list, int deep);
  *
  * Does nothing if `list` is already nullptr.
  */
-void free_nal_unit_list(nal_unit_list_p* list, int deep);
+void free_nal_unit_list(nal_unit_list_p *list, int deep);
 
 /*
  * Report on a NAL unit list's contents, to the given stream.
  */
-void report_nal_unit_list(int is_msg, char* prefix, nal_unit_list_p list);
+void report_nal_unit_list(int is_msg, char *prefix, nal_unit_list_p list);
 
 /*
  * Print out useful information about this NAL unit, on the given stream.

@@ -33,7 +33,7 @@
 // nothing we depend on from it. However, not that *it* includes
 // us, mainly for historical reasons.
 
-const char* h222_stream_type_str(unsigned s);
+const char *h222_stream_type_str(unsigned s);
 
 #endif // _h222_fns
 

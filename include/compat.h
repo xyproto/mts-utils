@@ -58,13 +58,15 @@ typedef off_t offset_t;
 // If Linux does not have 64 bit support built in, then our offsets will
 // be just 32 bit integers
 #define OFFSET_T_FORMAT "%ld"
-#define OFFSET_T_FORMAT_08 "%08ld" // deprecated, because it looks like hex/octal
+#define OFFSET_T_FORMAT_08                                                     \
+  "%08ld" // deprecated, because it looks like hex/octal
 #define OFFSET_T_FORMAT_8 "%8ld"
 #else
 // On Unices, printf supports %lld for 64 bit integers, and this is suitable
 // for printing out offset_t when it is 64 bit
 #define OFFSET_T_FORMAT "%" PRIi64
-#define OFFSET_T_FORMAT_08 "%08" PRIi64 // deprecated, because it looks like hex/octal
+#define OFFSET_T_FORMAT_08                                                     \
+  "%08" PRIi64 // deprecated, because it looks like hex/octal
 #define OFFSET_T_FORMAT_8 "%8" PRIi64
 #endif
 
@@ -80,7 +82,7 @@ typedef off_t offset_t;
 
 // Other useful things
 
-typedef void* void_p;
+typedef void *void_p;
 
 // The following defaults are common, and it's difficult
 // to decide which other header file they might belong in

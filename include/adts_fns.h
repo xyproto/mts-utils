@@ -60,4 +60,4 @@
  * Returns 0 if all goes well, EOF if end-of-file is read, and 1 if something
  * goes wrong.
  */
-int read_next_adts_frame(int file, audio_frame_p* frame, unsigned int flags);
+int read_next_adts_frame(int file, audio_frame_p *frame, unsigned int flags);
