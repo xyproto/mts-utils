@@ -1,6 +1,5 @@
 # mts-utils
 
-[![Build Status](https://travis-ci.com/xyproto/mts-utils.svg?branch=master)](https://travis-ci.com/xyproto/mts-utils)
 
 ## MPEG Transport Stream Utilities
 
@@ -10,12 +9,12 @@ This is a collection of utilities for working with MPEG data on 64-bit Linux.
 
 The goal of this fork is not portability and not being a drop-in replacement, but to make it possible to compile all the utilities with a modern C++ compiler, and make them easy to package on a modern Linux distro.
 
-Tested on Arch Linux with GCC 8.2.1 and GCC 10.1.0.
+Tested on Arch Linux with GCC 16.1.1.
 
 # Requirements
 
-* The [Slay](https://github.com/xyproto/slay) build tool.
-* C++ compiler with support for `-std=c++20`.
+* The [Slay](https://github.com/xyproto/slay) build tool (previously Python3 + SCons was required as well, but this tool is written in Go).
+* C++ compiler with support for `-std=c++26`.
 * GNU `make`.
 * GNU `parallel`.
 
