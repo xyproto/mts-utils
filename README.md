@@ -14,16 +14,16 @@ Tested on Arch Linux with GCC 8.2.1 and GCC 10.1.0.
 
 # Requirements
 
-* [cxx](https://github.com/xyproto/cxx)
-* SCons
-* GNU `make`
-* C++ compiler with support for `-std=c++2a`
+* The [Slay](https://github.com/xyproto/slay) build tool.
+* C++ compiler with support for `-std=c++20`.
+* GNU `make`.
+* GNU `parallel`.
 
 # Building and installing
 
 Build a utility:
 
-* `cxx -C tsplay`
+* `slay -C tsplay`
 
 Install the desired utility (use `sudo` if required):
 
@@ -93,12 +93,9 @@ The tools are focused on:
 # Running tests
 
     cd common
-    cxx test
+    slay test
 
-# License
+# General info:
 
-* MPL 1.1
-
-# Version
-
-* 2.0.99
+* License: MPL 1.1
+* Version: 2.0.99
