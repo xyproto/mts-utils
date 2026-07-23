@@ -1,25 +1,27 @@
 # mts-utils
 
-[![Build](https://github.com/xyproto/mts-utils/actions/workflows/build.yml/badge.svg)](https://github.com/xyproto/mts-utils/actions/workflows/build.yml)
-
-## MPEG Transport Stream Utilities
-
-Fork of `tstools`, formerly hosted at [`code.google.com/p/tstools`](https://code.google.com/p/tstools).
-
-This is a collection of utilities for working with MPEG data on 64-bit Linux.
+This is a fork of `tstools` - a set of utilities for working with MPEG data on 64-bit Linux.
 
 The goal of this fork is not portability and not being a drop-in replacement, but to make it possible to compile all the utilities with a modern C++ compiler, and make them easy to package on a modern Linux distro.
 
+## Current status
+
+It is working, but the tests are in the process of being upgraded to C++26 and the CI configuration is a work in progress.
+
 Tested on Arch Linux with GCC 16.1.1.
 
-# Requirements
+## tstools
+
+`tstools` (MPEG Transport Stream Utilities) were formerly hosted at [`code.google.com/p/tstools`](https://code.google.com/p/tstools).
+
+## Requirements
 
 * C++ compiler with support for `-std=c++26`.
 * GNU `make`.
 * GNU `parallel`.
 * The [`slay`](https://github.com/xyproto/slay) executable (build tool written in Go).
 
-# Building and installing
+## Building and installing
 
 Build a utility:
 
@@ -63,7 +65,7 @@ The following utilites are available:
 * `tsreport`
 * `tsserve`
 
-# TODO
+## TODO
 
 - [ ] Fix all warnings.
 - [ ] Use `enum class` for all enums.
@@ -73,7 +75,7 @@ The following utilites are available:
 - [ ] Use `const std::string` whenever possible.
 - [ ] Use `bool` whenever possible, instead of `int`.
 
-# Additional info
+## Additional info
 
 The emphasis is on relatively simple tools which concentrate on MPEG (H.264 and
 H.262) data packaged according to H.222 (i.e., TS or PS), with a particular
@@ -90,12 +92,14 @@ The tools are focused on:
 * Simple manipulation of stream data (`es2ts`, `esfilter`, `esreverse`, `esmerge`, `ts2es`)
 * Streaming of data, possibly with introduced errors (`tsplay`).
 
-# Running tests
+## Running tests
 
     cd common
     slay test
 
-# General info:
+(upgrading the tests is a work in progress)
+
+## General info:
 
 * License: MPL 1.1
 * Version: 2.0.99
