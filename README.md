@@ -1,5 +1,6 @@
 # mts-utils
 
+[![Build](https://github.com/xyproto/mts-utils/actions/workflows/build.yml/badge.svg)](https://github.com/xyproto/mts-utils/actions/workflows/build.yml)
 
 ## MPEG Transport Stream Utilities
 
