@@ -1,0 +1,31 @@
+name: Build
+
+on:
+  push:
+    paths-ignore:
+      - '.gitignore'
+      - '**/*.md'
+      - '**/*.txt'
+      - '**/*.sh'
+      - '**/*.gif'
+      - '**/*.png'
+      - '**/*.svg'
+      - '**/*.jpg'
+  pull_request:
+    paths-ignore:
+      - '.gitignore'
+      - '**/*.md'
+      - '**/*.txt'
+      - '**/*.sh'
+      - '**/*.gif'
+      - '**/*.png'
+      - '**/*.svg'
+      - '**/*.jpg'
+
+jobs:
+  ubuntu:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Test
+        run: tests/ubuntu/run.sh
