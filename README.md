@@ -2,7 +2,7 @@
 
 This is a fork of `tstools` - a set of utilities for working with MPEG data on 64-bit Linux.
 
-The goal of this fork is not portability and not being a drop-in replacement, but to make it possible to compile all the utilities with a modern C++ compiler, and make them easy to package on a modern Linux distro.
+The goal of this fork is to make it possible to compile all the utilities with a modern C++ compiler, and make them easy to package on a modern Linux distro.
 
 ## Current status
 
