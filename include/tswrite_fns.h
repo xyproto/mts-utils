@@ -70,8 +70,8 @@
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-int tswrite_open(TS_WRITER_TYPE how, char* name, char* multicast_if, int port, int quiet,
-    TS_writer_p* tswriter);
+int tswrite_open(TS_WRITER_TYPE how, char *name, char *multicast_if, int port,
+                 int quiet, TS_writer_p *tswriter);
 /*
  * Open a network connection for TS output.
  *
@@ -92,7 +92,8 @@ int tswrite_open(TS_WRITER_TYPE how, char* name, char* multicast_if, int port, i
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-int tswrite_open_connection(int use_tcp, char* name, int port, int quiet, TS_writer_p* tswriter);
+int tswrite_open_connection(int use_tcp, char *name, int port, int quiet,
+                            TS_writer_p *tswriter);
 /*
  * Open a file for TS output.
  *
@@ -108,7 +109,7 @@ int tswrite_open_connection(int use_tcp, char* name, int port, int quiet, TS_wri
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-int tswrite_open_file(char* name, int quiet, TS_writer_p* tswriter);
+int tswrite_open_file(char *name, int quiet, TS_writer_p *tswriter);
 /*
  * Wait for a client to connect and then both write TS data to it and
  * listen for command from it. Uses TCP/IP.
@@ -120,7 +121,8 @@ int tswrite_open_file(char* name, int quiet, TS_writer_p* tswriter);
  *
  * Returns 0 if all goes well, 1 if something went wrong.
  */
-int tswrite_wait_for_client(int server_socket, int quiet, TS_writer_p* tswriter);
+int tswrite_wait_for_client(int server_socket, int quiet,
+                            TS_writer_p *tswriter);
 /*
  * Set up internal buffering for TS output. This is necessary for UDP
  * output, and optional otherwise.
@@ -156,9 +158,11 @@ int tswrite_wait_for_client(int server_socket, int quiet, TS_writer_p* tswriter)
  * Returns 0 if all went well, 1 if something went wrong.
  */
 
-int tswrite_start_buffering(TS_writer_p tswriter, int circ_buf_size, int TS_in_packet,
-    int maxnowait, int waitfor, int byterate, tswrite_pcr_mode pcr_mode, int prime_size,
-    int prime_speedup, double pcr_scale, const tswrite_pkt_hdr_type_t hdr_type);
+int tswrite_start_buffering(TS_writer_p tswriter, int circ_buf_size,
+                            int TS_in_packet, int maxnowait, int waitfor,
+                            int byterate, tswrite_pcr_mode pcr_mode,
+                            int prime_size, int prime_speedup, double pcr_scale,
+                            const tswrite_pkt_hdr_type_t hdr_type);
 
 /*
  * Set up internal buffering for TS output. This is necessary for UDP output,
@@ -172,7 +176,8 @@ int tswrite_start_buffering(TS_writer_p tswriter, int circ_buf_size, int TS_in_p
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int tswrite_start_buffering_from_context(TS_writer_p tswriter, TS_context_p context);
+int tswrite_start_buffering_from_context(TS_writer_p tswriter,
+                                         TS_context_p context);
 /*
  * Indicate to a TS output context that `input` is to be used as
  * command input.
@@ -261,8 +266,8 @@ int wait_for_command(TS_writer_p tswriter);
  * has been given (in which case, no further commands will be read, and no
  * more output will be written, by any subsequent calls of this function).
  */
-int tswrite_write(
-    TS_writer_p tswriter, byte packet[TS_PACKET_SIZE], uint32_t pid, int got_pcr, uint64_t pcr);
+int tswrite_write(TS_writer_p tswriter, byte packet[TS_PACKET_SIZE],
+                  uint32_t pid, int got_pcr, uint64_t pcr);
 
 int tswrite_discontinuity(const TS_writer_p tswriter);
 
@@ -314,7 +319,8 @@ void tswrite_report_args(TS_context_p context);
  * Returns 0 if all goes well, 1 if there was an error. Note that not
  * specifying an output file or host counts as an error.
  */
-int tswrite_process_args(char* prefix, int argc, char* argv[], TS_context_p context);
+int tswrite_process_args(char *prefix, int argc, char *argv[],
+                         TS_context_p context);
 
 #endif // _tswrite_fns
 

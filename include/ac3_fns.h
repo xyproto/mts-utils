@@ -43,4 +43,4 @@
  * Returns 0 if all goes well, EOF if end-of-file is read, and 1 if something
  * goes wrong.
  */
-int read_next_ac3_frame(int file, audio_frame_p* frame);
+int read_next_ac3_frame(int file, audio_frame_p *frame);

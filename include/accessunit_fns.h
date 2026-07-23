@@ -34,7 +34,7 @@
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_access_unit_context(ES_p es, access_unit_context_p* context);
+int build_access_unit_context(ES_p es, access_unit_context_p *context);
 
 /*
  * Free a new access unit context datastructure.
@@ -45,7 +45,7 @@ int build_access_unit_context(ES_p es, access_unit_context_p* context);
  *
  * Does nothing if `context` is already nullptr.
  */
-void free_access_unit_context(access_unit_context_p* context);
+void free_access_unit_context(access_unit_context_p *context);
 
 /*
  * Reset an acccess unit context, so it "forgets" its current information
@@ -73,7 +73,7 @@ int rewind_access_unit_context(access_unit_context_p context);
  *
  * Does nothing if `acc_unit` is already nullptr.
  */
-void free_access_unit(access_unit_p* acc_unit);
+void free_access_unit(access_unit_p *acc_unit);
 
 /*
  * Report on this access unit
@@ -91,7 +91,8 @@ void report_access_unit(access_unit_p access_unit);
  *
  * Returns 0 if all goes well, 1 if the access unit has no content.
  */
-int get_access_unit_bounds(access_unit_p access_unit, ES_offset* start, uint32_t* length);
+int get_access_unit_bounds(access_unit_p access_unit, ES_offset *start,
+                           uint32_t *length);
 
 /*
  * Are all slices in this access unit I slices?
@@ -127,8 +128,8 @@ int all_slices_B(access_unit_p access_unit);
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int write_access_unit_as_ES(
-    access_unit_p access_unit, access_unit_context_p context, FILE* output);
+int write_access_unit_as_ES(access_unit_p access_unit,
+                            access_unit_context_p context, FILE *output);
 /*
  * Write out an access unit as TS.
  *
@@ -144,8 +145,9 @@ int write_access_unit_as_ES(
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int write_access_unit_as_TS(access_unit_p access_unit, access_unit_context_p context,
-    TS_writer_p tswriter, uint32_t video_pid);
+int write_access_unit_as_TS(access_unit_p access_unit,
+                            access_unit_context_p context, TS_writer_p tswriter,
+                            uint32_t video_pid);
 /*
  * Write out an access unit as TS, with PTS timing in the first PES packet
  * (and PCR timing in the first TS of the frame).
@@ -163,9 +165,12 @@ int write_access_unit_as_TS(access_unit_p access_unit, access_unit_context_p con
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int write_access_unit_as_TS_with_pts_dts(access_unit_p access_unit, access_unit_context_p context,
-    TS_writer_p tswriter, uint32_t video_pid, int got_pts, uint64_t pts, int got_dts,
-    uint64_t dts);
+int write_access_unit_as_TS_with_pts_dts(access_unit_p access_unit,
+                                         access_unit_context_p context,
+                                         TS_writer_p tswriter,
+                                         uint32_t video_pid, int got_pts,
+                                         uint64_t pts, int got_dts,
+                                         uint64_t dts);
 /*
  * Write out an access unit as TS, with PCR timing in the first TS of the
  * frame.
@@ -183,8 +188,10 @@ int write_access_unit_as_TS_with_pts_dts(access_unit_p access_unit, access_unit_
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int write_access_unit_as_TS_with_PCR(access_unit_p access_unit, access_unit_context_p context,
-    TS_writer_p tswriter, uint32_t video_pid, uint64_t pcr_base, uint32_t pcr_extn);
+int write_access_unit_as_TS_with_PCR(access_unit_p access_unit,
+                                     access_unit_context_p context,
+                                     TS_writer_p tswriter, uint32_t video_pid,
+                                     uint64_t pcr_base, uint32_t pcr_extn);
 /*
  * Retrieve the next access unit from the given elementary stream.
  *
@@ -212,13 +219,13 @@ int write_access_unit_as_TS_with_PCR(access_unit_p access_unit, access_unit_cont
  *
  * EOF can be returned because the end of file has been reached, or because an
  * end of stream NAL unit has been encountered. The two may be distinguished
- * by looking at `context->end_of_stream`, which will be nullptr if it was a true
- * EOF.
+ * by looking at `context->end_of_stream`, which will be nullptr if it was a
+ * true EOF.
  *
  * Note that `ret_access_unit` will be nullptr if EOF is returned.
  */
-int get_next_access_unit(
-    access_unit_context_p context, int quiet, int show_details, access_unit_p* ret_access_unit);
+int get_next_access_unit(access_unit_context_p context, int quiet,
+                         int show_details, access_unit_p *ret_access_unit);
 /*
  * Retrieve the next H.264 frame from the given elementary stream.
  *
@@ -258,13 +265,13 @@ int get_next_access_unit(
  *
  * EOF can be returned because the end of file has been reached, or because an
  * end of stream NAL unit has been encountered. The two may be distinguished
- * by looking at `context->end_of_stream`, which will be nullptr if it was a true
- * EOF.
+ * by looking at `context->end_of_stream`, which will be nullptr if it was a
+ * true EOF.
  *
  * Note that `ret_access_unit` will be nullptr if EOF is returned.
  */
-int get_next_h264_frame(
-    access_unit_context_p context, int quiet, int show_details, access_unit_p* frame);
+int get_next_h264_frame(access_unit_context_p context, int quiet,
+                        int show_details, access_unit_p *frame);
 /*
  * If this access unit was read from PES, did any of its PES packets contain
  * a PTS?

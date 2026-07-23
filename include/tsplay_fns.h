@@ -58,8 +58,10 @@
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int play_TS_stream(int input, TS_writer_p tswriter, const tsplay_output_pace_mode pace_mode,
-    uint32_t pid_to_ignore, uint32_t override_pcr_pid, int max, int loop, int quiet, int verbose);
+int play_TS_stream(int input, TS_writer_p tswriter,
+                   const tsplay_output_pace_mode pace_mode,
+                   uint32_t pid_to_ignore, uint32_t override_pcr_pid, int max,
+                   int loop, int quiet, int verbose);
 
 /*
  * Read PS packets and then output them as TS.
@@ -84,8 +86,8 @@ int play_TS_stream(int input, TS_writer_p tswriter, const tsplay_output_pace_mod
  *   audio from private_stream_1 (0xBD) with substream id <audio_stream>,
  *   otherwise we ignore `audio_stream` and assume that all data in
  *   private_stream_1 is the audio we want.
- * - `want_dolby_as_dvb` indicates if any Dolby (AC-3) audio data should be output
- *   with DVB or ATSC stream type
+ * - `want_dolby_as_dvb` indicates if any Dolby (AC-3) audio data should be
+ * output with DVB or ATSC stream type
  * - `pmt_pid` is the PID of the PMT to write
  * - `pcr_pid` is the PID of the TS unit containing the PCR
  * - `video_pid` is the PID for the video we write
@@ -103,11 +105,13 @@ int play_TS_stream(int input, TS_writer_p tswriter, const tsplay_output_pace_mod
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int play_PS_stream(int input, TS_writer_p output, int pad_start, int program_repeat,
-    int force_stream_type, int want_h262, int input_is_dvd, int video_stream, int audio_stream,
-    int want_ac3_audio, int want_dolby_as_dvb, uint32_t pmt_pid, uint32_t pcr_pid,
-    uint32_t video_pid, int keep_audio, uint32_t audio_pid, int max, int loop, int verbose,
-    int quiet);
+int play_PS_stream(int input, TS_writer_p output, int pad_start,
+                   int program_repeat, int force_stream_type, int want_h262,
+                   int input_is_dvd, int video_stream, int audio_stream,
+                   int want_ac3_audio, int want_dolby_as_dvb, uint32_t pmt_pid,
+                   uint32_t pcr_pid, uint32_t video_pid, int keep_audio,
+                   uint32_t audio_pid, int max, int loop, int verbose,
+                   int quiet);
 
 #endif // tsplay_fns
 

@@ -35,12 +35,12 @@
 #include "compat.h"
 
 struct bitdata {
-    byte* data; // The data we're reading from
-    int data_len; // It's length
-    int cur_byte; // Which byte our current bit is in
-    int cur_bit; // Which bit within that byte
+  byte *data;   // The data we're reading from
+  int data_len; // It's length
+  int cur_byte; // Which byte our current bit is in
+  int cur_bit;  // Which bit within that byte
 };
-typedef struct bitdata* bitdata_p;
+typedef struct bitdata *bitdata_p;
 #define SIZEOF_BITDATA sizeof(struct bitdata)
 
 #endif // _bitdata_defns

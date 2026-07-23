@@ -57,113 +57,112 @@
  * that some of the apparent start code prefixes are actually false
  * detections.
  */
-void print_h262_start_code_str(byte start_code)
-{
-    byte number;
-    char* str = nullptr;
-    switch (start_code) {
-        // H.262 start codes
-    case 0x00:
-        str = "Picture";
-        break;
-    case 0xB0:
-        str = "Reserved";
-        break;
-    case 0xB1:
-        str = "Reserved";
-        break;
-    case 0xB2:
-        str = "User data";
-        break;
-    case 0xB3:
-        str = "SEQUENCE HEADER";
-        break;
-    case 0xB4:
-        str = "Sequence error";
-        break;
-    case 0xB5:
-        str = "Extension start";
-        break;
-    case 0xB6:
-        str = "Reserved";
-        break;
-    case 0xB7:
-        str = "SEQUENCE END";
-        break;
-    case 0xB8:
-        str = "Group start";
-        break;
+void print_h262_start_code_str(byte start_code) {
+  byte number;
+  char *str = nullptr;
+  switch (start_code) {
+    // H.262 start codes
+  case 0x00:
+    str = "Picture";
+    break;
+  case 0xB0:
+    str = "Reserved";
+    break;
+  case 0xB1:
+    str = "Reserved";
+    break;
+  case 0xB2:
+    str = "User data";
+    break;
+  case 0xB3:
+    str = "SEQUENCE HEADER";
+    break;
+  case 0xB4:
+    str = "Sequence error";
+    break;
+  case 0xB5:
+    str = "Extension start";
+    break;
+  case 0xB6:
+    str = "Reserved";
+    break;
+  case 0xB7:
+    str = "SEQUENCE END";
+    break;
+  case 0xB8:
+    str = "Group start";
+    break;
 
-        // System start codes - 13818-1 p32 Table 2-18 stream_id
-        // If these occur, then we're seeing PES headers
-        // - maybe we're looking at transport stream data?
-    case 0xBC:
-        str = "SYSTEM START: Program stream map";
-        break;
-    case 0xBD:
-        str = "SYSTEM START: Private stream 1";
-        break;
-    case 0xBE:
-        str = "SYSTEM START: Padding stream";
-        break;
-    case 0xBF:
-        str = "SYSTEM START: Private stream 2";
-        break;
-    case 0xF0:
-        str = "SYSTEM START: ECM stream";
-        break;
-    case 0xF1:
-        str = "SYSTEM START: EMM stream";
-        break;
-    case 0xF2:
-        str = "SYSTEM START: DSMCC stream";
-        break;
-    case 0xF3:
-        str = "SYSTEM START: 13522 stream";
-        break;
-    case 0xF4:
-        str = "SYSTEM START: H.222 A stream";
-        break;
-    case 0xF5:
-        str = "SYSTEM START: H.222 B stream";
-        break;
-    case 0xF6:
-        str = "SYSTEM START: H.222 C stream";
-        break;
-    case 0xF7:
-        str = "SYSTEM START: H.222 D stream";
-        break;
-    case 0xF8:
-        str = "SYSTEM START: H.222 E stream";
-        break;
-    case 0xF9:
-        str = "SYSTEM START: Ancillary stream";
-        break;
-    case 0xFF:
-        str = "SYSTEM START: Program stream directory";
-        break;
+    // System start codes - 13818-1 p32 Table 2-18 stream_id
+    // If these occur, then we're seeing PES headers
+    // - maybe we're looking at transport stream data?
+  case 0xBC:
+    str = "SYSTEM START: Program stream map";
+    break;
+  case 0xBD:
+    str = "SYSTEM START: Private stream 1";
+    break;
+  case 0xBE:
+    str = "SYSTEM START: Padding stream";
+    break;
+  case 0xBF:
+    str = "SYSTEM START: Private stream 2";
+    break;
+  case 0xF0:
+    str = "SYSTEM START: ECM stream";
+    break;
+  case 0xF1:
+    str = "SYSTEM START: EMM stream";
+    break;
+  case 0xF2:
+    str = "SYSTEM START: DSMCC stream";
+    break;
+  case 0xF3:
+    str = "SYSTEM START: 13522 stream";
+    break;
+  case 0xF4:
+    str = "SYSTEM START: H.222 A stream";
+    break;
+  case 0xF5:
+    str = "SYSTEM START: H.222 B stream";
+    break;
+  case 0xF6:
+    str = "SYSTEM START: H.222 C stream";
+    break;
+  case 0xF7:
+    str = "SYSTEM START: H.222 D stream";
+    break;
+  case 0xF8:
+    str = "SYSTEM START: H.222 E stream";
+    break;
+  case 0xF9:
+    str = "SYSTEM START: Ancillary stream";
+    break;
+  case 0xFF:
+    str = "SYSTEM START: Program stream directory";
+    break;
 
-    default:
-        str = nullptr;
-        break;
-    }
+  default:
+    str = nullptr;
+    break;
+  }
 
-    if (str != nullptr)
-        print_msg(str);
-    else if (start_code == 0x47)
-        print_msg("TRANSPORT STREAM sync byte");
-    else if (start_code >= 0x01 && start_code <= 0xAF)
-        fprint_msg("Slice, vertical posn %d", start_code);
-    else if (start_code >= 0xC0 && start_code <= 0xDF) {
-        number = start_code & 0x1F;
-        fprint_msg("SYSTEM START: Audio stream %02x", number);
-    } else if (start_code >= 0xE0 && start_code <= 0xEF) {
-        number = start_code & 0x0F;
-        fprint_msg("SYSTEM START: Video stream %x", number);
-    } else if (start_code >= 0xFC && start_code <= 0xFE)
-        print_msg("SYSTEM START: Reserved data stream");
-    else
-        print_msg("SYSTEM START: Unrecognised stream id");
+  if (str != nullptr)
+    print_msg(str);
+  else if (start_code == 0x47)
+    print_msg("TRANSPORT STREAM sync byte");
+  else if (start_code >= 0x01 && start_code <= 0xAF)
+    fprint_msg("Slice, vertical posn %d", start_code);
+  else if (start_code >= 0xC0 && start_code <= 0xDF) {
+    number = start_code & 0x1F;
+    fprint_msg("SYSTEM START: Audio stream %02x", number);
+  } else if (start_code >= 0xE0 && start_code <= 0xEF) {
+    number = start_code & 0x0F;
+    fprint_msg("SYSTEM START: Video stream %x", number);
+  } else if (start_code >= 0xFC && start_code <= 0xFE)
+    print_msg("SYSTEM START: Reserved data stream");
+  else
+    print_msg("SYSTEM START: Unrecognised stream id");
 }
 
 /*
@@ -171,22 +170,21 @@ void print_h262_start_code_str(byte start_code)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_h262_item(h262_item_p* item)
-{
-    int err;
-    h262_item_p new2 = (h262_item_p)malloc(SIZEOF_H262_ITEM);
-    if (new2 == nullptr) {
-        print_err("### Unable to allocate MPEG2 item datastructure\n");
-        return 1;
-    }
-    err = setup_ES_unit(&(new2->unit));
-    if (err) {
-        print_err("### Unable to allocate MPEG2 item data buffer\n");
-        free(new2);
-        return 1;
-    }
-    *item = new2;
-    return 0;
+int build_h262_item(h262_item_p *item) {
+  int err;
+  h262_item_p new2 = (h262_item_p)malloc(SIZEOF_H262_ITEM);
+  if (new2 == nullptr) {
+    print_err("### Unable to allocate MPEG2 item datastructure\n");
+    return 1;
+  }
+  err = setup_ES_unit(&(new2->unit));
+  if (err) {
+    print_err("### Unable to allocate MPEG2 item data buffer\n");
+    free(new2);
+    return 1;
+  }
+  *item = new2;
+  return 0;
 }
 
 /*
@@ -196,29 +194,28 @@ int build_h262_item(h262_item_p* item)
  *
  * If `item` is already nullptr, does nothing.
  */
-void free_h262_item(h262_item_p* item)
-{
-    if (*item == nullptr)
-        return;
-    clear_ES_unit(&(*item)->unit);
-    free(*item);
-    *item = nullptr;
+void free_h262_item(h262_item_p *item) {
+  if (*item == nullptr)
+    return;
+  clear_ES_unit(&(*item)->unit);
+  free(*item);
+  *item = nullptr;
 }
 
 /*
  * Print out useful information about this MPEG2 item
  */
-void report_h262_item(h262_item_p item)
-{
-    fprint_msg(OFFSET_T_FORMAT_08 "/%04d: MPEG2 item %02x (", item->unit.start_posn.infile,
-        item->unit.start_posn.inpacket, item->unit.start_code);
-    print_h262_start_code_str(item->unit.start_code);
-    print_msg(")");
-    if (item->unit.start_code == 0)
-        fprint_msg(" %d (%s)", item->picture_coding_type,
-            H262_PICTURE_CODING_STR(item->picture_coding_type));
-    fprint_msg(" size %d", item->unit.data_len);
-    print_msg("\n");
+void report_h262_item(h262_item_p item) {
+  fprint_msg(OFFSET_T_FORMAT_08 "/%04d: MPEG2 item %02x (",
+             item->unit.start_posn.infile, item->unit.start_posn.inpacket,
+             item->unit.start_code);
+  print_h262_start_code_str(item->unit.start_code);
+  print_msg(")");
+  if (item->unit.start_code == 0)
+    fprint_msg(" %d (%s)", item->picture_coding_type,
+               H262_PICTURE_CODING_STR(item->picture_coding_type));
+  fprint_msg(" size %d", item->unit.data_len);
+  print_msg("\n");
 }
 
 // ------------------------------------------------------------
@@ -238,26 +235,25 @@ void report_h262_item(h262_item_p item)
  * Returns 0 if it succeeds, EOF if the end-of-file is read (i.e., there
  * is no next MPEG2 item), otherwise 1 if some error occurs.
  */
-int find_next_h262_item(ES_p es, h262_item_p* item)
-{
-    int err;
+int find_next_h262_item(ES_p es, h262_item_p *item) {
+  int err;
 
-    err = build_h262_item(item);
-    if (err)
-        return 1;
+  err = build_h262_item(item);
+  if (err)
+    return 1;
 
-    err = find_next_ES_unit(es, &(*item)->unit);
-    if (err) // 1 or EOF
-    {
-        free_h262_item(item);
-        return err;
-    }
+  err = find_next_ES_unit(es, &(*item)->unit);
+  if (err) // 1 or EOF
+  {
+    free_h262_item(item);
+    return err;
+  }
 
-    // If this is a picture, we can do a little more
-    if ((*item)->unit.start_code == 0) {
-        (*item)->picture_coding_type = ((*item)->unit.data[5] & 0x38) >> 3;
-    }
-    return 0;
+  // If this is a picture, we can do a little more
+  if ((*item)->unit.start_code == 0) {
+    (*item)->picture_coding_type = ((*item)->unit.data[5] & 0x38) >> 3;
+  }
+  return 0;
 }
 
 /*
@@ -269,25 +265,24 @@ int find_next_h262_item(ES_p es, h262_item_p* item)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_h262_context(ES_p es, h262_context_p* context)
-{
-    h262_context_p new2 = (h262_context_p)malloc(SIZEOF_H262_CONTEXT);
-    if (new2 == nullptr) {
-        print_err("### Unable to allocate H.262 context datastructure\n");
-        return 1;
-    }
+int build_h262_context(ES_p es, h262_context_p *context) {
+  h262_context_p new2 = (h262_context_p)malloc(SIZEOF_H262_CONTEXT);
+  if (new2 == nullptr) {
+    print_err("### Unable to allocate H.262 context datastructure\n");
+    return 1;
+  }
 
-    new2->es = es;
-    new2->picture_index = 0;
-    new2->last_item = nullptr;
-    new2->reverse_data = nullptr;
-    new2->count_since_seq_hdr = 0;
-    new2->last_aspect_ratio_info = H262_UNSET_ASPECT_RATIO_INFO;
-    new2->last_afd = UNSET_AFD_BYTE;
-    new2->add_fake_afd = false;
+  new2->es = es;
+  new2->picture_index = 0;
+  new2->last_item = nullptr;
+  new2->reverse_data = nullptr;
+  new2->count_since_seq_hdr = 0;
+  new2->last_aspect_ratio_info = H262_UNSET_ASPECT_RATIO_INFO;
+  new2->last_afd = UNSET_AFD_BYTE;
+  new2->add_fake_afd = false;
 
-    *context = new2;
-    return 0;
+  *context = new2;
+  return 0;
 }
 
 /*
@@ -299,21 +294,20 @@ int build_h262_context(ES_p es, h262_context_p* context)
  *
  * Does nothing if `context` is already nullptr.
  */
-void free_h262_context(h262_context_p* context)
-{
-    h262_context_p cc = *context;
+void free_h262_context(h262_context_p *context) {
+  h262_context_p cc = *context;
 
-    if (cc == nullptr)
-        return;
-
-    if (cc->last_item != nullptr)
-        free_h262_item(&cc->last_item);
-
-    cc->reverse_data = nullptr;
-
-    free(*context);
-    *context = nullptr;
+  if (cc == nullptr)
     return;
+
+  if (cc->last_item != nullptr)
+    free_h262_item(&cc->last_item);
+
+  cc->reverse_data = nullptr;
+
+  free(*context);
+  *context = nullptr;
+  return;
 }
 
 /*
@@ -327,24 +321,23 @@ void free_h262_context(h262_context_p* context)
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int rewind_h262_context(h262_context_p context)
-{
-    ES_offset start_of_file = { 0, 0 };
+int rewind_h262_context(h262_context_p context) {
+  ES_offset start_of_file = {0, 0};
 
-    // First, forget where we are
-    if (context->last_item)
-        free_h262_item(&context->last_item);
+  // First, forget where we are
+  if (context->last_item)
+    free_h262_item(&context->last_item);
 
-    context->picture_index = 0; // no pictures read from this file yet
+  context->picture_index = 0; // no pictures read from this file yet
 
-    // Next, take care of rewinding
-    if (context->reverse_data) {
-        context->reverse_data->last_posn_added = -1; // next entry to be 0
-        context->count_since_seq_hdr = 0; // what else can we do?
-    }
+  // Next, take care of rewinding
+  if (context->reverse_data) {
+    context->reverse_data->last_posn_added = -1; // next entry to be 0
+    context->count_since_seq_hdr = 0;            // what else can we do?
+  }
 
-    // And then, do the relocation itself
-    return seek_ES(context->es, start_of_file);
+  // And then, do the relocation itself
+  return seek_ES(context->es, start_of_file);
 }
 
 // ------------------------------------------------------------
@@ -358,22 +351,21 @@ int rewind_h262_context(h262_context_p context)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-static int append_to_h262_picture(h262_picture_p picture, h262_item_p item)
-{
-    ES_unit_p unit = &(item->unit);
+static int append_to_h262_picture(h262_picture_p picture, h262_item_p item) {
+  ES_unit_p unit = &(item->unit);
 
-    if (is_h262_extension_start_item(item)) {
-        byte* data = unit->data;
-        int extension_start_code_id = (data[4] & 0xF0) >> 4;
-        if (extension_start_code_id == 1) // sequence extension
-        {
-            picture->progressive_sequence = data[5] & 0x08;
-        } else if (extension_start_code_id == 8) // picture coding extension
-        {
-            picture->picture_structure = data[6] & 0x03;
-        }
+  if (is_h262_extension_start_item(item)) {
+    byte *data = unit->data;
+    int extension_start_code_id = (data[4] & 0xF0) >> 4;
+    if (extension_start_code_id == 1) // sequence extension
+    {
+      picture->progressive_sequence = data[5] & 0x08;
+    } else if (extension_start_code_id == 8) // picture coding extension
+    {
+      picture->picture_structure = data[6] & 0x03;
     }
-    return append_to_ES_unit_list(picture->list, unit);
+  }
+  return append_to_ES_unit_list(picture->list, unit);
 }
 
 /*
@@ -382,68 +374,69 @@ static int append_to_h262_picture(h262_picture_p picture, h262_item_p item)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-static int build_h262_picture(h262_context_p context, h262_picture_p* picture, h262_item_p item)
-{
-    int err;
-    ES_unit_p unit = &(item->unit);
-    byte* data = unit->data;
-    h262_picture_p new2 = (h262_picture_p)malloc(SIZEOF_H262_PICTURE);
-    if (new2 == nullptr) {
-        print_err("### Unable to allocate H.262 picture datastructure\n");
-        return 1;
-    }
+static int build_h262_picture(h262_context_p context, h262_picture_p *picture,
+                              h262_item_p item) {
+  int err;
+  ES_unit_p unit = &(item->unit);
+  byte *data = unit->data;
+  h262_picture_p new2 = (h262_picture_p)malloc(SIZEOF_H262_PICTURE);
+  if (new2 == nullptr) {
+    print_err("### Unable to allocate H.262 picture datastructure\n");
+    return 1;
+  }
 
-    err = build_ES_unit_list(&(new2->list));
-    if (err) {
-        print_err("### Unable to allocate internal list for H.262 picture\n");
-        free(new2);
-        return 1;
-    }
+  err = build_ES_unit_list(&(new2->list));
+  if (err) {
+    print_err("### Unable to allocate internal list for H.262 picture\n");
+    free(new2);
+    return 1;
+  }
 
-    // Deduce what we can from the first item of the "picture"
-    if (is_h262_picture_item(item)) {
-        new2->picture_coding_type = item->picture_coding_type;
-        new2->is_picture = true;
-        new2->is_sequence_header = false;
-        new2->temporal_reference = (data[4] << 2) | ((data[5] & 0xC0) >> 6);
-        // Assume that our picture is a frame, until we're told otherwise
-        // (MPEG-1 data will never tell us otherwise)
-        new2->picture_structure = 3;
-        new2->was_two_fields = false;
-        // Assume the last AFD and aspect ratio info until told otherwise
-        new2->afd = context->last_afd;
-        new2->aspect_ratio_info = context->last_aspect_ratio_info;
-        new2->is_real_afd = false;
-    } else if (is_h262_seq_header_item(item)) {
-        new2->is_picture = false;
-        new2->is_sequence_header = true;
-        new2->picture_coding_type = 0; // Forbidden value, just in case
-        new2->aspect_ratio_info = (data[7] & 0xF0) >> 4;
-        // Assume that we are only allowed progressive frames, until we're told
-        // otherwise (MPEG-1 data will never tell us otherwise)
-        new2->progressive_sequence = 1;
-    } else if (is_h262_seq_end_item(item)) {
-        new2->is_picture = false;
-        new2->is_sequence_header = false;
-        new2->picture_coding_type = 0; // Forbidden value, just in case
-    } else {
-        fprint_err("!!! Building H.262 picture that starts with a %s (%02x)\n",
-            H262_START_CODE_STR(item->unit.start_code), item->unit.start_code);
-        new2->is_picture = false;
-        new2->is_sequence_header = false;
-        new2->picture_coding_type = 0; // Forbidden value, just in case
-    }
+  // Deduce what we can from the first item of the "picture"
+  if (is_h262_picture_item(item)) {
+    new2->picture_coding_type = item->picture_coding_type;
+    new2->is_picture = true;
+    new2->is_sequence_header = false;
+    new2->temporal_reference = (data[4] << 2) | ((data[5] & 0xC0) >> 6);
+    // Assume that our picture is a frame, until we're told otherwise
+    // (MPEG-1 data will never tell us otherwise)
+    new2->picture_structure = 3;
+    new2->was_two_fields = false;
+    // Assume the last AFD and aspect ratio info until told otherwise
+    new2->afd = context->last_afd;
+    new2->aspect_ratio_info = context->last_aspect_ratio_info;
+    new2->is_real_afd = false;
+  } else if (is_h262_seq_header_item(item)) {
+    new2->is_picture = false;
+    new2->is_sequence_header = true;
+    new2->picture_coding_type = 0; // Forbidden value, just in case
+    new2->aspect_ratio_info = (data[7] & 0xF0) >> 4;
+    // Assume that we are only allowed progressive frames, until we're told
+    // otherwise (MPEG-1 data will never tell us otherwise)
+    new2->progressive_sequence = 1;
+  } else if (is_h262_seq_end_item(item)) {
+    new2->is_picture = false;
+    new2->is_sequence_header = false;
+    new2->picture_coding_type = 0; // Forbidden value, just in case
+  } else {
+    fprint_err("!!! Building H.262 picture that starts with a %s (%02x)\n",
+               H262_START_CODE_STR(item->unit.start_code),
+               item->unit.start_code);
+    new2->is_picture = false;
+    new2->is_sequence_header = false;
+    new2->picture_coding_type = 0; // Forbidden value, just in case
+  }
 
-    err = append_to_h262_picture(new2, item);
-    if (err) {
-        fprint_err("### Error appending first item to H.262 %s\n",
-            H262_START_CODE_STR(item->unit.start_code));
-        free_h262_picture(&new2);
-        return 1;
-    }
+  err = append_to_h262_picture(new2, item);
+  if (err) {
+    fprint_err("### Error appending first item to H.262 %s\n",
+               H262_START_CODE_STR(item->unit.start_code));
+    free_h262_picture(&new2);
+    return 1;
+  }
 
-    *picture = new2;
-    return 0;
+  *picture = new2;
+  return 0;
 }
 
 /*
@@ -452,42 +445,41 @@ static int build_h262_picture(h262_context_p context, h262_picture_p* picture, h
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-static int append_fake_afd(h262_picture_p picture, byte afd)
-{
-    int err;
-    static h262_item_p item = nullptr;
+static int append_fake_afd(h262_picture_p picture, byte afd) {
+  int err;
+  static h262_item_p item = nullptr;
 
-    if (item == nullptr) {
-        err = build_h262_item(&item);
-        if (err) {
-            print_err("### Error building 'fake' AFD for H.262 picture\n");
-            return 1;
-        }
-        item->unit.data[0] = 0x00;
-        item->unit.data[1] = 0x00;
-        item->unit.data[2] = 0x01;
-        item->unit.data[3] = 0xb2;
-        item->unit.data[4] = 0x44;
-        item->unit.data[5] = 0x54;
-        item->unit.data[6] = 0x47;
-        item->unit.data[7] = 0x31;
-        item->unit.data[8] = 0x41;
-        item->unit.data[9] = afd;
-        item->unit.data_len = 10;
-        item->unit.start_code = 0xb2;
-    } else
-        item->unit.data[9] = afd;
-
-    // Remember, this *copies* the item, so we can use it again later on
-    err = append_to_h262_picture(picture, item);
+  if (item == nullptr) {
+    err = build_h262_item(&item);
     if (err) {
-        print_err("### Error appending 'fake' AFD to H.262 picture\n");
-        return 1;
+      print_err("### Error building 'fake' AFD for H.262 picture\n");
+      return 1;
     }
+    item->unit.data[0] = 0x00;
+    item->unit.data[1] = 0x00;
+    item->unit.data[2] = 0x01;
+    item->unit.data[3] = 0xb2;
+    item->unit.data[4] = 0x44;
+    item->unit.data[5] = 0x54;
+    item->unit.data[6] = 0x47;
+    item->unit.data[7] = 0x31;
+    item->unit.data[8] = 0x41;
+    item->unit.data[9] = afd;
+    item->unit.data_len = 10;
+    item->unit.start_code = 0xb2;
+  } else
+    item->unit.data[9] = afd;
 
-    picture->afd = afd;
-    picture->is_real_afd = false;
-    return 0;
+  // Remember, this *copies* the item, so we can use it again later on
+  err = append_to_h262_picture(picture, item);
+  if (err) {
+    print_err("### Error appending 'fake' AFD to H.262 picture\n");
+    return 1;
+  }
+
+  picture->afd = afd;
+  picture->is_real_afd = false;
+  return 0;
 }
 
 /*
@@ -499,18 +491,18 @@ static int append_fake_afd(h262_picture_p picture, byte afd)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-static int merge_fields(h262_picture_p picture1, h262_picture_p picture2)
-{
-    int ii;
-    for (ii = 0; ii < picture2->list->length; ii++) {
-        int err = append_to_ES_unit_list(picture1->list, &picture2->list->array[ii]);
-        if (err) {
-            print_err("### Error merging two H.262 field pictures\n");
-            return 1;
-        }
+static int merge_fields(h262_picture_p picture1, h262_picture_p picture2) {
+  int ii;
+  for (ii = 0; ii < picture2->list->length; ii++) {
+    int err =
+        append_to_ES_unit_list(picture1->list, &picture2->list->array[ii]);
+    if (err) {
+      print_err("### Error merging two H.262 field pictures\n");
+      return 1;
     }
-    picture1->was_two_fields = true;
-    return 0;
+  }
+  picture1->was_two_fields = true;
+  return 0;
 }
 
 /*
@@ -520,19 +512,18 @@ static int merge_fields(h262_picture_p picture1, h262_picture_p picture2)
  *
  * Does nothing if `picture` is already nullptr.
  */
-void free_h262_picture(h262_picture_p* picture)
-{
-    h262_picture_p pic = *picture;
+void free_h262_picture(h262_picture_p *picture) {
+  h262_picture_p pic = *picture;
 
-    if (pic == nullptr)
-        return;
-
-    if (pic->list != nullptr)
-        free_ES_unit_list(&pic->list);
-
-    free(*picture);
-    *picture = nullptr;
+  if (pic == nullptr)
     return;
+
+  if (pic->list != nullptr)
+    free_ES_unit_list(&pic->list);
+
+  free(*picture);
+  *picture = nullptr;
+  return;
 }
 
 /*
@@ -543,14 +534,13 @@ void free_h262_picture(h262_picture_p* picture)
  *
  * Returns true if the lists contain identical content, false otherwise.
  */
-int same_h262_picture(h262_picture_p picture1, h262_picture_p picture2)
-{
-    if (picture1 == picture2)
-        return true;
-    else if (picture1 == nullptr || picture2 == nullptr)
-        return false;
-    else
-        return same_ES_unit_list(picture1->list, picture2->list);
+int same_h262_picture(h262_picture_p picture1, h262_picture_p picture2) {
+  if (picture1 == picture2)
+    return true;
+  else if (picture1 == nullptr || picture2 == nullptr)
+    return false;
+  else
+    return same_ES_unit_list(picture1->list, picture2->list);
 }
 
 /*
@@ -559,52 +549,57 @@ int same_h262_picture(h262_picture_p picture1, h262_picture_p picture2)
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-static int maybe_remember_this_picture(
-    h262_context_p h262, int verbose, h262_picture_p this_picture)
-{
-    int err;
-    ES_offset start_posn = { 0, 0 };
-    uint32_t num_bytes = 0;
-    if (this_picture->is_picture) {
-        if (this_picture->picture_coding_type == 1) {
-            // It's an I picture - we want to remember it in our reverse list
-            (h262->count_since_seq_hdr)++;
+static int maybe_remember_this_picture(h262_context_p h262, int verbose,
+                                       h262_picture_p this_picture) {
+  int err;
+  ES_offset start_posn = {0, 0};
+  uint32_t num_bytes = 0;
+  if (this_picture->is_picture) {
+    if (this_picture->picture_coding_type == 1) {
+      // It's an I picture - we want to remember it in our reverse list
+      (h262->count_since_seq_hdr)++;
 
-            err = get_ES_unit_list_bounds(this_picture->list, &start_posn, &num_bytes);
-            if (err) {
-                print_err("### Error working out position/size of H.262 picture\n");
-                return 1;
-            }
+      err =
+          get_ES_unit_list_bounds(this_picture->list, &start_posn, &num_bytes);
+      if (err) {
+        print_err("### Error working out position/size of H.262 picture\n");
+        return 1;
+      }
 
-            err = remember_reverse_h262_data(h262->reverse_data, h262->picture_index, start_posn,
-                num_bytes, h262->count_since_seq_hdr, this_picture->afd);
-            if (err) {
-                print_err("### Error remembering reversing data for H.262 item\n");
-                return 1;
-            }
-            if (verbose)
-                fprint_msg("REMEMBER I picture %5d at " OFFSET_T_FORMAT_08 "/%04d for %5d\n",
-                    h262->picture_index, start_posn.infile, start_posn.inpacket, num_bytes);
-        }
-    } else if (this_picture->is_sequence_header) {
-        // It's a sequence header - remember it for the next picture
-        h262->count_since_seq_hdr = 0;
-        err = get_ES_unit_list_bounds(this_picture->list, &start_posn, &num_bytes);
-        if (err) {
-            print_err("### Error working out position/size of H.262"
-                      " sequence header for reversing data\n");
-            return 1;
-        }
-        err = remember_reverse_h262_data(h262->reverse_data, 0, start_posn, num_bytes, 0, 0);
-        if (err) {
-            print_err("### Error remembering reversing data for H.262 item\n");
-            return 1;
-        }
-        if (verbose)
-            fprint_msg("REMEMBER Sequence header at " OFFSET_T_FORMAT_08 "/%04d for %5d\n",
-                start_posn.infile, start_posn.inpacket, num_bytes);
+      err = remember_reverse_h262_data(
+          h262->reverse_data, h262->picture_index, start_posn, num_bytes,
+          h262->count_since_seq_hdr, this_picture->afd);
+      if (err) {
+        print_err("### Error remembering reversing data for H.262 item\n");
+        return 1;
+      }
+      if (verbose)
+        fprint_msg("REMEMBER I picture %5d at " OFFSET_T_FORMAT_08
+                   "/%04d for %5d\n",
+                   h262->picture_index, start_posn.infile, start_posn.inpacket,
+                   num_bytes);
     }
-    return 0;
+  } else if (this_picture->is_sequence_header) {
+    // It's a sequence header - remember it for the next picture
+    h262->count_since_seq_hdr = 0;
+    err = get_ES_unit_list_bounds(this_picture->list, &start_posn, &num_bytes);
+    if (err) {
+      print_err("### Error working out position/size of H.262"
+                " sequence header for reversing data\n");
+      return 1;
+    }
+    err = remember_reverse_h262_data(h262->reverse_data, 0, start_posn,
+                                     num_bytes, 0, 0);
+    if (err) {
+      print_err("### Error remembering reversing data for H.262 item\n");
+      return 1;
+    }
+    if (verbose)
+      fprint_msg("REMEMBER Sequence header at " OFFSET_T_FORMAT_08
+                 "/%04d for %5d\n",
+                 start_posn.infile, start_posn.inpacket, num_bytes);
+  }
+  return 0;
 }
 
 /*
@@ -618,54 +613,56 @@ static int maybe_remember_this_picture(
  * (in which case a message will have been written out to ``stderr``, but
  * the "apparent" AFD value will still be returned).
  */
-static int extract_AFD(h262_item_p item, byte* afd)
-{
-    if (item->unit.data[8] == 0x41) {
-        // AFD flag set
-        if (item->unit.data_len < 10) {
-            fprint_err("!!! AFD too short (only %d bytes - AFD missing)\n", item->unit.data_len);
-            *afd = UNSET_AFD_BYTE;
-            return 1;
-        }
-        *afd = item->unit.data[9];
-        if ((item->unit.data[9] & 0xF0) != 0xF0) {
-            fprint_err("### Bad AFD %02x (reserved bits not 1111)\n", item->unit.data[9]);
-            return 1;
-        }
-    } else if (item->unit.data[8] == 0x01) {
-        *afd = UNSET_AFD_BYTE; // no explicit AFD - use the default
-    } else {
-        fprint_err("### AFD datastructure malformed: flag byte is %02x"
-                   " instead of 0x41 or 0x01\n",
-            item->unit.data[8]);
-        if (item->unit.data_len == 9)
-            *afd = UNSET_AFD_BYTE;
-        else
-            *afd = item->unit.data[9];
-        return 1;
+static int extract_AFD(h262_item_p item, byte *afd) {
+  if (item->unit.data[8] == 0x41) {
+    // AFD flag set
+    if (item->unit.data_len < 10) {
+      fprint_err("!!! AFD too short (only %d bytes - AFD missing)\n",
+                 item->unit.data_len);
+      *afd = UNSET_AFD_BYTE;
+      return 1;
     }
-    return 0;
+    *afd = item->unit.data[9];
+    if ((item->unit.data[9] & 0xF0) != 0xF0) {
+      fprint_err("### Bad AFD %02x (reserved bits not 1111)\n",
+                 item->unit.data[9]);
+      return 1;
+    }
+  } else if (item->unit.data[8] == 0x01) {
+    *afd = UNSET_AFD_BYTE; // no explicit AFD - use the default
+  } else {
+    fprint_err("### AFD datastructure malformed: flag byte is %02x"
+               " instead of 0x41 or 0x01\n",
+               item->unit.data[8]);
+    if (item->unit.data_len == 9)
+      *afd = UNSET_AFD_BYTE;
+    else
+      *afd = item->unit.data[9];
+    return 1;
+  }
+  return 0;
 }
 
 #if DEBUG_GET_NEXT_PICTURE
 /*
  * Print a representation of an item for debugging
  */
-static void _show_item(h262_item_p item)
-{
-    print_msg("__ ");
-    if (item == nullptr) {
-        print_msg("<no item>\n");
-        return;
-    }
-    if (is_h262_picture_item(item))
-        fprint_msg("%s picture", H262_PICTURE_CODING_STR(item->picture_coding_type));
-    else if (is_h262_slice_item(item))
-        fprint_msg("slice %2x", item->unit.start_code);
-    else
-        fprint_msg("%s", H262_START_CODE_STR(item->unit.start_code));
-    fprint_msg(" at " OFFSET_T_FORMAT "/%d for %d\n", item->unit.start_posn.infile,
-        item->unit.start_posn.inpacket, item->unit.data_len);
+static void _show_item(h262_item_p item) {
+  print_msg("__ ");
+  if (item == nullptr) {
+    print_msg("<no item>\n");
+    return;
+  }
+  if (is_h262_picture_item(item))
+    fprint_msg("%s picture",
+               H262_PICTURE_CODING_STR(item->picture_coding_type));
+  else if (is_h262_slice_item(item))
+    fprint_msg("slice %2x", item->unit.start_code);
+  else
+    fprint_msg("%s", H262_START_CODE_STR(item->unit.start_code));
+  fprint_msg(" at " OFFSET_T_FORMAT "/%d for %d\n",
+             item->unit.start_posn.infile, item->unit.start_posn.inpacket,
+             item->unit.data_len);
 }
 #endif
 
@@ -687,183 +684,186 @@ static void _show_item(h262_item_p item)
  * Returns 0 if it succeeds, EOF if we reach the end of file, or 1 if some
  * error occurs.
  */
-int get_next_h262_single_picture(h262_context_p context, int verbose, h262_picture_p* picture)
-{
-    int err = 0;
+int get_next_h262_single_picture(h262_context_p context, int verbose,
+                                 h262_picture_p *picture) {
+  int err = 0;
 
-    int in_sequence_header = false;
-    int in_sequence_end = false;
-    int in_picture = false;
-    int last_was_slice = false;
-    int had_afd = false;
+  int in_sequence_header = false;
+  int in_sequence_end = false;
+  int in_picture = false;
+  int last_was_slice = false;
+  int had_afd = false;
 
-    h262_item_p item = context->last_item;
+  h262_item_p item = context->last_item;
 
 #if DEBUG_GET_NEXT_PICTURE
-    int num_slices = 0;
-    int had_slice = false;
-    int last_slice_start_code = 0;
-    if (verbose && context->last_item)
-        print_msg("__ reuse last item\n");
+  int num_slices = 0;
+  int had_slice = false;
+  int last_slice_start_code = 0;
+  if (verbose && context->last_item)
+    print_msg("__ reuse last item\n");
 #endif
 
-    context->last_item = nullptr;
+  context->last_item = nullptr;
 
-    // Find the first item of our next "picture"
-    for (;;) {
-        if (item == nullptr) {
-            err = find_next_h262_item(context->es, &item);
-            if (err)
-                return err;
-        }
-        if (is_h262_picture_item(item)) {
-            in_picture = true;
-            break;
-        } else if (is_h262_seq_header_item(item)) {
-            in_sequence_header = true;
-            break;
-        } else if (is_h262_seq_end_item(item)) {
-            in_sequence_end = true;
-            break;
-        }
-#if DEBUG_GET_NEXT_PICTURE
-        else if (verbose)
-            _show_item(item);
-#endif
-        free_h262_item(&item);
+  // Find the first item of our next "picture"
+  for (;;) {
+    if (item == nullptr) {
+      err = find_next_h262_item(context->es, &item);
+      if (err)
+        return err;
     }
-
-#if DEBUG_GET_NEXT_PICTURE
-    if (verbose) {
-        print_msg("__ --------------------------------- <start picture>\n");
-        _show_item(item);
+    if (is_h262_picture_item(item)) {
+      in_picture = true;
+      break;
+    } else if (is_h262_seq_header_item(item)) {
+      in_sequence_header = true;
+      break;
+    } else if (is_h262_seq_end_item(item)) {
+      in_sequence_end = true;
+      break;
     }
+#if DEBUG_GET_NEXT_PICTURE
+    else if (verbose)
+      _show_item(item);
 #endif
-
-    err = build_h262_picture(context, picture, item);
-    if (err)
-        return 1;
-
     free_h262_item(&item);
-
-    if (in_sequence_end) {
-        // A sequence end is a single item, so we're done
-#if DEBUG_GET_NEXT_PICTURE
-        if (verbose)
-            print_msg("__ --------------------------------- <end picture>\n");
-#endif
-        return 0;
-    }
-
-    // Now find all the rest of the picture/sequence header
-    for (;;) {
-        err = find_next_h262_item(context->es, &item);
-        if (err) {
-            if (err != EOF)
-                free_h262_picture(picture);
-            return err;
-        }
-
-        if (in_picture) {
-            // Have we just finished a picture?
-            // We know we have if the last item was a slice, but this one isn't
-            if (last_was_slice && !is_h262_slice_item(item))
-                break;
-            last_was_slice = is_h262_slice_item(item);
-        } else if (in_sequence_header) {
-            // Have we just finished a sequence header and its friends?
-            // We know we have if we've hit something that isn't an
-            // extension start or user data start code (perhaps we could
-            // get away with just keeping the (in MPEG-2) sequence_extension,
-            // but it's safer (and simpler) to keep the lot
-            if (!is_h262_extension_start_item(item) && !is_h262_user_data_item(item))
-                break;
-        }
-
-        if (in_picture) {
-            if (is_h262_AFD_user_data_item(item)) {
-                // We found a *real* AFD - remember it
-                err = extract_AFD(item, &(*picture)->afd);
-                if (err)
-                    fprint_err("!!! Assuming AFD %x at " OFFSET_T_FORMAT "/%d\n", (*picture)->afd,
-                        item->unit.start_posn.infile, item->unit.start_posn.inpacket);
-                (*picture)->is_real_afd = true;
-#if DEBUG_AFD
-                if ((*picture)->afd != context->last_afd) {
-                    print_msg("* ");
-                    report_h262_picture(stdout, *picture, false);
-                }
-#endif
-                context->last_afd = (*picture)->afd;
-                had_afd = true;
-            } else if (context->add_fake_afd && !had_afd && is_h262_slice_item(item)) {
-                // We've been asked to fake AFDs for pictures that don't have them,
-                // and this is the first slice of a picture, so now (i.e., before
-                // said first slice) is the time to add in that faked AFD
-                err = append_fake_afd(*picture, context->last_afd);
-                if (err) {
-                    free_h262_picture(picture);
-                    return 1;
-                }
-                had_afd = true; // well, sort of
-#if DEBUG_GET_NEXT_PICTURE
-                if (verbose) {
-                    print_msg("__ fake AFD ");
-                    print_bits(4, (*picture)->afd);
-                    fprint_msg(", i.e., %s", SHORT_AFD_STR((*picture)->afd));
-                    print_msg("\n");
-                }
-#endif
-            }
-        }
+  }
 
 #if DEBUG_GET_NEXT_PICTURE
-        if (verbose) {
-            if (!had_slice)
-                _show_item(item);
-            if (is_h262_slice_item(item)) {
-                num_slices++;
-                last_slice_start_code = item->unit.start_code;
-                if (!had_slice)
-                    had_slice = true;
-            }
-        }
+  if (verbose) {
+    print_msg("__ --------------------------------- <start picture>\n");
+    _show_item(item);
+  }
 #endif
 
-        // Don't forget to remember the actual item
-        err = append_to_h262_picture(*picture, item);
-        if (err) {
-            print_err("### Error adding item to H.262 sequence header\n");
-            free_h262_picture(picture);
-            return 1;
-        }
-        free_h262_item(&item);
-    }
+  err = build_h262_picture(context, picture, item);
+  if (err)
+    return 1;
 
-    if (in_picture)
-        context->picture_index++;
-    else
-        context->last_aspect_ratio_info = (*picture)->aspect_ratio_info;
+  free_h262_item(&item);
 
-    context->last_item = item;
+  if (in_sequence_end) {
+    // A sequence end is a single item, so we're done
 #if DEBUG_GET_NEXT_PICTURE
-    if (verbose) {
-        if (in_picture) {
-            if (num_slices > 1) {
-                ES_unit_p unit = &(*picture)->list->array[(*picture)->list->length - 1];
-                print_msg("__ ...\n");
-                fprint_msg("__ slice %2x", last_slice_start_code);
-                fprint_msg(" at " OFFSET_T_FORMAT "/%d for %d\n", unit->start_posn.infile,
-                    unit->start_posn.inpacket, unit->data_len);
-            }
-            fprint_msg("__ (%2d slices)\n", num_slices);
-        }
-        print_msg("__ --------------------------------- <end picture>\n");
-        if (in_picture || in_sequence_header)
-            _show_item(item);
-    }
+    if (verbose)
+      print_msg("__ --------------------------------- <end picture>\n");
 #endif
     return 0;
+  }
+
+  // Now find all the rest of the picture/sequence header
+  for (;;) {
+    err = find_next_h262_item(context->es, &item);
+    if (err) {
+      if (err != EOF)
+        free_h262_picture(picture);
+      return err;
+    }
+
+    if (in_picture) {
+      // Have we just finished a picture?
+      // We know we have if the last item was a slice, but this one isn't
+      if (last_was_slice && !is_h262_slice_item(item))
+        break;
+      last_was_slice = is_h262_slice_item(item);
+    } else if (in_sequence_header) {
+      // Have we just finished a sequence header and its friends?
+      // We know we have if we've hit something that isn't an
+      // extension start or user data start code (perhaps we could
+      // get away with just keeping the (in MPEG-2) sequence_extension,
+      // but it's safer (and simpler) to keep the lot
+      if (!is_h262_extension_start_item(item) && !is_h262_user_data_item(item))
+        break;
+    }
+
+    if (in_picture) {
+      if (is_h262_AFD_user_data_item(item)) {
+        // We found a *real* AFD - remember it
+        err = extract_AFD(item, &(*picture)->afd);
+        if (err)
+          fprint_err("!!! Assuming AFD %x at " OFFSET_T_FORMAT "/%d\n",
+                     (*picture)->afd, item->unit.start_posn.infile,
+                     item->unit.start_posn.inpacket);
+        (*picture)->is_real_afd = true;
+#if DEBUG_AFD
+        if ((*picture)->afd != context->last_afd) {
+          print_msg("* ");
+          report_h262_picture(stdout, *picture, false);
+        }
+#endif
+        context->last_afd = (*picture)->afd;
+        had_afd = true;
+      } else if (context->add_fake_afd && !had_afd &&
+                 is_h262_slice_item(item)) {
+        // We've been asked to fake AFDs for pictures that don't have them,
+        // and this is the first slice of a picture, so now (i.e., before
+        // said first slice) is the time to add in that faked AFD
+        err = append_fake_afd(*picture, context->last_afd);
+        if (err) {
+          free_h262_picture(picture);
+          return 1;
+        }
+        had_afd = true; // well, sort of
+#if DEBUG_GET_NEXT_PICTURE
+        if (verbose) {
+          print_msg("__ fake AFD ");
+          print_bits(4, (*picture)->afd);
+          fprint_msg(", i.e., %s", SHORT_AFD_STR((*picture)->afd));
+          print_msg("\n");
+        }
+#endif
+      }
+    }
+
+#if DEBUG_GET_NEXT_PICTURE
+    if (verbose) {
+      if (!had_slice)
+        _show_item(item);
+      if (is_h262_slice_item(item)) {
+        num_slices++;
+        last_slice_start_code = item->unit.start_code;
+        if (!had_slice)
+          had_slice = true;
+      }
+    }
+#endif
+
+    // Don't forget to remember the actual item
+    err = append_to_h262_picture(*picture, item);
+    if (err) {
+      print_err("### Error adding item to H.262 sequence header\n");
+      free_h262_picture(picture);
+      return 1;
+    }
+    free_h262_item(&item);
+  }
+
+  if (in_picture)
+    context->picture_index++;
+  else
+    context->last_aspect_ratio_info = (*picture)->aspect_ratio_info;
+
+  context->last_item = item;
+#if DEBUG_GET_NEXT_PICTURE
+  if (verbose) {
+    if (in_picture) {
+      if (num_slices > 1) {
+        ES_unit_p unit = &(*picture)->list->array[(*picture)->list->length - 1];
+        print_msg("__ ...\n");
+        fprint_msg("__ slice %2x", last_slice_start_code);
+        fprint_msg(" at " OFFSET_T_FORMAT "/%d for %d\n",
+                   unit->start_posn.infile, unit->start_posn.inpacket,
+                   unit->data_len);
+      }
+      fprint_msg("__ (%2d slices)\n", num_slices);
+    }
+    print_msg("__ --------------------------------- <end picture>\n");
+    if (in_picture || in_sequence_header)
+      _show_item(item);
+  }
+#endif
+  return 0;
 }
 
 /*
@@ -884,60 +884,61 @@ int get_next_h262_single_picture(h262_context_p context, int verbose, h262_pictu
  * Returns 0 if it succeeds, EOF if we reach the end of file or have
  * read the sequence_end_code, or 1 if some error occurs.
  */
-static int get_next_field_of_pair(
-    h262_context_p context, int verbose, int quiet, int first_time, h262_picture_p* picture)
-{
-    int err;
-    h262_picture_p second;
+static int get_next_field_of_pair(h262_context_p context, int verbose,
+                                  int quiet, int first_time,
+                                  h262_picture_p *picture) {
+  int err;
+  h262_picture_p second;
 
+  if (verbose)
+    fprint_msg("@@ Looking for second field (%s time)\n",
+               (first_time ? "first" : "second"));
+
+  // We assume (hope) the next picture will be our second half
+  err = get_next_h262_single_picture(context, verbose, &second);
+  if (err) {
+    if (err != EOF)
+      print_err("### Trying to read second field\n");
+    return err;
+  }
+
+  if (!is_h262_field_picture(second)) {
+    // But it was either a frame or a sequence header - oh dear
+    if (!quiet)
+      fprint_err("!!! Field followed by a %s - ignoring the field\n",
+                 (second->is_picture ? "frame" : "sequence header"));
+    free_h262_picture(picture);
+    *picture = second;
+    // and pretend to success
+  } else if ((*picture)->temporal_reference == second->temporal_reference) {
+    // They appear to be matching fields - make a frame from them
     if (verbose)
-        fprint_msg("@@ Looking for second field (%s time)\n", (first_time ? "first" : "second"));
-
-    // We assume (hope) the next picture will be our second half
-    err = get_next_h262_single_picture(context, verbose, &second);
+      print_msg("@@ Merging two fields\n");
+    err = merge_fields(*picture, second);
     if (err) {
-        if (err != EOF)
-            print_err("### Trying to read second field\n");
-        return err;
+      free_h262_picture(&second);
+      return 1;
     }
+    free_h262_picture(&second);
+  } else if (first_time) {
+    if (!quiet)
+      fprint_err("!!! Field with temporal ref %d (%x) followed by"
+                 " field with temporal ref %d (%x) - ignoring first field\n",
+                 (*picture)->temporal_reference, (*picture)->temporal_reference,
+                 second->temporal_reference, second->temporal_reference);
 
-    if (!is_h262_field_picture(second)) {
-        // But it was either a frame or a sequence header - oh dear
-        if (!quiet)
-            fprint_err("!!! Field followed by a %s - ignoring the field\n",
-                (second->is_picture ? "frame" : "sequence header"));
-        free_h262_picture(picture);
-        *picture = second;
-        // and pretend to success
-    } else if ((*picture)->temporal_reference == second->temporal_reference) {
-        // They appear to be matching fields - make a frame from them
-        if (verbose)
-            print_msg("@@ Merging two fields\n");
-        err = merge_fields(*picture, second);
-        if (err) {
-            free_h262_picture(&second);
-            return 1;
-        }
-        free_h262_picture(&second);
-    } else if (first_time) {
-        if (!quiet)
-            fprint_err("!!! Field with temporal ref %d (%x) followed by"
-                       " field with temporal ref %d (%x) - ignoring first field\n",
-                (*picture)->temporal_reference, (*picture)->temporal_reference,
-                second->temporal_reference, second->temporal_reference);
-
-        // Try again
-        free_h262_picture(picture);
-        *picture = second;
-        err = get_next_field_of_pair(context, verbose, quiet, false, picture);
-        if (err)
-            return 1;
-    } else {
-        print_err("### Adjacent fields do not share temporal references"
-                  " - unable to match fields up\n");
-        return 1;
-    }
-    return 0;
+    // Try again
+    free_h262_picture(picture);
+    *picture = second;
+    err = get_next_field_of_pair(context, verbose, quiet, false, picture);
+    if (err)
+      return 1;
+  } else {
+    print_err("### Adjacent fields do not share temporal references"
+              " - unable to match fields up\n");
+    return 1;
+  }
+  return 0;
 }
 
 /*
@@ -982,33 +983,33 @@ static int get_next_field_of_pair(
  * Returns 0 if it succeeds, EOF if we reach the end of file, or 1 if some
  * error occurs.
  */
-int get_next_h262_frame(h262_context_p context, int verbose, int quiet, h262_picture_p* picture)
-{
-    int err;
+int get_next_h262_frame(h262_context_p context, int verbose, int quiet,
+                        h262_picture_p *picture) {
+  int err;
 
-    err = get_next_h262_single_picture(context, verbose, picture);
-    if (err)
-        return err;
+  err = get_next_h262_single_picture(context, verbose, picture);
+  if (err)
+    return err;
 
-    if (is_h262_field_picture(*picture)) {
-        // We assume (hope) the next picture will be our second half
-        // - let's try to get it, and merge it into our current picture
-        err = get_next_field_of_pair(context, verbose, quiet, true, picture);
-        if (err) {
-            free_h262_picture(picture);
-            return 1;
-        }
+  if (is_h262_field_picture(*picture)) {
+    // We assume (hope) the next picture will be our second half
+    // - let's try to get it, and merge it into our current picture
+    err = get_next_field_of_pair(context, verbose, quiet, true, picture);
+    if (err) {
+      free_h262_picture(picture);
+      return 1;
     }
+  }
 
-    if (context->reverse_data) {
-        err = maybe_remember_this_picture(context, verbose, *picture);
-        if (err) {
-            free_h262_picture(picture);
-            return 1;
-        }
+  if (context->reverse_data) {
+    err = maybe_remember_this_picture(context, verbose, *picture);
+    if (err) {
+      free_h262_picture(picture);
+      return 1;
     }
+  }
 
-    return 0;
+  return 0;
 }
 
 /*
@@ -1020,28 +1021,28 @@ int get_next_h262_frame(h262_context_p context, int verbose, int quiet, h262_pic
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int write_h262_picture_as_TS(TS_writer_p tswriter, h262_picture_p picture, uint32_t pid)
-{
-    int ii;
-    ES_unit_list_p list;
+int write_h262_picture_as_TS(TS_writer_p tswriter, h262_picture_p picture,
+                             uint32_t pid) {
+  int ii;
+  ES_unit_list_p list;
 
-    if (picture == nullptr || picture->list == nullptr)
-        return 0;
-
-    list = picture->list;
-
-    for (ii = 0; ii < list->length; ii++) {
-        int err;
-        ES_unit_p unit = &(list->array[ii]);
-
-        err = write_ES_as_TS_PES_packet(
-            tswriter, unit->data, unit->data_len, pid, DEFAULT_VIDEO_STREAM_ID);
-        if (err) {
-            print_err("### Error writing out picture list to TS\n");
-            return err;
-        }
-    }
+  if (picture == nullptr || picture->list == nullptr)
     return 0;
+
+  list = picture->list;
+
+  for (ii = 0; ii < list->length; ii++) {
+    int err;
+    ES_unit_p unit = &(list->array[ii]);
+
+    err = write_ES_as_TS_PES_packet(tswriter, unit->data, unit->data_len, pid,
+                                    DEFAULT_VIDEO_STREAM_ID);
+    if (err) {
+      print_err("### Error writing out picture list to TS\n");
+      return err;
+    }
+  }
+  return 0;
 }
 
 /*
@@ -1052,26 +1053,25 @@ int write_h262_picture_as_TS(TS_writer_p tswriter, h262_picture_p picture, uint3
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int write_h262_picture_as_ES(FILE* output, h262_picture_p picture)
-{
-    int ii;
-    ES_unit_list_p list;
+int write_h262_picture_as_ES(FILE *output, h262_picture_p picture) {
+  int ii;
+  ES_unit_list_p list;
 
-    if (picture == nullptr || picture->list == nullptr)
-        return 0;
-
-    list = picture->list;
-
-    for (ii = 0; ii < list->length; ii++) {
-        int err;
-        ES_unit_p unit = &(list->array[ii]);
-        err = write_ES_unit(output, unit);
-        if (err) {
-            print_err("### Error writing out picture list to ES\n");
-            return err;
-        }
-    }
+  if (picture == nullptr || picture->list == nullptr)
     return 0;
+
+  list = picture->list;
+
+  for (ii = 0; ii < list->length; ii++) {
+    int err;
+    ES_unit_p unit = &(list->array[ii]);
+    err = write_ES_unit(output, unit);
+    if (err) {
+      print_err("### Error writing out picture list to ES\n");
+      return err;
+    }
+  }
+  return 0;
 }
 
 /*
@@ -1081,43 +1081,45 @@ int write_h262_picture_as_ES(FILE* output, h262_picture_p picture)
  * - `picture` is the picture to report on
  * - if `report_data`, then the component ES units will be printed out as well
  */
-void report_h262_picture(h262_picture_p picture, int report_data)
-{
-    if (picture->is_picture) {
-        fprint_msg("%s %s #%02d", H262_PICTURE_CODING_STR(picture->picture_coding_type),
-            H262_PICTURE_STRUCTURE_STR(picture->picture_structure), picture->temporal_reference);
+void report_h262_picture(h262_picture_p picture, int report_data) {
+  if (picture->is_picture) {
+    fprint_msg("%s %s #%02d",
+               H262_PICTURE_CODING_STR(picture->picture_coding_type),
+               H262_PICTURE_STRUCTURE_STR(picture->picture_structure),
+               picture->temporal_reference);
 
-        if (picture->was_two_fields)
-            print_msg(" (merged)");
+    if (picture->was_two_fields)
+      print_msg(" (merged)");
 
-        fprint_msg(" %s", H262_ASPECT_RATIO_INFO_STR(picture->aspect_ratio_info));
+    fprint_msg(" %s", H262_ASPECT_RATIO_INFO_STR(picture->aspect_ratio_info));
 
-        if (picture->is_real_afd)
-            print_msg(" AFD ");
-        else
-            print_msg(" afd ");
-        print_bits(4, picture->afd);
-        fprint_msg(", i.e., %s", SHORT_AFD_STR(picture->afd));
-        print_msg("\n");
-    } else if (picture->is_sequence_header) {
-        print_msg("Sequence header: ");
+    if (picture->is_real_afd)
+      print_msg(" AFD ");
+    else
+      print_msg(" afd ");
+    print_bits(4, picture->afd);
+    fprint_msg(", i.e., %s", SHORT_AFD_STR(picture->afd));
+    print_msg("\n");
+  } else if (picture->is_sequence_header) {
+    print_msg("Sequence header: ");
 
-        switch (picture->progressive_sequence) {
-        case 0:
-            print_msg("frames and fields");
-            break;
-        case 1:
-            print_msg("progressive frames only");
-            break;
-        default:
-            fprint_msg("progressive_sequence=%d", picture->progressive_sequence);
-            break;
-        }
-        fprint_msg(", aspect ratio %s", H262_ASPECT_RATIO_INFO_STR(picture->aspect_ratio_info));
-        print_msg("\n");
-    } else {
-        print_msg("Sequence end\n");
+    switch (picture->progressive_sequence) {
+    case 0:
+      print_msg("frames and fields");
+      break;
+    case 1:
+      print_msg("progressive frames only");
+      break;
+    default:
+      fprint_msg("progressive_sequence=%d", picture->progressive_sequence);
+      break;
     }
-    if (report_data)
-        report_ES_unit_list("ES units", picture->list);
+    fprint_msg(", aspect ratio %s",
+               H262_ASPECT_RATIO_INFO_STR(picture->aspect_ratio_info));
+    print_msg("\n");
+  } else {
+    print_msg("Sequence end\n");
+  }
+  if (report_data)
+    report_ES_unit_list("ES units", picture->list);
 }

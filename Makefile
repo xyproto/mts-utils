@@ -1,11 +1,14 @@
 .NOTPARALLEL: build clean install install-man
-.PHONY: build clean install install-man test
+.PHONY: build clean install install-man test fmt
 
 DESTDIR ?=
 PREFIX ?= /usr
 
 build:
 	+CXXFLAGS='$(CXXFLAGS) -w' parallel slay opt -C ::: es2ts esdots esfilter esmerge esreport esreverse m2ts2ts pcapreport ps2ts psdots psreport rtp2264 stream_type ts2es ts2ps ts_packet_insert tsdvbsub tsfilter tsinfo tsplay tsreport tsserve
+
+fmt:
+	@./fmt.sh
 
 test:
 	+slay -C common test

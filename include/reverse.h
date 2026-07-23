@@ -71,7 +71,8 @@
 // ------------------------------------------------------------
 // A useful macro to tell us if the `idx` entry in the reverse_data
 // structure `rev` is a sequence header or not (or did you guess?)
-#define SEQUENCE_HEADER_ENTRY(rev, idx) (!(rev)->is_h264 && (rev)->seq_offset[idx] == 0)
+#define SEQUENCE_HEADER_ENTRY(rev, idx)                                        \
+  (!(rev)->is_h264 && (rev)->seq_offset[idx] == 0)
 
 // ============================================================
 // Remembering start/length information for reversing video sequences
@@ -93,91 +94,90 @@
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_reverse_data(reverse_data_p* reverse_data, int is_h264)
-{
-    int newsize = REVERSE_ARRAY_START_SIZE;
-    reverse_data_p new2 = (reverse_data_p)malloc(SIZEOF_REVERSE_DATA);
-    if (new2 == nullptr) {
-        print_err("### Unable to allocate reverse data datastructure\n");
-        return 1;
+int build_reverse_data(reverse_data_p *reverse_data, int is_h264) {
+  int newsize = REVERSE_ARRAY_START_SIZE;
+  reverse_data_p new2 = (reverse_data_p)malloc(SIZEOF_REVERSE_DATA);
+  if (new2 == nullptr) {
+    print_err("### Unable to allocate reverse data datastructure\n");
+    return 1;
+  }
+
+  new2->start_file = (offset_t *)malloc(newsize * sizeof(offset_t));
+  if (new2->start_file == nullptr) {
+    print_err("### Unable to allocate reverse data array (start_file)\n");
+    free(new2);
+    return 1;
+  }
+
+  new2->start_pkt = (int32_t *)malloc(newsize * sizeof(int32_t));
+  if (new2->start_pkt == nullptr) {
+    print_err("### Unable to allocate reverse data array (start_pkt)\n");
+    free(new2->start_file);
+    free(new2);
+    return 1;
+  }
+
+  new2->index = (uint32_t *)malloc(newsize * sizeof(uint32_t));
+  if (new2->index == nullptr) {
+    print_err("### Unable to allocate reverse data array (index)\n");
+    free(new2->start_file);
+    free(new2->start_pkt);
+    free(new2);
+    return 1;
+  }
+  new2->data_len = (int32_t *)malloc(newsize * sizeof(int32_t));
+  if (new2->data_len == nullptr) {
+    print_err("### Unable to allocate reverse data array (data_len)\n");
+    free(new2->start_file);
+    free(new2->start_pkt);
+    free(new2->index);
+    free(new2);
+    return 1;
+  }
+
+  if (is_h264) {
+    new2->seq_offset = nullptr;
+    new2->afd_byte = nullptr;
+  } else {
+    new2->seq_offset = (byte *)malloc(newsize);
+    if (new2->seq_offset == nullptr) {
+      print_err("### Unable to allocate reverse data array (seq offset)\n");
+      free(new2->start_file);
+      free(new2->start_pkt);
+      free(new2->index);
+      free(new2->data_len);
+      free(new2);
+      return 1;
     }
-
-    new2->start_file = (offset_t*)malloc(newsize * sizeof(offset_t));
-    if (new2->start_file == nullptr) {
-        print_err("### Unable to allocate reverse data array (start_file)\n");
-        free(new2);
-        return 1;
+    new2->afd_byte = (byte *)malloc(newsize);
+    if (new2->afd_byte == nullptr) {
+      print_err("### Unable to allocate reverse data array (AFD)\n");
+      free(new2->seq_offset);
+      free(new2->start_file);
+      free(new2->start_pkt);
+      free(new2->index);
+      free(new2->data_len);
+      free(new2);
+      return 1;
     }
+  }
+  new2->size = newsize;
+  new2->length = 0;
+  new2->num_pictures = 0;
 
-    new2->start_pkt = (int32_t*)malloc(newsize * sizeof(int32_t));
-    if (new2->start_pkt == nullptr) {
-        print_err("### Unable to allocate reverse data array (start_pkt)\n");
-        free(new2->start_file);
-        free(new2);
-        return 1;
-    }
+  new2->is_h264 = is_h264;
+  new2->pictures_written = 0;
+  new2->pictures_kept = 0;
+  new2->first_written = 0;
+  new2->last_written = 0;
+  new2->last_posn_added = 0; // although undefined if `length` == 0
+  new2->output_sequence_headers = !is_h264;
 
-    new2->index = (uint32_t*)malloc(newsize * sizeof(uint32_t));
-    if (new2->index == nullptr) {
-        print_err("### Unable to allocate reverse data array (index)\n");
-        free(new2->start_file);
-        free(new2->start_pkt);
-        free(new2);
-        return 1;
-    }
-    new2->data_len = (int32_t*)malloc(newsize * sizeof(int32_t));
-    if (new2->data_len == nullptr) {
-        print_err("### Unable to allocate reverse data array (data_len)\n");
-        free(new2->start_file);
-        free(new2->start_pkt);
-        free(new2->index);
-        free(new2);
-        return 1;
-    }
+  new2->pid = DEFAULT_VIDEO_PID;
+  new2->stream_id = DEFAULT_VIDEO_STREAM_ID;
 
-    if (is_h264) {
-        new2->seq_offset = nullptr;
-        new2->afd_byte = nullptr;
-    } else {
-        new2->seq_offset = (byte*)malloc(newsize);
-        if (new2->seq_offset == nullptr) {
-            print_err("### Unable to allocate reverse data array (seq offset)\n");
-            free(new2->start_file);
-            free(new2->start_pkt);
-            free(new2->index);
-            free(new2->data_len);
-            free(new2);
-            return 1;
-        }
-        new2->afd_byte = (byte*)malloc(newsize);
-        if (new2->afd_byte == nullptr) {
-            print_err("### Unable to allocate reverse data array (AFD)\n");
-            free(new2->seq_offset);
-            free(new2->start_file);
-            free(new2->start_pkt);
-            free(new2->index);
-            free(new2->data_len);
-            free(new2);
-            return 1;
-        }
-    }
-    new2->size = newsize;
-    new2->length = 0;
-    new2->num_pictures = 0;
-
-    new2->is_h264 = is_h264;
-    new2->pictures_written = 0;
-    new2->pictures_kept = 0;
-    new2->first_written = 0;
-    new2->last_written = 0;
-    new2->last_posn_added = 0; // although undefined if `length` == 0
-    new2->output_sequence_headers = !is_h264;
-
-    new2->pid = DEFAULT_VIDEO_PID;
-    new2->stream_id = DEFAULT_VIDEO_STREAM_ID;
-
-    *reverse_data = new2;
-    return 0;
+  *reverse_data = new2;
+  return 0;
 }
 
 /*
@@ -187,10 +187,10 @@ int build_reverse_data(reverse_data_p* reverse_data, int is_h264)
  * and if the standard default values (DEFAULT_VIDEO_PID and
  * DEFAULT_VIDEO_STREAM_ID) are not correct.
  */
-void set_reverse_pid(reverse_data_p reverse_data, uint32_t pid, byte stream_id)
-{
-    reverse_data->pid = pid;
-    reverse_data->stream_id = stream_id;
+void set_reverse_pid(reverse_data_p reverse_data, uint32_t pid,
+                     byte stream_id) {
+  reverse_data->pid = pid;
+  reverse_data->stream_id = stream_id;
 }
 
 /*
@@ -200,16 +200,15 @@ void set_reverse_pid(reverse_data_p reverse_data, uint32_t pid, byte stream_id)
  *
  * Returns 0 if all is well, 1 if something goes wrong.
  */
-int add_h262_reverse_context(h262_context_p h262, reverse_data_p reverse_data)
-{
-    if (reverse_data->is_h264) {
-        print_err("### Cannot add an H.262 context to an H.264 reverse data"
-                  " context\n");
-        return 1;
-    }
-    h262->reverse_data = reverse_data;
-    reverse_data->h262 = h262;
-    return 0;
+int add_h262_reverse_context(h262_context_p h262, reverse_data_p reverse_data) {
+  if (reverse_data->is_h264) {
+    print_err("### Cannot add an H.262 context to an H.264 reverse data"
+              " context\n");
+    return 1;
+  }
+  h262->reverse_data = reverse_data;
+  reverse_data->h262 = h262;
+  return 0;
 }
 
 /*
@@ -219,16 +218,16 @@ int add_h262_reverse_context(h262_context_p h262, reverse_data_p reverse_data)
  *
  * Returns 0 if all is well, 1 if something goes wrong.
  */
-int add_access_unit_reverse_context(access_unit_context_p context, reverse_data_p reverse_data)
-{
-    if (!reverse_data->is_h264) {
-        print_err("### Cannot add an H.264 access unit context to an"
-                  " H.262 reverse data context\n");
-        return 1;
-    }
-    context->reverse_data = reverse_data;
-    reverse_data->h264 = context;
-    return 0;
+int add_access_unit_reverse_context(access_unit_context_p context,
+                                    reverse_data_p reverse_data) {
+  if (!reverse_data->is_h264) {
+    print_err("### Cannot add an H.264 access unit context to an"
+              " H.262 reverse data context\n");
+    return 1;
+  }
+  context->reverse_data = reverse_data;
+  reverse_data->h264 = context;
+  return 0;
 }
 
 /*
@@ -236,28 +235,27 @@ int add_access_unit_reverse_context(access_unit_context_p context, reverse_data_
  *
  * Sets `reverse_data` to nullptr.
  */
-void free_reverse_data(reverse_data_p* reverse_data)
-{
-    reverse_data_p this2 = *reverse_data;
+void free_reverse_data(reverse_data_p *reverse_data) {
+  reverse_data_p this2 = *reverse_data;
 
-    if (this2 == nullptr)
-        return;
+  if (this2 == nullptr)
+    return;
 
-    if (this2->seq_offset != nullptr) {
-        free(this2->seq_offset);
-        this2->seq_offset = nullptr;
-    }
-    free(this2->index);
-    free(this2->start_file);
-    free(this2->start_pkt);
-    free(this2->data_len);
-    this2->index = nullptr;
-    this2->start_file = nullptr;
-    this2->start_pkt = nullptr;
-    this2->data_len = nullptr;
-    this2->length = this2->size = 0;
-    free(this2);
-    *reverse_data = nullptr;
+  if (this2->seq_offset != nullptr) {
+    free(this2->seq_offset);
+    this2->seq_offset = nullptr;
+  }
+  free(this2->index);
+  free(this2->start_file);
+  free(this2->start_pkt);
+  free(this2->data_len);
+  this2->index = nullptr;
+  this2->start_file = nullptr;
+  this2->start_pkt = nullptr;
+  this2->data_len = nullptr;
+  this2->length = this2->size = 0;
+  free(this2);
+  *reverse_data = nullptr;
 }
 
 /*
@@ -267,60 +265,63 @@ void free_reverse_data(reverse_data_p* reverse_data)
  * Returns -1 if offset1 < offset2, 0 if they are the same, and 1 if
  * offset1 > offset2.
  */
-static inline int cmp_offsets(ES_offset offset1, offset_t file_posn2, int32_t pkt_posn2)
-{
-    if (offset1.infile < file_posn2)
-        return -1;
-    else if (offset1.infile > file_posn2)
-        return 1;
-    else if (offset1.inpacket < pkt_posn2)
-        return -1;
-    else if (offset1.inpacket > pkt_posn2)
-        return 1;
-    else
-        return 0;
+static inline int cmp_offsets(ES_offset offset1, offset_t file_posn2,
+                              int32_t pkt_posn2) {
+  if (offset1.infile < file_posn2)
+    return -1;
+  else if (offset1.infile > file_posn2)
+    return 1;
+  else if (offset1.inpacket < pkt_posn2)
+    return -1;
+  else if (offset1.inpacket > pkt_posn2)
+    return 1;
+  else
+    return 0;
 }
 
-static void debug_reverse_data_problem(
-    reverse_data_p reverse_data, uint32_t index, ES_offset start_posn, uint32_t idx)
-{
-    FILE* tempfile;
-    char* tempfilename = "tsserve_reverse_problem.txt";
-    int ii;
+static void debug_reverse_data_problem(reverse_data_p reverse_data,
+                                       uint32_t index, ES_offset start_posn,
+                                       uint32_t idx) {
+  FILE *tempfile;
+  char *tempfilename = "tsserve_reverse_problem.txt";
+  int ii;
 
-    tempfile = fopen(tempfilename, "a+");
-    if (tempfile == nullptr) {
-        fprint_err("### Unable to open file %s - writing diagnostics"
-                   " to stderr instead\n",
-            tempfilename);
-        tempfile = stderr;
-    } else {
-        time_t now;
-        fprint_err("### Appending diagnostics to file %s\n", tempfilename);
-        now = time(nullptr);
-        fprintf(tempfile, "** %s:\n", ctime(&now));
-    }
+  tempfile = fopen(tempfilename, "a+");
+  if (tempfile == nullptr) {
+    fprint_err("### Unable to open file %s - writing diagnostics"
+               " to stderr instead\n",
+               tempfilename);
+    tempfile = stderr;
+  } else {
+    time_t now;
+    fprint_err("### Appending diagnostics to file %s\n", tempfilename);
+    now = time(nullptr);
+    fprintf(tempfile, "** %s:\n", ctime(&now));
+  }
 
-    fprintf(tempfile,
-        "Trying to add reverse data [%d] " OFFSET_T_FORMAT
-        "/%d at index %d (again),\nbut previous entry was [%d] " OFFSET_T_FORMAT "/%d\n",
-        index, start_posn.infile, start_posn.inpacket, idx, reverse_data->index[idx],
-        reverse_data->start_file[idx], reverse_data->start_pkt[idx]);
-    fprintf(tempfile, "Last posn added %d, length %d, index %d\n", reverse_data->last_posn_added,
-        reverse_data->length, index);
-    for (ii = 0; ii < reverse_data->length; ii++)
-        if (reverse_data->is_h264 || reverse_data->seq_offset[ii])
-            fprintf(tempfile, "   %3d: %4d at " OFFSET_T_FORMAT "/%d for %d\n", ii,
-                reverse_data->index[ii], reverse_data->start_file[ii], reverse_data->start_pkt[ii],
-                reverse_data->data_len[ii]);
-        else
-            fprintf(tempfile, "   %3d: seqh at " OFFSET_T_FORMAT "/%d for %d\n", ii,
-                reverse_data->start_file[ii], reverse_data->start_pkt[ii],
-                reverse_data->data_len[ii]);
-    if (tempfile != stderr) {
-        fprintf(tempfile, "\n\n");
-        fclose(tempfile);
-    }
+  fprintf(
+      tempfile,
+      "Trying to add reverse data [%d] " OFFSET_T_FORMAT
+      "/%d at index %d (again),\nbut previous entry was [%d] " OFFSET_T_FORMAT
+      "/%d\n",
+      index, start_posn.infile, start_posn.inpacket, idx,
+      reverse_data->index[idx], reverse_data->start_file[idx],
+      reverse_data->start_pkt[idx]);
+  fprintf(tempfile, "Last posn added %d, length %d, index %d\n",
+          reverse_data->last_posn_added, reverse_data->length, index);
+  for (ii = 0; ii < reverse_data->length; ii++)
+    if (reverse_data->is_h264 || reverse_data->seq_offset[ii])
+      fprintf(tempfile, "   %3d: %4d at " OFFSET_T_FORMAT "/%d for %d\n", ii,
+              reverse_data->index[ii], reverse_data->start_file[ii],
+              reverse_data->start_pkt[ii], reverse_data->data_len[ii]);
+    else
+      fprintf(tempfile, "   %3d: seqh at " OFFSET_T_FORMAT "/%d for %d\n", ii,
+              reverse_data->start_file[ii], reverse_data->start_pkt[ii],
+              reverse_data->data_len[ii]);
+  if (tempfile != stderr) {
+    fprintf(tempfile, "\n\n");
+    fclose(tempfile);
+  }
 }
 
 /*
@@ -341,96 +342,99 @@ static void debug_reverse_data_problem(
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int remember_reverse_h262_data(reverse_data_p reverse_data, uint32_t index, ES_offset start_posn,
-    uint32_t length, byte seq_offset, byte afd)
-{
-    if (reverse_data->length > 0
-        && (reverse_data->last_posn_added + 1) < (uint32_t)reverse_data->length) {
-        // We're repeating an entry we previously added - check it hasn't
-        // changed (since the only obvious way for this to have happened
-        // is if we've rewound and are then moving forwards again, it should
-        // not be possible for the data to have changed at a particular index)
-        int idx = reverse_data->last_posn_added + 1;
-        int cmp
-            = cmp_offsets(start_posn, reverse_data->start_file[idx], reverse_data->start_pkt[idx]);
-        if (cmp == 0) {
+int remember_reverse_h262_data(reverse_data_p reverse_data, uint32_t index,
+                               ES_offset start_posn, uint32_t length,
+                               byte seq_offset, byte afd) {
+  if (reverse_data->length > 0 &&
+      (reverse_data->last_posn_added + 1) < (uint32_t)reverse_data->length) {
+    // We're repeating an entry we previously added - check it hasn't
+    // changed (since the only obvious way for this to have happened
+    // is if we've rewound and are then moving forwards again, it should
+    // not be possible for the data to have changed at a particular index)
+    int idx = reverse_data->last_posn_added + 1;
+    int cmp = cmp_offsets(start_posn, reverse_data->start_file[idx],
+                          reverse_data->start_pkt[idx]);
+    if (cmp == 0) {
 #if DEBUG
-            fprint_msg("++ Added [%d] " OFFSET_T_FORMAT "/%d again\n", index, start_posn.infile,
-                start_posn.inpacket);
+      fprint_msg("++ Added [%d] " OFFSET_T_FORMAT "/%d again\n", index,
+                 start_posn.infile, start_posn.inpacket);
 #endif
-            reverse_data->last_posn_added++;
-            return 0;
-        } else {
-            fprint_err("### Trying to add reverse data [%d] " OFFSET_T_FORMAT
-                       "/%d at index %d (again),\n    but previous entry was [%d] " OFFSET_T_FORMAT
-                       "/%d\n",
-                index, start_posn.infile, start_posn.inpacket, idx, reverse_data->index[idx],
-                reverse_data->start_file[idx], reverse_data->start_pkt[idx]);
-            debug_reverse_data_problem(reverse_data, index, start_posn, idx);
-            return 1;
-        }
-    }
-
-    if (reverse_data->size == reverse_data->length) {
-        int newsize = reverse_data->size + REVERSE_ARRAY_INCREMENT_SIZE;
-        reverse_data->index = (uint32_t*)realloc(reverse_data->index, newsize * sizeof(uint32_t));
-        if (reverse_data->index == nullptr) {
-            print_err("### Unable to extend reverse data array (index)\n");
-            return 1;
-        }
-        reverse_data->start_file
-            = (offset_t*)realloc(reverse_data->start_file, newsize * sizeof(offset_t));
-        if (reverse_data->start_file == nullptr) {
-            print_err("### Unable to extend reverse data array (start_file)\n");
-            return 1;
-        }
-        reverse_data->start_pkt
-            = (int32_t*)realloc(reverse_data->start_pkt, newsize * sizeof(int32_t));
-        if (reverse_data->start_pkt == nullptr) {
-            print_err("### Unable to extend reverse data array (start_pkt)\n");
-            return 1;
-        }
-        reverse_data->data_len
-            = (int32_t*)realloc(reverse_data->data_len, newsize * sizeof(int32_t));
-        if (reverse_data->data_len == nullptr) {
-            print_err("### Unable to extend reverse data array (length)\n");
-            return 1;
-        }
-
-        if (!reverse_data->is_h264) {
-            reverse_data->seq_offset = (byte*)realloc(reverse_data->seq_offset, newsize);
-            if (reverse_data->seq_offset == nullptr) {
-                print_err("### Unable to extend reverse data array (seq offset)\n");
-                return 1;
-            }
-            reverse_data->afd_byte = (byte*)realloc(reverse_data->afd_byte, newsize);
-            if (reverse_data->afd_byte == nullptr) {
-                print_err("### Unable to extend reverse data array (AFD)\n");
-                return 1;
-            }
-        }
-        reverse_data->size = newsize;
-    }
-
-    // If we're not an H.262 sequence header, remember our index
-    if (seq_offset != 0) {
-        reverse_data->num_pictures++;
-        reverse_data->index[reverse_data->length] = index;
-        reverse_data->seq_offset[reverse_data->length] = seq_offset;
-        reverse_data->afd_byte[reverse_data->length] = afd;
+      reverse_data->last_posn_added++;
+      return 0;
     } else {
-        reverse_data->index[reverse_data->length] = 0;
-        reverse_data->seq_offset[reverse_data->length] = 0;
-        reverse_data->afd_byte[reverse_data->length] = 0;
+      fprint_err("### Trying to add reverse data [%d] " OFFSET_T_FORMAT
+                 "/%d at index %d (again),\n    but previous entry was "
+                 "[%d] " OFFSET_T_FORMAT "/%d\n",
+                 index, start_posn.infile, start_posn.inpacket, idx,
+                 reverse_data->index[idx], reverse_data->start_file[idx],
+                 reverse_data->start_pkt[idx]);
+      debug_reverse_data_problem(reverse_data, index, start_posn, idx);
+      return 1;
+    }
+  }
+
+  if (reverse_data->size == reverse_data->length) {
+    int newsize = reverse_data->size + REVERSE_ARRAY_INCREMENT_SIZE;
+    reverse_data->index =
+        (uint32_t *)realloc(reverse_data->index, newsize * sizeof(uint32_t));
+    if (reverse_data->index == nullptr) {
+      print_err("### Unable to extend reverse data array (index)\n");
+      return 1;
+    }
+    reverse_data->start_file = (offset_t *)realloc(reverse_data->start_file,
+                                                   newsize * sizeof(offset_t));
+    if (reverse_data->start_file == nullptr) {
+      print_err("### Unable to extend reverse data array (start_file)\n");
+      return 1;
+    }
+    reverse_data->start_pkt =
+        (int32_t *)realloc(reverse_data->start_pkt, newsize * sizeof(int32_t));
+    if (reverse_data->start_pkt == nullptr) {
+      print_err("### Unable to extend reverse data array (start_pkt)\n");
+      return 1;
+    }
+    reverse_data->data_len =
+        (int32_t *)realloc(reverse_data->data_len, newsize * sizeof(int32_t));
+    if (reverse_data->data_len == nullptr) {
+      print_err("### Unable to extend reverse data array (length)\n");
+      return 1;
     }
 
-    reverse_data->start_file[reverse_data->length] = start_posn.infile;
-    reverse_data->start_pkt[reverse_data->length] = start_posn.inpacket;
-    reverse_data->data_len[reverse_data->length] = length;
+    if (!reverse_data->is_h264) {
+      reverse_data->seq_offset =
+          (byte *)realloc(reverse_data->seq_offset, newsize);
+      if (reverse_data->seq_offset == nullptr) {
+        print_err("### Unable to extend reverse data array (seq offset)\n");
+        return 1;
+      }
+      reverse_data->afd_byte = (byte *)realloc(reverse_data->afd_byte, newsize);
+      if (reverse_data->afd_byte == nullptr) {
+        print_err("### Unable to extend reverse data array (AFD)\n");
+        return 1;
+      }
+    }
+    reverse_data->size = newsize;
+  }
 
-    reverse_data->last_posn_added = reverse_data->length;
-    reverse_data->length++;
-    return 0;
+  // If we're not an H.262 sequence header, remember our index
+  if (seq_offset != 0) {
+    reverse_data->num_pictures++;
+    reverse_data->index[reverse_data->length] = index;
+    reverse_data->seq_offset[reverse_data->length] = seq_offset;
+    reverse_data->afd_byte[reverse_data->length] = afd;
+  } else {
+    reverse_data->index[reverse_data->length] = 0;
+    reverse_data->seq_offset[reverse_data->length] = 0;
+    reverse_data->afd_byte[reverse_data->length] = 0;
+  }
+
+  reverse_data->start_file[reverse_data->length] = start_posn.infile;
+  reverse_data->start_pkt[reverse_data->length] = start_posn.inpacket;
+  reverse_data->data_len[reverse_data->length] = length;
+
+  reverse_data->last_posn_added = reverse_data->length;
+  reverse_data->length++;
+  return 0;
 }
 
 /*
@@ -447,73 +451,74 @@ int remember_reverse_h262_data(reverse_data_p reverse_data, uint32_t index, ES_o
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int remember_reverse_h264_data(
-    reverse_data_p reverse_data, uint32_t index, ES_offset start_posn, uint32_t length)
-{
-    if (reverse_data->length > 0
-        && (reverse_data->last_posn_added + 1) < (uint32_t)reverse_data->length) {
-        // We're repeating an entry we previously added - check it hasn't
-        // changed (since the only obvious way for this to have happened
-        // is if we've rewound and are then moving forwards again, it should
-        // not be possible for the data to have changed at a particular index)
-        int idx = reverse_data->last_posn_added + 1;
-        int cmp
-            = cmp_offsets(start_posn, reverse_data->start_file[idx], reverse_data->start_pkt[idx]);
-        if (cmp == 0) {
+int remember_reverse_h264_data(reverse_data_p reverse_data, uint32_t index,
+                               ES_offset start_posn, uint32_t length) {
+  if (reverse_data->length > 0 &&
+      (reverse_data->last_posn_added + 1) < (uint32_t)reverse_data->length) {
+    // We're repeating an entry we previously added - check it hasn't
+    // changed (since the only obvious way for this to have happened
+    // is if we've rewound and are then moving forwards again, it should
+    // not be possible for the data to have changed at a particular index)
+    int idx = reverse_data->last_posn_added + 1;
+    int cmp = cmp_offsets(start_posn, reverse_data->start_file[idx],
+                          reverse_data->start_pkt[idx]);
+    if (cmp == 0) {
 #if DEBUG
-            fprint_msg("++ Added [%d] " OFFSET_T_FORMAT "/%d again\n", index, start_posn.infile,
-                start_posn.inpacket);
+      fprint_msg("++ Added [%d] " OFFSET_T_FORMAT "/%d again\n", index,
+                 start_posn.infile, start_posn.inpacket);
 #endif
-            reverse_data->last_posn_added++;
-            return 0;
-        } else {
-            fprint_err("### Trying to add reverse data [%d] " OFFSET_T_FORMAT
-                       "/%d at index %d (again),\n    but previous entry was [%d] " OFFSET_T_FORMAT
-                       "/%d\n",
-                index, start_posn.infile, start_posn.inpacket, idx, reverse_data->index[idx],
-                reverse_data->start_file[idx], reverse_data->start_pkt[idx]);
-            debug_reverse_data_problem(reverse_data, index, start_posn, idx);
-            return 1;
-        }
+      reverse_data->last_posn_added++;
+      return 0;
+    } else {
+      fprint_err("### Trying to add reverse data [%d] " OFFSET_T_FORMAT
+                 "/%d at index %d (again),\n    but previous entry was "
+                 "[%d] " OFFSET_T_FORMAT "/%d\n",
+                 index, start_posn.infile, start_posn.inpacket, idx,
+                 reverse_data->index[idx], reverse_data->start_file[idx],
+                 reverse_data->start_pkt[idx]);
+      debug_reverse_data_problem(reverse_data, index, start_posn, idx);
+      return 1;
     }
+  }
 
-    if (reverse_data->size == reverse_data->length) {
-        int newsize = reverse_data->size + REVERSE_ARRAY_INCREMENT_SIZE;
-        reverse_data->index = (uint32_t*)realloc(reverse_data->index, newsize * sizeof(uint32_t));
-        if (reverse_data->index == nullptr) {
-            print_err("### Unable to extend reverse data array (index)\n");
-            return 1;
-        }
-        reverse_data->start_file
-            = (offset_t*)realloc(reverse_data->start_file, newsize * sizeof(offset_t));
-        if (reverse_data->start_file == nullptr) {
-            print_err("### Unable to extend reverse data array (start_file)\n");
-            return 1;
-        }
-        reverse_data->start_pkt
-            = (int32_t*)realloc(reverse_data->start_pkt, newsize * sizeof(int32_t));
-        if (reverse_data->start_pkt == nullptr) {
-            print_err("### Unable to extend reverse data array (start_pkt)\n");
-            return 1;
-        }
-        reverse_data->data_len
-            = (int32_t*)realloc(reverse_data->data_len, newsize * sizeof(int32_t));
-        if (reverse_data->data_len == nullptr) {
-            print_err("### Unable to extend reverse data array (length)\n");
-            return 1;
-        }
-        reverse_data->size = newsize;
+  if (reverse_data->size == reverse_data->length) {
+    int newsize = reverse_data->size + REVERSE_ARRAY_INCREMENT_SIZE;
+    reverse_data->index =
+        (uint32_t *)realloc(reverse_data->index, newsize * sizeof(uint32_t));
+    if (reverse_data->index == nullptr) {
+      print_err("### Unable to extend reverse data array (index)\n");
+      return 1;
     }
+    reverse_data->start_file = (offset_t *)realloc(reverse_data->start_file,
+                                                   newsize * sizeof(offset_t));
+    if (reverse_data->start_file == nullptr) {
+      print_err("### Unable to extend reverse data array (start_file)\n");
+      return 1;
+    }
+    reverse_data->start_pkt =
+        (int32_t *)realloc(reverse_data->start_pkt, newsize * sizeof(int32_t));
+    if (reverse_data->start_pkt == nullptr) {
+      print_err("### Unable to extend reverse data array (start_pkt)\n");
+      return 1;
+    }
+    reverse_data->data_len =
+        (int32_t *)realloc(reverse_data->data_len, newsize * sizeof(int32_t));
+    if (reverse_data->data_len == nullptr) {
+      print_err("### Unable to extend reverse data array (length)\n");
+      return 1;
+    }
+    reverse_data->size = newsize;
+  }
 
-    reverse_data->num_pictures++;
-    reverse_data->index[reverse_data->length] = index;
-    reverse_data->start_file[reverse_data->length] = start_posn.infile;
-    reverse_data->start_pkt[reverse_data->length] = start_posn.inpacket;
-    reverse_data->data_len[reverse_data->length] = length;
+  reverse_data->num_pictures++;
+  reverse_data->index[reverse_data->length] = index;
+  reverse_data->start_file[reverse_data->length] = start_posn.infile;
+  reverse_data->start_pkt[reverse_data->length] = start_posn.inpacket;
+  reverse_data->data_len[reverse_data->length] = length;
 
-    reverse_data->last_posn_added = reverse_data->length;
-    reverse_data->length++;
-    return 0;
+  reverse_data->last_posn_added = reverse_data->length;
+  reverse_data->length++;
+  return 0;
 }
 
 /*
@@ -536,44 +541,45 @@ int remember_reverse_h264_data(
  *   will always be 0. `seq_offset` may be passed as nullptr if the value is
  *   of no interest.
  * - for H.262 data, if the entry is a picture, then `afd` will be its
- *   (effective) AFD byte. Otherwise it will be 0. `afd` may be passed as nullptr
- *   if the value if of no interest.
+ *   (effective) AFD byte. Otherwise it will be 0. `afd` may be passed as
+ * nullptr if the value if of no interest.
  *
  * To clarify, all of the following are legitimate calls::
  *
- *    err = get_reverse_data(reverse_data,10,&index,&start,&length,&offset,&afd);
- *    err = get_reverse_data(reverse_data,10,&index,&start,&length,nullptr,nullptr);
- *    err = get_reverse_data(reverse_data,10,nullptr,&start,&length,nullptr,nullptr);
+ *    err =
+ * get_reverse_data(reverse_data,10,&index,&start,&length,&offset,&afd); err =
+ * get_reverse_data(reverse_data,10,&index,&start,&length,nullptr,nullptr); err
+ * = get_reverse_data(reverse_data,10,nullptr,&start,&length,nullptr,nullptr);
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int get_reverse_data(reverse_data_p reverse_data, int which, uint32_t* index,
-    ES_offset* start_posn, uint32_t* length, byte* seq_offset, byte* afd)
-{
-    if (which >= reverse_data->length || which < 0) {
-        fprint_err("Requested reverse data index (%d) is out of range 0-%d\n", which,
-            reverse_data->length - 1);
-        return 1;
-    }
+int get_reverse_data(reverse_data_p reverse_data, int which, uint32_t *index,
+                     ES_offset *start_posn, uint32_t *length, byte *seq_offset,
+                     byte *afd) {
+  if (which >= reverse_data->length || which < 0) {
+    fprint_err("Requested reverse data index (%d) is out of range 0-%d\n",
+               which, reverse_data->length - 1);
+    return 1;
+  }
 
-    if (index != nullptr)
-        *index = reverse_data->index[which];
-    start_posn->infile = reverse_data->start_file[which];
-    start_posn->inpacket = reverse_data->start_pkt[which];
-    *length = reverse_data->data_len[which];
-    if (seq_offset != nullptr) {
-        if (reverse_data->is_h264)
-            *seq_offset = 0;
-        else
-            *seq_offset = reverse_data->seq_offset[which];
-    }
-    if (afd != nullptr) {
-        if (reverse_data->is_h264)
-            *afd = 0;
-        else
-            *afd = reverse_data->afd_byte[which];
-    }
-    return 0;
+  if (index != nullptr)
+    *index = reverse_data->index[which];
+  start_posn->infile = reverse_data->start_file[which];
+  start_posn->inpacket = reverse_data->start_pkt[which];
+  *length = reverse_data->data_len[which];
+  if (seq_offset != nullptr) {
+    if (reverse_data->is_h264)
+      *seq_offset = 0;
+    else
+      *seq_offset = reverse_data->seq_offset[which];
+  }
+  if (afd != nullptr) {
+    if (reverse_data->is_h264)
+      *afd = 0;
+    else
+      *afd = reverse_data->afd_byte[which];
+  }
+  return 0;
 }
 
 // ============================================================
@@ -593,39 +599,38 @@ int get_reverse_data(reverse_data_p reverse_data, int which, uint32_t* index,
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int collect_reverse_h262(h262_context_p h262, int max, int verbose, int quiet)
-{
-    int err = 0;
-    // In order to stop after `max` items, we need to count pictures
-    int picture_count = 0;
+int collect_reverse_h262(h262_context_p h262, int max, int verbose, int quiet) {
+  int err = 0;
+  // In order to stop after `max` items, we need to count pictures
+  int picture_count = 0;
 
-    if (h262->reverse_data == nullptr) {
-        print_err("### Unable to collect reverse data for H.262 pictures\n");
-        print_err("    H.262 context does not have reverse data"
-                  " information attached to it\n");
-        return 1;
-    }
+  if (h262->reverse_data == nullptr) {
+    print_err("### Unable to collect reverse data for H.262 pictures\n");
+    print_err("    H.262 context does not have reverse data"
+              " information attached to it\n");
+    return 1;
+  }
 
-    for (;;) {
-        h262_picture_p picture = nullptr;
+  for (;;) {
+    h262_picture_p picture = nullptr;
 
-        if (es_command_changed(h262->es))
-            return COMMAND_RETURN_CODE;
+    if (es_command_changed(h262->es))
+      return COMMAND_RETURN_CODE;
 
-        err = get_next_h262_frame(h262, verbose, quiet, &picture);
-        if (err == EOF)
-            return EOF;
-        else if (err)
-            return 1;
+    err = get_next_h262_frame(h262, verbose, quiet, &picture);
+    if (err == EOF)
+      return EOF;
+    else if (err)
+      return 1;
 
-        if (picture->is_picture)
-            picture_count++;
+    if (picture->is_picture)
+      picture_count++;
 
-        free_h262_picture(&picture);
-        if (max > 0 && picture_count >= max)
-            break;
-    }
-    return 0;
+    free_h262_picture(&picture);
+    if (max > 0 && picture_count >= max)
+      break;
+  }
+  return 0;
 }
 
 /*
@@ -643,56 +648,58 @@ int collect_reverse_h262(h262_context_p h262, int max, int verbose, int quiet)
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int collect_reverse_access_units(access_unit_context_p acontext, int max, int verbose, int quiet)
-{
-    int err = 0;
-    int access_unit_count = 0;
+int collect_reverse_access_units(access_unit_context_p acontext, int max,
+                                 int verbose, int quiet) {
+  int err = 0;
+  int access_unit_count = 0;
 
-    if (acontext->reverse_data == nullptr) {
-        print_err("### Unable to collect reverse data for access units\n");
-        print_err("    Access unit context does not have reverse data"
-                  " information attached to it\n");
-        return 1;
+  if (acontext->reverse_data == nullptr) {
+    print_err("### Unable to collect reverse data for access units\n");
+    print_err("    Access unit context does not have reverse data"
+              " information attached to it\n");
+    return 1;
+  }
+
+  for (;;) {
+    access_unit_p access_unit;
+
+    if (es_command_changed(acontext->nac->es))
+      return COMMAND_RETURN_CODE;
+
+    if (verbose)
+      print_msg("\n");
+
+    err = get_next_h264_frame(acontext, quiet, verbose, &access_unit);
+    if (err == EOF)
+      return EOF;
+    else if (err)
+      return 1;
+
+    access_unit_count++;
+
+    free_access_unit(&access_unit);
+
+    if (!verbose && !quiet && (access_unit_count % 5000 == 0))
+      fprint_msg("Scanned %d NAL units in %d frames,"
+                 " remembered %d frames\n",
+                 acontext->nac->count, access_unit_count,
+                 acontext->reverse_data->length);
+
+    // Did the logical stream end after the last access unit?
+    if (acontext->end_of_stream) {
+      if (!quiet)
+        print_msg("Found End-of-stream NAL unit\n");
+      break;
     }
 
-    for (;;) {
-        access_unit_p access_unit;
-
-        if (es_command_changed(acontext->nac->es))
-            return COMMAND_RETURN_CODE;
-
-        if (verbose)
-            print_msg("\n");
-
-        err = get_next_h264_frame(acontext, quiet, verbose, &access_unit);
-        if (err == EOF)
-            return EOF;
-        else if (err)
-            return 1;
-
-        access_unit_count++;
-
-        free_access_unit(&access_unit);
-
-        if (!verbose && !quiet && (access_unit_count % 5000 == 0))
-            fprint_msg("Scanned %d NAL units in %d frames,"
-                       " remembered %d frames\n",
-                acontext->nac->count, access_unit_count, acontext->reverse_data->length);
-
-        // Did the logical stream end after the last access unit?
-        if (acontext->end_of_stream) {
-            if (!quiet)
-                print_msg("Found End-of-stream NAL unit\n");
-            break;
-        }
-
-        if (max > 0 && access_unit_count >= max) {
-            if (verbose)
-                fprint_msg("\nStopping because %d frames have been read\n", access_unit_count);
-            break;
-        }
+    if (max > 0 && access_unit_count >= max) {
+      if (verbose)
+        fprint_msg("\nStopping because %d frames have been read\n",
+                   access_unit_count);
+      break;
     }
-    return 0;
+  }
+  return 0;
 }
 
 /*
@@ -704,55 +711,55 @@ int collect_reverse_access_units(access_unit_context_p acontext, int max, int ve
  * Note that the last two arguments (`pid` and `stream_id`) are only
  * used if the data `is_TS`.
  */
-int write_packet_data(
-    WRITER output, int as_TS, byte data[], int data_len, uint32_t pid, byte stream_id)
-{
-    int err;
-    if (as_TS) {
-        // If we're writing TS data, then wrap the whole thing up as PES and
-        // write it out as TS packets.
-        // Unfortunately, it's not *quite* that simple, as a PES packet has
-        // a length specified either as a 16 bit quantity, or as 0 (allowed
-        // for video data). And it is known that some pictures are longer
-        // than 65535 bytes.
-        err = write_ES_as_TS_PES_packet(output.ts_output, data, data_len, pid, stream_id);
-        if (err) {
-            print_err("### Error writing data as TS PES packet\n");
-            return 1;
-        }
-    } else {
-        // Otherwise, just write it out as is
-        size_t written = fwrite(data, 1, data_len, output.es_output);
-        if (written != data_len) {
-            fprint_err("### Error writing out data: %s\n"
-                       "    Wrote %d bytes instead of %d\n",
-                strerror(errno), (int)written, data_len);
-            return 1;
-        }
+int write_packet_data(WRITER output, int as_TS, byte data[], int data_len,
+                      uint32_t pid, byte stream_id) {
+  int err;
+  if (as_TS) {
+    // If we're writing TS data, then wrap the whole thing up as PES and
+    // write it out as TS packets.
+    // Unfortunately, it's not *quite* that simple, as a PES packet has
+    // a length specified either as a 16 bit quantity, or as 0 (allowed
+    // for video data). And it is known that some pictures are longer
+    // than 65535 bytes.
+    err = write_ES_as_TS_PES_packet(output.ts_output, data, data_len, pid,
+                                    stream_id);
+    if (err) {
+      print_err("### Error writing data as TS PES packet\n");
+      return 1;
     }
-    return 0;
+  } else {
+    // Otherwise, just write it out as is
+    size_t written = fwrite(data, 1, data_len, output.es_output);
+    if (written != data_len) {
+      fprint_err("### Error writing out data: %s\n"
+                 "    Wrote %d bytes instead of %d\n",
+                 strerror(errno), (int)written, data_len);
+      return 1;
+    }
+  }
+  return 0;
 }
 
 /*
  * Write out H.262 picture data as ES or TS
  */
-static int write_picture_data(WRITER output, int as_TS, h262_picture_p picture, uint32_t pid)
-{
-    int err;
-    if (as_TS) {
-        err = write_h262_picture_as_TS(output.ts_output, picture, pid);
-        if (err) {
-            print_err("### Error writing data as TS PES packet\n");
-            return 1;
-        }
-    } else {
-        err = write_h262_picture_as_ES(output.es_output, picture);
-        if (err) {
-            print_err("### Error writing data as ES\n");
-            return 1;
-        }
+static int write_picture_data(WRITER output, int as_TS, h262_picture_p picture,
+                              uint32_t pid) {
+  int err;
+  if (as_TS) {
+    err = write_h262_picture_as_TS(output.ts_output, picture, pid);
+    if (err) {
+      print_err("### Error writing data as TS PES packet\n");
+      return 1;
     }
-    return 0;
+  } else {
+    err = write_h262_picture_as_ES(output.es_output, picture);
+    if (err) {
+      print_err("### Error writing data as ES\n");
+      return 1;
+    }
+  }
+  return 0;
 }
 
 /*
@@ -764,42 +771,41 @@ static int write_picture_data(WRITER output, int as_TS, h262_picture_p picture, 
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-static int read_h262_picture(
-    h262_context_p context, ES_offset where, byte afd, int verbose, h262_picture_p* picture)
-{
-    int err;
-    reverse_data_p reverse_data = nullptr;
+static int read_h262_picture(h262_context_p context, ES_offset where, byte afd,
+                             int verbose, h262_picture_p *picture) {
+  int err;
+  reverse_data_p reverse_data = nullptr;
 
-    // Ensure that the H.262 context doesn't think it has any ES items in hand
-    // so that it will start building a picture from scratch
-    if (context->last_item)
-        free_h262_item(&context->last_item);
+  // Ensure that the H.262 context doesn't think it has any ES items in hand
+  // so that it will start building a picture from scratch
+  if (context->last_item)
+    free_h262_item(&context->last_item);
 
-    err = seek_ES(context->es, where);
-    if (err) {
-        print_err("### Error seeking for H.262 picture to reverse\n");
-        return 1;
-    }
+  err = seek_ES(context->es, where);
+  if (err) {
+    print_err("### Error seeking for H.262 picture to reverse\n");
+    return 1;
+  }
 
-    // Hmm - we don't want this call to "remember" the picture for us,
-    // since we've already done so. Thus we'll have to pretend that we
-    // don't have a reverse data context whilst we're making the call...
-    reverse_data = context->reverse_data;
-    context->reverse_data = nullptr;
+  // Hmm - we don't want this call to "remember" the picture for us,
+  // since we've already done so. Thus we'll have to pretend that we
+  // don't have a reverse data context whilst we're making the call...
+  reverse_data = context->reverse_data;
+  context->reverse_data = nullptr;
 
-    // But we *do* want to insist that the picture contain an AFD
-    context->add_fake_afd = true;
-    context->last_afd = afd; // the value to use if the picture doesn't have one
+  // But we *do* want to insist that the picture contain an AFD
+  context->add_fake_afd = true;
+  context->last_afd = afd; // the value to use if the picture doesn't have one
 
-    err = get_next_h262_frame(context, verbose, true, picture);
+  err = get_next_h262_frame(context, verbose, true, picture);
 
-    context->reverse_data = reverse_data;
+  context->reverse_data = reverse_data;
 
-    if (err) {
-        print_err("### Error reading H.262 picture when reversing\n");
-        return 1;
-    }
-    return 0;
+  if (err) {
+    print_err("### Error reading H.262 picture when reversing\n");
+    return 1;
+  }
+  return 0;
 }
 
 /*
@@ -812,40 +818,42 @@ static int read_h262_picture(
  * - `seq_index` is the index of the sequence header in the `reverse_data`
  * - `reverse_data` contains the list of pictures/access units to reverse.
  */
-static int output_sequence_header(ES_p es, WRITER output, int as_TS, int verbose,
-    uint16_t seq_index, reverse_data_p reverse_data)
-{
-    int err;
-    ES_offset seq_posn;
-    uint32_t seq_len;
-    byte* seq_data = nullptr;
-    err = get_reverse_data(
-        reverse_data, seq_index, nullptr, &seq_posn, &seq_len, nullptr, nullptr);
-    if (err) {
-        fprint_err("### Error retrieving sequence header location at %d\n", seq_index);
-        return 1;
-    }
+static int output_sequence_header(ES_p es, WRITER output, int as_TS,
+                                  int verbose, uint16_t seq_index,
+                                  reverse_data_p reverse_data) {
+  int err;
+  ES_offset seq_posn;
+  uint32_t seq_len;
+  byte *seq_data = nullptr;
+  err = get_reverse_data(reverse_data, seq_index, nullptr, &seq_posn, &seq_len,
+                         nullptr, nullptr);
+  if (err) {
+    fprint_err("### Error retrieving sequence header location at %d\n",
+               seq_index);
+    return 1;
+  }
 
-    if (verbose)
-        fprint_msg("Writing sequence header %2d from " OFFSET_T_FORMAT_08 "/%04d for %5d\n",
-            seq_index, seq_posn.infile, seq_posn.inpacket, seq_len);
+  if (verbose)
+    fprint_msg("Writing sequence header %2d from " OFFSET_T_FORMAT_08
+               "/%04d for %5d\n",
+               seq_index, seq_posn.infile, seq_posn.inpacket, seq_len);
 
-    err = read_ES_data(es, seq_posn, seq_len, nullptr, &seq_data);
-    if (err) {
-        fprint_err("### Error reading (sequence header) data"
-                   " from " OFFSET_T_FORMAT "/%d for %d\n",
-            seq_posn.infile, seq_posn.inpacket, seq_len);
-        return 1;
-    }
-    err = write_packet_data(
-        output, as_TS, seq_data, seq_len, reverse_data->pid, reverse_data->stream_id);
-    free(seq_data);
-    if (err) {
-        print_err("### Error writing (sequence header) data as"
-                  " TS PES packet\n");
-        return 1;
-    }
-    return 0;
+  err = read_ES_data(es, seq_posn, seq_len, nullptr, &seq_data);
+  if (err) {
+    fprint_err("### Error reading (sequence header) data"
+               " from " OFFSET_T_FORMAT "/%d for %d\n",
+               seq_posn.infile, seq_posn.inpacket, seq_len);
+    return 1;
+  }
+  err = write_packet_data(output, as_TS, seq_data, seq_len, reverse_data->pid,
+                          reverse_data->stream_id);
+  free(seq_data);
+  if (err) {
+    print_err("### Error writing (sequence header) data as"
+              " TS PES packet\n");
+    return 1;
+  }
+  return 0;
 }
 
 /*
@@ -867,114 +875,117 @@ static int output_sequence_header(ES_p es, WRITER output, int as_TS, int verbose
  *
  * Returns 0 if all went well, or 1 if something went wrong.
  */
-static int output_from_reverse_data(ES_p es, WRITER output, int as_TS, int verbose, int quiet,
-    uint32_t offset, reverse_data_p reverse_data)
-{
-    int with_sequence_headers = (!reverse_data->is_h264 && reverse_data->output_sequence_headers);
-    uint32_t which = reverse_data->length - 1; // the maximum picture index
-    int is_h262 = !reverse_data->is_h264;
-    int err;
-    uint32_t index;
-    ES_offset start_posn;
-    uint32_t num_bytes;
-    byte seq_offset;
-    byte afd;
-    uint32_t uu;
+static int output_from_reverse_data(ES_p es, WRITER output, int as_TS,
+                                    int verbose, int quiet, uint32_t offset,
+                                    reverse_data_p reverse_data) {
+  int with_sequence_headers =
+      (!reverse_data->is_h264 && reverse_data->output_sequence_headers);
+  uint32_t which = reverse_data->length - 1; // the maximum picture index
+  int is_h262 = !reverse_data->is_h264;
+  int err;
+  uint32_t index;
+  ES_offset start_posn;
+  uint32_t num_bytes;
+  byte seq_offset;
+  byte afd;
+  uint32_t uu;
 
-    if (verbose)
-        fprint_msg("\nGOING BACK: offset %u, max pic index %u\n", offset, which);
+  if (verbose)
+    fprint_msg("\nGOING BACK: offset %u, max pic index %u\n", offset, which);
 
-    // Check we have some data to work with, so we don't try to index
-    // nonexistant entries in the arrays
-    if (reverse_data->length == 0)
-        return 0;
-
-    // Start with the last non-sequence header, and work backwards
-    if (which > 0 && SEQUENCE_HEADER_ENTRY(reverse_data, which))
-        which--;
-
-    if (verbose)
-        fprint_msg("   last non-sequence header picture is %u\n", which);
-
-    for (uu = 0; uu < offset; uu++) {
-        if (which > 1) {
-            which--;
-            if (SEQUENCE_HEADER_ENTRY(reverse_data, which))
-                which--;
-        }
-        if (verbose)
-            fprint_msg("   back %u to %d\n", uu, which);
-    }
-
-    // And let's output that picture...
-    err = get_reverse_data(
-        reverse_data, which, &index, &start_posn, &num_bytes, &seq_offset, &afd);
-    if (err)
-        return 1;
-
-    if (verbose)
-        fprint_msg("Picture [%03d] %4d from " OFFSET_T_FORMAT_08 "/%04d for %5d\n", which, index,
-            start_posn.infile, start_posn.inpacket, num_bytes);
-
-    if (with_sequence_headers) {
-        // Make sure we've output its sequence header
-        err = output_sequence_header(
-            es, output, as_TS, verbose, (uint16_t)(which - seq_offset), reverse_data);
-        if (err) {
-            fprint_err("### Error retrieving sequence header"
-                       " for picture %d (offset %d)\n",
-                which, seq_offset);
-            return 1;
-        }
-    }
-
-    if (is_h262) {
-        h262_picture_p picture;
-        err = read_h262_picture(reverse_data->h262, start_posn, afd, verbose, &picture);
-        if (err) {
-            fprint_err("### Error reading H.262 picture from " OFFSET_T_FORMAT "/%d for %d\n",
-                start_posn.infile, start_posn.inpacket, num_bytes);
-            return 1;
-        }
-        err = write_picture_data(output, as_TS, picture, reverse_data->pid);
-        if (err) {
-            print_err("### Error writing picture\n");
-            free_h262_picture(&picture);
-            return 1;
-        }
-        free_h262_picture(&picture);
-    } else {
-        byte* data = nullptr;
-        uint32_t data_len = 0;
-        err = read_ES_data(es, start_posn, num_bytes, &data_len, &data);
-        if (err) {
-            fprint_err("### Error reading data from " OFFSET_T_FORMAT "/%d for %d\n",
-                start_posn.infile, start_posn.inpacket, num_bytes);
-            return 1;
-        }
-        err = write_packet_data(
-            output, as_TS, data, num_bytes, reverse_data->pid, reverse_data->stream_id);
-        if (err) {
-            print_err("### Error writing picture as TS PES packet\n");
-            free(data);
-            return 1;
-        }
-        free(data);
-    }
-
-    // And let our "outer" contexts know which picture that *is* in the
-    // sequence of pictures
-    if (reverse_data->is_h264)
-        reverse_data->h264->access_unit_index = reverse_data->index[which];
-    else
-        reverse_data->h262->picture_index = reverse_data->index[which];
-
-    // Remember that we are now that bit further "back" in the reverse data
-    // arrays, for when we come to move forwards again
-    // (we only do this for pictures that have actually been *read*, since
-    // it's only then that our file positions, etc., will have changed.)
-    reverse_data->last_posn_added = which;
+  // Check we have some data to work with, so we don't try to index
+  // nonexistant entries in the arrays
+  if (reverse_data->length == 0)
     return 0;
+
+  // Start with the last non-sequence header, and work backwards
+  if (which > 0 && SEQUENCE_HEADER_ENTRY(reverse_data, which))
+    which--;
+
+  if (verbose)
+    fprint_msg("   last non-sequence header picture is %u\n", which);
+
+  for (uu = 0; uu < offset; uu++) {
+    if (which > 1) {
+      which--;
+      if (SEQUENCE_HEADER_ENTRY(reverse_data, which))
+        which--;
+    }
+    if (verbose)
+      fprint_msg("   back %u to %d\n", uu, which);
+  }
+
+  // And let's output that picture...
+  err = get_reverse_data(reverse_data, which, &index, &start_posn, &num_bytes,
+                         &seq_offset, &afd);
+  if (err)
+    return 1;
+
+  if (verbose)
+    fprint_msg("Picture [%03d] %4d from " OFFSET_T_FORMAT_08 "/%04d for %5d\n",
+               which, index, start_posn.infile, start_posn.inpacket, num_bytes);
+
+  if (with_sequence_headers) {
+    // Make sure we've output its sequence header
+    err = output_sequence_header(es, output, as_TS, verbose,
+                                 (uint16_t)(which - seq_offset), reverse_data);
+    if (err) {
+      fprint_err("### Error retrieving sequence header"
+                 " for picture %d (offset %d)\n",
+                 which, seq_offset);
+      return 1;
+    }
+  }
+
+  if (is_h262) {
+    h262_picture_p picture;
+    err = read_h262_picture(reverse_data->h262, start_posn, afd, verbose,
+                            &picture);
+    if (err) {
+      fprint_err("### Error reading H.262 picture from " OFFSET_T_FORMAT
+                 "/%d for %d\n",
+                 start_posn.infile, start_posn.inpacket, num_bytes);
+      return 1;
+    }
+    err = write_picture_data(output, as_TS, picture, reverse_data->pid);
+    if (err) {
+      print_err("### Error writing picture\n");
+      free_h262_picture(&picture);
+      return 1;
+    }
+    free_h262_picture(&picture);
+  } else {
+    byte *data = nullptr;
+    uint32_t data_len = 0;
+    err = read_ES_data(es, start_posn, num_bytes, &data_len, &data);
+    if (err) {
+      fprint_err("### Error reading data from " OFFSET_T_FORMAT "/%d for %d\n",
+                 start_posn.infile, start_posn.inpacket, num_bytes);
+      return 1;
+    }
+    err = write_packet_data(output, as_TS, data, num_bytes, reverse_data->pid,
+                            reverse_data->stream_id);
+    if (err) {
+      print_err("### Error writing picture as TS PES packet\n");
+      free(data);
+      return 1;
+    }
+    free(data);
+  }
+
+  // And let our "outer" contexts know which picture that *is* in the
+  // sequence of pictures
+  if (reverse_data->is_h264)
+    reverse_data->h264->access_unit_index = reverse_data->index[which];
+  else
+    reverse_data->h262->picture_index = reverse_data->index[which];
+
+  // Remember that we are now that bit further "back" in the reverse data
+  // arrays, for when we come to move forwards again
+  // (we only do this for pictures that have actually been *read*, since
+  // it's only then that our file positions, etc., will have changed.)
+  reverse_data->last_posn_added = which;
+  return 0;
 }
 
 /*
@@ -999,12 +1010,13 @@ static int output_from_reverse_data(ES_p es, WRITER output, int as_TS, int verbo
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int output_from_reverse_data_as_TS(ES_p es, TS_writer_p tswriter, int verbose, int quiet,
-    uint32_t offset, reverse_data_p reverse_data)
-{
-    WRITER writer;
-    writer.ts_output = tswriter;
-    return output_from_reverse_data(es, writer, true, verbose, quiet, offset, reverse_data);
+int output_from_reverse_data_as_TS(ES_p es, TS_writer_p tswriter, int verbose,
+                                   int quiet, uint32_t offset,
+                                   reverse_data_p reverse_data) {
+  WRITER writer;
+  writer.ts_output = tswriter;
+  return output_from_reverse_data(es, writer, true, verbose, quiet, offset,
+                                  reverse_data);
 }
 
 /*
@@ -1029,12 +1041,13 @@ int output_from_reverse_data_as_TS(ES_p es, TS_writer_p tswriter, int verbose, i
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int output_from_reverse_data_as_ES(
-    ES_p es, FILE* output, int verbose, int quiet, uint32_t offset, reverse_data_p reverse_data)
-{
-    WRITER writer;
-    writer.es_output = output;
-    return output_from_reverse_data(es, writer, false, verbose, quiet, offset, reverse_data);
+int output_from_reverse_data_as_ES(ES_p es, FILE *output, int verbose,
+                                   int quiet, uint32_t offset,
+                                   reverse_data_p reverse_data) {
+  WRITER writer;
+  writer.es_output = output;
+  return output_from_reverse_data(es, writer, false, verbose, quiet, offset,
+                                  reverse_data);
 }
 
 /*
@@ -1062,273 +1075,287 @@ int output_from_reverse_data_as_ES(
  * Returns 0 if all went well, COMMAND_RETURN_CODE if the current "command"
  * has changed, or 1 if something went wrong.
  */
-static int output_in_reverse(ES_p es, WRITER output, int as_TS, int frequency, int verbose,
-    int quiet, int32_t start_with, int max, reverse_data_p reverse_data)
-{
-    int ii;
-    int with_sequence_headers = reverse_data->output_sequence_headers;
-    byte* data = nullptr; // picture data, as a "chunk"
-    uint32_t data_len = 0; // the current size of `data`
-    h262_picture_p picture = nullptr; // H.262 picture data as a "picture"
-    uint32_t last_seq_index = reverse_data->length; // impossible value
-    int max_pic_index = reverse_data->length - 1;
-    int first_actual_picture_index = 0; // the first *actual* picture
-    int is_h262 = !reverse_data->is_h264;
+static int output_in_reverse(ES_p es, WRITER output, int as_TS, int frequency,
+                             int verbose, int quiet, int32_t start_with,
+                             int max, reverse_data_p reverse_data) {
+  int ii;
+  int with_sequence_headers = reverse_data->output_sequence_headers;
+  byte *data = nullptr;             // picture data, as a "chunk"
+  uint32_t data_len = 0;            // the current size of `data`
+  h262_picture_p picture = nullptr; // H.262 picture data as a "picture"
+  uint32_t last_seq_index = reverse_data->length; // impossible value
+  int max_pic_index = reverse_data->length - 1;
+  int first_actual_picture_index = 0; // the first *actual* picture
+  int is_h262 = !reverse_data->is_h264;
 
-    uint32_t start_index;
-    uint32_t final_index;
-    uint32_t last_index;
+  uint32_t start_index;
+  uint32_t final_index;
+  uint32_t last_index;
 
-    uint32_t last_num_bytes = 0; // Number of bytes of last picture written
+  uint32_t last_num_bytes = 0; // Number of bytes of last picture written
 
-    reverse_data->pictures_written = 0;
-    reverse_data->pictures_kept = 0;
-    reverse_data->first_written = 0;
-    reverse_data->last_written = 0;
+  reverse_data->pictures_written = 0;
+  reverse_data->pictures_kept = 0;
+  reverse_data->first_written = 0;
+  reverse_data->last_written = 0;
 
-    // Check we have some data to work with, so we don't try to index
-    // nonexistant entries in the arrays
-    if (reverse_data->length == 0) {
-        if (!quiet)
-            print_msg("No data to reverse\n");
-        return 0;
-    }
-
-    // What's the earliest *actual* picture (not a sequence header)?
-    while (SEQUENCE_HEADER_ENTRY(reverse_data, first_actual_picture_index))
-        first_actual_picture_index++;
-
-    // Where did the user ask us to start?
-    if (start_with < -1)
-        return 0;
-    else if (start_with == -1)
-        start_index = reverse_data->last_posn_added;
-    else if (start_with > max_pic_index)
-        start_index = max_pic_index;
-    else
-        start_index = start_with;
-
-    // Check that's not a sequence header - if it is, go back one
-    while (start_index > 0 && SEQUENCE_HEADER_ENTRY(reverse_data, start_index))
-        start_index--;
-
-    // If that means there's nothing to output, then so be it
-    if (start_index < (uint32_t)first_actual_picture_index)
-        return 0;
-
-    // Remember the index of the latest picture we're interested in
-    final_index = reverse_data->index[start_index];
-    // And the index of the last picture we output
-    // - we carefully forge this so that the first (last) picture will be output
-    last_index = final_index + frequency;
-
-    reverse_data->first_written = start_index;
-
-    if (verbose)
-        fprint_msg("REVERSING: "
-                   "From index %d (picture %d) down to %d (%d), frequency %d, max %d\n",
-            start_index, reverse_data->index[start_index], first_actual_picture_index,
-            reverse_data->index[first_actual_picture_index], frequency, max);
-
-    // If `frequency` is 0, we just want to output all the pictures, backwards.
-    // Otherwise, we want to output the first picture we retrieve (i.e., the
-    // last picture in the reverse data list), and then (effectively) output
-    // a picture every `frequency` pictures. The reverse data `index` value
-    // is the index of the picture as a picture of any type (i.e., including
-    // the pictures that we didn't bother to remember).
-
-    for (ii = start_index; ii >= first_actual_picture_index; ii--) {
-        int err;
-        int keep = false;
-        uint32_t index;
-        ES_offset start_posn;
-        uint32_t num_bytes;
-        byte seq_offset;
-        byte afd;
-        uint32_t seq_index;
-
-        if (as_TS && tswrite_command_changed(output.ts_output)) {
-            if (data != nullptr)
-                free(data);
-            if (picture != nullptr)
-                free_h262_picture(&picture);
-            return COMMAND_RETURN_CODE;
-        }
-
-        err = get_reverse_data(
-            reverse_data, ii, &index, &start_posn, &num_bytes, &seq_offset, &afd);
-        if (err)
-            return 1;
-
-        if (verbose)
-            fprint_msg("\nPicture [%03d] %4d from " OFFSET_T_FORMAT_08 "/%04d for %5d\n", ii,
-                index, start_posn.infile, start_posn.inpacket, num_bytes);
-
-        // Should we write this picture out?
-        if (start_posn.infile < 0) {
-            fprint_err("!!! Start position for reverse item %d does not make sense\n"
-                       "    item %d, picture %d, start posn " OFFSET_T_FORMAT
-                       "/%d, num bytes %d, seq offset %d\n",
-                ii, ii, index, start_posn.infile, start_posn.inpacket, num_bytes, seq_offset);
-            print_err("    Ignoring item\n");
-        } else if (is_h262 && seq_offset == 0) {
-            // Sequence headers get output (if at all) when their pictures
-            // are written out
-            if (verbose)
-                print_msg(".. Sequence header - no need to write\n");
-        } else if (frequency != 0) {
-            int gap = last_index - index; // gap since last picture output
-            if (gap < frequency) {
-                if (verbose)
-                    fprint_msg("++ %d/%d DROP: [%d] %d too soon\n", gap, frequency, ii, index);
-            } else {
-                // It's not too soon - but do we need to up our output frequency
-                // by repeating the last picture?
-                int pictures_seen = final_index - index;
-                int pictures_wanted = pictures_seen / frequency;
-                int repeat = pictures_wanted - reverse_data->pictures_written;
-                if (verbose)
-                    fprint_msg("** Pictures seen = %d, wanted = %d, written = %d"
-                               " -> repeat = %d\n",
-                        pictures_seen, pictures_wanted, reverse_data->pictures_written, repeat);
-                if (repeat > 0
-                    && ((is_h262 && picture != nullptr) || (!is_h262 && data != nullptr))) {
-                    int jj;
-                    if (verbose) {
-                        if (repeat == 1)
-                            print_msg(">> repeating last picture\n");
-                        else if (repeat > 1)
-                            fprint_msg(">> repeating last picture %d times\n", repeat);
-                    }
-                    for (jj = 0; jj < repeat; jj++) {
-                        if (is_h262)
-                            err = write_picture_data(output, as_TS, picture, reverse_data->pid);
-                        else
-                            err = write_packet_data(output, as_TS, data, last_num_bytes,
-                                reverse_data->pid, reverse_data->stream_id);
-                        if (err) {
-                            print_err("### Error writing (picture) data\n");
-                            if (data != nullptr)
-                                free(data);
-                            if (picture != nullptr)
-                                free_h262_picture(&picture);
-                            return 1;
-                        }
-                        reverse_data->pictures_written++;
-                    }
-                }
-                keep = true;
-                if (verbose)
-                    fprint_msg("++ %d/%d KEEP: writing out\n", gap, frequency);
-                last_index = index;
-            }
-        } else
-            keep = true; // i.e., because frequency == 0
-
-        // *But* always output the *first* picture, since if we reach it we've
-        // "run out" of pictures to present
-        if (ii == first_actual_picture_index) {
-            if (verbose && !keep)
-                print_msg("++ but KEEP first picture regardless\n");
-            keep = true;
-        }
-
-        if (keep) {
-            if (with_sequence_headers) {
-                // Make sure we've output its sequence header
-                seq_index = ii - seq_offset;
-                if (seq_index != last_seq_index) {
-                    err = output_sequence_header(
-                        es, output, as_TS, verbose, (uint16_t)seq_index, reverse_data);
-                    if (err) {
-                        fprint_err("### Error retrieving sequence header"
-                                   " for picture %d (offset %d)\n",
-                            ii, seq_offset);
-                        if (data != nullptr)
-                            free(data);
-                        if (picture != nullptr)
-                            free_h262_picture(&picture);
-                        return 1;
-                    }
-                    last_seq_index = seq_index;
-                }
-            }
-
-            if (verbose)
-                fprint_msg("Writing picture [%03d] %4d from " OFFSET_T_FORMAT_08 "/%04d for %5d\n",
-                    ii, index, start_posn.infile, start_posn.inpacket, num_bytes);
-
-            if (is_h262) {
-                if (picture != nullptr)
-                    free_h262_picture(&picture);
-                err = read_h262_picture(reverse_data->h262, start_posn, afd, verbose, &picture);
-                if (err) {
-                    fprint_err("### Error reading H.262 picture from " OFFSET_T_FORMAT
-                               "/%d for %d\n",
-                        start_posn.infile, start_posn.inpacket, num_bytes);
-                    return 1;
-                }
-                err = write_picture_data(output, as_TS, picture, reverse_data->pid);
-                if (err) {
-                    print_err("### Error writing picture\n");
-                    free_h262_picture(&picture);
-                    return 1;
-                }
-            } else {
-                err = read_ES_data(es, start_posn, num_bytes, &data_len, &data);
-                if (err) {
-                    fprint_err("### Error reading data from " OFFSET_T_FORMAT "/%d for %d\n",
-                        start_posn.infile, start_posn.inpacket, num_bytes);
-                    if (data != nullptr)
-                        free(data);
-                    return 1;
-                }
-                err = write_packet_data(
-                    output, as_TS, data, num_bytes, reverse_data->pid, reverse_data->stream_id);
-                if (err) {
-                    print_err("### Error writing picture\n");
-                    if (data != nullptr)
-                        free(data);
-                    return 1;
-                }
-                last_num_bytes = num_bytes;
-            }
-
-            reverse_data->last_written = ii;
-            reverse_data->pictures_written++;
-            reverse_data->pictures_kept++;
-
-            // And let our "outer" contexts know which picture that *is* in the
-            // sequence of pictures
-            if (reverse_data->is_h264)
-                reverse_data->h264->access_unit_index = reverse_data->index[ii];
-            else
-                reverse_data->h262->picture_index = reverse_data->index[ii];
-            // Remember that we are now that bit further "back" in the reverse data
-            // arrays, for when we come to move forwards again
-            // (we only do this for pictures that have actually been *read*, since
-            // it's only then that our file positions, etc., will have changed.)
-            reverse_data->last_posn_added = ii;
-
-            if (verbose)
-                fprint_msg("Last written [%03d], picture index %d, last_posn_added %d\n", ii,
-                    reverse_data->index[ii], ii);
-        }
-
-        if (max != 0 && (int)(final_index - index + 1) >= max) {
-            if (verbose)
-                fprint_msg("Break: max %d, final_index %d, index %d\n", max, final_index, index);
-            break;
-        }
-    }
-    if (data != nullptr)
-        free(data);
-    if (picture != nullptr)
-        free_h262_picture(&picture);
-
-    if (verbose)
-        print_msg("END OF REVERSE\n");
+  // Check we have some data to work with, so we don't try to index
+  // nonexistant entries in the arrays
+  if (reverse_data->length == 0) {
+    if (!quiet)
+      print_msg("No data to reverse\n");
     return 0;
+  }
+
+  // What's the earliest *actual* picture (not a sequence header)?
+  while (SEQUENCE_HEADER_ENTRY(reverse_data, first_actual_picture_index))
+    first_actual_picture_index++;
+
+  // Where did the user ask us to start?
+  if (start_with < -1)
+    return 0;
+  else if (start_with == -1)
+    start_index = reverse_data->last_posn_added;
+  else if (start_with > max_pic_index)
+    start_index = max_pic_index;
+  else
+    start_index = start_with;
+
+  // Check that's not a sequence header - if it is, go back one
+  while (start_index > 0 && SEQUENCE_HEADER_ENTRY(reverse_data, start_index))
+    start_index--;
+
+  // If that means there's nothing to output, then so be it
+  if (start_index < (uint32_t)first_actual_picture_index)
+    return 0;
+
+  // Remember the index of the latest picture we're interested in
+  final_index = reverse_data->index[start_index];
+  // And the index of the last picture we output
+  // - we carefully forge this so that the first (last) picture will be output
+  last_index = final_index + frequency;
+
+  reverse_data->first_written = start_index;
+
+  if (verbose)
+    fprint_msg(
+        "REVERSING: "
+        "From index %d (picture %d) down to %d (%d), frequency %d, max %d\n",
+        start_index, reverse_data->index[start_index],
+        first_actual_picture_index,
+        reverse_data->index[first_actual_picture_index], frequency, max);
+
+  // If `frequency` is 0, we just want to output all the pictures, backwards.
+  // Otherwise, we want to output the first picture we retrieve (i.e., the
+  // last picture in the reverse data list), and then (effectively) output
+  // a picture every `frequency` pictures. The reverse data `index` value
+  // is the index of the picture as a picture of any type (i.e., including
+  // the pictures that we didn't bother to remember).
+
+  for (ii = start_index; ii >= first_actual_picture_index; ii--) {
+    int err;
+    int keep = false;
+    uint32_t index;
+    ES_offset start_posn;
+    uint32_t num_bytes;
+    byte seq_offset;
+    byte afd;
+    uint32_t seq_index;
+
+    if (as_TS && tswrite_command_changed(output.ts_output)) {
+      if (data != nullptr)
+        free(data);
+      if (picture != nullptr)
+        free_h262_picture(&picture);
+      return COMMAND_RETURN_CODE;
+    }
+
+    err = get_reverse_data(reverse_data, ii, &index, &start_posn, &num_bytes,
+                           &seq_offset, &afd);
+    if (err)
+      return 1;
+
+    if (verbose)
+      fprint_msg("\nPicture [%03d] %4d from " OFFSET_T_FORMAT_08
+                 "/%04d for %5d\n",
+                 ii, index, start_posn.infile, start_posn.inpacket, num_bytes);
+
+    // Should we write this picture out?
+    if (start_posn.infile < 0) {
+      fprint_err("!!! Start position for reverse item %d does not make sense\n"
+                 "    item %d, picture %d, start posn " OFFSET_T_FORMAT
+                 "/%d, num bytes %d, seq offset %d\n",
+                 ii, ii, index, start_posn.infile, start_posn.inpacket,
+                 num_bytes, seq_offset);
+      print_err("    Ignoring item\n");
+    } else if (is_h262 && seq_offset == 0) {
+      // Sequence headers get output (if at all) when their pictures
+      // are written out
+      if (verbose)
+        print_msg(".. Sequence header - no need to write\n");
+    } else if (frequency != 0) {
+      int gap = last_index - index; // gap since last picture output
+      if (gap < frequency) {
+        if (verbose)
+          fprint_msg("++ %d/%d DROP: [%d] %d too soon\n", gap, frequency, ii,
+                     index);
+      } else {
+        // It's not too soon - but do we need to up our output frequency
+        // by repeating the last picture?
+        int pictures_seen = final_index - index;
+        int pictures_wanted = pictures_seen / frequency;
+        int repeat = pictures_wanted - reverse_data->pictures_written;
+        if (verbose)
+          fprint_msg("** Pictures seen = %d, wanted = %d, written = %d"
+                     " -> repeat = %d\n",
+                     pictures_seen, pictures_wanted,
+                     reverse_data->pictures_written, repeat);
+        if (repeat > 0 && ((is_h262 && picture != nullptr) ||
+                           (!is_h262 && data != nullptr))) {
+          int jj;
+          if (verbose) {
+            if (repeat == 1)
+              print_msg(">> repeating last picture\n");
+            else if (repeat > 1)
+              fprint_msg(">> repeating last picture %d times\n", repeat);
+          }
+          for (jj = 0; jj < repeat; jj++) {
+            if (is_h262)
+              err =
+                  write_picture_data(output, as_TS, picture, reverse_data->pid);
+            else
+              err =
+                  write_packet_data(output, as_TS, data, last_num_bytes,
+                                    reverse_data->pid, reverse_data->stream_id);
+            if (err) {
+              print_err("### Error writing (picture) data\n");
+              if (data != nullptr)
+                free(data);
+              if (picture != nullptr)
+                free_h262_picture(&picture);
+              return 1;
+            }
+            reverse_data->pictures_written++;
+          }
+        }
+        keep = true;
+        if (verbose)
+          fprint_msg("++ %d/%d KEEP: writing out\n", gap, frequency);
+        last_index = index;
+      }
+    } else
+      keep = true; // i.e., because frequency == 0
+
+    // *But* always output the *first* picture, since if we reach it we've
+    // "run out" of pictures to present
+    if (ii == first_actual_picture_index) {
+      if (verbose && !keep)
+        print_msg("++ but KEEP first picture regardless\n");
+      keep = true;
+    }
+
+    if (keep) {
+      if (with_sequence_headers) {
+        // Make sure we've output its sequence header
+        seq_index = ii - seq_offset;
+        if (seq_index != last_seq_index) {
+          err = output_sequence_header(es, output, as_TS, verbose,
+                                       (uint16_t)seq_index, reverse_data);
+          if (err) {
+            fprint_err("### Error retrieving sequence header"
+                       " for picture %d (offset %d)\n",
+                       ii, seq_offset);
+            if (data != nullptr)
+              free(data);
+            if (picture != nullptr)
+              free_h262_picture(&picture);
+            return 1;
+          }
+          last_seq_index = seq_index;
+        }
+      }
+
+      if (verbose)
+        fprint_msg("Writing picture [%03d] %4d from " OFFSET_T_FORMAT_08
+                   "/%04d for %5d\n",
+                   ii, index, start_posn.infile, start_posn.inpacket,
+                   num_bytes);
+
+      if (is_h262) {
+        if (picture != nullptr)
+          free_h262_picture(&picture);
+        err = read_h262_picture(reverse_data->h262, start_posn, afd, verbose,
+                                &picture);
+        if (err) {
+          fprint_err("### Error reading H.262 picture from " OFFSET_T_FORMAT
+                     "/%d for %d\n",
+                     start_posn.infile, start_posn.inpacket, num_bytes);
+          return 1;
+        }
+        err = write_picture_data(output, as_TS, picture, reverse_data->pid);
+        if (err) {
+          print_err("### Error writing picture\n");
+          free_h262_picture(&picture);
+          return 1;
+        }
+      } else {
+        err = read_ES_data(es, start_posn, num_bytes, &data_len, &data);
+        if (err) {
+          fprint_err("### Error reading data from " OFFSET_T_FORMAT
+                     "/%d for %d\n",
+                     start_posn.infile, start_posn.inpacket, num_bytes);
+          if (data != nullptr)
+            free(data);
+          return 1;
+        }
+        err = write_packet_data(output, as_TS, data, num_bytes,
+                                reverse_data->pid, reverse_data->stream_id);
+        if (err) {
+          print_err("### Error writing picture\n");
+          if (data != nullptr)
+            free(data);
+          return 1;
+        }
+        last_num_bytes = num_bytes;
+      }
+
+      reverse_data->last_written = ii;
+      reverse_data->pictures_written++;
+      reverse_data->pictures_kept++;
+
+      // And let our "outer" contexts know which picture that *is* in the
+      // sequence of pictures
+      if (reverse_data->is_h264)
+        reverse_data->h264->access_unit_index = reverse_data->index[ii];
+      else
+        reverse_data->h262->picture_index = reverse_data->index[ii];
+      // Remember that we are now that bit further "back" in the reverse data
+      // arrays, for when we come to move forwards again
+      // (we only do this for pictures that have actually been *read*, since
+      // it's only then that our file positions, etc., will have changed.)
+      reverse_data->last_posn_added = ii;
+
+      if (verbose)
+        fprint_msg(
+            "Last written [%03d], picture index %d, last_posn_added %d\n", ii,
+            reverse_data->index[ii], ii);
+    }
+
+    if (max != 0 && (int)(final_index - index + 1) >= max) {
+      if (verbose)
+        fprint_msg("Break: max %d, final_index %d, index %d\n", max,
+                   final_index, index);
+      break;
+    }
+  }
+  if (data != nullptr)
+    free(data);
+  if (picture != nullptr)
+    free_h262_picture(&picture);
+
+  if (verbose)
+    print_msg("END OF REVERSE\n");
+  return 0;
 }
 
 /*
@@ -1357,13 +1384,13 @@ static int output_in_reverse(ES_p es, WRITER output, int as_TS, int frequency, i
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int output_in_reverse_as_TS(ES_p es, TS_writer_p tswriter, int frequency, int verbose, int quiet,
-    int32_t start_with, int max, reverse_data_p reverse_data)
-{
-    WRITER writer;
-    writer.ts_output = tswriter;
-    return output_in_reverse(
-        es, writer, true, frequency, verbose, quiet, start_with, max, reverse_data);
+int output_in_reverse_as_TS(ES_p es, TS_writer_p tswriter, int frequency,
+                            int verbose, int quiet, int32_t start_with, int max,
+                            reverse_data_p reverse_data) {
+  WRITER writer;
+  writer.ts_output = tswriter;
+  return output_in_reverse(es, writer, true, frequency, verbose, quiet,
+                           start_with, max, reverse_data);
 }
 
 /*
@@ -1392,11 +1419,11 @@ int output_in_reverse_as_TS(ES_p es, TS_writer_p tswriter, int frequency, int ve
  * If command input is enabled, then it can also return COMMAND_RETURN_CODE
  * if the current command has changed.
  */
-int output_in_reverse_as_ES(ES_p es, FILE* output, int frequency, int verbose, int quiet,
-    int32_t start_with, int max, reverse_data_p reverse_data)
-{
-    WRITER writer;
-    writer.es_output = output;
-    return output_in_reverse(
-        es, writer, false, frequency, verbose, quiet, start_with, max, reverse_data);
+int output_in_reverse_as_ES(ES_p es, FILE *output, int frequency, int verbose,
+                            int quiet, int32_t start_with, int max,
+                            reverse_data_p reverse_data) {
+  WRITER writer;
+  writer.es_output = output;
+  return output_in_reverse(es, writer, false, frequency, verbose, quiet,
+                           start_with, max, reverse_data);
 }

@@ -43,7 +43,7 @@ int init_pidint_list(pidint_list_p list);
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_pidint_list(pidint_list_p* list);
+int build_pidint_list(pidint_list_p *list);
 /*
  * Add a pid/integer pair to the end of the list
  *
@@ -63,18 +63,18 @@ int remove_from_pidint_list(pidint_list_p list, uint32_t pid);
  *
  * Does nothing if `list` is already nullptr.
  */
-void free_pidint_list(pidint_list_p* list);
+void free_pidint_list(pidint_list_p *list);
 /*
  * Report on a pid/int list's contents
  */
-void report_pidint_list(
-    pidint_list_p list, const char* list_name, const char* int_name, int pid_first);
+void report_pidint_list(pidint_list_p list, const char *list_name,
+                        const char *int_name, int pid_first);
 /*
  * Lookup a PID to find the corresponding integer value in a pid/int list.
  *
  * Returns 0 if the PID is in the list, -1 if it is not.
  */
-int pid_int_in_pidint_list(pidint_list_p list, uint32_t pid, int* number);
+int pid_int_in_pidint_list(pidint_list_p list, uint32_t pid, int *number);
 /*
  * Lookup a PID to find its index in a pid/int list.
  *
@@ -113,7 +113,7 @@ int same_pidint_list(pidint_list_p list1, pidint_list_p list2);
  * - `list` is the stream list to report on
  * - `prefix` is nullptr or a string to put before each line printed
  */
-void report_stream_list(pidint_list_p list, char* prefix);
+void report_stream_list(pidint_list_p list, char *prefix);
 
 // ============================================================================
 // PMT data maintenance
@@ -142,7 +142,8 @@ pmt_p build_pmt(uint16_t program_number, byte version_number, uint32_t PCR_pid);
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int set_pmt_program_info(pmt_p pmt, uint16_t program_info_length, byte* program_info);
+int set_pmt_program_info(pmt_p pmt, uint16_t program_info_length,
+                         byte *program_info);
 /*
  * Add a program stream to a PMT datastructure
  *
@@ -150,8 +151,8 @@ int set_pmt_program_info(pmt_p pmt, uint16_t program_info_length, byte* program_
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int add_stream_to_pmt(
-    pmt_p pmt, uint32_t elementary_PID, byte stream_type, uint16_t ES_info_length, byte* ES_info);
+int add_stream_to_pmt(pmt_p pmt, uint32_t elementary_PID, byte stream_type,
+                      uint16_t ES_info_length, byte *ES_info);
 /*
  * Remove a program stream from a PMT.
  *
@@ -165,7 +166,7 @@ int remove_stream_from_pmt(pmt_p pmt, uint32_t pid);
  *
  * Does nothing if `pmt` is already nullptr.
  */
-void free_pmt(pmt_p* pmt);
+void free_pmt(pmt_p *pmt);
 /*
  * Lookup a PID to find its index in a PMT datastructure.
  *
@@ -210,7 +211,7 @@ int same_pmt(pmt_p pmt1, pmt_p pmt2);
  * - `prefix` is nullptr or a string to put before each line printed
  * - `pmt` is the PMT to report on
  */
-void report_pmt(int is_msg, char* prefix, pmt_p pmt);
+void report_pmt(int is_msg, char *prefix, pmt_p pmt);
 
 #endif // _pidint_fns
 

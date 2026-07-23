@@ -58,7 +58,8 @@
  * Returns 0 if it worked, 1 if something went wrong.
  */
 int write_TS_program_data(TS_writer_p output, uint32_t transport_stream_id,
-    uint32_t program_number, uint32_t pmt_pid, uint32_t pid, byte stream_type);
+                          uint32_t program_number, uint32_t pmt_pid,
+                          uint32_t pid, byte stream_type);
 
 /*
  * Write out a Transport Stream PAT and PMT, for multiple streams.
@@ -77,8 +78,9 @@ int write_TS_program_data(TS_writer_p output, uint32_t transport_stream_id,
  * Returns 0 if it worked, 1 if something went wrong.
  */
 int write_TS_program_data2(TS_writer_p output, uint32_t transport_stream_id,
-    uint32_t program_number, uint32_t pmt_pid, uint32_t pcr_pid, int num_progs,
-    uint32_t prog_pid[], byte prog_type[]);
+                           uint32_t program_number, uint32_t pmt_pid,
+                           uint32_t pcr_pid, int num_progs, uint32_t prog_pid[],
+                           byte prog_type[]);
 
 /*
  * Write out a Transport Stream PAT.
@@ -89,7 +91,8 @@ int write_TS_program_data2(TS_writer_p output, uint32_t transport_stream_id,
  *
  * Returns 0 if it worked, 1 if something went wrong.
  */
-int write_pat(TS_writer_p output, uint32_t transport_stream_id, pidint_list_p prog_list);
+int write_pat(TS_writer_p output, uint32_t transport_stream_id,
+              pidint_list_p prog_list);
 /*
  * Write out a Transport Stream PMT, given a PMT datastructure
  *
@@ -112,8 +115,8 @@ int write_pmt(TS_writer_p output, uint32_t pmt_pid, pmt_p pmt);
  *
  * Returns 0 if it worked, 1 if something went wrong.
  */
-int write_pat_and_pmt(TS_writer_p output, uint32_t transport_stream_id, pidint_list_p prog_list,
-    uint32_t pmt_pid, pmt_p pmt);
+int write_pat_and_pmt(TS_writer_p output, uint32_t transport_stream_id,
+                      pidint_list_p prog_list, uint32_t pmt_pid, pmt_p pmt);
 /*
  * Write out a Transport Stream PAT, for a single program.
  *
@@ -124,8 +127,8 @@ int write_pat_and_pmt(TS_writer_p output, uint32_t transport_stream_id, pidint_l
  *
  * Returns 0 if it worked, 1 if something went wrong.
  */
-int write_single_program_pat(
-    TS_writer_p output, uint32_t transport_stream_id, uint32_t program_number, uint32_t pmt_pid);
+int write_single_program_pat(TS_writer_p output, uint32_t transport_stream_id,
+                             uint32_t program_number, uint32_t pmt_pid);
 /*
  * Write out our ES data as a Transport Stream PES packet.
  *
@@ -144,8 +147,8 @@ int write_single_program_pat(
  *
  * Returns 0 if it worked, 1 if something went wrong.
  */
-int write_ES_as_TS_PES_packet(
-    TS_writer_p output, byte data[], uint32_t data_len, uint32_t pid, byte stream_id);
+int write_ES_as_TS_PES_packet(TS_writer_p output, byte data[],
+                              uint32_t data_len, uint32_t pid, byte stream_id);
 /*
  * Write out our ES data as a Transport Stream PES packet, with PTS and/or DTS
  * if we've got them, and some attempt to write out a sensible PCR.
@@ -179,8 +182,11 @@ int write_ES_as_TS_PES_packet(
  *
  * Returns 0 if it worked, 1 if something went wrong.
  */
-int write_ES_as_TS_PES_packet_with_pts_dts(TS_writer_p output, byte data[], uint32_t data_len,
-    uint32_t pid, byte stream_id, int got_pts, uint64_t pts, int got_dts, uint64_t dts);
+int write_ES_as_TS_PES_packet_with_pts_dts(TS_writer_p output, byte data[],
+                                           uint32_t data_len, uint32_t pid,
+                                           byte stream_id, int got_pts,
+                                           uint64_t pts, int got_dts,
+                                           uint64_t dts);
 /*
  * Write out our ES data as a Transport Stream PES packet, with PCR.
  *
@@ -200,8 +206,10 @@ int write_ES_as_TS_PES_packet_with_pts_dts(TS_writer_p output, byte data[], uint
  *
  * Returns 0 if it worked, 1 if something went wrong.
  */
-int write_ES_as_TS_PES_packet_with_pcr(TS_writer_p output, byte data[], uint32_t data_len,
-    uint32_t pid, byte stream_id, uint64_t pcr_base, uint32_t pcr_extn);
+int write_ES_as_TS_PES_packet_with_pcr(TS_writer_p output, byte data[],
+                                       uint32_t data_len, uint32_t pid,
+                                       byte stream_id, uint64_t pcr_base,
+                                       uint32_t pcr_extn);
 /*
  * Write out a PES packet's data as a Transport Stream PES packet.
  *
@@ -222,8 +230,10 @@ int write_ES_as_TS_PES_packet_with_pcr(TS_writer_p output, byte data[], uint32_t
  *
  * Returns 0 if it worked, 1 if something went wrong.
  */
-int write_PES_as_TS_PES_packet(TS_writer_p output, byte data[], uint32_t data_len, uint32_t pid,
-    byte stream_id, int got_pcr, uint64_t pcr_base, uint32_t pcr_extn);
+int write_PES_as_TS_PES_packet(TS_writer_p output, byte data[],
+                               uint32_t data_len, uint32_t pid, byte stream_id,
+                               int got_pcr, uint64_t pcr_base,
+                               uint32_t pcr_extn);
 /*
  * Write out a Transport Stream Null packet.
  *
@@ -246,15 +256,17 @@ int write_TS_null_packet(TS_writer_p output);
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int build_TS_reader(int file, TS_reader_p* tsreader);
+int build_TS_reader(int file, TS_reader_p *tsreader);
 
 /*
  * Build a TS packet reader using the given functions as read() and seek().
  *
  * Returns 0 on success, 1 on failure.
  */
-int build_TS_reader_with_fns(void* handle, int (*read_fn)(void*, byte*, size_t),
-    int (*seek_fn)(void*, offset_t), TS_reader_p* tsreader);
+int build_TS_reader_with_fns(void *handle,
+                             int (*read_fn)(void *, byte *, size_t),
+                             int (*seek_fn)(void *, offset_t),
+                             TS_reader_p *tsreader);
 
 /*
  * Open a file to read TS packets from.
@@ -263,13 +275,13 @@ int build_TS_reader_with_fns(void* handle, int (*read_fn)(void*, byte*, size_t),
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int open_file_for_TS_read(char* filename, TS_reader_p* tsreader);
+int open_file_for_TS_read(char *filename, TS_reader_p *tsreader);
 /*
  * Free a TS packet read-ahead buffer
  *
  * Sets `buffer` to nullptr.
  */
-void free_TS_reader(TS_reader_p* tsreader);
+void free_TS_reader(TS_reader_p *tsreader);
 /*
  * Free a TS packet read-ahead buffer and close the referenced file
  * (if it is not standard input).
@@ -278,7 +290,7 @@ void free_TS_reader(TS_reader_p* tsreader);
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int close_TS_reader(TS_reader_p* tsreader);
+int close_TS_reader(TS_reader_p *tsreader);
 /*
  * Seek to a given offset in the TS reader's file
  *
@@ -314,7 +326,8 @@ int seek_using_TS_reader(TS_reader_p tsreader, offset_t posn);
  * other error occurred (in which case it will already have output a message
  * on stderr about the problem).
  */
-int read_rest_of_first_TS_packet(TS_reader_p tsreader, byte start[4], byte** packet);
+int read_rest_of_first_TS_packet(TS_reader_p tsreader, byte start[4],
+                                 byte **packet);
 /*
  * Read the next TS packet.
  *
@@ -330,7 +343,7 @@ int read_rest_of_first_TS_packet(TS_reader_p tsreader, byte start[4], byte** pac
  * other error occurred (in which case it will already have output a message
  * on stderr about the problem).
  */
-int read_next_TS_packet(TS_reader_p tsreader, byte** packet);
+int read_next_TS_packet(TS_reader_p tsreader, byte **packet);
 
 // ------------------------------------------------------------
 // Reading a transport stream with buffered timing
@@ -372,8 +385,10 @@ int prime_read_buffered_TS_packet(TS_reader_p tsreader, uint32_t pcr_pid);
  *
  * Returns 0 if all went well, 1 if something went wrong, EOF if EOF was read.
  */
-int read_first_TS_packet_from_buffer(TS_reader_p tsreader, uint32_t pcr_pid, uint32_t start_count,
-    byte* data[TS_PACKET_SIZE], uint32_t* pid, uint64_t* pcr, uint32_t* count);
+int read_first_TS_packet_from_buffer(TS_reader_p tsreader, uint32_t pcr_pid,
+                                     uint32_t start_count,
+                                     byte *data[TS_PACKET_SIZE], uint32_t *pid,
+                                     uint64_t *pcr, uint32_t *count);
 /* Retrieve the next TS packet from the PCR read-ahead buffer,
  * complete with its calculated PCR time.
  *
@@ -388,8 +403,9 @@ int read_first_TS_packet_from_buffer(TS_reader_p tsreader, uint32_t pcr_pid, uin
  *
  * Returns 0 if all went well, 1 if something went wrong, EOF if EOF was read.
  */
-int read_next_TS_packet_from_buffer(
-    TS_reader_p tsreader, byte* data[TS_PACKET_SIZE], uint32_t* pid, uint64_t* pcr);
+int read_next_TS_packet_from_buffer(TS_reader_p tsreader,
+                                    byte *data[TS_PACKET_SIZE], uint32_t *pid,
+                                    uint64_t *pcr);
 /*
  * Read the next TS packet, coping with looping, etc.
  *
@@ -419,9 +435,11 @@ int read_next_TS_packet_from_buffer(
  * Returns 0 if all went well, 1 if something went wrong, EOF if `loop` is
  * false and either EOF was read, or `max` TS packets were read.
  */
-int read_buffered_TS_packet(TS_reader_p tsreader, uint32_t* count, byte* data[TS_PACKET_SIZE],
-    uint32_t* pid, uint64_t* pcr, int max, int loop, offset_t start_posn, uint32_t start_count,
-    int quiet);
+int read_buffered_TS_packet(TS_reader_p tsreader, uint32_t *count,
+                            byte *data[TS_PACKET_SIZE], uint32_t *pid,
+                            uint64_t *pcr, int max, int loop,
+                            offset_t start_posn, uint32_t start_count,
+                            int quiet);
 
 // ------------------------------------------------------------
 // Packet interpretation
@@ -434,7 +452,8 @@ int read_buffered_TS_packet(TS_reader_p tsreader, uint32_t* count, byte* data[TS
  * - `got_PCR` is true if the adaptation field contains a PCR
  * - `pcr` is then the PCR value itself
  */
-void get_PCR_from_adaptation_field(byte adapt[], int adapt_len, int* got_pcr, uint64_t* pcr);
+void get_PCR_from_adaptation_field(byte adapt[], int adapt_len, int *got_pcr,
+                                   uint64_t *pcr);
 /*
  * Report on the contents of this TS packet's adaptation field
  *
@@ -455,7 +474,8 @@ void report_adaptation_field(byte adapt[], int adapt_len);
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-void report_adaptation_timing(timing_p times, byte adapt[], int adapt_len, int packet_count);
+void report_adaptation_timing(timing_p times, byte adapt[], int adapt_len,
+                              int packet_count);
 /*
  * Report on the contents of this TS packet's payload. The packet is assumed
  * to have a payload that is (part of) a PES packet.
@@ -469,8 +489,9 @@ void report_adaptation_timing(timing_p times, byte adapt[], int adapt_len, int p
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-void report_payload(int show_data, int stream_type, byte payload[MAX_TS_PAYLOAD_SIZE],
-    int payload_len, int payload_unit_start_indicator);
+void report_payload(int show_data, int stream_type,
+                    byte payload[MAX_TS_PAYLOAD_SIZE], int payload_len,
+                    int payload_unit_start_indicator);
 /*
  * Print out information about program descriptors
  * (either from the PMT program info, or the PMT/stream ES info)
@@ -483,8 +504,8 @@ void report_payload(int show_data, int stream_type, byte payload[MAX_TS_PAYLOAD_
  *
  * Returns 0 if all went well, 1 if something went wrong
  */
-int print_descriptors(
-    int is_msg, char* leader1, char* leader2, byte* desc_data, int desc_data_len);
+int print_descriptors(int is_msg, char *leader1, char *leader2, byte *desc_data,
+                      int desc_data_len);
 /*
  * Extract the program list from a PAT packet (PID 0x0000).
  *
@@ -498,8 +519,8 @@ int print_descriptors(
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int extract_prog_list_from_pat(
-    int verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_len, pidint_list_p* prog_list);
+int extract_prog_list_from_pat(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
+                               int payload_len, pidint_list_p *prog_list);
 /*
  * Extract the stream list (and PCR PID) from a PMT packet.
  *
@@ -516,8 +537,10 @@ int extract_prog_list_from_pat(
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_len,
-    uint32_t pid, int* program_number, uint32_t* pcr_pid, pidint_list_p* stream_list);
+int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
+                                 int payload_len, uint32_t pid,
+                                 int *program_number, uint32_t *pcr_pid,
+                                 pidint_list_p *stream_list);
 /*
  * Given a TS packet, extract the (next bit of) a PAT/PMT's data.
  *
@@ -541,13 +564,14 @@ int extract_stream_list_from_pmt(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
  *
  *  If a PSI packet has PUSI set, then it is the first packet of said PSI
  *  (which, for our purposes, means PAT or PMT). If it does not, then it
- *  is a continuation. If PUSI was set, call this with ``data`` nullptr, otherwise
- *  pass it some previous data to continue.
+ *  is a continuation. If PUSI was set, call this with ``data`` nullptr,
+ * otherwise pass it some previous data to continue.
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int build_psi_data(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_len, uint32_t pid,
-    byte** data, int* data_len, int* data_used);
+int build_psi_data(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE],
+                   int payload_len, uint32_t pid, byte **data, int *data_len,
+                   int *data_used);
 /*
  * Extract the program map table from a PMT packet.
  *
@@ -560,7 +584,8 @@ int build_psi_data(int verbose, byte payload[MAX_TS_PAYLOAD_SIZE], int payload_l
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt);
+int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid,
+                pmt_p *pmt);
 /*
  * Split a TS packet into its main parts
  *
@@ -581,8 +606,9 @@ int extract_pmt(int verbose, byte data[], int data_len, uint32_t pid, pmt_p* pmt
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int split_TS_packet(byte buf[TS_PACKET_SIZE], uint32_t* pid, int* payload_unit_start_indicator,
-    byte* adapt[], int* adapt_len, byte* payload[], int* payload_len);
+int split_TS_packet(byte buf[TS_PACKET_SIZE], uint32_t *pid,
+                    int *payload_unit_start_indicator, byte *adapt[],
+                    int *adapt_len, byte *payload[], int *payload_len);
 /*
  * Return the next TS packet, as payload and adaptation controls.
  *
@@ -610,8 +636,9 @@ int split_TS_packet(byte buf[TS_PACKET_SIZE], uint32_t* pid, int* payload_unit_s
  * Returns 0 if all went well, EOF if there is no more data, 1 if something
  * went wrong.
  */
-int get_next_TS_packet(TS_reader_p tsreader, uint32_t* pid, int* payload_unit_start_indicator,
-    byte* adapt[], int* adapt_len, byte* payload[], int* payload_len);
+int get_next_TS_packet(TS_reader_p tsreader, uint32_t *pid,
+                       int *payload_unit_start_indicator, byte *adapt[],
+                       int *adapt_len, byte *payload[], int *payload_len);
 /*
  * Find the first (next) PAT.
  *
@@ -626,8 +653,8 @@ int get_next_TS_packet(TS_reader_p tsreader, uint32_t* pid, int* payload_unit_st
  * Returns 0 if all went well, EOF if no PAT was found,
  * 1 if something else went wrong.
  */
-int find_pat(TS_reader_p tsreader, int max, int verbose, int quiet, int* num_read,
-    pidint_list_p* prog_list);
+int find_pat(TS_reader_p tsreader, int max, int verbose, int quiet,
+             int *num_read, pidint_list_p *prog_list);
 /*
  * Find the next PMT, and report on it.
  *
@@ -646,8 +673,8 @@ int find_pat(TS_reader_p tsreader, int max, int verbose, int quiet, int* num_rea
  * Returns 0 if all went well, EOF if no PMT was found,
  * 1 if something else went wrong.
  */
-int find_next_pmt(TS_reader_p tsreader, uint32_t pmt_pid, int program_number, int max, int verbose,
-    int quiet, int* num_read, pmt_p* pmt);
+int find_next_pmt(TS_reader_p tsreader, uint32_t pmt_pid, int program_number,
+                  int max, int verbose, int quiet, int *num_read, pmt_p *pmt);
 /*
  * Find the next PAT, and from that the next PMT.
  *
@@ -667,8 +694,8 @@ int find_next_pmt(TS_reader_p tsreader, uint32_t pmt_pid, int program_number, in
  * no program stream), -2 if a PAT was found but it did not contain any
  * programs, 1 if something else went wrong.
  */
-int find_pmt(TS_reader_p tsreader, const int req_prog_no, int max, int verbose, int quiet,
-    int* num_read, pmt_p* pmt);
+int find_pmt(TS_reader_p tsreader, const int req_prog_no, int max, int verbose,
+             int quiet, int *num_read, pmt_p *pmt);
 
 #endif // _ts_fns
 

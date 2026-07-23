@@ -50,7 +50,7 @@ void print_h262_start_code_str(byte start_code);
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_h262_item(h262_item_p* item);
+int build_h262_item(h262_item_p *item);
 /*
  * Tidy up and free an MPEG2 item datastructure after we've finished with it.
  *
@@ -58,7 +58,7 @@ int build_h262_item(h262_item_p* item);
  *
  * If `item` is already nullptr, does nothing.
  */
-void free_h262_item(h262_item_p* item);
+void free_h262_item(h262_item_p *item);
 /*
  * Print out useful information about this MPEG2 item
  */
@@ -80,7 +80,7 @@ void report_h262_item(h262_item_p item);
  * Returns 0 if it succeeds, EOF if the end-of-file is read (i.e., there
  * is no next MPEG2 item), otherwise 1 if some error occurs.
  */
-int find_next_h262_item(ES_p es, h262_item_p* item);
+int find_next_h262_item(ES_p es, h262_item_p *item);
 /*
  * Build a new H.262 picture reading context.
  *
@@ -90,7 +90,7 @@ int find_next_h262_item(ES_p es, h262_item_p* item);
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int build_h262_context(ES_p es, h262_context_p* context);
+int build_h262_context(ES_p es, h262_context_p *context);
 /*
  * Free an H.262 picture reading context.
  *
@@ -100,7 +100,7 @@ int build_h262_context(ES_p es, h262_context_p* context);
  *
  * Does nothing if `context` is already nullptr.
  */
-void free_h262_context(h262_context_p* context);
+void free_h262_context(h262_context_p *context);
 /*
  * Rewind a file being read as H.262 pictures
  *
@@ -120,7 +120,7 @@ int rewind_h262_context(h262_context_p context);
  *
  * Does nothing if `picture` is already nullptr.
  */
-void free_h262_picture(h262_picture_p* picture);
+void free_h262_picture(h262_picture_p *picture);
 /*
  * Compare two H.262 pictures. The comparison does not include the start
  * position of the picture, but just the actual data - i.e., two pictures
@@ -148,7 +148,8 @@ int same_h262_picture(h262_picture_p picture1, h262_picture_p picture2);
  * Returns 0 if it succeeds, EOF if we reach the end of file, or 1 if some
  * error occurs.
  */
-int get_next_h262_single_picture(h262_context_p context, int verbose, h262_picture_p* picture);
+int get_next_h262_single_picture(h262_context_p context, int verbose,
+                                 h262_picture_p *picture);
 /*
  * Retrieve the the next H.262 "picture".
  *
@@ -188,7 +189,8 @@ int get_next_h262_single_picture(h262_context_p context, int verbose, h262_pictu
  * Returns 0 if it succeeds, EOF if we reach the end of file, or 1 if some
  * error occurs.
  */
-int get_next_h262_frame(h262_context_p context, int verbose, int quiet, h262_picture_p* picture);
+int get_next_h262_frame(h262_context_p context, int verbose, int quiet,
+                        h262_picture_p *picture);
 /*
  * Write out an H.262 picture as TS
  *
@@ -198,7 +200,8 @@ int get_next_h262_frame(h262_context_p context, int verbose, int quiet, h262_pic
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int write_h262_picture_as_TS(TS_writer_p tswriter, h262_picture_p picture, uint32_t pid);
+int write_h262_picture_as_TS(TS_writer_p tswriter, h262_picture_p picture,
+                             uint32_t pid);
 /*
  * Write out a picture (as stored in an ES unit list) as ES
  *
@@ -207,7 +210,7 @@ int write_h262_picture_as_TS(TS_writer_p tswriter, h262_picture_p picture, uint3
  *
  * Returns 0 if it succeeds, 1 if some error occurs.
  */
-int write_h262_picture_as_ES(FILE* output, h262_picture_p picture);
+int write_h262_picture_as_ES(FILE *output, h262_picture_p picture);
 /*
  * Report on an H.262 picture's contents.
  *

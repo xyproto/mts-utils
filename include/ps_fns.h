@@ -48,7 +48,7 @@
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-int build_PS_reader(int input, int quiet, PS_reader_p* ps);
+int build_PS_reader(int input, int quiet, PS_reader_p *ps);
 /*
  * Tidy up the PS read-ahead context after we've finished with it.
  *
@@ -59,7 +59,7 @@ int build_PS_reader(int input, int quiet, PS_reader_p* ps);
  *
  * Does not close the associated file.
  */
-void free_PS_reader(PS_reader_p* ps);
+void free_PS_reader(PS_reader_p *ps);
 /*
  * Open a PS file for reading.
  *
@@ -69,13 +69,13 @@ void free_PS_reader(PS_reader_p* ps);
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-int open_PS_file(char* name, int quiet, PS_reader_p* ps);
+int open_PS_file(char *name, int quiet, PS_reader_p *ps);
 /*
  * Close a PS file, and free the reader context
  *
  * Returns 0 if all goes well, 1 otherwise.
  */
-int close_PS_file(PS_reader_p* ps);
+int close_PS_file(PS_reader_p *ps);
 /*
  * Given a program stream, attempt to determine if it holds H.262 or H.264
  * data.
@@ -92,7 +92,7 @@ int close_PS_file(PS_reader_p* ps);
  * Returns 0 if all goes well, 1 if there was an error (including the
  * stream not appearing to be either).
  */
-int determine_if_PS_is_h264(PS_reader_p ps, int* is_h264);
+int determine_if_PS_is_h264(PS_reader_p ps, int *is_h264);
 /*
  * Given a program stream, attempt to determine what type of video data it
  * contains.
@@ -107,7 +107,7 @@ int determine_if_PS_is_h264(PS_reader_p ps, int* is_h264);
  * Returns 0 if all goes well, 1 if there was an error (including the
  * stream not appearing to be either).
  */
-int determine_PS_video_type(PS_reader_p ps, int* video_type);
+int determine_PS_video_type(PS_reader_p ps, int *video_type);
 /*
  * Seek within the PS file.
  *
@@ -154,8 +154,8 @@ void print_stream_id(int is_msg, byte stream_id);
  *   * EOF if EOF is read, or an MPEG_program_end_code is read, or
  *   * 1 if some error (including the first 3 bytes not being 00 00 01) occurs.
  */
-int find_PS_packet_start(
-    PS_reader_p ps, int verbose, uint32_t max, offset_t* posn, byte* stream_id);
+int find_PS_packet_start(PS_reader_p ps, int verbose, uint32_t max,
+                         offset_t *posn, byte *stream_id);
 /*
  * Look for the next PS pack header.
  *
@@ -179,7 +179,8 @@ int find_PS_packet_start(
  *   * EOF if EOF is read, or an MPEG_program_end_code is read, or
  *   * 1 if some error (including the first 3 bytes not being 00 00 01) occurs.
  */
-int find_PS_pack_header_start(PS_reader_p ps, int verbose, uint32_t max, offset_t* posn);
+int find_PS_pack_header_start(PS_reader_p ps, int verbose, uint32_t max,
+                              offset_t *posn);
 /*
  * Read in (the rest of) a PS packet according to its length.
  *
@@ -220,7 +221,7 @@ void clear_PS_packet(PS_packet_p packet);
  *
  * If `unit` is already nullptr, does nothing.
  */
-void free_PS_packet(PS_packet_p* packet);
+void free_PS_packet(PS_packet_p *packet);
 /*
  * Read in the start (the first 4 bytes) of the next program stream packet.
  *
@@ -243,10 +244,12 @@ void free_PS_packet(PS_packet_p* packet);
  *   * 2 if the bytes read are not 00 00 01 `stream_id`, or
  *   * 1 if some other error occurs.
  */
-int read_PS_packet_start(PS_reader_p ps, int verbose, offset_t* posn, byte* stream_id);
+int read_PS_packet_start(PS_reader_p ps, int verbose, offset_t *posn,
+                         byte *stream_id);
 
 /*
- * Inspect the given PS packet, and determine if it contains AC3 or DTS audio data.
+ * Inspect the given PS packet, and determine if it contains AC3 or DTS audio
+ * data.
  *
  * - `packet` is the packet's data, already established as private_data_1
  * - `is_dvd` is true if the data should be interpreted as DVD data
@@ -260,8 +263,8 @@ int read_PS_packet_start(PS_reader_p ps, int verbose, offset_t* posn, byte* stre
  *
  * Returns one of the SUBSTREAM_* values.
  */
-int identify_private1_data(struct PS_packet* packet, int is_dvd, int verbose, int* substream_index,
-    byte* bsmod, byte* acmod);
+int identify_private1_data(struct PS_packet *packet, int is_dvd, int verbose,
+                           int *substream_index, byte *bsmod, byte *acmod);
 
 // ============================================================
 // PS to TS functions
@@ -305,10 +308,12 @@ int identify_private1_data(struct PS_packet* packet, int is_dvd, int verbose, in
  *
  * Returns 0 if all went well, 1 if something went wrong.
  */
-int ps_to_ts(PS_reader_p ps, TS_writer_p output, int pad_start, int program_repeat, int video_type,
-    int is_dvd, int video_stream, int audio_stream, int want_ac3_audio, int dolby_is_dvb,
-    uint32_t pmt_pid, uint32_t pcr_pid, uint32_t video_pid, int keep_audio, uint32_t audio_pid,
-    int max, int verbose, int quiet);
+int ps_to_ts(PS_reader_p ps, TS_writer_p output, int pad_start,
+             int program_repeat, int video_type, int is_dvd, int video_stream,
+             int audio_stream, int want_ac3_audio, int dolby_is_dvb,
+             uint32_t pmt_pid, uint32_t pcr_pid, uint32_t video_pid,
+             int keep_audio, uint32_t audio_pid, int max, int verbose,
+             int quiet);
 
 #endif // _ps_fns
 

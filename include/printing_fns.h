@@ -37,24 +37,24 @@
 /*
  * Prints the given string, as a normal message.
  */
-void print_msg(const char* text);
+void print_msg(const char *text);
 /*
  * Prints the given string, as an error message.
  */
-void print_err(const char* text);
+void print_err(const char *text);
 /*
  * Prints the given format text, as a normal message.
  */
-void fprint_msg(const char* format, ...);
+void fprint_msg(const char *format, ...);
 /*
  * Prints the given formatted text, as an error message.
  */
-void fprint_err(const char* format, ...);
+void fprint_err(const char *format, ...);
 /*
  * Prints the given formatted text, as a normal or error message.
  * If `is_msg`, then as a normal message, else as an error
  */
-void fprint_msg_or_err(int is_msg, const char* format, ...);
+void fprint_msg_or_err(int is_msg, const char *format, ...);
 /*
  * Flush the message output
  */
@@ -96,11 +96,13 @@ void redirect_output_stdout(void);
  *
  * Returns 0 if all goes well, 1 if something goes wrong.
  */
-int redirect_output(void (*new_print_message_fn)(const char* message),
-    void (*new_print_error_fn)(const char* message),
-    void (*new_fprint_message_fn)(const char* format, va_list arg_ptr),
-    void (*new_fprint_error_fn)(const char* format, va_list arg_ptr),
-    void (*new_flush_msg_fn)(void));
+int redirect_output(void (*new_print_message_fn)(const char *message),
+                    void (*new_print_error_fn)(const char *message),
+                    void (*new_fprint_message_fn)(const char *format,
+                                                  va_list arg_ptr),
+                    void (*new_fprint_error_fn)(const char *format,
+                                                va_list arg_ptr),
+                    void (*new_flush_msg_fn)(void));
 
 // Just for the moment
 void test_C_printing(void);
