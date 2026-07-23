@@ -13,10 +13,10 @@ Tested on Arch Linux with GCC 16.1.1.
 
 # Requirements
 
-* The [Slay](https://github.com/xyproto/slay) build tool (previously Python3 + SCons was required as well, but this tool is written in Go).
 * C++ compiler with support for `-std=c++26`.
 * GNU `make`.
 * GNU `parallel`.
+* The [`slay`](https://github.com/xyproto/slay) executable (build tool written in Go).
 
 # Building and installing
 
