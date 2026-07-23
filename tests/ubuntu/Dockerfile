@@ -8,9 +8,10 @@ RUN apt-get update && \
     apt-get update && \
     apt-get clean
 
-# Install slay, but don't keep the git checkout in the docker image
+# Install slay
 RUN git clone https://github.com/xyproto/slay && \
     cd slay && \
+    make && \
     make install
 
 # Install and test mts-utils
