@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:26.10
 
 # Update and install packages
 ARG DEBIAN_FRONTEND=noninteractive
