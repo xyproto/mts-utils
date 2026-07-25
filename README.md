@@ -94,8 +94,7 @@ The tools are focused on:
 
 ## Running tests
 
-    cd common
-    slay test
+    make test
 
 (upgrading the tests is a work in progress)
 

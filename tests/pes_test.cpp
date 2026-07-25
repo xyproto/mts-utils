@@ -270,14 +270,101 @@ int test1(PES_reader_p reader, int verbose) {
   return 0;
 }
 
+#define SELF_TEST_FILE "pes_test.ts"
+#define SELF_TEST_PMT_PID 0x66
+#define SELF_TEST_PACKETS 20
+
+/*
+ * Write a small TS file containing PES packets, for the self test
+ *
+ * Returns 0 if all went well, 1 if an error occurred.
+ */
+int write_self_test_file(char *name) {
+  TS_writer_p output = nullptr;
+  int err = tswrite_open_file(name, true, &output);
+  if (err) {
+    fprintf(stderr, "### test_pes: Unable to write %s\n", name);
+    return 1;
+  }
+
+  for (int ii = 0; ii < SELF_TEST_PACKETS; ii++) {
+    byte data[64];
+
+    // Repeat the program data, so that it is found regardless of where
+    // the reader starts looking
+    if (ii % 5 == 0) {
+      err = write_TS_program_data(output, 1, 1, SELF_TEST_PMT_PID,
+                                  DEFAULT_VIDEO_PID, MPEG2_VIDEO_STREAM_TYPE);
+      if (err)
+        break;
+    }
+
+    memset(data, ii, sizeof(data));
+    // Start each unit with an MPEG-2 sequence header, so that the data
+    // looks like H.262 video
+    data[0] = 0x00;
+    data[1] = 0x00;
+    data[2] = 0x01;
+    data[3] = 0xb3;
+
+    err = write_ES_as_TS_PES_packet(output, data, sizeof(data),
+                                    DEFAULT_VIDEO_PID, DEFAULT_VIDEO_STREAM_ID);
+    if (err)
+      break;
+  }
+
+  if (err) {
+    fprintf(stderr, "### test_pes: Error writing %s\n", name);
+    (void)tswrite_close(output, true);
+    return 1;
+  }
+  return tswrite_close(output, true);
+}
+
+/*
+ * Run the tests against a TS stream that we generate ourselves, so that
+ * no data files (and no target host) are needed.
+ *
+ * Returns 0 if all went well, 1 if an error occurred.
+ */
+int self_test(int verbose) {
+  char name[] = SELF_TEST_FILE;
+  PES_reader_p reader = nullptr;
+  int err;
+
+  if (write_self_test_file(name))
+    return 1;
+
+  err = open_PES_reader(name, verbose, verbose, &reader);
+  if (err) {
+    fprintf(stderr, "### test_pes: Error opening %s\n", name);
+    (void)remove(name);
+    return 1;
+  }
+
+  err = test1(reader, verbose);
+  (void)close_PES_reader(&reader);
+  (void)remove(name);
+
+  if (err) {
+    fprintf(stderr, "### test_pes: Test 1 failed\n");
+    return 1;
+  }
+  printf("** Test 1 passed\n");
+  return 0;
+}
+
 void print_usage() {
-  printf("Usage: test_pes <input-file> <host>[:<port>]\n"
+  printf("Usage: test_pes [<input-file> <host>[:<port>]]\n"
          "\n");
   REPORT_VERSION("test_pes");
   printf(
       "\n"
       "  Test the PES reading facilities. <input-file> should be a TS\n"
       "  (Transport Stream) or PS (Program Stream) file.\n"
+      "\n"
+      "  With no arguments, a small TS stream is generated and read back\n"
+      "  again, and no host is contacted.\n"
       "\n"
       "Input:\n"
       "  <input-file>       An H.222.0 TS or PS file.\n"
@@ -308,10 +395,6 @@ int main(int argc, char **argv) {
   int err;
   int ii = 1;
 
-  if (argc < 2) {
-    print_usage();
-    return 1;
-  }
   while (ii < argc) {
     if (argv[ii][0] == '-') {
       if (!strcmp("--help", argv[ii]) || !strcmp("-h", argv[ii]) ||
@@ -353,10 +436,9 @@ int main(int argc, char **argv) {
     ii++;
   }
 
-  if (!had_input_name) {
-    fprintf(stderr, "### test_pes: No input file specified\n");
-    return 1;
-  }
+  // Without an input file, test against a stream that we generate ourselves
+  if (!had_input_name)
+    return self_test(verbose);
   if (want_output && !had_output_name) {
     fprintf(stderr, "### test_pes: No target host specified\n");
     return 1;
