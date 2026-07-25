@@ -9,10 +9,12 @@
 *.pro.user
 build-*/
 
-common/es_test
-common/nal_unit_list_test
-common/pes_test
-common/printing_test
+tests/pes_test.ts
+
+tests/es_test
+tests/nal_unit_list_test
+tests/pes_test
+tests/printing_test
 
 tsplay/tsplay
 esdots/esdots
