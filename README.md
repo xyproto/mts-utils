@@ -101,4 +101,4 @@ The tools are focused on:
 ## General info:
 
 * License: MPL 1.1
-* Version: 3.1.0
+* Version: 3.1.1
